@@ -8,9 +8,9 @@
     <h1>PiliPlus</h1>
 <div align="center">
     
-![GitHub repo size](https://img.shields.io/github/repo-size/bggRGjQaUbCoE/PiliPlus) 
-![GitHub Repo stars](https://img.shields.io/github/stars/bggRGjQaUbCoE/PiliPlus) 
-![GitHub all releases](https://img.shields.io/github/downloads/bggRGjQaUbCoE/PiliPlus/total) 
+![GitHub repo size](https://img.shields.io/github/repo-size/furrybluelan/PiliSuper) 
+![GitHub Repo stars](https://img.shields.io/github/stars/furrybluelan/PiliSuper) 
+![GitHub all releases](https://img.shields.io/github/downloads/furrybluelan/PiliSuper/total) 
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
     
@@ -151,7 +151,7 @@
   - [x] 粉丝、关注用户、拉黑用户查看
   - [x] 用户主页查看
   - [x] 关注/取关用户
-  - [ ] 离线缓存
+  - [ ] 离线缓存(正在完成，进度:0%)
   - [x] 稍后再看
   - [x] 观看记录
   - [x] 我的收藏
