@@ -10,12 +10,12 @@ class PgcIndexResult {
   PgcIndexResult({this.hasNext, this.list, this.num, this.size, this.total});
 
   factory PgcIndexResult.fromJson(Map<String, dynamic> json) => PgcIndexResult(
-        hasNext: json['has_next'] as int?,
-        list: (json['list'] as List<dynamic>?)
-            ?.map((e) => PgcIndexItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        num: json['num'] as int?,
-        size: json['size'] as int?,
-        total: json['total'] as int?,
-      );
+    hasNext: json['has_next'] as int?,
+    list: (json['list'] as List<dynamic>?)
+        ?.map((e) => PgcIndexItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    num: json['num'] as int?,
+    size: json['size'] as int?,
+    total: json['total'] as int?,
+  );
 }

@@ -16,8 +16,10 @@ import 'package:flutter/material.dart' hide Scrollable, ScrollableState;
 import 'package:flutter/rendering.dart';
 
 class _ForceImplicitScrollPhysics extends ScrollPhysics {
-  const _ForceImplicitScrollPhysics(
-      {required this.allowImplicitScrolling, super.parent});
+  const _ForceImplicitScrollPhysics({
+    required this.allowImplicitScrolling,
+    super.parent,
+  });
 
   @override
   _ForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -160,10 +162,10 @@ class CustomPageView extends StatefulWidget {
     this.header,
     this.bgColor = Colors.transparent,
   }) : childrenDelegate = SliverChildBuilderDelegate(
-          itemBuilder,
-          findChildIndexCallback: findChildIndexCallback,
-          childCount: itemCount,
-        );
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+       );
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
@@ -345,8 +347,9 @@ class _CustomPageViewState extends State<CustomPageView> {
       case Axis.horizontal:
         assert(debugCheckHasDirectionality(context));
         final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection =
-            textDirectionToAxisDirection(textDirection);
+        final AxisDirection axisDirection = textDirectionToAxisDirection(
+          textDirection,
+        );
         return widget.reverse
             ? flipAxisDirection(axisDirection)
             : axisDirection;
@@ -358,16 +361,18 @@ class _CustomPageViewState extends State<CustomPageView> {
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics = _ForceImplicitScrollPhysics(
-      allowImplicitScrolling: widget.allowImplicitScrolling,
-    ).applyTo(
-      widget.pageSnapping
-          ? _kPagePhysics.applyTo(
-              widget.physics ??
-                  widget.scrollBehavior?.getScrollPhysics(context),
-            )
-          : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
-    );
+    final ScrollPhysics physics =
+        _ForceImplicitScrollPhysics(
+          allowImplicitScrolling: widget.allowImplicitScrolling,
+        ).applyTo(
+          widget.pageSnapping
+              ? _kPagePhysics.applyTo(
+                  widget.physics ??
+                      widget.scrollBehavior?.getScrollPhysics(context),
+                )
+              : widget.physics ??
+                    widget.scrollBehavior?.getScrollPhysics(context),
+        );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
@@ -392,7 +397,8 @@ class _CustomPageViewState extends State<CustomPageView> {
         physics: physics,
         restorationId: widget.restorationId,
         hitTestBehavior: widget.hitTestBehavior,
-        scrollBehavior: widget.scrollBehavior ??
+        scrollBehavior:
+            widget.scrollBehavior ??
             ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
@@ -424,14 +430,25 @@ class _CustomPageViewState extends State<CustomPageView> {
       ..add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection))
       ..add(FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'))
       ..add(
-        DiagnosticsProperty<PageController>('controller', _controller,
-            showName: false),
+        DiagnosticsProperty<PageController>(
+          'controller',
+          _controller,
+          showName: false,
+        ),
       )
-      ..add(DiagnosticsProperty<ScrollPhysics>('physics', widget.physics,
-          showName: false))
       ..add(
-        FlagProperty('pageSnapping',
-            value: widget.pageSnapping, ifFalse: 'snapping disabled'),
+        DiagnosticsProperty<ScrollPhysics>(
+          'physics',
+          widget.physics,
+          showName: false,
+        ),
+      )
+      ..add(
+        FlagProperty(
+          'pageSnapping',
+          value: widget.pageSnapping,
+          ifFalse: 'snapping disabled',
+        ),
       )
       ..add(
         FlagProperty(

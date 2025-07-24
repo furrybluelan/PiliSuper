@@ -54,7 +54,7 @@ Widget livePanel(
                         color: theme.colorScheme.outline,
                         fontSize: theme.textTheme.labelMedium!.fontSize,
                       ),
-                    )
+                    ),
                 ],
               ),
             ),
@@ -64,7 +64,7 @@ Widget livePanel(
                 style: TextStyle(
                   fontSize: theme.textTheme.labelMedium!.fontSize,
                 ),
-              )
+              ),
           ],
         ),
       ),

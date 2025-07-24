@@ -10,8 +10,8 @@ class TopicCreator {
   });
 
   factory TopicCreator.fromJson(Map<String, dynamic> json) => TopicCreator(
-        uid: json['uid'] as int?,
-        face: json['face'] as String?,
-        name: json['name'] as String?,
-      );
+    uid: json['uid'] as int?,
+    face: json['face'] as String?,
+    name: json['name'] as String?,
+  );
 }

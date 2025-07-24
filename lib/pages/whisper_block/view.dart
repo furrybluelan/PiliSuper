@@ -33,47 +33,51 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<KeywordBlockingItem>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<KeywordBlockingItem>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => loadingWidget,
-      Success(:var response) => response?.isNotEmpty == true
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '点击屏蔽词即可删除',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                      if (_controller.listLimit != null)
-                        Obx(
-                          () => Text(
-                            '${_controller.count.value}/${_controller.listLimit}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: theme.colorScheme.outline,
-                            ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '点击屏蔽词即可删除',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.colorScheme.outline,
                           ),
                         ),
-                    ],
+                        if (_controller.listLimit != null)
+                          Obx(
+                            () => Text(
+                              '${_controller.count.value}/${_controller.listLimit}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: response!
-                            .map((e) => SearchText(
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: response!
+                              .map(
+                                (e) => SearchText(
                                   text: e.keyword,
                                   onTap: (keyword) {
                                     showConfirmDialog(
@@ -83,61 +87,66 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
                                       onConfirm: () => _controller.onRemove(e),
                                     );
                                   },
-                                ))
-                            .toList(),
+                                ),
+                              )
+                              .toList(),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: 25,
-                    right: 25,
-                    bottom: MediaQuery.paddingOf(context).bottom + 10,
-                  ),
-                  child: FilledButton.tonal(
-                    onPressed: _onAdd,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Icon(Icons.add, size: 22), Text('添加消息屏蔽词')],
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 25,
+                      right: 25,
+                      bottom: MediaQuery.paddingOf(context).bottom + 10,
+                    ),
+                    child: FilledButton.tonal(
+                      onPressed: _onAdd,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [Icon(Icons.add, size: 22), Text('添加消息屏蔽词')],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            )
-          : SizedBox.expand(
-              child: Column(
-                children: [
-                  const Spacer(),
-                  SvgPicture.asset("assets/images/error.svg", height: 156),
-                  const SizedBox(height: 6),
-                  const Text(
-                    '还未添加屏蔽词',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text('添加后，将不再接受包含屏蔽词的消息'),
-                  const SizedBox(height: 6),
-                  FilledButton.tonal(
-                    onPressed: _onAdd,
-                    style: FilledButton.styleFrom(
-                        visualDensity: VisualDensity.compact),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add, size: 22),
-                        Text('添加'),
-                      ],
-                    ),
-                  ),
-                  const Spacer(flex: 2),
                 ],
+              )
+            : SizedBox.expand(
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    SvgPicture.asset("assets/images/error.svg", height: 156),
+                    const SizedBox(height: 6),
+                    const Text(
+                      '还未添加屏蔽词',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text('添加后，将不再接受包含屏蔽词的消息'),
+                    const SizedBox(height: 6),
+                    FilledButton.tonal(
+                      onPressed: _onAdd,
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, size: 22),
+                          Text('添加'),
+                        ],
+                      ),
+                    ),
+                    const Spacer(flex: 2),
+                  ],
+                ),
               ),
-            ),
       Error(:var errMsg) => scrollErrorWidget(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 
@@ -151,10 +160,13 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
       builder: (context) {
         final theme = Theme.of(context);
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12) +
+          padding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12) +
               EdgeInsets.only(
-                  bottom: MediaQuery.paddingOf(context).bottom +
-                      MediaQuery.viewInsetsOf(context).bottom),
+                bottom:
+                    MediaQuery.paddingOf(context).bottom +
+                    MediaQuery.viewInsetsOf(context).bottom,
+              ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,8 +198,10 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
                   isDense: true,
                   hintText: '请输入',
                   hintStyle: const TextStyle(fontSize: 14),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
                   border: const OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.all(Radius.circular(25)),

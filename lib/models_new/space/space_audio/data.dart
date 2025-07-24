@@ -16,12 +16,12 @@ class SpaceAudioData {
   });
 
   factory SpaceAudioData.fromJson(Map<String, dynamic> json) => SpaceAudioData(
-        curPage: json['curPage'] as int?,
-        pageCount: json['pageCount'] as int?,
-        totalSize: json['totalSize'] as int?,
-        pageSize: json['pageSize'] as int?,
-        items: (json['data'] as List<dynamic>?)
-            ?.map((e) => SpaceAudioItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    curPage: json['curPage'] as int?,
+    pageCount: json['pageCount'] as int?,
+    totalSize: json['totalSize'] as int?,
+    pageSize: json['pageSize'] as int?,
+    items: (json['data'] as List<dynamic>?)
+        ?.map((e) => SpaceAudioItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

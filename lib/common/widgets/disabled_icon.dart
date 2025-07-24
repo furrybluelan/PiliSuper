@@ -14,9 +14,9 @@ class DisabledIcon<T extends Widget> extends SingleChildRenderObjectWidget {
     this.color,
     double? lineLengthScale,
     StrokeCap? strokeCap,
-  })  : lineLengthScale = lineLengthScale ?? 0.9,
-        strokeCap = strokeCap ?? StrokeCap.butt,
-        super(child: child);
+  }) : lineLengthScale = lineLengthScale ?? 0.9,
+       strokeCap = strokeCap ?? StrokeCap.butt,
+       super(child: child);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -60,16 +60,17 @@ class RenderMaskedIcon extends RenderProxyBox {
     // );
 
     final path = Path.combine(
-        PathOperation.union,
-        Path() // bottom
-          ..moveTo(rect.left, rect.bottom)
-          ..lineTo(rect.left, rect.top + sqrt2Width)
-          ..lineTo(rect.right - sqrt2Width, rect.bottom)
-          ..close(),
-        Path() // top
-          ..moveTo(rect.right, rect.top)
-          ..lineTo(rect.right, rect.bottom - sqrt2Width)
-          ..lineTo(rect.left + sqrt2Width, rect.top));
+      PathOperation.union,
+      Path() // bottom
+        ..moveTo(rect.left, rect.bottom)
+        ..lineTo(rect.left, rect.top + sqrt2Width)
+        ..lineTo(rect.right - sqrt2Width, rect.bottom)
+        ..close(),
+      Path() // top
+        ..moveTo(rect.right, rect.top)
+        ..lineTo(rect.right, rect.bottom - sqrt2Width)
+        ..lineTo(rect.left + sqrt2Width, rect.top),
+    );
 
     canvas
       ..save()

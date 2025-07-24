@@ -61,7 +61,7 @@ class LiveSearchUserItem extends StatelessWidget {
                   style: style,
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

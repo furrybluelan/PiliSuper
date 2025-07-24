@@ -25,13 +25,14 @@ class FavVideoItem extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
-        onLongPress: onLongPress ??
+        onLongPress:
+            onLongPress ??
             (onTap == null
                 ? null
                 : () => imageSaveDialog(
-                      title: item.title,
-                      cover: item.cover,
-                    )),
+                    title: item.title,
+                    cover: item.cover,
+                  )),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Row(

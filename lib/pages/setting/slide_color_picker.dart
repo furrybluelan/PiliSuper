@@ -40,11 +40,12 @@ class _SlideColorPickerState extends State<SlideColorPicker> {
     super.dispose();
   }
 
-  String get _convert => Color.fromARGB(255, _r, _g, _b)
-      .value
-      .toRadixString(16)
-      .substring(2)
-      .toUpperCase();
+  String get _convert => Color.fromARGB(
+    255,
+    _r,
+    _g,
+    _b,
+  ).value.toRadixString(16).substring(2).toUpperCase();
 
   Widget _slider({
     required String title,
@@ -113,8 +114,9 @@ class _SlideColorPickerState extends State<SlideColorPicker> {
               onChanged: (value) {
                 _textController.text = value.toUpperCase();
                 if (value.length == 6) {
-                  Color color =
-                      Color(int.tryParse('FF$value', radix: 16) ?? 0xFF000000);
+                  Color color = Color(
+                    int.tryParse('FF$value', radix: 16) ?? 0xFF000000,
+                  );
                   setState(() {
                     _r = color.red;
                     _g = color.green;
@@ -185,7 +187,7 @@ class _SlideColorPickerState extends State<SlideColorPicker> {
               ),
               const SizedBox(width: 16),
             ],
-          )
+          ),
         ],
       ),
     );

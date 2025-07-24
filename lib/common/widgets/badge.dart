@@ -75,13 +75,16 @@ class PBadge extends StatelessWidget {
         bgColor = Colors.transparent;
         borderColor = theme.secondary;
       case PBadgeType.free:
-        bgColor =
-            Get.isDarkMode ? const Color(0xFFD66011) : const Color(0xFFFF7F24);
+        bgColor = Get.isDarkMode
+            ? const Color(0xFFD66011)
+            : const Color(0xFFFF7F24);
         color = Colors.white;
     }
 
-    late EdgeInsets paddingStyle =
-        const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
+    late EdgeInsets paddingStyle = const EdgeInsets.symmetric(
+      vertical: 2,
+      horizontal: 3,
+    );
     BorderRadius br = size == PBadgeSize.small
         ? const BorderRadius.all(Radius.circular(3))
         : const BorderRadius.all(Radius.circular(4));

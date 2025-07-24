@@ -22,9 +22,10 @@ class SearchArticleController
   }
 
   void jump2Article() {
-    String? cvid = RegExp(r'^cv(id)?(\d+)$', caseSensitive: false)
-        .matchAsPrefix(keyword)
-        ?.group(2);
+    String? cvid = RegExp(
+      r'^cv(id)?(\d+)$',
+      caseSensitive: false,
+    ).matchAsPrefix(keyword)?.group(2);
     if (cvid != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.toNamed(
@@ -108,8 +109,8 @@ class SearchArticleController
                               : null,
                           textColor:
                               item['value'] == currentOrderFilterval.value
-                                  ? theme.colorScheme.onSecondaryContainer
-                                  : null,
+                              ? theme.colorScheme.onSecondaryContainer
+                              : null,
                         ),
                       )
                       .toList(),

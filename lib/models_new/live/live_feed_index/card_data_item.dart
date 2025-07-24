@@ -15,17 +15,17 @@ class CardDataItem {
   });
 
   factory CardDataItem.fromJson(Map<String, dynamic> json) => CardDataItem(
-        moduleInfo: json['module_info'] == null
-            ? null
-            : ModuleInfo.fromJson(json['module_info'] as Map<String, dynamic>),
-        list: (json['list'] as List<dynamic>?)
-            ?.map((e) => CardLiveItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        topView: json['top_view'] as dynamic,
-        extraInfo: json['extra_info'] == null
-            ? null
-            : ExtraInfo.fromJson(json['extra_info'] as Map<String, dynamic>),
-      );
+    moduleInfo: json['module_info'] == null
+        ? null
+        : ModuleInfo.fromJson(json['module_info'] as Map<String, dynamic>),
+    list: (json['list'] as List<dynamic>?)
+        ?.map((e) => CardLiveItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    topView: json['top_view'] as dynamic,
+    extraInfo: json['extra_info'] == null
+        ? null
+        : ExtraInfo.fromJson(json['extra_info'] as Map<String, dynamic>),
+  );
 }
 
 class ExtraInfo {

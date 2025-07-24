@@ -13,12 +13,12 @@ class SpaceSsData {
   });
 
   factory SpaceSsData.fromJson(Map<String, dynamic> json) => SpaceSsData(
-        page: json["page"] == null ? null : SpaceSsPage.fromJson(json["page"]),
-        seasonsList: (json["seasons_list"] as List?)
-            ?.map((e) => SpaceSsModel.fromJson(e))
-            .toList(),
-        seriesList: (json["series_list"] as List?)
-            ?.map((e) => SpaceSsModel.fromJson(e))
-            .toList(),
-      );
+    page: json["page"] == null ? null : SpaceSsPage.fromJson(json["page"]),
+    seasonsList: (json["seasons_list"] as List?)
+        ?.map((e) => SpaceSsModel.fromJson(e))
+        .toList(),
+    seriesList: (json["series_list"] as List?)
+        ?.map((e) => SpaceSsModel.fromJson(e))
+        .toList(),
+  );
 }

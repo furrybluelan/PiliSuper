@@ -65,8 +65,9 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
               const SizedBox(height: 12),
               TextField(
                 autofocus: true,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
                   labelText: '自定义倍速',
                   border: OutlineInputBorder(
@@ -106,7 +107,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
                 }
               },
               child: const Text('确认'),
-            )
+            ),
           ],
         );
       },
@@ -130,8 +131,9 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
             const SizedBox(height: 10),
             ...sheetMenu.map(
               (item) => ListTile(
-                enabled:
-                    enableAutoLongPressSpeed && item.id == 2 ? false : true,
+                enabled: enableAutoLongPressSpeed && item.id == 2
+                    ? false
+                    : true,
                 onTap: () {
                   Get.back();
                   menuAction(index, item.id);
@@ -202,8 +204,12 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
         child: ListView(
           children: [
             Padding(
-              padding:
-                  const EdgeInsets.only(left: 14, right: 14, top: 6, bottom: 0),
+              padding: const EdgeInsets.only(
+                left: 14,
+                right: 14,
+                top: 6,
+                bottom: 0,
+              ),
               child: Text(
                 '点击下方按钮设置默认（长按）倍速',
                 style: TextStyle(color: theme.colorScheme.outline),

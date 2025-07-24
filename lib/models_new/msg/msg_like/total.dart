@@ -8,11 +8,11 @@ class Total {
   Total({this.cursor, this.items});
 
   factory Total.fromJson(Map<String, dynamic> json) => Total(
-        cursor: json['cursor'] == null
-            ? null
-            : Cursor.fromJson(json['cursor'] as Map<String, dynamic>),
-        items: (json['items'] as List<dynamic>?)
-            ?.map((e) => MsgLikeItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    cursor: json['cursor'] == null
+        ? null
+        : Cursor.fromJson(json['cursor'] as Map<String, dynamic>),
+    items: (json['items'] as List<dynamic>?)
+        ?.map((e) => MsgLikeItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

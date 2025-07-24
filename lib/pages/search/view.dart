@@ -44,7 +44,8 @@ class _SearchPageState extends State<SearchPage> {
                     tooltip: 'UID搜索用户',
                     icon: const Icon(Icons.person_outline, size: 22),
                     onPressed: () => Get.toNamed(
-                        '/member?mid=${_searchController.controller.text}'),
+                      '/member?mid=${_searchController.controller.text}',
+                    ),
                   )
                 : const SizedBox.shrink(),
           ),
@@ -58,7 +59,7 @@ class _SearchPageState extends State<SearchPage> {
             onPressed: () => _searchController.submit(),
             icon: const Icon(Icons.search, size: 22),
           ),
-          const SizedBox(width: 10)
+          const SizedBox(width: 10),
         ],
         title: TextField(
           autofocus: true,
@@ -80,7 +81,7 @@ class _SearchPageState extends State<SearchPage> {
           if (context.orientation == Orientation.portrait) ...[
             if (_searchController.enableHotKey) hotSearch(theme),
             _history(theme),
-            if (_searchController.enableSearchRcmd) hotSearch(theme, false)
+            if (_searchController.enableSearchRcmd) hotSearch(theme, false),
           ] else
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +93,7 @@ class _SearchPageState extends State<SearchPage> {
                       children: [
                         if (_searchController.enableHotKey) hotSearch(theme),
                         if (_searchController.enableSearchRcmd)
-                          hotSearch(theme, false)
+                          hotSearch(theme, false),
                       ],
                     ),
                   ),
@@ -106,7 +107,8 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _searchSuggest() {
     return Obx(
-      () => _searchController.searchSuggestList.isNotEmpty &&
+      () =>
+          _searchController.searchSuggestList.isNotEmpty &&
               _searchController.searchSuggestList.first.term != null &&
               _searchController.controller.text != ''
           ? Column(
@@ -127,17 +129,19 @@ class _SearchPageState extends State<SearchPage> {
                         child: Text.rich(
                           TextSpan(
                             children: Em.regTitle(item.textRich)
-                                .map((e) => TextSpan(
-                                      text: e.text,
-                                      style: e.isEm
-                                          ? TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                            )
-                                          : null,
-                                    ))
+                                .map(
+                                  (e) => TextSpan(
+                                    text: e.text,
+                                    style: e.isEm
+                                        ? TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                          )
+                                        : null,
+                                  ),
+                                )
                                 .toList(),
                           ),
                         ),
@@ -154,8 +158,10 @@ class _SearchPageState extends State<SearchPage> {
     final text = Text(
       isHot ? '大家都在搜' : '搜索发现',
       strutStyle: const StrutStyle(leading: 0, height: 1),
-      style: theme.textTheme.titleMedium!
-          .copyWith(height: 1, fontWeight: FontWeight.bold),
+      style: theme.textTheme.titleMedium!.copyWith(
+        height: 1,
+        fontWeight: FontWeight.bold,
+      ),
     );
     final outline = theme.colorScheme.outline;
     final secondary = theme.colorScheme.secondary;
@@ -191,8 +197,10 @@ class _SearchPageState extends State<SearchPage> {
                                 children: [
                                   Text(
                                     '完整榜单',
-                                    strutStyle:
-                                        const StrutStyle(leading: 0, height: 1),
+                                    strutStyle: const StrutStyle(
+                                      leading: 0,
+                                      height: 1,
+                                    ),
                                     style: style,
                                   ),
                                   Icon(
@@ -212,7 +220,8 @@ class _SearchPageState extends State<SearchPage> {
                   child: TextButton.icon(
                     style: const ButtonStyle(
                       padding: WidgetStatePropertyAll(
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 6)),
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      ),
                     ),
                     onPressed: isHot
                         ? _searchController.queryHotSearchList
@@ -235,12 +244,14 @@ class _SearchPageState extends State<SearchPage> {
               ],
             ),
           ),
-          Obx(() => _buildHotKey(
-                isHot
-                    ? _searchController.loadingState.value
-                    : _searchController.recommendData.value,
-                isHot,
-              )),
+          Obx(
+            () => _buildHotKey(
+              isHot
+                  ? _searchController.loadingState.value
+                  : _searchController.recommendData.value,
+              isHot,
+            ),
+          ),
         ],
       ),
     );
@@ -259,8 +270,8 @@ class _SearchPageState extends State<SearchPage> {
             context.orientation == Orientation.landscape
                 ? 25
                 : _searchController.enableHotKey
-                    ? 0
-                    : 6,
+                ? 0
+                : 6,
             6,
             25,
           ),
@@ -274,8 +285,10 @@ class _SearchPageState extends State<SearchPage> {
                     Text(
                       '搜索历史',
                       strutStyle: const StrutStyle(leading: 0, height: 1),
-                      style: theme.textTheme.titleMedium!
-                          .copyWith(height: 1, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium!.copyWith(
+                        height: 1,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Obx(
@@ -291,14 +304,17 @@ class _SearchPageState extends State<SearchPage> {
                             icon: enable
                                 ? historyIcon(theme)
                                 : historyIcon(theme).disable(),
-                            style:
-                                IconButton.styleFrom(padding: EdgeInsets.zero),
+                            style: IconButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                            ),
                             onPressed: () {
                               enable = !enable;
                               _searchController.recordSearchHistory.value =
                                   enable;
                               GStorage.setting.put(
-                                  SettingBoxKey.recordSearchHistory, enable);
+                                SettingBoxKey.recordSearchHistory,
+                                enable,
+                              );
                             },
                           ),
                         );
@@ -327,7 +343,7 @@ class _SearchPageState extends State<SearchPage> {
                           style: TextStyle(color: secondary),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -353,26 +369,29 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Icon historyIcon(ThemeData theme) => Icon(Icons.history,
-      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8));
+  Icon historyIcon(ThemeData theme) => Icon(
+    Icons.history,
+    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+  );
 
   Widget _buildHotKey(LoadingState<SearchRcmdData> loadingState, bool isHot) {
     return switch (loadingState) {
-      Success(:var response) => response.list?.isNotEmpty == true
-          ? LayoutBuilder(
-              builder: (context, constraints) => HotKeyword(
-                width: constraints.maxWidth,
-                hotSearchList: response.list!,
-                onClick: _searchController.onClickKeyword,
-              ),
-            )
-          : const SizedBox.shrink(),
+      Success(:var response) =>
+        response.list?.isNotEmpty == true
+            ? LayoutBuilder(
+                builder: (context, constraints) => HotKeyword(
+                  width: constraints.maxWidth,
+                  hotSearchList: response.list!,
+                  onClick: _searchController.onClickKeyword,
+                ),
+              )
+            : const SizedBox.shrink(),
       Error(:var errMsg) => errorWidget(
-          errMsg: errMsg,
-          onReload: isHot
-              ? _searchController.queryHotSearchList
-              : _searchController.queryRecommendList,
-        ),
+        errMsg: errMsg,
+        onReload: isHot
+            ? _searchController.queryHotSearchList
+            : _searchController.queryRecommendList,
+      ),
       _ => const SizedBox.shrink(),
     };
   }

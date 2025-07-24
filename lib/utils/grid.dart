@@ -9,14 +9,14 @@ class Grid {
   static final double smallCardWidth = Pref.smallCardWidth;
 
   static SliverGridDelegateWithExtentAndRatio videoCardHDelegate(
-          BuildContext context,
-          {double minHeight = 90}) =>
-      SliverGridDelegateWithExtentAndRatio(
-        mainAxisSpacing: 2,
-        maxCrossAxisExtent: Grid.smallCardWidth * 2,
-        childAspectRatio: StyleString.aspectRatio * 2.2,
-        minHeight: MediaQuery.textScalerOf(context).scale(minHeight),
-      );
+    BuildContext context, {
+    double minHeight = 90,
+  }) => SliverGridDelegateWithExtentAndRatio(
+    mainAxisSpacing: 2,
+    maxCrossAxisExtent: Grid.smallCardWidth * 2,
+    childAspectRatio: StyleString.aspectRatio * 2.2,
+    minHeight: MediaQuery.textScalerOf(context).scale(minHeight),
+  );
 }
 
 class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
@@ -33,11 +33,11 @@ class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
     this.childAspectRatio = 1.0,
     this.mainAxisExtent = 0.0,
     this.minHeight = 0.0,
-  })  : assert(maxCrossAxisExtent > 0),
-        assert(mainAxisSpacing >= 0),
-        assert(crossAxisSpacing >= 0),
-        assert(childAspectRatio > 0),
-        assert(minHeight >= 0);
+  }) : assert(maxCrossAxisExtent > 0),
+       assert(mainAxisSpacing >= 0),
+       assert(crossAxisSpacing >= 0),
+       assert(childAspectRatio > 0),
+       assert(minHeight >= 0);
 
   final double minHeight;
 
@@ -79,9 +79,10 @@ class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     assert(_debugAssertIsValid(constraints.crossAxisExtent));
-    int crossAxisCount = ((constraints.crossAxisExtent - crossAxisSpacing) /
-            (maxCrossAxisExtent + crossAxisSpacing))
-        .ceil();
+    int crossAxisCount =
+        ((constraints.crossAxisExtent - crossAxisSpacing) /
+                (maxCrossAxisExtent + crossAxisSpacing))
+            .ceil();
     // Ensure a minimum count of 1, can be zero and result in an infinite extent
     // below when the window size is 0.
     crossAxisCount = max(1, crossAxisCount);
@@ -91,7 +92,9 @@ class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
     );
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
     final double childMainAxisExtent = max(
-        minHeight, childCrossAxisExtent / childAspectRatio + mainAxisExtent);
+      minHeight,
+      childCrossAxisExtent / childAspectRatio + mainAxisExtent,
+    );
     return SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: childMainAxisExtent + mainAxisSpacing,

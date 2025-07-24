@@ -16,11 +16,11 @@ class ReplyPicture {
   });
 
   factory ReplyPicture.fromJson(Map<String, dynamic> json) => ReplyPicture(
-        imgSrc: json['img_src'] as String?,
-        imgWidth: json['img_width'] as int?,
-        imgHeight: json['img_height'] as int?,
-        imgSize: (json['img_size'] as num?)?.toDouble(),
-        topRightIcon: json['top_right_icon'] as String?,
-        playGifThumbnail: json['play_gif_thumbnail'] as bool?,
-      );
+    imgSrc: json['img_src'] as String?,
+    imgWidth: json['img_width'] as int?,
+    imgHeight: json['img_height'] as int?,
+    imgSize: (json['img_size'] as num?)?.toDouble(),
+    topRightIcon: json['top_right_icon'] as String?,
+    playGifThumbnail: json['play_gif_thumbnail'] as bool?,
+  );
 }

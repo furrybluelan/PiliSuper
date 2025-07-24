@@ -47,7 +47,7 @@ class DynamicCardSkeleton extends StatelessWidget {
                       height: 11,
                     ),
                   ],
-                )
+                ),
               ],
             ),
             Container(
@@ -102,19 +102,20 @@ class DynamicCardSkeleton extends StatelessWidget {
                     ),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                      foregroundColor:
-                          theme.colorScheme.outline.withValues(alpha: 0.2),
+                      foregroundColor: theme.colorScheme.outline.withValues(
+                        alpha: 0.2,
+                      ),
                     ),
                     label: Text(
                       i == 0
                           ? '转发'
                           : i == 1
-                              ? '评论'
-                              : '点赞',
+                          ? '评论'
+                          : '点赞',
                     ),
-                  )
+                  ),
               ],
-            )
+            ),
           ],
         ),
       ),

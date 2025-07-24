@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/member.dart';
 import 'package:PiliPlus/http/search.dart';
@@ -14,7 +15,8 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class MemberVideoCtr
-    extends CommonListController<SpaceArchiveData, SpaceArchiveItem> {
+    extends CommonListController<SpaceArchiveData, SpaceArchiveItem>
+    with ReloadMixin {
   MemberVideoCtr({
     required this.type,
     required this.mid,
@@ -72,7 +74,9 @@ class MemberVideoCtr
 
   @override
   bool customHandleResponse(
-      bool isRefresh, Success<SpaceArchiveData> response) {
+    bool isRefresh,
+    Success<SpaceArchiveData> response,
+  ) {
     SpaceArchiveData data = response.response;
     episodicButton
       ..value = data.episodicButton ?? EpisodicButton()
@@ -114,14 +118,14 @@ class MemberVideoCtr
         mid: mid,
         aid: type == ContributeType.video
             ? isLoadPrevious == true
-                ? firstAid
-                : lastAid
+                  ? firstAid
+                  : lastAid
             : null,
         order: type == ContributeType.video ? order.value : null,
         sort: type == ContributeType.video
             ? isLoadPrevious == true
-                ? 'asc'
-                : null
+                  ? 'asc'
+                  : null
             : sort.value,
         pn: type == ContributeType.charging ? page : null,
         next: next,
@@ -141,9 +145,10 @@ class MemberVideoCtr
   }
 
   Future<void> toViewPlayAll() async {
-    if (episodicButton.value.text == '继续播放' &&
-        episodicButton.value.uri?.isNotEmpty == true) {
-      final params = Uri.parse(episodicButton.value.uri!).queryParameters;
+    final episodicButton = this.episodicButton.value;
+    if (episodicButton.text == '继续播放' &&
+        episodicButton.uri?.isNotEmpty == true) {
+      final params = Uri.parse(episodicButton.uri!).queryParameters;
       String? oid = params['oid'];
       if (oid != null) {
         var bvid = IdUtils.av2bv(int.parse(oid));
@@ -155,8 +160,7 @@ class MemberVideoCtr
             'sourceType': 'archive',
             'mediaId': seasonId ?? seriesId ?? mid,
             'oid': oid,
-            'favTitle':
-                '$username: ${title ?? episodicButton.value.text ?? '播放全部'}',
+            'favTitle': '$username: ${title ?? episodicButton.text ?? '播放全部'}',
             if (seriesId == null) 'count': count.value,
             if (seasonId != null || seriesId != null)
               'mediaType': params['page_type'],
@@ -182,7 +186,8 @@ class MemberVideoCtr
             SmartDialog.showToast('已跳过不支持播放的视频');
           }
           bool desc = seasonId != null ? false : true;
-          desc = (seasonId != null || seriesId != null) &&
+          desc =
+              (seasonId != null || seriesId != null) &&
                   (type == ContributeType.video
                       ? order.value == 'click'
                       : sort.value == 'asc')
@@ -197,11 +202,12 @@ class MemberVideoCtr
               'mediaId': seasonId ?? seriesId ?? mid,
               'oid': IdUtils.bv2av(element.bvid!),
               'favTitle':
-                  '$username: ${title ?? episodicButton.value.text ?? '播放全部'}',
+                  '$username: ${title ?? episodicButton.text ?? '播放全部'}',
               if (seriesId == null) 'count': count.value,
               if (seasonId != null || seriesId != null)
-                'mediaType': Uri.parse(episodicButton.value.uri!)
-                    .queryParameters['page_type'],
+                'mediaType': Uri.parse(
+                  episodicButton.uri!,
+                ).queryParameters['page_type'],
               'desc': desc,
               if (type == ContributeType.video)
                 'sortField': order.value == 'click' ? 2 : 1,
@@ -215,6 +221,7 @@ class MemberVideoCtr
 
   @override
   Future<void> onReload() {
+    reload = true;
     isLocating.value = null;
     return super.onReload();
   }

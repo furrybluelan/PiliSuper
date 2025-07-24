@@ -30,7 +30,8 @@ class SearchArchiveData {
         episodicButton: json['episodic_button'] == null
             ? null
             : EpisodicButton.fromJson(
-                json['episodic_button'] as Map<String, dynamic>),
+                json['episodic_button'] as Map<String, dynamic>,
+              ),
         isRisk: json['is_risk'] as bool?,
         gaiaResType: json['gaia_res_type'] as int?,
         gaiaData: json['gaia_data'] as dynamic,

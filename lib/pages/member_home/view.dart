@@ -50,229 +50,242 @@ class _MemberHomeState extends State<MemberHome>
     final color = Theme.of(context).colorScheme.outline;
     return switch (loadingState) {
       Loading() => loadingWidget,
-      Success(response: final res) => res != null
-          ? CustomScrollView(
-              slivers: [
-                if (res.archive?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '视频',
-                    param: 'contribute',
-                    param1: 'video',
-                    count: res.archive!.count!,
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: StyleString.safeSpace,
+      Success(response: final res) =>
+        res != null
+            ? CustomScrollView(
+                slivers: [
+                  if (res.archive?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '视频',
+                      param: 'contribute',
+                      param1: 'video',
+                      count: res.archive!.count!,
                     ),
-                    sliver: SliverGrid(
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: StyleString.safeSpace,
+                      ),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                          mainAxisSpacing: StyleString.cardSpace,
+                          crossAxisSpacing: StyleString.cardSpace,
+                          maxCrossAxisExtent: Grid.smallCardWidth,
+                          childAspectRatio: StyleString.aspectRatio,
+                          mainAxisExtent: MediaQuery.textScalerOf(
+                            context,
+                          ).scale(55),
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return VideoCardVMemberHome(
+                              videoItem: res.archive!.item![index],
+                            );
+                          },
+                          childCount: min(
+                            isVertical ? 4 : 8,
+                            res.archive!.item!.length,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (res.favourite2?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '收藏',
+                      param: 'favorite',
+                      count: res.favourite2!.count!,
+                      visible: isOwner ? setting.favVideo == 1 : null,
+                    ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 98,
+                        child: MemberFavItem(
+                          item: res.favourite2!.item!.first,
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (res.coinArchive?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '最近投币的视频',
+                      param: 'coinArchive',
+                      count: res.coinArchive!.count!,
+                      visible: isOwner ? setting.coinsVideo == 1 : null,
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: StyleString.safeSpace,
+                      ),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                          mainAxisSpacing: StyleString.cardSpace,
+                          crossAxisSpacing: StyleString.cardSpace,
+                          maxCrossAxisExtent: Grid.smallCardWidth,
+                          childAspectRatio: StyleString.aspectRatio,
+                          mainAxisExtent: MediaQuery.textScalerOf(
+                            context,
+                          ).scale(55),
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return VideoCardVMemberHome(
+                              videoItem: res.coinArchive!.item![index],
+                            );
+                          },
+                          childCount: min(
+                            isVertical ? 2 : 4,
+                            res.coinArchive!.item!.length,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (res.likeArchive?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '最近点赞的视频',
+                      param: 'likeArchive',
+                      count: res.likeArchive!.count!,
+                      visible: isOwner ? setting.likesVideo == 1 : null,
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: StyleString.safeSpace,
+                      ),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                          mainAxisSpacing: StyleString.cardSpace,
+                          crossAxisSpacing: StyleString.cardSpace,
+                          maxCrossAxisExtent: Grid.smallCardWidth,
+                          childAspectRatio: StyleString.aspectRatio,
+                          mainAxisExtent: MediaQuery.textScalerOf(
+                            context,
+                          ).scale(55),
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return VideoCardVMemberHome(
+                              videoItem: res.likeArchive!.item![index],
+                            );
+                          },
+                          childCount: min(
+                            isVertical ? 2 : 4,
+                            res.likeArchive!.item!.length,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (res.article?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '图文',
+                      param: 'contribute',
+                      param1: 'opus',
+                      count: res.article!.count!,
+                    ),
+                    SliverGrid(
+                      gridDelegate: Grid.videoCardHDelegate(context),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return MemberArticleItem(
+                            item: res.article!.item![index],
+                          );
+                        },
+                        childCount: isVertical ? 1 : res.article!.item!.length,
+                      ),
+                    ),
+                  ],
+                  if (res.audios?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '音频',
+                      param: 'contribute',
+                      param1: 'audio',
+                      count: res.audios!.count!,
+                    ),
+                    SliverGrid(
                       gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                        mainAxisSpacing: StyleString.cardSpace,
-                        crossAxisSpacing: StyleString.cardSpace,
-                        maxCrossAxisExtent: Grid.smallCardWidth,
-                        childAspectRatio: StyleString.aspectRatio,
-                        mainAxisExtent:
-                            MediaQuery.textScalerOf(context).scale(55),
+                        mainAxisSpacing: 2,
+                        maxCrossAxisExtent: Grid.smallCardWidth * 2,
+                        childAspectRatio: StyleString.aspectRatio * 2.6,
+                        minHeight: MediaQuery.textScalerOf(context).scale(90),
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          return VideoCardVMemberHome(
-                            videoItem: res.archive!.item![index],
+                          return MemberAudioItem(
+                            item: res.audios!.item![index],
                           );
                         },
-                        childCount:
-                            min(isVertical ? 4 : 8, res.archive!.item!.length),
+                        childCount: isVertical ? 1 : min(2, res.audios!.count!),
                       ),
                     ),
-                  ),
-                ],
-                if (res.favourite2?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '收藏',
-                    param: 'favorite',
-                    count: res.favourite2!.count!,
-                    visible: isOwner ? setting.favVideo == 1 : null,
-                  ),
+                  ],
+                  if (res.comic?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '漫画',
+                      param: 'contribute',
+                      param1: 'comic',
+                      count: res.comic!.count!,
+                    ),
+                    SliverGrid(
+                      gridDelegate: Grid.videoCardHDelegate(context),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return MemberComicItem(item: res.comic!.item![index]);
+                        },
+                        childCount: isVertical ? 1 : min(2, res.comic!.count!),
+                      ),
+                    ),
+                  ],
+                  if (res.season?.item?.isNotEmpty == true) ...[
+                    _header(
+                      color,
+                      title: '追番',
+                      param: 'bangumi',
+                      count: res.season!.count!,
+                      visible: isOwner ? setting.bangumi == 1 : null,
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: StyleString.safeSpace,
+                      ),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                          mainAxisSpacing: StyleString.cardSpace,
+                          crossAxisSpacing: StyleString.cardSpace,
+                          maxCrossAxisExtent: Grid.smallCardWidth / 3 * 2,
+                          childAspectRatio: 0.75,
+                          mainAxisExtent: MediaQuery.textScalerOf(
+                            context,
+                          ).scale(52),
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return PgcCardVMemberPgc(
+                              item: res.season!.item![index],
+                            );
+                          },
+                          childCount: min(
+                            isVertical ? 3 : 6,
+                            res.season!.item!.length,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 98,
-                      child: MemberFavItem(
-                        item: res.favourite2!.item!.first,
-                      ),
+                      height: 80 + MediaQuery.paddingOf(context).bottom,
                     ),
                   ),
                 ],
-                if (res.coinArchive?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '最近投币的视频',
-                    param: 'coinArchive',
-                    count: res.coinArchive!.count!,
-                    visible: isOwner ? setting.coinsVideo == 1 : null,
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: StyleString.safeSpace,
-                    ),
-                    sliver: SliverGrid(
-                      gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                        mainAxisSpacing: StyleString.cardSpace,
-                        crossAxisSpacing: StyleString.cardSpace,
-                        maxCrossAxisExtent: Grid.smallCardWidth,
-                        childAspectRatio: StyleString.aspectRatio,
-                        mainAxisExtent:
-                            MediaQuery.textScalerOf(context).scale(55),
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return VideoCardVMemberHome(
-                            videoItem: res.coinArchive!.item![index],
-                          );
-                        },
-                        childCount: min(
-                            isVertical ? 2 : 4, res.coinArchive!.item!.length),
-                      ),
-                    ),
-                  ),
-                ],
-                if (res.likeArchive?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '最近点赞的视频',
-                    param: 'likeArchive',
-                    count: res.likeArchive!.count!,
-                    visible: isOwner ? setting.likesVideo == 1 : null,
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: StyleString.safeSpace,
-                    ),
-                    sliver: SliverGrid(
-                      gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                        mainAxisSpacing: StyleString.cardSpace,
-                        crossAxisSpacing: StyleString.cardSpace,
-                        maxCrossAxisExtent: Grid.smallCardWidth,
-                        childAspectRatio: StyleString.aspectRatio,
-                        mainAxisExtent:
-                            MediaQuery.textScalerOf(context).scale(55),
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return VideoCardVMemberHome(
-                            videoItem: res.likeArchive!.item![index],
-                          );
-                        },
-                        childCount: min(
-                            isVertical ? 2 : 4, res.likeArchive!.item!.length),
-                      ),
-                    ),
-                  ),
-                ],
-                if (res.article?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '图文',
-                    param: 'contribute',
-                    param1: 'opus',
-                    count: res.article!.count!,
-                  ),
-                  SliverGrid(
-                    gridDelegate: Grid.videoCardHDelegate(context),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return MemberArticleItem(
-                          item: res.article!.item![index],
-                        );
-                      },
-                      childCount: isVertical ? 1 : res.article!.item!.length,
-                    ),
-                  ),
-                ],
-                if (res.audios?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '音频',
-                    param: 'contribute',
-                    param1: 'audio',
-                    count: res.audios!.count!,
-                  ),
-                  SliverGrid(
-                    gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                      mainAxisSpacing: 2,
-                      maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                      childAspectRatio: StyleString.aspectRatio * 2.6,
-                      minHeight: MediaQuery.textScalerOf(context).scale(90),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return MemberAudioItem(
-                          item: res.audios!.item![index],
-                        );
-                      },
-                      childCount: isVertical ? 1 : min(2, res.audios!.count!),
-                    ),
-                  )
-                ],
-                if (res.comic?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '漫画',
-                    param: 'contribute',
-                    param1: 'comic',
-                    count: res.comic!.count!,
-                  ),
-                  SliverGrid(
-                    gridDelegate: Grid.videoCardHDelegate(context),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return MemberComicItem(item: res.comic!.item![index]);
-                      },
-                      childCount: isVertical ? 1 : min(2, res.comic!.count!),
-                    ),
-                  ),
-                ],
-                if (res.season?.item?.isNotEmpty == true) ...[
-                  _header(
-                    color,
-                    title: '追番',
-                    param: 'bangumi',
-                    count: res.season!.count!,
-                    visible: isOwner ? setting.bangumi == 1 : null,
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: StyleString.safeSpace,
-                    ),
-                    sliver: SliverGrid(
-                      gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                        mainAxisSpacing: StyleString.cardSpace,
-                        crossAxisSpacing: StyleString.cardSpace,
-                        maxCrossAxisExtent: Grid.smallCardWidth / 3 * 2,
-                        childAspectRatio: 0.75,
-                        mainAxisExtent:
-                            MediaQuery.textScalerOf(context).scale(52),
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return PgcCardVMemberPgc(
-                            item: res.season!.item![index],
-                          );
-                        },
-                        childCount:
-                            min(isVertical ? 3 : 6, res.season!.item!.length),
-                      ),
-                    ),
-                  ),
-                ],
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 80 + MediaQuery.paddingOf(context).bottom,
-                  ),
-                ),
-              ],
-            )
-          : scrollErrorWidget(),
+              )
+            : scrollErrorWidget(),
       Error(:var errMsg) => scrollErrorWidget(errMsg: errMsg),
     };
   }
@@ -318,20 +331,27 @@ class _MemberHomeState extends State<MemberHome>
             ),
             GestureDetector(
               onTap: () {
-                int index =
-                    _ctr.tab2!.indexWhere((item) => item.param == param);
+                int index = _ctr.tab2!.indexWhere(
+                  (item) => item.param == param,
+                );
                 if (index != -1) {
-                  if (const ['video', 'opus', 'audio', 'comic']
-                      .contains(param1)) {
+                  if (const [
+                    'video',
+                    'opus',
+                    'audio',
+                    'comic',
+                  ].contains(param1)) {
                     List<SpaceTab2Item> items = _ctr.tab2!
                         .firstWhere((item) => item.param == param)
                         .items!;
-                    int index1 =
-                        items.indexWhere((item) => item.param == param1);
+                    int index1 = items.indexWhere(
+                      (item) => item.param == param1,
+                    );
                     if (index1 != -1) {
                       try {
-                        final contributeCtr =
-                            Get.find<MemberContributeCtr>(tag: widget.heroTag);
+                        final contributeCtr = Get.find<MemberContributeCtr>(
+                          tag: widget.heroTag,
+                        );
                         // contributeCtr.tabController?.animateTo(index1);
                         if (contributeCtr.tabController?.index != index1) {
                           contributeCtr.tabController?.index = index1;
@@ -346,18 +366,22 @@ class _MemberHomeState extends State<MemberHome>
                   _ctr.tabController?.animateTo(index);
                 } else {
                   if (param == 'coinArchive') {
-                    Get.to(MemberCoinArcPage(
-                      mid: _ctr.mid,
-                      name: _ctr.username,
-                    ));
+                    Get.to(
+                      MemberCoinArcPage(
+                        mid: _ctr.mid,
+                        name: _ctr.username,
+                      ),
+                    );
                     return;
                   }
 
                   if (param == 'likeArchive') {
-                    Get.to(MemberLikeArcPage(
-                      mid: _ctr.mid,
-                      name: _ctr.username,
-                    ));
+                    Get.to(
+                      MemberLikeArcPage(
+                        mid: _ctr.mid,
+                        name: _ctr.username,
+                      ),
+                    );
                     return;
                   }
 

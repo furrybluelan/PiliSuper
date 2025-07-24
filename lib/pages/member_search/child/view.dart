@@ -56,27 +56,29 @@ class _MemberSearchChildPageState extends State<MemberSearchChildPage>
   Widget get _buildLoading {
     return switch (widget.searchType) {
       MemberSearchType.archive => SliverGrid(
-          gridDelegate: Grid.videoCardHDelegate(context),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardHSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: Grid.videoCardHDelegate(context),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardHSkeleton();
+          },
+          childCount: 10,
         ),
-      MemberSearchType.dynamic =>
-        DynamicsTabPage.dynSkeleton(GlobalData().dynamicsWaterfallFlow),
+      ),
+      MemberSearchType.dynamic => DynamicsTabPage.dynSkeleton(
+        GlobalData().dynamicsWaterfallFlow,
+      ),
     };
   }
 
   Widget _buildBody(LoadingState<List?> loadingState) {
     return switch (loadingState) {
       Loading() => _buildLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? Builder(
-              builder: (context) {
-                return switch (widget.searchType) {
-                  MemberSearchType.archive => SliverGrid(
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? Builder(
+                builder: (context) {
+                  return switch (widget.searchType) {
+                    MemberSearchType.archive => SliverGrid(
                       gridDelegate: Grid.videoCardHDelegate(context),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -90,53 +92,54 @@ class _MemberSearchChildPageState extends State<MemberSearchChildPage>
                         childCount: response!.length,
                       ),
                     ),
-                  MemberSearchType.dynamic => GlobalData().dynamicsWaterfallFlow
-                      ? SliverWaterfallFlow.extent(
-                          maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                          crossAxisSpacing: StyleString.safeSpace,
-                          mainAxisSpacing: StyleString.safeSpace,
-                          lastChildLayoutTypeBuilder: (index) {
-                            if (index == response.length - 1) {
-                              _controller.onLoadMore();
-                            }
-                            return index == response.length
-                                ? LastChildLayoutType.foot
-                                : LastChildLayoutType.none;
-                          },
-                          children: response!
-                              .map((item) => DynamicPanel(item: item))
-                              .toList(),
-                        )
-                      : SliverCrossAxisGroup(
-                          slivers: [
-                            const SliverFillRemaining(),
-                            SliverConstrainedCrossAxis(
-                              maxExtent: Grid.smallCardWidth * 2,
-                              sliver: SliverList.builder(
-                                itemBuilder: (context, index) {
-                                  if (index == response.length - 1) {
-                                    _controller.onLoadMore();
-                                  }
-                                  return DynamicPanel(
-                                    item: response[index],
-                                  );
-                                },
-                                itemCount: response!.length,
-                              ),
+                    MemberSearchType.dynamic =>
+                      GlobalData().dynamicsWaterfallFlow
+                          ? SliverWaterfallFlow.extent(
+                              maxCrossAxisExtent: Grid.smallCardWidth * 2,
+                              crossAxisSpacing: StyleString.safeSpace,
+                              mainAxisSpacing: StyleString.safeSpace,
+                              lastChildLayoutTypeBuilder: (index) {
+                                if (index == response.length - 1) {
+                                  _controller.onLoadMore();
+                                }
+                                return index == response.length
+                                    ? LastChildLayoutType.foot
+                                    : LastChildLayoutType.none;
+                              },
+                              children: response!
+                                  .map((item) => DynamicPanel(item: item))
+                                  .toList(),
+                            )
+                          : SliverCrossAxisGroup(
+                              slivers: [
+                                const SliverFillRemaining(),
+                                SliverConstrainedCrossAxis(
+                                  maxExtent: Grid.smallCardWidth * 2,
+                                  sliver: SliverList.builder(
+                                    itemBuilder: (context, index) {
+                                      if (index == response.length - 1) {
+                                        _controller.onLoadMore();
+                                      }
+                                      return DynamicPanel(
+                                        item: response[index],
+                                      );
+                                    },
+                                    itemCount: response!.length,
+                                  ),
+                                ),
+                                const SliverFillRemaining(),
+                              ],
                             ),
-                            const SliverFillRemaining(),
-                          ],
-                        ),
-                };
-              },
-            )
-          : HttpError(
-              onReload: _controller.onReload,
-            ),
+                  };
+                },
+              )
+            : HttpError(
+                onReload: _controller.onReload,
+              ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

@@ -13,8 +13,10 @@ class FavNotePage extends StatefulWidget {
 
 class _FavNotePageState extends State<FavNotePage>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  late final TabController _tabController =
-      TabController(length: 2, vsync: this);
+  late final TabController _tabController = TabController(
+    length: 2,
+    vsync: this,
+  );
 
   @override
   bool get wantKeepAlive => true;
@@ -44,16 +46,19 @@ class _FavNotePageState extends State<FavNotePage>
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 dividerHeight: 0,
                 indicatorWeight: 0,
-                indicatorPadding:
-                    const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+                indicatorPadding: const EdgeInsets.symmetric(
+                  horizontal: 3,
+                  vertical: 8,
+                ),
                 indicator: BoxDecoration(
                   color: theme.colorScheme.secondaryContainer,
                   borderRadius: const BorderRadius.all(Radius.circular(20)),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
-                labelStyle: TabBarTheme.of(context)
-                        .labelStyle
-                        ?.copyWith(fontSize: 14) ??
+                labelStyle:
+                    TabBarTheme.of(
+                      context,
+                    ).labelStyle?.copyWith(fontSize: 14) ??
                     const TextStyle(fontSize: 14),
                 labelColor: theme.colorScheme.onSecondaryContainer,
                 unselectedLabelColor: theme.colorScheme.outline,
@@ -65,9 +70,8 @@ class _FavNotePageState extends State<FavNotePage>
                   try {
                     if (!_tabController.indexIsChanging) {
                       Get.find<FavNoteController>(
-                              tag: index == 0 ? 'false' : 'true')
-                          .scrollController
-                          .animToTop();
+                        tag: index == 0 ? 'false' : 'true',
+                      ).scrollController.animToTop();
                     }
                   } catch (_) {}
                 },

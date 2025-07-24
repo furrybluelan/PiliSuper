@@ -20,13 +20,13 @@ class ViewPoint {
   });
 
   factory ViewPoint.fromJson(Map<String, dynamic> json) => ViewPoint(
-        type: json["type"],
-        from: json["from"],
-        to: json["to"],
-        content: json["content"],
-        imgUrl: json["imgUrl"],
-        logoUrl: json["logoUrl"],
-        teamType: json["team_type"],
-        teamName: json["team_name"],
-      );
+    type: json["type"],
+    from: json["from"],
+    to: json["to"],
+    content: json["content"],
+    imgUrl: json["imgUrl"],
+    logoUrl: json["logoUrl"],
+    teamType: json["team_type"],
+    teamName: json["team_name"],
+  );
 }

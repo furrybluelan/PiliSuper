@@ -36,8 +36,9 @@ class FavNoteController
 
   Future<void> onRemove() async {
     List<FavNoteItemModel> dataList = loadingState.value.data!;
-    Set<FavNoteItemModel> removeList =
-        dataList.where((item) => item.checked == true).toSet();
+    Set<FavNoteItemModel> removeList = dataList
+        .where((item) => item.checked == true)
+        .toSet();
     final res = await FavHttp.delNote(
       isPublish: isPublish,
       noteIds: removeList
@@ -45,8 +46,10 @@ class FavNoteController
           .toList(),
     );
     if (res['status']) {
-      List<FavNoteItemModel> remainList =
-          dataList.toSet().difference(removeList).toList();
+      List<FavNoteItemModel> remainList = dataList
+          .toSet()
+          .difference(removeList)
+          .toList();
       loadingState.value = Success(remainList);
       enableMultiSelect.value = false;
       SmartDialog.showToast('删除成功');

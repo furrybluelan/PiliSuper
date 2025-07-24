@@ -32,7 +32,8 @@ class PgcReviewController
 
   @override
   void checkIsEnd(int length) {
-    if (count.value != null && length >= count.value!) {
+    final count = this.count.value;
+    if (count != null && length >= count) {
       isEnd = true;
     }
   }
@@ -52,11 +53,11 @@ class PgcReviewController
 
   @override
   Future<LoadingState<PgcReviewData>> customGetData() => PgcHttp.pgcReview(
-        type: type,
-        mediaId: mediaId,
-        next: next,
-        sort: sortType.value.sort,
-      );
+    type: type,
+    mediaId: mediaId,
+    next: next,
+    sort: sortType.value.sort,
+  );
 
   Future<void> onLike(PgcReviewItemModel item, bool isLike, reviewId) async {
     var res = await PgcHttp.pgcReviewLike(
@@ -78,7 +79,10 @@ class PgcReviewController
   }
 
   Future<void> onDislike(
-      PgcReviewItemModel item, bool isDislike, reviewId) async {
+    PgcReviewItemModel item,
+    bool isDislike,
+    reviewId,
+  ) async {
     var res = await PgcHttp.pgcReviewDislike(
       mediaId: mediaId,
       reviewId: reviewId,

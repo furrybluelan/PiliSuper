@@ -79,16 +79,20 @@ class BottomControl extends StatelessWidget {
                           }
                           if ((newProgress - lastAnnouncedValue).abs() > 0.02) {
                             accessibilityDebounce?.cancel();
-                            accessibilityDebounce =
-                                Timer(const Duration(milliseconds: 200), () {
-                              SemanticsService.announce(
+                            accessibilityDebounce = Timer(
+                              const Duration(milliseconds: 200),
+                              () {
+                                SemanticsService.announce(
                                   "${(newProgress * 100).round()}%",
-                                  TextDirection.ltr);
-                              lastAnnouncedValue = newProgress;
-                            });
+                                  TextDirection.ltr,
+                                );
+                                lastAnnouncedValue = newProgress;
+                              },
+                            );
                           }
-                          controller
-                              .onUpdatedSliderProgress(duration.timeStamp);
+                          controller.onUpdatedSliderProgress(
+                            duration.timeStamp,
+                          );
                         },
                         onSeek: (duration) {
                           if (controller.showSeekPreview) {
@@ -97,11 +101,14 @@ class BottomControl extends StatelessWidget {
                           controller
                             ..onChangedSliderEnd()
                             ..onChangedSlider(duration.inSeconds.toDouble())
-                            ..seekTo(Duration(seconds: duration.inSeconds),
-                                type: 'slider');
+                            ..seekTo(
+                              Duration(seconds: duration.inSeconds),
+                              type: 'slider',
+                            );
                           SemanticsService.announce(
-                              "${(duration.inSeconds / max * 100).round()}%",
-                              TextDirection.ltr);
+                            "${(duration.inSeconds / max * 100).round()}%",
+                            TextDirection.ltr,
+                          );
                         },
                       ),
                       if (controller.segmentList.isNotEmpty)

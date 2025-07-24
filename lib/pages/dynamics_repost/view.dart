@@ -52,12 +52,14 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
 
   late final _key = GlobalKey();
 
-  late final _pic = widget.pic ??
+  late final _pic =
+      widget.pic ??
       widget.item?.modules.moduleDynamic?.major?.archive?.cover ??
       widget.item?.modules.moduleDynamic?.major?.pgc?.cover ??
       widget.item?.modules.moduleDynamic?.major?.opus?.pics?.firstOrNull?.url;
 
-  late final _text = widget.title ??
+  late final _text =
+      widget.title ??
       widget.item?.modules.moduleDynamic?.major?.opus?.summary?.text ??
       widget.item?.modules.moduleDynamic?.desc?.text ??
       widget.item?.modules.moduleDynamic?.major?.archive?.title ??
@@ -79,29 +81,29 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
     final ThemeData theme = Theme.of(context);
 
     Widget page([ScrollController? scrollController]) => Column(
-          key: _isMax ? _key : null,
-          mainAxisSize: _isMax ? MainAxisSize.max : MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (!_isMax) const SizedBox(height: 10),
-            _buildAppBar(theme),
-            if (_isMax) ...[
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  controller: scrollController,
-                  physics: const ClampingScrollPhysics(),
-                  children: _buildEditPanel(theme),
-                ),
-              ),
-              _buildToolbar,
-              buildPanelContainer(theme, Colors.transparent),
-            ] else ...[
-              ..._buildEditPanel(theme),
-              ..._biuldDismiss(theme),
-            ],
-          ],
-        );
+      key: _isMax ? _key : null,
+      mainAxisSize: _isMax ? MainAxisSize.max : MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!_isMax) const SizedBox(height: 10),
+        _buildAppBar(theme),
+        if (_isMax) ...[
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              controller: scrollController,
+              physics: const ClampingScrollPhysics(),
+              children: _buildEditPanel(theme),
+            ),
+          ),
+          _buildToolbar,
+          buildPanelContainer(theme, Colors.transparent),
+        ] else ...[
+          ..._buildEditPanel(theme),
+          ..._biuldDismiss(theme),
+        ],
+      ],
+    );
 
     Widget child() => _isMax
         ? DraggableScrollableSheet(
@@ -126,124 +128,124 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
   }
 
   List<Widget> _buildEditPanel(ThemeData theme) => [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _isMax
-              ? _buildEditWidget(theme)
-              : DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        width: 2,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: _isMax
+          ? _buildEditWidget(theme)
+          : DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    width: 2,
+                    color: theme.colorScheme.primary,
                   ),
-                  child: _buildEditPlaceHolder(theme),
                 ),
-        ),
-        const SizedBox(height: 10),
-        _buildRefWidget(theme),
-      ];
+              ),
+              child: _buildEditPlaceHolder(theme),
+            ),
+    ),
+    const SizedBox(height: 10),
+    _buildRefWidget(theme),
+  ];
 
   Widget _buildRefWidget(ThemeData theme) => Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              if (_pic != null) ...[
-                NetworkImgLayer(
-                  radius: 6,
-                  width: 40,
-                  height: 40,
-                  src: _pic,
-                ),
-                const SizedBox(width: 10),
-              ],
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_uname?.isNotEmpty == true)
-                      Text(
-                        '@$_uname',
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
-                          fontSize: 13,
-                        ),
-                      ),
-                    Text(
-                      _text,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+    margin: const EdgeInsets.symmetric(horizontal: 16),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          if (_pic != null) ...[
+            NetworkImgLayer(
+              radius: 6,
+              width: 40,
+              height: 40,
+              src: _pic,
+            ),
+            const SizedBox(width: 10),
+          ],
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (_uname?.isNotEmpty == true)
+                  Text(
+                    '@$_uname',
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontSize: 13,
                     ),
-                  ],
+                  ),
+                Text(
+                  _text,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 
   Widget _buildEditPlaceHolder(ThemeData theme) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          setState(() => _isMax = true);
-          Future.delayed(const Duration(milliseconds: 300), () {
-            _isExpanded = true;
-            if (mounted) {
-              focusNode.requestFocus();
-            }
-          });
-        },
-        child: SizedBox(
-          width: double.infinity,
-          child: Text(
-            '说点什么吧',
-            style: TextStyle(
-              height: 1.75,
-              fontSize: 15,
-              color: theme.colorScheme.outline,
-            ),
-          ),
+    behavior: HitTestBehavior.opaque,
+    onTap: () {
+      setState(() => _isMax = true);
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _isExpanded = true;
+        if (mounted) {
+          focusNode.requestFocus();
+        }
+      });
+    },
+    child: SizedBox(
+      width: double.infinity,
+      child: Text(
+        '说点什么吧',
+        style: TextStyle(
+          height: 1.75,
+          fontSize: 15,
+          color: theme.colorScheme.outline,
         ),
-      );
+      ),
+    ),
+  );
 
   Widget _buildEditWidget(ThemeData theme) => Form(
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Listener(
-          onPointerUp: (event) {
-            if (readOnly.value) {
-              updatePanelType(PanelType.keyboard);
-            }
-          },
-          child: Obx(
-            () => RichTextField(
-              key: key,
-              controller: editController,
-              minLines: 4,
-              maxLines: null,
-              focusNode: focusNode,
-              readOnly: readOnly.value,
-              decoration: InputDecoration(
-                hintText: '说点什么吧',
-                hintStyle: TextStyle(color: theme.colorScheme.outline),
-                border: const OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  gapPadding: 0,
-                ),
-                contentPadding: EdgeInsets.zero,
-              ),
-              // inputFormatters: [LengthLimitingTextInputFormatter(1000)],
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    child: Listener(
+      onPointerUp: (event) {
+        if (readOnly.value) {
+          updatePanelType(PanelType.keyboard);
+        }
+      },
+      child: Obx(
+        () => RichTextField(
+          key: key,
+          controller: editController,
+          minLines: 4,
+          maxLines: null,
+          focusNode: focusNode,
+          readOnly: readOnly.value,
+          decoration: InputDecoration(
+            hintText: '说点什么吧',
+            hintStyle: TextStyle(color: theme.colorScheme.outline),
+            border: const OutlineInputBorder(
+              borderSide: BorderSide.none,
+              gapPadding: 0,
             ),
+            contentPadding: EdgeInsets.zero,
           ),
+          // inputFormatters: [LengthLimitingTextInputFormatter(1000)],
         ),
-      );
+      ),
+    ),
+  );
 
   Widget _buildAppBar(ThemeData theme) => !_isMax
       ? Row(
@@ -257,8 +259,10 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
             TextButton(
               onPressed: onPublish,
               style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 visualDensity: VisualDensity.compact,
               ),
               child: Text(widget.rid != null ? '立即发布' : '立即转发'),
@@ -281,8 +285,9 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
                     tooltip: '返回',
                     style: ButtonStyle(
                       padding: WidgetStateProperty.all(EdgeInsets.zero),
-                      backgroundColor:
-                          WidgetStateProperty.resolveWith((states) {
+                      backgroundColor: WidgetStateProperty.resolveWith((
+                        states,
+                      ) {
                         return theme.colorScheme.secondaryContainer;
                       }),
                     ),
@@ -299,7 +304,9 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
                 child: Text(
                   widget.rid != null ? '分享至动态' : '转发动态',
                   style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Align(
@@ -322,34 +329,34 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
         );
 
   Widget get _buildToolbar => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          spacing: 16,
-          children: [
-            emojiBtn,
-            atBtn,
-          ],
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Row(
+      spacing: 16,
+      children: [
+        emojiBtn,
+        atBtn,
+      ],
+    ),
+  );
 
   List<Widget> _biuldDismiss(ThemeData theme) => [
-        const SizedBox(height: 10),
-        Divider(
-          height: 1,
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+    const SizedBox(height: 10),
+    Divider(
+      height: 1,
+      color: theme.colorScheme.outline.withValues(alpha: 0.1),
+    ),
+    ListTile(
+      dense: true,
+      onTap: Get.back,
+      title: Center(
+        child: Text(
+          '取消',
+          style: TextStyle(color: theme.colorScheme.outline),
         ),
-        ListTile(
-          dense: true,
-          onTap: Get.back,
-          title: Center(
-            child: Text(
-              '取消',
-              style: TextStyle(color: theme.colorScheme.outline),
-            ),
-          ),
-        ),
-        SizedBox(height: 10 + MediaQuery.paddingOf(context).bottom),
-      ];
+      ),
+    ),
+    SizedBox(height: 10 + MediaQuery.paddingOf(context).bottom),
+  ];
 
   @override
   Widget? get customPanel => EmotePanel(onChoose: onChooseEmote);
@@ -398,8 +405,9 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
     SmartDialog.showLoading();
     List<Map<String, dynamic>>? richContent = getRichContent();
     final hasRichText = richContent != null;
-    List<Map<String, dynamic>>? repostContent =
-        widget.item?.orig != null ? getRepostContent(widget.item!) : null;
+    List<Map<String, dynamic>>? repostContent = widget.item?.orig != null
+        ? getRepostContent(widget.item!)
+        : null;
     if (hasRichText && repostContent != null) {
       richContent.addAll(repostContent);
     }

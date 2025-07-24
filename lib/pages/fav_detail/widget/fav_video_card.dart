@@ -40,31 +40,31 @@ class FavVideoCardH extends StatelessWidget {
         onTap: isSort == true
             ? null
             : onTap ??
-                () {
-                  if (!const [0, 16].contains(item.attr)) {
-                    Get.toNamed('/member?mid=${item.upper?.mid}');
-                    return;
-                  }
+                  () {
+                    if (!const [0, 16].contains(item.attr)) {
+                      Get.toNamed('/member?mid=${item.upper?.mid}');
+                      return;
+                    }
 
-                  // pgc
-                  if (item.type == 24) {
-                    PageUtils.viewPgc(
-                      seasonId: item.ogv!.seasonId,
-                      epId: item.id,
-                    );
-                    return;
-                  }
+                    // pgc
+                    if (item.type == 24) {
+                      PageUtils.viewPgc(
+                        seasonId: item.ogv!.seasonId,
+                        epId: item.id,
+                      );
+                      return;
+                    }
 
-                  onViewFav?.call();
-                },
+                    onViewFav?.call();
+                  },
         onLongPress: isSort == true
             ? null
             : onLongPress ??
-                () => imageSaveDialog(
-                      title: item.title,
-                      cover: item.cover,
-                      bvid: item.bvid,
-                    ),
+                  () => imageSaveDialog(
+                    title: item.title,
+                    cover: item.cover,
+                    bvid: item.bvid,
+                  ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: StyleString.safeSpace,
@@ -200,7 +200,7 @@ class FavVideoCardH extends StatelessWidget {
                             onDelFav!();
                           },
                           child: const Text('确定取消'),
-                        )
+                        ),
                       ],
                     );
                   },

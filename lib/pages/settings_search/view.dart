@@ -42,19 +42,21 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     _sub = _ctr.stream
         .debounce(const Duration(milliseconds: 200), trailing: true)
         .listen((value) {
-      if (value.isEmpty) {
-        _list.clear();
-      } else {
-        value = value.toLowerCase();
-        _list.value = _settings
-            .where((item) =>
-                (item.title ?? item.getTitle?.call())
-                    ?.toLowerCase()
-                    .contains(value) ||
-                item.subtitle?.toLowerCase().contains(value) == true)
-            .toList();
-      }
-    });
+          if (value.isEmpty) {
+            _list.clear();
+          } else {
+            value = value.toLowerCase();
+            _list.value = _settings
+                .where(
+                  (item) =>
+                      (item.title ?? item.getTitle?.call())
+                          ?.toLowerCase()
+                          .contains(value) ||
+                      item.subtitle?.toLowerCase().contains(value) == true,
+                )
+                .toList();
+          }
+        });
   }
 
   @override

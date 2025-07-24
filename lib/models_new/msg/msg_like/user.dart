@@ -16,11 +16,11 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        mid: json['mid'] as int?,
-        fans: json['fans'] as int?,
-        nickname: json['nickname'] as String?,
-        avatar: json['avatar'] as String?,
-        midLink: json['mid_link'] as String?,
-        follow: json['follow'] as bool?,
-      );
+    mid: json['mid'] as int?,
+    fans: json['fans'] as int?,
+    nickname: json['nickname'] as String?,
+    avatar: json['avatar'] as String?,
+    midLink: json['mid_link'] as String?,
+    follow: json['follow'] as bool?,
+  );
 }

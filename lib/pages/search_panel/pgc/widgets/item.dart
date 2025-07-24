@@ -49,7 +49,7 @@ class SearchPgcItem extends StatelessWidget {
                     right: 4.0,
                     bottom: null,
                     left: null,
-                  )
+                  ),
                 ],
               ),
               const SizedBox(width: 10),
@@ -60,16 +60,19 @@ class SearchPgcItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text.rich(
                       TextSpan(
-                          children: item.title
-                              .map((e) => TextSpan(
-                                    text: e.text,
-                                    style: TextStyle(
-                                      color: e.isEm
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.onSurface,
-                                    ),
-                                  ))
-                              .toList()),
+                        children: item.title
+                            .map(
+                              (e) => TextSpan(
+                                text: e.text,
+                                style: TextStyle(
+                                  color: e.isEm
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Text('评分:${item.mediaScore?['score']}', style: style),

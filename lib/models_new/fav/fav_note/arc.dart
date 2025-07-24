@@ -18,12 +18,12 @@ class Arc {
   });
 
   factory Arc.fromJson(Map<String, dynamic> json) => Arc(
-        oid: json['oid'] as int?,
-        bvid: json['bvid'] as String?,
-        pic: json['pic'] as String?,
-        desc: json['desc'] as String?,
-        status: json['status'] as int?,
-        oidType: json['oid_type'] as int?,
-        aid: json['aid'] as int?,
-      );
+    oid: json['oid'] as int?,
+    bvid: json['bvid'] as String?,
+    pic: json['pic'] as String?,
+    desc: json['desc'] as String?,
+    status: json['status'] as int?,
+    oidType: json['oid_type'] as int?,
+    aid: json['aid'] as int?,
+  );
 }

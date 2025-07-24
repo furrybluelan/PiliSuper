@@ -18,12 +18,12 @@ class NewEp {
   });
 
   factory NewEp.fromJson(Map<String, dynamic> json) => NewEp(
-        id: json['id'] as int?,
-        indexShow: json['index_show'] as String?,
-        cover: json['cover'] as String?,
-        title: json['title'] as String?,
-        longTitle: json['long_title'] as String?,
-        pubTime: json['pub_time'] as String?,
-        duration: json['duration'] as int?,
-      );
+    id: json['id'] as int?,
+    indexShow: json['index_show'] as String?,
+    cover: json['cover'] as String?,
+    title: json['title'] as String?,
+    longTitle: json['long_title'] as String?,
+    pubTime: json['pub_time'] as String?,
+    duration: json['duration'] as int?,
+  );
 }

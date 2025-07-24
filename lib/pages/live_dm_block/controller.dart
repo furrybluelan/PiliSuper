@@ -17,8 +17,10 @@ class LiveDmBlockController extends GetxController
     queryData();
   }
 
-  late final TabController tabController =
-      TabController(length: 2, vsync: this);
+  late final TabController tabController = TabController(
+    length: 2,
+    vsync: this,
+  );
 
   int? oldLevel;
   final RxInt level = 0.obs;
@@ -54,8 +56,11 @@ class LiveDmBlockController extends GetxController
     }
   }
 
-  Future<bool> setSilent(LiveDmSilentType type, int level,
-      {VoidCallback? onError}) async {
+  Future<bool> setSilent(
+    LiveDmSilentType type,
+    int level, {
+    VoidCallback? onError,
+  }) async {
     var res = await LiveHttp.liveSetSilent(type: type.name, level: level);
     if (res['status']) {
       switch (type) {
@@ -108,8 +113,11 @@ class LiveDmBlockController extends GetxController
         SmartDialog.showToast(res['msg']);
       }
     } else {
-      var res =
-          await LiveHttp.liveShieldUser(uid: value, roomid: roomId, type: 1);
+      var res = await LiveHttp.liveShieldUser(
+        uid: value,
+        roomid: roomId,
+        type: 1,
+      );
       if (res['status']) {
         shieldUserList.insert(
           0,
@@ -126,8 +134,11 @@ class LiveDmBlockController extends GetxController
 
   Future<void> onRemove(int index, dynamic item) async {
     if (item is ShieldUserList) {
-      var res =
-          await LiveHttp.liveShieldUser(uid: item.uid, roomid: roomId, type: 0);
+      var res = await LiveHttp.liveShieldUser(
+        uid: item.uid,
+        roomid: roomId,
+        type: 0,
+      );
       if (res['status']) {
         shieldUserList.removeAt(index);
       } else {

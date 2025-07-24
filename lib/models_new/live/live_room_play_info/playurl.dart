@@ -18,16 +18,16 @@ class Playurl {
   });
 
   factory Playurl.fromJson(Map<String, dynamic> json) => Playurl(
-        cid: json['cid'] as int?,
-        gQnDesc: (json['g_qn_desc'] as List<dynamic>?)
-            ?.map((e) => GQnDesc.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        stream: (json['stream'] as List<dynamic>?)
-            ?.map((e) => Stream.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        p2pData: json['p2p_data'] == null
-            ? null
-            : P2pData.fromJson(json['p2p_data'] as Map<String, dynamic>),
-        dolbyQn: json['dolby_qn'] as dynamic,
-      );
+    cid: json['cid'] as int?,
+    gQnDesc: (json['g_qn_desc'] as List<dynamic>?)
+        ?.map((e) => GQnDesc.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    stream: (json['stream'] as List<dynamic>?)
+        ?.map((e) => Stream.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    p2pData: json['p2p_data'] == null
+        ? null
+        : P2pData.fromJson(json['p2p_data'] as Map<String, dynamic>),
+    dolbyQn: json['dolby_qn'] as dynamic,
+  );
 }

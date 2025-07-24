@@ -213,15 +213,15 @@ class InteractiveViewerBoundaryState extends State<InteractiveViewerBoundary>
   }
 
   Widget get content => DecoratedBoxTransition(
-        decoration: _opacityAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: widget.child,
-          ),
-        ),
-      );
+    decoration: _opacityAnimation,
+    child: SlideTransition(
+      position: _slideAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: widget.child,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -33,6 +33,7 @@ class LiveSearchRoomItemModel {
         watchedShow: json['watched_show'] == null
             ? null
             : WatchedShow.fromJson(
-                json['watched_show'] as Map<String, dynamic>),
+                json['watched_show'] as Map<String, dynamic>,
+              ),
       );
 }

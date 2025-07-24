@@ -11,14 +11,13 @@ class ActionItem extends StatefulWidget {
   final Icon? selectIcon;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-  final bool? isLoading;
   final String? text;
   final bool selectStatus;
   final String semanticsLabel;
   final bool needAnim;
   final bool hasTriple;
   final ValueChanged<bool>? callBack;
-  final bool? expand;
+  final bool expand;
 
   const ActionItem({
     super.key,
@@ -26,14 +25,13 @@ class ActionItem extends StatefulWidget {
     this.selectIcon,
     this.onTap,
     this.onLongPress,
-    this.isLoading,
     this.text,
     this.selectStatus = false,
     this.needAnim = false,
     this.hasTriple = false,
     this.callBack,
     required this.semanticsLabel,
-    this.expand,
+    this.expand = true,
   });
 
   @override
@@ -123,88 +121,81 @@ class ActionItemState extends State<ActionItem>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return widget.expand == false
-        ? _buildItem(theme)
-        : Expanded(child: _buildItem(theme));
-  }
-
-  Widget _buildItem(ThemeData theme) => Semantics(
-        label: (widget.text ?? "") +
-            (widget.selectStatus ? "已" : "") +
-            widget.semanticsLabel,
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: const BorderRadius.all(Radius.circular(6)),
-            onTap: _isThumbsUp
-                ? null
-                : () {
-                    feedBack();
-                    widget.onTap?.call();
-                  },
-            onLongPress: _isThumbsUp ? null : widget.onLongPress,
-            onTapDown: _isThumbsUp ? (details) => _startLongPress() : null,
-            onTapUp: _isThumbsUp ? (details) => _cancelLongPress() : null,
-            onTapCancel: _isThumbsUp ? () => _cancelLongPress(true) : null,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.center,
-                  children: [
-                    if (widget.needAnim)
-                      AnimatedBuilder(
-                        animation: _animation!,
-                        builder: (context, child) => CustomPaint(
-                          size: const Size(28, 28),
-                          painter: _ArcPainter(
-                            color: theme.colorScheme.primary,
-                            sweepAngle: _animation!.value,
-                          ),
-                        ),
-                      )
-                    else
-                      const SizedBox(width: 28, height: 28),
-                    Icon(
-                      widget.selectStatus
-                          ? widget.selectIcon!.icon!
-                          : widget.icon.icon,
-                      size: 18,
-                      color: widget.selectStatus
-                          ? theme.colorScheme.primary
-                          : widget.icon.color ?? theme.colorScheme.outline,
-                    ),
-                  ],
-                ),
-                if (widget.text != null)
-                  AnimatedOpacity(
-                    opacity: widget.isLoading! ? 0 : 1,
-                    duration: const Duration(milliseconds: 200),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return ScaleTransition(scale: animation, child: child);
-                      },
-                      child: Text(
-                        widget.text!,
-                        key: ValueKey<String>(widget.text!),
-                        style: TextStyle(
-                          color: widget.selectStatus
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.outline,
-                          fontSize: theme.textTheme.labelSmall!.fontSize,
-                        ),
-                        semanticsLabel: "",
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+    Widget? text;
+    if (widget.expand) {
+      final hasText = widget.text != null;
+      text = Text(
+        hasText ? widget.text! : '-',
+        key: hasText ? ValueKey(widget.text!) : null,
+        style: TextStyle(
+          color: widget.selectStatus
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outline,
+          fontSize: theme.textTheme.labelSmall!.fontSize,
         ),
       );
+      if (hasText) {
+        text = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return ScaleTransition(scale: animation, child: child);
+          },
+          child: text,
+        );
+      }
+    }
+    final child = Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+        onTap: _isThumbsUp
+            ? null
+            : () {
+                feedBack();
+                widget.onTap?.call();
+              },
+        onLongPress: _isThumbsUp ? null : widget.onLongPress,
+        onTapDown: _isThumbsUp ? (details) => _startLongPress() : null,
+        onTapUp: _isThumbsUp ? (details) => _cancelLongPress() : null,
+        onTapCancel: _isThumbsUp ? () => _cancelLongPress(true) : null,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                if (widget.needAnim)
+                  AnimatedBuilder(
+                    animation: _animation!,
+                    builder: (context, child) => CustomPaint(
+                      size: const Size(28, 28),
+                      painter: _ArcPainter(
+                        color: theme.colorScheme.primary,
+                        sweepAngle: _animation!.value,
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox(width: 28, height: 28),
+                Icon(
+                  widget.selectStatus
+                      ? widget.selectIcon!.icon!
+                      : widget.icon.icon,
+                  size: 18,
+                  color: widget.selectStatus
+                      ? theme.colorScheme.primary
+                      : widget.icon.color ?? theme.colorScheme.outline,
+                ),
+              ],
+            ),
+            ?text,
+          ],
+        ),
+      ),
+    );
+    return widget.expand ? Expanded(child: child) : child;
+  }
 }
 
 class _ArcPainter extends CustomPainter {

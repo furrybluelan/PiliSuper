@@ -54,8 +54,9 @@ class ArticleController extends ReplyController<MainListReply> {
 
     // to opus
     if (type == 'read') {
-      UrlUtils.parseRedirectUrl('https://www.bilibili.com/read/cv$id/')
-          .then((url) {
+      UrlUtils.parseRedirectUrl('https://www.bilibili.com/read/cv$id/').then((
+        url,
+      ) {
         if (url != null) {
           id = url.split('/').last;
           type = 'opus';
@@ -188,8 +189,8 @@ class ArticleController extends ReplyController<MainListReply> {
     bool isFav = stats.value?.favorite?.status == true;
     final res = type == 'read'
         ? isFav
-            ? await FavHttp.delFavArticle(id: commentId)
-            : await FavHttp.addFavArticle(id: commentId)
+              ? await FavHttp.delFavArticle(id: commentId)
+              : await FavHttp.addFavArticle(id: commentId)
         : await FavHttp.communityAction(opusId: id, action: isFav ? 4 : 3);
     if (res['status']) {
       stats.value?.favorite?.status = !isFav;
@@ -209,8 +210,9 @@ class ArticleController extends ReplyController<MainListReply> {
   Future<void> onLike() async {
     bool isLike = stats.value?.like?.status == true;
     final res = await DynamicsHttp.thumbDynamic(
-        dynamicId: opusData?.idStr ?? articleData?.dynIdStr,
-        up: isLike ? 2 : 1);
+      dynamicId: opusData?.idStr ?? articleData?.dynIdStr,
+      up: isLike ? 2 : 1,
+    );
     if (res['status']) {
       stats.value?.like?.status = !isLike;
       int count = stats.value?.like?.count ?? 0;

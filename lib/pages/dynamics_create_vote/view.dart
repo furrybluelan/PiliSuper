@@ -21,8 +21,10 @@ class CreateVotePage extends StatefulWidget {
 }
 
 class _CreateVotePageState extends State<CreateVotePage> {
-  late final _controller = Get.put(CreateVoteController(widget.voteId),
-      tag: Utils.generateRandomString(8));
+  late final _controller = Get.put(
+    CreateVoteController(widget.voteId),
+    tag: Utils.generateRandomString(8),
+  );
   late final imagePicker = ImagePicker();
 
   late TextStyle _leadingStyle;
@@ -92,29 +94,31 @@ class _CreateVotePageState extends State<CreateVotePage> {
               for (int i = 0; i < _controller.options.length; i++) {
                 final e = _controller.options[i];
                 children
-                  ..add(_buildInput(
-                    theme,
-                    key: ValueKey(e.hashCode),
-                    showDel: showDel,
-                    onDel: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      _controller.onDel(i);
-                    },
-                    showImg: showImg,
-                    imgUrl: e.imgUrl,
-                    onPickImg: () => EasyThrottle.throttle(
-                      'picImg',
-                      const Duration(milliseconds: 500),
-                      () => _onPickImg(i),
+                  ..add(
+                    _buildInput(
+                      theme,
+                      key: ValueKey(e.hashCode),
+                      showDel: showDel,
+                      onDel: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        _controller.onDel(i);
+                      },
+                      showImg: showImg,
+                      imgUrl: e.imgUrl,
+                      onPickImg: () => EasyThrottle.throttle(
+                        'picImg',
+                        const Duration(milliseconds: 500),
+                        () => _onPickImg(i),
+                      ),
+                      initialValue: e.optDesc,
+                      onChanged: (value) => _controller
+                        ..options[i].optDesc = value
+                        ..updateCanCreate(),
+                      desc: '选项${i + 1}',
+                      hintText: '选项内容，最多20字',
+                      inputFormatters: [LengthLimitingTextInputFormatter(20)],
                     ),
-                    initialValue: e.optDesc,
-                    onChanged: (value) => _controller
-                      ..options[i].optDesc = value
-                      ..updateCanCreate(),
-                    desc: '选项${i + 1}',
-                    hintText: '选项内容，最多20字',
-                    inputFormatters: [LengthLimitingTextInputFormatter(20)],
-                  ))
+                  )
                   ..add(divider);
               }
               return Column(
@@ -130,7 +134,11 @@ class _CreateVotePageState extends State<CreateVotePage> {
                       style: FilledButton.styleFrom(
                         minimumSize: Size.zero,
                         padding: const EdgeInsets.only(
-                            left: 10, right: 14, top: 4, bottom: 4),
+                          left: 10,
+                          right: 14,
+                          top: 4,
+                          bottom: 4,
+                        ),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         foregroundColor: theme.colorScheme.onSurfaceVariant,
                         backgroundColor: theme.colorScheme.onInverseSurface,
@@ -160,23 +168,28 @@ class _CreateVotePageState extends State<CreateVotePage> {
               ),
               Obx(() {
                 final choiceCnt = _controller.choiceCnt.value;
-                final choices =
-                    List.generate(_controller.options.length, (i) => i + 1);
+                final choices = List.generate(
+                  _controller.options.length,
+                  (i) => i + 1,
+                );
                 return Listener(
                   onPointerDown: (_) =>
                       FocusManager.instance.primaryFocus?.unfocus(),
                   child: PopupMenuButton<int>(
                     initialValue: choiceCnt,
                     requestFocus: false,
-                    child:
-                        Text(choiceCnt == 1 ? '单选         ' : '最多选$choiceCnt项'),
+                    child: Text(
+                      choiceCnt == 1 ? '单选         ' : '最多选$choiceCnt项',
+                    ),
                     onSelected: (value) => _controller.choiceCnt.value = value,
                     itemBuilder: (context) {
                       return choices
-                          .map((e) => PopupMenuItem(
-                                value: e,
-                                child: Text(e == 1 ? '单选' : '最多选$e项'),
-                              ))
+                          .map(
+                            (e) => PopupMenuItem(
+                              value: e,
+                              child: Text(e == 1 ? '单选' : '最多选$e项'),
+                            ),
+                          )
                           .toList();
                     },
                   ),
@@ -206,8 +219,9 @@ class _CreateVotePageState extends State<CreateVotePage> {
                   if (newDate != null && context.mounted) {
                     TimeOfDay? newTime = await showTimePicker(
                       context: context,
-                      initialTime:
-                          TimeOfDay.fromDateTime(_controller.endtime.value),
+                      initialTime: TimeOfDay.fromDateTime(
+                        _controller.endtime.value,
+                      ),
                     );
                     if (newTime != null) {
                       final newEndtime = DateTime(
@@ -228,9 +242,11 @@ class _CreateVotePageState extends State<CreateVotePage> {
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Obx(() => Text(
-                        DateUtil.longFormatD.format(_controller.endtime.value),
-                      )),
+                  child: Obx(
+                    () => Text(
+                      DateUtil.longFormatD.format(_controller.endtime.value),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -317,91 +333,93 @@ class _CreateVotePageState extends State<CreateVotePage> {
   }
 
   Widget _buildType(ThemeData theme) => Obx(
-        () {
-          return Row(
-            spacing: 16,
-            children: List.generate(
-              2,
-              (index) {
-                final isEnable = index == _controller.type.value;
-                final style = TextButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 17),
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: isEnable
-                          ? theme.colorScheme.secondary
-                          : theme.colorScheme.outline,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  ),
-                  backgroundColor: isEnable
-                      ? theme.colorScheme.secondaryContainer
-                      : Colors.transparent,
-                  foregroundColor: isEnable
-                      ? theme.colorScheme.onSecondaryContainer
-                      : theme.colorScheme.onSurfaceVariant,
-                );
-                Widget child = TextButton(
-                  style: style,
-                  onPressed: () => _controller
-                    ..type.value = index
-                    ..updateCanCreate(),
-                  child: Text(
-                    '${const ['文字', '图片'][index]}投票',
-                    strutStyle: const StrutStyle(forceStrutHeight: true),
-                  ),
-                );
-                if (isEnable) {
-                  child = Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      child,
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(1),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(4),
-                              bottomRight: Radius.circular(6),
-                            ),
-                            color: theme.colorScheme.primary,
-                          ),
-                          child: Icon(
-                            size: 10,
-                            Icons.check,
-                            color: theme.colorScheme.onPrimary,
-                          ),
+    () {
+      return Row(
+        spacing: 16,
+        children: List.generate(
+          2,
+          (index) {
+            final isEnable = index == _controller.type.value;
+            final style = TextButton.styleFrom(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 17),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  color: isEnable
+                      ? theme.colorScheme.secondary
+                      : theme.colorScheme.outline,
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+              ),
+              backgroundColor: isEnable
+                  ? theme.colorScheme.secondaryContainer
+                  : Colors.transparent,
+              foregroundColor: isEnable
+                  ? theme.colorScheme.onSecondaryContainer
+                  : theme.colorScheme.onSurfaceVariant,
+            );
+            Widget child = TextButton(
+              style: style,
+              onPressed: () => _controller
+                ..type.value = index
+                ..updateCanCreate(),
+              child: Text(
+                '${const ['文字', '图片'][index]}投票',
+                strutStyle: const StrutStyle(forceStrutHeight: true),
+              ),
+            );
+            if (isEnable) {
+              child = Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  child,
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(4),
+                          bottomRight: Radius.circular(6),
                         ),
+                        color: theme.colorScheme.primary,
                       ),
-                    ],
-                  );
-                }
-                return child;
-              },
-            ),
-          );
-        },
+                      child: Icon(
+                        size: 10,
+                        Icons.check,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return child;
+          },
+        ),
       );
+    },
+  );
 
   void _onPickImg(int index) {
-    EasyThrottle.throttle('imagePicker', const Duration(milliseconds: 500),
-        () async {
-      try {
-        XFile? pickedFile = await imagePicker.pickImage(
-          imageQuality: 100,
-          source: ImageSource.gallery,
-        );
-        if (pickedFile != null) {
-          _controller.onUpload(index, pickedFile);
+    EasyThrottle.throttle(
+      'imagePicker',
+      const Duration(milliseconds: 500),
+      () async {
+        try {
+          XFile? pickedFile = await imagePicker.pickImage(
+            imageQuality: 100,
+            source: ImageSource.gallery,
+          );
+          if (pickedFile != null) {
+            _controller.onUpload(index, pickedFile);
+          }
+        } catch (e) {
+          SmartDialog.showToast(e.toString());
         }
-      } catch (e) {
-        SmartDialog.showToast(e.toString());
-      }
-    });
+      },
+    );
   }
 }

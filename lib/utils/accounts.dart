@@ -18,10 +18,12 @@ class Accounts {
   // static set main(Account account) => set(AccountType.main, account);
 
   static Future<void> init() async {
-    account = await Hive.openBox('account',
-        compactionStrategy: (int entries, int deletedEntries) {
-      return deletedEntries > 2;
-    });
+    account = await Hive.openBox(
+      'account',
+      compactionStrategy: (int entries, int deletedEntries) {
+        return deletedEntries > 2;
+      },
+    );
     await _migrate();
   }
 
@@ -31,13 +33,17 @@ class Accounts {
     final Directory dir = Directory(tempPath);
     if (dir.existsSync()) {
       if (kDebugMode) debugPrint('migrating...');
-      final cookieJar =
-          PersistCookieJar(ignoreExpires: true, storage: FileStorage(tempPath));
+      final cookieJar = PersistCookieJar(
+        ignoreExpires: true,
+        storage: FileStorage(tempPath),
+      );
       await cookieJar.forceInit();
       final cookies = DefaultCookieJar(ignoreExpires: true)
         ..domainCookies.addAll(cookieJar.domainCookies);
-      final localAccessKey =
-          GStorage.localCache.get('accessKey', defaultValue: {});
+      final localAccessKey = GStorage.localCache.get(
+        'accessKey',
+        defaultValue: {},
+      );
 
       final isLogin =
           cookies.domainCookies['bilibili.com']?['/']?['SESSDATA'] != null;
@@ -48,9 +54,12 @@ class Accounts {
         GStorage.localCache.delete('blackMidsList'),
         dir.delete(recursive: true),
         if (isLogin)
-          LoginAccount(cookies, localAccessKey['value'],
-                  localAccessKey['refresh'], AccountType.values.toSet())
-              .onChange()
+          LoginAccount(
+            cookies,
+            localAccessKey['value'],
+            localAccessKey['refresh'],
+            AccountType.values.toSet(),
+          ).onChange(),
       ]);
       if (kDebugMode) debugPrint('migrated successfully');
     }
@@ -65,9 +74,11 @@ class Accounts {
     for (var type in AccountType.values) {
       accountMode[type] ??= AnonymousAccount();
     }
-    await Future.wait((accountMode.values.toSet()
-          ..retainWhere((i) => !i.activited))
-        .map((i) => Request.buvidActive(i)));
+    await Future.wait(
+      (accountMode.values.toSet()..retainWhere((i) => !i.activited)).map(
+        (i) => Request.buvidActive(i),
+      ),
+    );
   }
 
   static Future<void> clear() async {
@@ -87,8 +98,9 @@ class Accounts {
 
   static Future<void> deleteAll(Set<Account> accounts) async {
     var isloginMain = Accounts.main.isLogin;
-    Accounts.accountMode
-        .updateAll((_, a) => accounts.contains(a) ? AnonymousAccount() : a);
+    Accounts.accountMode.updateAll(
+      (_, a) => accounts.contains(a) ? AnonymousAccount() : a,
+    );
     await Future.wait(accounts.map((i) => i.delete()));
     if (isloginMain && !Accounts.main.isLogin) {
       await LoginUtils.onLogoutMain();

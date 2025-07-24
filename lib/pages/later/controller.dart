@@ -28,17 +28,18 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel> {
 
   @override
   Future<LoadingState<LaterData>> customGetData() => UserHttp.seeYouLater(
-        page: page,
-        viewed: laterViewType.type,
-        asc: asc.value,
-      );
+    page: page,
+    viewed: laterViewType.type,
+    asc: asc.value,
+  );
 
   @override
   void onSelect(LaterItemModel item, [bool disableSelect = true]) {
     List<LaterItemModel> list = loadingState.value.data!;
     item.checked = !(item.checked ?? false);
-    baseCtr.checkedCount.value =
-        list.where((item) => item.checked == true).length;
+    baseCtr.checkedCount.value = list
+        .where((item) => item.checked == true)
+        .length;
     loadingState.refresh();
     if (baseCtr.checkedCount.value == 0) {
       baseCtr.enableMultiSelect.value = false;
@@ -111,7 +112,7 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel> {
                 SmartDialog.showToast(res['msg']);
               },
               child: const Text('确认移除'),
-            )
+            ),
           ],
         );
       },
@@ -166,12 +167,14 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel> {
             TextButton(
               onPressed: () {
                 Get.back();
-                _onDelete(loadingState.value.data!
-                    .where((e) => e.checked == true)
-                    .toList());
+                _onDelete(
+                  loadingState.value.data!
+                      .where((e) => e.checked == true)
+                      .toList(),
+                );
               },
               child: const Text('确认'),
-            )
+            ),
           ],
         );
       },
@@ -183,8 +186,9 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel> {
     List<int?> aids = result.map((item) => item.aid).toList();
     var res = await UserHttp.toViewDel(aids: aids);
     if (res['status']) {
-      Set<LaterItemModel> remainList =
-          loadingState.value.data!.toSet().difference(result.toSet());
+      Set<LaterItemModel> remainList = loadingState.value.data!
+          .toSet()
+          .difference(result.toSet());
       baseCtr.counts[laterViewType] =
           baseCtr.counts[laterViewType]! - aids.length;
       loadingState.value = Success(remainList.toList());

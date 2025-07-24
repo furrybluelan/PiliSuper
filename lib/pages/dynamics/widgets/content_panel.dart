@@ -55,8 +55,8 @@ Widget content(
                 fontSize: floor != 1
                     ? 14
                     : isDetail && !isSave
-                        ? 16
-                        : 15,
+                    ? 16
+                    : 15,
                 color: theme.colorScheme.primary,
               ),
             ),

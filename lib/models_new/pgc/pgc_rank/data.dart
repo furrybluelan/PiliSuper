@@ -8,10 +8,10 @@ class Data {
   Data({this.list, this.note, this.seasonType});
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        list: (json['list'] as List<dynamic>?)
-            ?.map((e) => PgcRankItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        note: json['note'] as String?,
-        seasonType: json['season_type'] as int?,
-      );
+    list: (json['list'] as List<dynamic>?)
+        ?.map((e) => PgcRankItemModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    note: json['note'] as String?,
+    seasonType: json['season_type'] as int?,
+  );
 }

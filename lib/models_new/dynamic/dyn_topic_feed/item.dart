@@ -7,10 +7,11 @@ class TopicCardItem {
   TopicCardItem({this.dynamicCardItem, this.topicType});
 
   factory TopicCardItem.fromJson(Map<String, dynamic> json) => TopicCardItem(
-        dynamicCardItem: json['dynamic_card_item'] == null
-            ? null
-            : DynamicItemModel.fromJson(
-                json['dynamic_card_item'] as Map<String, dynamic>),
-        topicType: json['topic_type'] as String?,
-      );
+    dynamicCardItem: json['dynamic_card_item'] == null
+        ? null
+        : DynamicItemModel.fromJson(
+            json['dynamic_card_item'] as Map<String, dynamic>,
+          ),
+    topicType: json['topic_type'] as String?,
+  );
 }

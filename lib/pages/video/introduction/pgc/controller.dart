@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show max;
 
 import 'package:PiliPlus/grpc/bilibili/app/viewunite/pgcanymodel.pb.dart'
     show ViewPgcAny;
@@ -35,8 +36,8 @@ class PgcIntroController extends CommonIntroController {
 
   late dynamic type =
       Get.parameters['type'] == '1' || Get.parameters['type'] == '4'
-          ? '追番'
-          : '追剧';
+      ? '追番'
+      : '追剧';
 
   final PgcInfoModel pgcItem = Get.arguments['pgcItem'];
 
@@ -59,9 +60,18 @@ class PgcIntroController extends CommonIntroController {
     var result = await VideoHttp.pgcLikeCoinFav(epId: epId);
     if (result['status']) {
       PgcLCF data = result['data'];
-      hasLike.value = data.like == 1;
+      final hasLike = data.like == 1;
+      final hasFav = data.favorite == 1;
+      late final stat = pgcItem.stat!;
+      if (hasLike) {
+        stat.likes = max(1, stat.likes);
+      }
+      if (hasFav) {
+        stat.favorite = max(1, stat.favorite);
+      }
+      this.hasLike.value = hasLike;
       coinNum.value = data.coinNumber!;
-      hasFav.value = data.favorite == 1;
+      this.hasFav.value = hasFav;
     } else {
       SmartDialog.showToast(result['msg']);
     }
@@ -69,11 +79,16 @@ class PgcIntroController extends CommonIntroController {
 
   // （取消）点赞
   Future<void> actionLikeVideo() async {
-    var result = await VideoHttp.likeVideo(bvid: bvid, type: !hasLike.value);
+    if (!accountService.isLogin.value) {
+      SmartDialog.showToast('账号未登录');
+      return;
+    }
+    final newVal = !hasLike.value;
+    var result = await VideoHttp.likeVideo(bvid: bvid, type: newVal);
     if (result['status']) {
-      SmartDialog.showToast(!hasLike.value ? result['data']['toast'] : '取消赞');
-      pgcItem.stat!.likes = pgcItem.stat!.likes! + (!hasLike.value ? 1 : -1);
-      hasLike.value = !hasLike.value;
+      SmartDialog.showToast(newVal ? result['data']['toast'] : '取消赞');
+      pgcItem.stat!.likes += newVal ? 1 : -1;
+      hasLike.value = newVal;
     } else {
       SmartDialog.showToast(result['msg']);
     }
@@ -87,13 +102,13 @@ class PgcIntroController extends CommonIntroController {
     );
     if (res['status']) {
       SmartDialog.showToast('投币成功');
-      pgcItem.stat!.coins = pgcItem.stat!.coins! + coin;
-      if (selectLike && !hasLike.value) {
-        hasLike.value = true;
-        pgcItem.stat!.likes = pgcItem.stat!.likes! + 1;
-      }
       coinNum.value += coin;
       GlobalData().afterCoin(coin);
+      final stat = pgcItem.stat!..coins += coin;
+      if (selectLike && !hasLike.value) {
+        stat.likes++;
+        hasLike.value = true;
+      }
     } else {
       SmartDialog.showToast(res['msg']);
     }
@@ -130,19 +145,17 @@ class PgcIntroController extends CommonIntroController {
       SmartDialog.showLoading(msg: '请求中');
       queryVideoInFolder().then((res) async {
         if (res['status']) {
-          int defaultFolderId = favFolderData.value.list!.first.id;
-          int favStatus = favFolderData.value.list!.first.favState!;
-          var result = await FavHttp.favVideo(
-            aid: epId,
-            type: 24,
-            addIds: favStatus == 0 ? '$defaultFolderId' : '',
-            delIds: favStatus == 1 ? '$defaultFolderId' : '',
-          );
+          final hasFav = this.hasFav.value;
+          var result = hasFav
+              ? await FavHttp.unfavAll(rid: epId, type: 24)
+              : await FavHttp.favVideo(
+                  resources: '$epId:24',
+                  addIds: favFolderId.toString(),
+                );
           SmartDialog.dismiss();
           if (result['status']) {
-            // 重新获取收藏状态
-            await Future.delayed(const Duration(milliseconds: 255));
-            await queryPgcLikeCoinFav();
+            pgcItem.stat!.favorite += hasFav ? -1 : 1;
+            this.hasFav.value = !hasFav;
             SmartDialog.showToast('✅ 快速收藏/取消收藏成功');
           } else {
             SmartDialog.showToast(result['msg']);
@@ -171,17 +184,19 @@ class PgcIntroController extends CommonIntroController {
       }
     } catch (_) {}
     var result = await FavHttp.favVideo(
-      aid: epId,
-      type: 24,
+      resources: '$epId:24',
       addIds: addMediaIdsNew.join(','),
       delIds: delMediaIdsNew.join(','),
     );
     if (result['status']) {
       SmartDialog.showToast('操作成功');
       Get.back();
-      Future.delayed(const Duration(milliseconds: 255), () {
-        queryPgcLikeCoinFav();
-      });
+      final newVal =
+          addMediaIdsNew.isNotEmpty || favIds?.length != delMediaIdsNew.length;
+      if (hasFav.value != newVal) {
+        pgcItem.stat!.favorite += newVal ? 1 : -1;
+        hasFav.value = newVal;
+      }
     } else {
       SmartDialog.showToast(result['msg']);
     }
@@ -190,65 +205,66 @@ class PgcIntroController extends CommonIntroController {
   // 分享视频
   void actionShareVideo(BuildContext context) {
     showDialog(
-        context: context,
-        builder: (_) {
-          String videoUrl = '${HttpString.baseUrl}/bangumi/play/ep$epId';
-          return AlertDialog(
-            clipBehavior: Clip.hardEdge,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  dense: true,
-                  title: const Text(
-                    '复制链接',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  onTap: () {
-                    Get.back();
-                    Utils.copyText(videoUrl);
-                  },
+      context: context,
+      builder: (_) {
+        String videoUrl = '${HttpString.baseUrl}/bangumi/play/ep$epId';
+        return AlertDialog(
+          clipBehavior: Clip.hardEdge,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                dense: true,
+                title: const Text(
+                  '复制链接',
+                  style: TextStyle(fontSize: 14),
                 ),
-                ListTile(
-                  dense: true,
-                  title: const Text(
-                    '其它app打开',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  onTap: () {
-                    Get.back();
-                    PageUtils.launchURL(videoUrl);
-                  },
+                onTap: () {
+                  Get.back();
+                  Utils.copyText(videoUrl);
+                },
+              ),
+              ListTile(
+                dense: true,
+                title: const Text(
+                  '其它app打开',
+                  style: TextStyle(fontSize: 14),
                 ),
-                ListTile(
-                  dense: true,
-                  title: const Text(
-                    '分享视频',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  onTap: () {
-                    Get.back();
-                    Utils.shareText(videoUrl);
-                  },
+                onTap: () {
+                  Get.back();
+                  PageUtils.launchURL(videoUrl);
+                },
+              ),
+              ListTile(
+                dense: true,
+                title: const Text(
+                  '分享视频',
+                  style: TextStyle(fontSize: 14),
                 ),
-                ListTile(
-                  dense: true,
-                  title: const Text(
-                    '分享至动态',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  onTap: () {
-                    Get.back();
-                    EpisodeItem? item = pgcItem.episodes
-                        ?.firstWhereOrNull((item) => item.epId == epId);
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      builder: (context) => RepostPanel(
-                        rid: epId,
-                        /**
+                onTap: () {
+                  Get.back();
+                  Utils.shareText(videoUrl);
+                },
+              ),
+              ListTile(
+                dense: true,
+                title: const Text(
+                  '分享至动态',
+                  style: TextStyle(fontSize: 14),
+                ),
+                onTap: () {
+                  Get.back();
+                  EpisodeItem? item = pgcItem.episodes?.firstWhereOrNull(
+                    (item) => item.epId == epId,
+                  );
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    builder: (context) => RepostPanel(
+                      rid: epId,
+                      /**
                          *  1：番剧 // 4097
                             2：电影 // 4098
                             3：纪录片 // 4101
@@ -257,64 +273,66 @@ class PgcIntroController extends CommonIntroController {
                             6：漫画
                             7：综艺 // 4099
                          */
-                        dynType: switch (Get.parameters['type']) {
-                          '1' => 4097,
-                          '2' => 4098,
-                          '3' => 4101,
-                          '4' => 4100,
-                          '5' || '7' => 4099,
-                          _ => -1,
-                        },
-                        pic: pgcItem.cover,
-                        title:
-                            '${pgcItem.title}${item != null ? '\n${item.showTitle}' : ''}',
-                        uname: '',
-                      ),
+                      dynType: switch (Get.parameters['type']) {
+                        '1' => 4097,
+                        '2' => 4098,
+                        '3' => 4101,
+                        '4' => 4100,
+                        '5' || '7' => 4099,
+                        _ => -1,
+                      },
+                      pic: pgcItem.cover,
+                      title:
+                          '${pgcItem.title}${item != null ? '\n${item.showTitle}' : ''}',
+                      uname: '',
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                dense: true,
+                title: const Text(
+                  '分享至消息',
+                  style: TextStyle(fontSize: 14),
+                ),
+                onTap: () {
+                  Get.back();
+                  try {
+                    EpisodeItem item = pgcItem.episodes!.firstWhere(
+                      (item) => item.epId == epId,
                     );
-                  },
-                ),
-                ListTile(
-                  dense: true,
-                  title: const Text(
-                    '分享至消息',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  onTap: () {
-                    Get.back();
-                    try {
-                      EpisodeItem item = pgcItem.episodes!
-                          .firstWhere((item) => item.epId == epId);
-                      final title = '${item.title!} ${item.showTitle}';
-                      PageUtils.pmShare(
-                        context,
-                        content: {
-                          "id": epId!.toString(),
-                          "title": title,
-                          "url": item.shareUrl,
-                          "headline": title,
-                          "source": 16,
-                          "thumb": item.cover,
-                          "source_desc": switch (pgcItem.type) {
-                            1 => '番剧',
-                            2 => '电影',
-                            3 => '纪录片',
-                            4 => '国创',
-                            5 => '电视剧',
-                            6 => '漫画',
-                            7 => '综艺',
-                            _ => null,
-                          }
+                    final title = '${item.title!} ${item.showTitle}';
+                    PageUtils.pmShare(
+                      context,
+                      content: {
+                        "id": epId!.toString(),
+                        "title": title,
+                        "url": item.shareUrl,
+                        "headline": title,
+                        "source": 16,
+                        "thumb": item.cover,
+                        "source_desc": switch (pgcItem.type) {
+                          1 => '番剧',
+                          2 => '电影',
+                          3 => '纪录片',
+                          4 => '国创',
+                          5 => '电视剧',
+                          6 => '漫画',
+                          7 => '综艺',
+                          _ => null,
                         },
-                      );
-                    } catch (e) {
-                      SmartDialog.showToast(e.toString());
-                    }
-                  },
-                ),
-              ],
-            ),
-          );
-        });
+                      },
+                    );
+                  } catch (e) {
+                    SmartDialog.showToast(e.toString());
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   // 修改分P或番剧分集
@@ -334,7 +352,7 @@ class PgcIntroController extends CommonIntroController {
           ..danmakuCid.value = cid
           ..queryVideoUrl();
     if (cover is String && cover.isNotEmpty) {
-      videoDetailCtr.videoItem['pic'] = cover;
+      videoDetailCtr.cover.value = cover;
     }
 
     // 重新请求评论
@@ -409,10 +427,12 @@ class PgcIntroController extends CommonIntroController {
 
   bool prevPlay() {
     List episodes = pgcItem.episodes!;
-    VideoDetailController videoDetailCtr =
-        Get.find<VideoDetailController>(tag: Get.arguments['heroTag']);
-    int currentIndex =
-        episodes.indexWhere((e) => e.cid == videoDetailCtr.cid.value);
+    VideoDetailController videoDetailCtr = Get.find<VideoDetailController>(
+      tag: Get.arguments['heroTag'],
+    );
+    int currentIndex = episodes.indexWhere(
+      (e) => e.cid == videoDetailCtr.cid.value,
+    );
     int prevIndex = currentIndex - 1;
     PlayRepeat playRepeat = videoDetailCtr.plPlayerController.playRepeat;
     if (prevIndex < 0) {
@@ -435,12 +455,14 @@ class PgcIntroController extends CommonIntroController {
   bool nextPlay() {
     try {
       List episodes = pgcItem.episodes!;
-      VideoDetailController videoDetailCtr =
-          Get.find<VideoDetailController>(tag: Get.arguments['heroTag']);
+      VideoDetailController videoDetailCtr = Get.find<VideoDetailController>(
+        tag: Get.arguments['heroTag'],
+      );
       PlayRepeat playRepeat = videoDetailCtr.plPlayerController.playRepeat;
 
-      int currentIndex =
-          episodes.indexWhere((e) => e.cid == videoDetailCtr.cid.value);
+      int currentIndex = episodes.indexWhere(
+        (e) => e.cid == videoDetailCtr.cid.value,
+      );
       int nextIndex = currentIndex + 1;
       // 列表循环
       if (nextIndex >= episodes.length) {
@@ -479,12 +501,20 @@ class PgcIntroController extends CommonIntroController {
     var result = await VideoHttp.triple(epId: epId, seasonId: seasonId);
     if (result['status']) {
       PgcTriple data = result['data'];
-      hasLike.value = data.like == 1;
-      if (data.coin == 1) {
+      late final stat = pgcItem.stat!;
+      if ((data.like == 1) != hasLike.value) {
+        stat.likes++;
+        hasLike.value = true;
+      }
+      if ((data.coin == 1) != hasCoin) {
+        stat.coins += 2;
         coinNum.value = 2;
         GlobalData().afterCoin(2);
       }
-      hasFav.value = data.favorite == 1;
+      if ((data.favorite == 1) != hasFav.value) {
+        stat.favorite++;
+        hasFav.value = true;
+      }
       SmartDialog.showToast('三连成功');
     } else {
       SmartDialog.showToast(result['msg']);

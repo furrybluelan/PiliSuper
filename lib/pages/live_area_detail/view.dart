@@ -29,7 +29,8 @@ class LiveAreaDetailPage extends StatefulWidget {
 
 class _LiveAreaDetailPageState extends State<LiveAreaDetailPage> {
   late final _controller = Get.put(
-      LiveAreaDatailController(widget.areaId?.toString(), widget.parentAreaId));
+    LiveAreaDatailController(widget.areaId?.toString(), widget.parentAreaId),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -54,75 +55,81 @@ class _LiveAreaDetailPageState extends State<LiveAreaDetailPage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<AreaItem>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<AreaItem>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
-      Success(:var response) => response?.isNotEmpty == true
-          ? DefaultTabController(
-              initialIndex: _controller.initialIndex,
-              length: response!.length,
-              child: Builder(
-                builder: (context) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TabBar(
-                              dividerHeight: 0,
-                              dividerColor: Colors.transparent,
-                              isScrollable: true,
-                              tabAlignment: TabAlignment.start,
-                              tabs: response
-                                  .map((e) => Tab(text: e.name ?? ''))
-                                  .toList(),
-                              onTap: (index) {
-                                try {
-                                  if (!DefaultTabController.of(context)
-                                      .indexIsChanging) {
-                                    final item = response[index];
-                                    Get.find<LiveAreaChildController>(
-                                            tag: '${item.id}${item.parentId}')
-                                        .animateToTop();
-                                  }
-                                } catch (_) {}
-                              },
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? DefaultTabController(
+                initialIndex: _controller.initialIndex,
+                length: response!.length,
+                child: Builder(
+                  builder: (context) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TabBar(
+                                dividerHeight: 0,
+                                dividerColor: Colors.transparent,
+                                isScrollable: true,
+                                tabAlignment: TabAlignment.start,
+                                tabs: response
+                                    .map((e) => Tab(text: e.name ?? ''))
+                                    .toList(),
+                                onTap: (index) {
+                                  try {
+                                    if (!DefaultTabController.of(
+                                      context,
+                                    ).indexIsChanging) {
+                                      final item = response[index];
+                                      Get.find<LiveAreaChildController>(
+                                        tag: '${item.id}${item.parentId}',
+                                      ).animateToTop();
+                                    }
+                                  } catch (_) {}
+                                },
+                              ),
                             ),
-                          ),
-                          iconButton(
-                            context: context,
-                            icon: Icons.menu,
-                            bgColor: Colors.transparent,
-                            onPressed: () =>
-                                _showTags(context, theme, response),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 1),
-                      Expanded(
-                        child: tabBarView(
-                          children: response
-                              .map((e) => LiveAreaChildPage(
+                            iconButton(
+                              context: context,
+                              icon: Icons.menu,
+                              bgColor: Colors.transparent,
+                              onPressed: () =>
+                                  _showTags(context, theme, response),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 1),
+                        Expanded(
+                          child: tabBarView(
+                            children: response
+                                .map(
+                                  (e) => LiveAreaChildPage(
                                     areaId: e.id,
                                     parentAreaId: e.parentId,
-                                  ))
-                              .toList(),
+                                  ),
+                                )
+                                .toList(),
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
+              )
+            : LiveAreaChildPage(
+                areaId: widget.areaId,
+                parentAreaId: widget.parentAreaId,
               ),
-            )
-          : LiveAreaChildPage(
-              areaId: widget.areaId,
-              parentAreaId: widget.parentAreaId,
-            ),
       Error() => LiveAreaChildPage(
-          areaId: widget.areaId,
-          parentAreaId: widget.parentAreaId,
-        ),
+        areaId: widget.areaId,
+        parentAreaId: widget.parentAreaId,
+      ),
     };
   }
 
@@ -194,11 +201,11 @@ class _LiveAreaDetailPageState extends State<LiveAreaDetailPage> {
                     itemCount: list.length,
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 100,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      mainAxisExtent: 80,
-                    ),
+                          maxCrossAxisExtent: 100,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          mainAxisExtent: 80,
+                        ),
                     itemBuilder: (_, index) {
                       return _tagItem(
                         theme: theme,

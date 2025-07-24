@@ -4,6 +4,6 @@ class RelationInfo {
   RelationInfo({this.attention});
 
   factory RelationInfo.fromJson(Map<String, dynamic> json) => RelationInfo(
-        attention: json['attention'] as int?,
-      );
+    attention: json['attention'] as int?,
+  );
 }

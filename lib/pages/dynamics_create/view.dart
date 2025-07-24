@@ -115,8 +115,9 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
                         TextButton(
                           style: TextButton.styleFrom(
                             overlayColor: hasTopic ? Colors.transparent : null,
-                            splashFactory:
-                                hasTopic ? NoSplash.splashFactory : null,
+                            splashFactory: hasTopic
+                                ? NoSplash.splashFactory
+                                : null,
                             shape: hasTopic
                                 ? null
                                 : RoundedRectangleBorder(
@@ -124,7 +125,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
                                       color: hasTopic
                                           ? Colors.transparent
                                           : theme.colorScheme.outline
-                                              .withValues(alpha: 0.2),
+                                                .withValues(alpha: 0.2),
                                     ),
                                     borderRadius: const BorderRadius.all(
                                       Radius.circular(25),
@@ -239,107 +240,108 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
   }
 
   Widget _buildImageList(ThemeData theme) => SizedBox(
-        height: 100,
-        width: double.infinity,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Obx(
-            () => Row(
-              spacing: 10,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...List.generate(
-                    pathList.length, (index) => buildImage(index, 100)),
-                if (pathList.length != limit)
-                  Builder(
-                    builder: (context) {
-                      const borderRadius = StyleString.mdRadius;
-                      return Material(
-                        borderRadius: borderRadius,
-                        child: InkWell(
+    height: 100,
+    width: double.infinity,
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Obx(
+        () => Row(
+          spacing: 10,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...List.generate(
+              pathList.length,
+              (index) => buildImage(index, 100),
+            ),
+            if (pathList.length != limit)
+              Builder(
+                builder: (context) {
+                  const borderRadius = StyleString.mdRadius;
+                  return Material(
+                    borderRadius: borderRadius,
+                    child: InkWell(
+                      borderRadius: borderRadius,
+                      onTap: () => onPickImage(() {
+                        if (pathList.isNotEmpty && !enablePublish.value) {
+                          enablePublish.value = true;
+                        }
+                      }),
+                      child: Ink(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
                           borderRadius: borderRadius,
-                          onTap: () => onPickImage(() {
-                            if (pathList.isNotEmpty && !enablePublish.value) {
-                              enablePublish.value = true;
-                            }
-                          }),
-                          child: Ink(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              borderRadius: borderRadius,
-                              color: theme.colorScheme.secondaryContainer,
-                            ),
-                            child:
-                                const Center(child: Icon(Icons.add, size: 35)),
-                          ),
+                          color: theme.colorScheme.secondaryContainer,
                         ),
-                      );
-                    },
-                  ),
-              ],
+                        child: const Center(child: Icon(Icons.add, size: 35)),
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _buildAppBar(ThemeData theme) => Container(
+    height: 66,
+    padding: const EdgeInsets.all(16),
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: 34,
+            height: 34,
+            child: IconButton(
+              tooltip: '返回',
+              style: ButtonStyle(
+                padding: WidgetStateProperty.all(EdgeInsets.zero),
+                backgroundColor: WidgetStateProperty.resolveWith(
+                  (states) {
+                    return theme.colorScheme.secondaryContainer;
+                  },
+                ),
+              ),
+              onPressed: Get.back,
+              icon: Icon(
+                Icons.arrow_back_outlined,
+                size: 18,
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
             ),
           ),
         ),
-      );
-
-  Widget _buildAppBar(ThemeData theme) => Container(
-        height: 66,
-        padding: const EdgeInsets.all(16),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: SizedBox(
-                width: 34,
-                height: 34,
-                child: IconButton(
-                  tooltip: '返回',
-                  style: ButtonStyle(
-                    padding: WidgetStateProperty.all(EdgeInsets.zero),
-                    backgroundColor: WidgetStateProperty.resolveWith(
-                      (states) {
-                        return theme.colorScheme.secondaryContainer;
-                      },
-                    ),
-                  ),
-                  onPressed: Get.back,
-                  icon: Icon(
-                    Icons.arrow_back_outlined,
-                    size: 18,
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                ),
-              ),
-            ),
-            const Center(
-              child: Text(
-                '发布动态',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Obx(
-                () => FilledButton.tonal(
-                  onPressed: enablePublish.value ? onPublish : null,
-                  style: FilledButton.styleFrom(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  child: Text(_publishTime.value == null ? '发布' : '定时发布'),
-                ),
-              ),
-            ),
-          ],
+        const Center(
+          child: Text(
+            '发布动态',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
         ),
-      );
+        Align(
+          alignment: Alignment.centerRight,
+          child: Obx(
+            () => FilledButton.tonal(
+              onPressed: enablePublish.value ? onPublish : null,
+              style: FilledButton.styleFrom(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+              child: Text(_publishTime.value == null ? '发布' : '定时发布'),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildPrivateWidget(ThemeData theme) {
     final color = _isPrivate.value
@@ -530,23 +532,23 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
         );
 
   Widget get _buildToolbar => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          spacing: 16,
-          children: [
-            emojiBtn,
-            atBtn,
-            voteBtn,
-            moreBtn,
-            // if (kDebugMode)
-            //   ToolbarIconButton(
-            //     onPressed: editController.clear,
-            //     icon: const Icon(Icons.clear, size: 22),
-            //     selected: false,
-            //   ),
-          ],
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Row(
+      spacing: 16,
+      children: [
+        emojiBtn,
+        atBtn,
+        voteBtn,
+        moreBtn,
+        // if (kDebugMode)
+        //   ToolbarIconButton(
+        //     onPressed: editController.clear,
+        //     icon: const Icon(Icons.clear, size: 22),
+        //     selected: false,
+        //   ),
+      ],
+    ),
+  );
 
   @override
   Widget buildMorePanel(ThemeData theme) {
@@ -612,88 +614,90 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
   }
 
   Widget get voteBtn => ToolbarIconButton(
-        onPressed: () async {
-          controller.keepChatPanel();
-          RichTextItem? voteItem = editController.items
-              .firstWhereOrNull((e) => e.type == RichTextType.vote);
-          VoteInfo? voteInfo = await Navigator.of(context).push(
-            GetPageRoute(
-                page: () => CreateVotePage(
-                    voteId: voteItem?.id == null
-                        ? null
-                        : int.parse(voteItem!.id!))),
-          );
-          if (voteInfo != null) {
-            if (voteItem != null) {
-              final range = voteItem.range;
-              final text = ' ${voteInfo.title} ';
-              final selection =
-                  TextSelection.collapsed(offset: range.start + text.length);
-              final delta = RichTextEditingDeltaReplacement(
-                oldText: editController.text,
-                replacementText: text,
-                replacedRange: range,
-                selection: selection,
-                composing: TextRange.empty,
-                type: RichTextType.vote,
-                id: voteInfo.voteId.toString(),
-                rawText: voteInfo.title,
-              );
-              final newValue = delta.apply(editController.value);
-              editController
-                ..syncRichText(delta)
-                ..value = newValue;
-            } else {
-              onInsertText(
-                '我发起了一个投票',
-                RichTextType.text,
-              );
-              onInsertText(
-                ' ${voteInfo.title} ',
-                RichTextType.vote,
-                rawText: voteInfo.title,
-                id: voteInfo.voteId.toString(),
-              );
-            }
-          }
-          controller.restoreChatPanel();
-        },
-        icon: const Icon(Icons.bar_chart_rounded, size: 24),
-        tooltip: '投票',
-        selected: false,
+    onPressed: () async {
+      controller.keepChatPanel();
+      RichTextItem? voteItem = editController.items.firstWhereOrNull(
+        (e) => e.type == RichTextType.vote,
       );
-
-  Widget _buildEditWidget(ThemeData theme) => Form(
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Listener(
-          onPointerUp: (event) {
-            if (readOnly.value) {
-              updatePanelType(PanelType.keyboard);
-            }
-          },
-          child: Obx(
-            () => RichTextField(
-              key: key,
-              controller: editController,
-              minLines: 4,
-              maxLines: null,
-              focusNode: focusNode,
-              readOnly: readOnly.value,
-              onChanged: onChanged,
-              decoration: InputDecoration(
-                hintText: '说点什么吧',
-                hintStyle: TextStyle(color: theme.colorScheme.outline),
-                border: const OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  gapPadding: 0,
-                ),
-                contentPadding: EdgeInsets.zero,
-              ),
-              // inputFormatters: [LengthLimitingTextInputFormatter(1000)],
-            ),
+      VoteInfo? voteInfo = await Navigator.of(context).push(
+        GetPageRoute(
+          page: () => CreateVotePage(
+            voteId: voteItem?.id == null ? null : int.parse(voteItem!.id!),
           ),
         ),
       );
+      if (voteInfo != null) {
+        if (voteItem != null) {
+          final range = voteItem.range;
+          final text = ' ${voteInfo.title} ';
+          final selection = TextSelection.collapsed(
+            offset: range.start + text.length,
+          );
+          final delta = RichTextEditingDeltaReplacement(
+            oldText: editController.text,
+            replacementText: text,
+            replacedRange: range,
+            selection: selection,
+            composing: TextRange.empty,
+            type: RichTextType.vote,
+            id: voteInfo.voteId.toString(),
+            rawText: voteInfo.title,
+          );
+          final newValue = delta.apply(editController.value);
+          editController
+            ..syncRichText(delta)
+            ..value = newValue;
+        } else {
+          onInsertText(
+            '我发起了一个投票',
+            RichTextType.text,
+          );
+          onInsertText(
+            ' ${voteInfo.title} ',
+            RichTextType.vote,
+            rawText: voteInfo.title,
+            id: voteInfo.voteId.toString(),
+          );
+        }
+      }
+      controller.restoreChatPanel();
+    },
+    icon: const Icon(Icons.bar_chart_rounded, size: 24),
+    tooltip: '投票',
+    selected: false,
+  );
+
+  Widget _buildEditWidget(ThemeData theme) => Form(
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    child: Listener(
+      onPointerUp: (event) {
+        if (readOnly.value) {
+          updatePanelType(PanelType.keyboard);
+        }
+      },
+      child: Obx(
+        () => RichTextField(
+          key: key,
+          controller: editController,
+          minLines: 4,
+          maxLines: null,
+          focusNode: focusNode,
+          readOnly: readOnly.value,
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            hintText: '说点什么吧',
+            hintStyle: TextStyle(color: theme.colorScheme.outline),
+            border: const OutlineInputBorder(
+              borderSide: BorderSide.none,
+              gapPadding: 0,
+            ),
+            contentPadding: EdgeInsets.zero,
+          ),
+          // inputFormatters: [LengthLimitingTextInputFormatter(1000)],
+        ),
+      ),
+    ),
+  );
 
   @override
   Widget? get customPanel => EmotePanel(onChoose: onChooseEmote);
@@ -788,8 +792,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
                     Text('直播预约: ${reserveCard.title}'),
                     Text(
                       '${DateUtil.longFormatD.format(
-                        DateTime.fromMillisecondsSinceEpoch(
-                            reserveCard.livePlanStartTime! * 1000),
+                        DateTime.fromMillisecondsSinceEpoch(reserveCard.livePlanStartTime! * 1000),
                       )} 直播',
                     ),
                   ],

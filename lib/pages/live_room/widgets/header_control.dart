@@ -26,6 +26,7 @@ class LiveHeaderControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isFullScreen = plPlayerController.isFullScreen.value;
     return AppBar(
       backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
@@ -35,7 +36,7 @@ class LiveHeaderControl extends StatelessWidget {
       title: Row(
         spacing: 10,
         children: [
-          if (plPlayerController.isFullScreen.value)
+          if (isFullScreen)
             SizedBox(
               width: 35,
               height: 35,
@@ -62,14 +63,20 @@ class LiveHeaderControl extends StatelessWidget {
                     title!,
                     maxLines: 1,
                     style: const TextStyle(
-                        fontSize: 15, height: 1, color: Colors.white),
+                      fontSize: 15,
+                      height: 1,
+                      color: Colors.white,
+                    ),
                   ),
-                  if (plPlayerController.isFullScreen.value && upName != null)
+                  if (isFullScreen && upName != null)
                     Text(
                       upName!,
                       maxLines: 1,
                       style: const TextStyle(
-                          fontSize: 12, height: 1, color: Colors.white),
+                        fontSize: 12,
+                        height: 1,
+                        color: Colors.white,
+                      ),
                     ),
                 ],
               ),
@@ -93,31 +100,33 @@ class LiveHeaderControl extends StatelessWidget {
             ),
           ),
           Obx(
-            () => SizedBox(
-              width: 35,
-              height: 35,
-              child: IconButton(
-                onPressed: () {
-                  plPlayerController.onlyPlayAudio.value =
-                      !plPlayerController.onlyPlayAudio.value;
-                  onPlayAudio();
-                },
-                style: ButtonStyle(
-                  padding: WidgetStateProperty.all(EdgeInsets.zero),
+            () {
+              final onlyPlayAudio = plPlayerController.onlyPlayAudio.value;
+              return SizedBox(
+                width: 35,
+                height: 35,
+                child: IconButton(
+                  onPressed: () {
+                    plPlayerController.onlyPlayAudio.value = !onlyPlayAudio;
+                    onPlayAudio();
+                  },
+                  style: ButtonStyle(
+                    padding: WidgetStateProperty.all(EdgeInsets.zero),
+                  ),
+                  icon: onlyPlayAudio
+                      ? const Icon(
+                          size: 18,
+                          MdiIcons.musicCircle,
+                          color: Colors.white,
+                        )
+                      : const Icon(
+                          size: 18,
+                          MdiIcons.musicCircleOutline,
+                          color: Colors.white,
+                        ),
                 ),
-                icon: plPlayerController.onlyPlayAudio.value
-                    ? const Icon(
-                        size: 18,
-                        MdiIcons.musicCircle,
-                        color: Colors.white,
-                      )
-                    : const Icon(
-                        size: 18,
-                        MdiIcons.musicCircleOutline,
-                        color: Colors.white,
-                      ),
-              ),
-            ),
+              );
+            },
           ),
           if (Platform.isAndroid)
             SizedBox(
@@ -136,7 +145,8 @@ class LiveHeaderControl extends StatelessWidget {
                       floating.enable(
                         plPlayerController.direction.value == 'vertical'
                             ? const EnableManual(
-                                aspectRatio: Rational.vertical())
+                                aspectRatio: Rational.vertical(),
+                              )
                             : const EnableManual(),
                       );
                     }

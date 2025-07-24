@@ -93,8 +93,9 @@ class CacheManage {
     var appDocDir = await getTemporaryDirectory();
     if (appDocDir.existsSync()) {
       // await appDocDir.delete(recursive: true);
-      final List<FileSystemEntity> children =
-          appDocDir.listSync(recursive: false);
+      final List<FileSystemEntity> children = appDocDir.listSync(
+        recursive: false,
+      );
       for (final FileSystemEntity file in children) {
         await file.delete(recursive: true);
       }

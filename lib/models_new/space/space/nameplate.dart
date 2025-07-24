@@ -16,11 +16,11 @@ class Nameplate {
   });
 
   factory Nameplate.fromJson(Map<String, dynamic> json) => Nameplate(
-        nid: json['nid'] as int?,
-        name: json['name'] as String?,
-        image: json['image'] as String?,
-        imageSmall: json['image_small'] as String?,
-        level: json['level'] as String?,
-        condition: json['condition'] as String?,
-      );
+    nid: json['nid'] as int?,
+    name: json['name'] as String?,
+    image: json['image'] as String?,
+    imageSmall: json['image_small'] as String?,
+    level: json['level'] as String?,
+    condition: json['condition'] as String?,
+  );
 }

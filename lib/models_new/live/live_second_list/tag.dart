@@ -10,8 +10,8 @@ class LiveSecondTag {
   });
 
   factory LiveSecondTag.fromJson(Map json) => LiveSecondTag(
-        id: json['id'],
-        name: json['name'],
-        sortType: json['sort_type'],
-      );
+    id: json['id'],
+    name: json['name'],
+    sortType: json['sort_type'],
+  );
 }

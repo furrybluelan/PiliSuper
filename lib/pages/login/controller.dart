@@ -88,7 +88,9 @@ class LoginPageController extends GetxController
               t.cancel();
               statusQRCode.value = '扫码成功';
               await setAccount(
-                  value['data'], value['data']['cookie_info']['cookies']);
+                value['data'],
+                value['data']['cookie_info']['cookies'],
+              );
               Get.back();
             } else if (value['code'] == 86038) {
               t.cancel();
@@ -122,90 +124,91 @@ class LoginPageController extends GetxController
 
     captcha
       ..addEventHandler(
-          onShow: (Map<String, dynamic> message) {},
-          onClose: (Map<String, dynamic> message) {
-            SmartDialog.showToast('关闭验证');
-          },
-          onResult: (Map<String, dynamic> message) {
-            if (kDebugMode) debugPrint("Captcha result: $message");
-            String code = message["code"];
-            if (code == "1") {
-              // 发送 message["result"] 中的数据向 B 端的业务服务接口进行查询
-              SmartDialog.showToast('验证成功');
-              captchaData
-                ..validate = message['result']['geetest_validate']
-                ..seccode = message['result']['geetest_seccode']
-                ..geetest = GeetestData(
-                  challenge: message['result']['geetest_challenge'],
-                  gt: geeGt,
-                );
-              onSuccess();
+        onShow: (Map<String, dynamic> message) {},
+        onClose: (Map<String, dynamic> message) {
+          SmartDialog.showToast('关闭验证');
+        },
+        onResult: (Map<String, dynamic> message) {
+          if (kDebugMode) debugPrint("Captcha result: $message");
+          String code = message["code"];
+          if (code == "1") {
+            // 发送 message["result"] 中的数据向 B 端的业务服务接口进行查询
+            SmartDialog.showToast('验证成功');
+            captchaData
+              ..validate = message['result']['geetest_validate']
+              ..seccode = message['result']['geetest_seccode']
+              ..geetest = GeetestData(
+                challenge: message['result']['geetest_challenge'],
+                gt: geeGt,
+              );
+            onSuccess();
+          } else {
+            // 终端用户完成验证失败，自动重试 If the verification fails, it will be automatically retried.
+            if (kDebugMode) debugPrint("Captcha result code : $code");
+          }
+        },
+        onError: (Map<String, dynamic> message) {
+          SmartDialog.showToast("Captcha onError: $message");
+          String code = message["code"];
+          // 处理验证中返回的错误 Handling errors returned in verification
+          if (Platform.isAndroid) {
+            // Android 平台
+            if (code == "-2") {
+              // Dart 调用异常 Call exception
+            } else if (code == "-1") {
+              // Gt3RegisterData 参数不合法 Parameter is invalid
+            } else if (code == "201") {
+              // 网络无法访问 Network inaccessible
+            } else if (code == "202") {
+              // Json 解析错误 Analysis error
+            } else if (code == "204") {
+              // WebView 加载超时，请检查是否混淆极验 SDK   Load timed out
+            } else if (code == "204_1") {
+              // WebView 加载前端页面错误，请查看日志 Error loading front-end page, please check the log
+            } else if (code == "204_2") {
+              // WebView 加载 SSLError
+            } else if (code == "206") {
+              // gettype 接口错误或返回为 null   API error or return null
+            } else if (code == "207") {
+              // getphp 接口错误或返回为 null    API error or return null
+            } else if (code == "208") {
+              // ajax 接口错误或返回为 null      API error or return null
             } else {
-              // 终端用户完成验证失败，自动重试 If the verification fails, it will be automatically retried.
-              if (kDebugMode) debugPrint("Captcha result code : $code");
+              // 更多错误码参考开发文档  More error codes refer to the development document
+              // https://docs.geetest.com/sensebot/apirefer/errorcode/android
             }
-          },
-          onError: (Map<String, dynamic> message) {
-            SmartDialog.showToast("Captcha onError: $message");
-            String code = message["code"];
-            // 处理验证中返回的错误 Handling errors returned in verification
-            if (Platform.isAndroid) {
-              // Android 平台
-              if (code == "-2") {
-                // Dart 调用异常 Call exception
-              } else if (code == "-1") {
-                // Gt3RegisterData 参数不合法 Parameter is invalid
-              } else if (code == "201") {
-                // 网络无法访问 Network inaccessible
-              } else if (code == "202") {
-                // Json 解析错误 Analysis error
-              } else if (code == "204") {
-                // WebView 加载超时，请检查是否混淆极验 SDK   Load timed out
-              } else if (code == "204_1") {
-                // WebView 加载前端页面错误，请查看日志 Error loading front-end page, please check the log
-              } else if (code == "204_2") {
-                // WebView 加载 SSLError
-              } else if (code == "206") {
-                // gettype 接口错误或返回为 null   API error or return null
-              } else if (code == "207") {
-                // getphp 接口错误或返回为 null    API error or return null
-              } else if (code == "208") {
-                // ajax 接口错误或返回为 null      API error or return null
-              } else {
-                // 更多错误码参考开发文档  More error codes refer to the development document
-                // https://docs.geetest.com/sensebot/apirefer/errorcode/android
-              }
-            }
+          }
 
-            if (Platform.isIOS) {
-              // iOS 平台
-              if (code == "-1009") {
-                // 网络无法访问 Network inaccessible
-              } else if (code == "-1004") {
-                // 无法查找到 HOST  Unable to find HOST
-              } else if (code == "-1002") {
-                // 非法的 URL  Illegal URL
-              } else if (code == "-1001") {
-                // 网络超时 Network timeout
-              } else if (code == "-999") {
-                // 请求被意外中断, 一般由用户进行取消操作导致 The interrupted request was usually caused by the user cancelling the operation
-              } else if (code == "-21") {
-                // 使用了重复的 challenge   Duplicate challenges are used
-                // 检查获取 challenge 是否进行了缓存  Check if the fetch challenge is cached
-              } else if (code == "-20") {
-                // 尝试过多, 重新引导用户触发验证即可 Try too many times, lead the user to request verification again
-              } else if (code == "-10") {
-                // 预判断时被封禁, 不会再进行图形验证 Banned during pre-judgment, and no more image captcha verification
-              } else if (code == "-2") {
-                // Dart 调用异常 Call exception
-              } else if (code == "-1") {
-                // Gt3RegisterData 参数不合法  Parameter is invalid
-              } else {
-                // 更多错误码参考开发文档 More error codes refer to the development document
-                // https://docs.geetest.com/sensebot/apirefer/errorcode/ios
-              }
+          if (Platform.isIOS) {
+            // iOS 平台
+            if (code == "-1009") {
+              // 网络无法访问 Network inaccessible
+            } else if (code == "-1004") {
+              // 无法查找到 HOST  Unable to find HOST
+            } else if (code == "-1002") {
+              // 非法的 URL  Illegal URL
+            } else if (code == "-1001") {
+              // 网络超时 Network timeout
+            } else if (code == "-999") {
+              // 请求被意外中断, 一般由用户进行取消操作导致 The interrupted request was usually caused by the user cancelling the operation
+            } else if (code == "-21") {
+              // 使用了重复的 challenge   Duplicate challenges are used
+              // 检查获取 challenge 是否进行了缓存  Check if the fetch challenge is cached
+            } else if (code == "-20") {
+              // 尝试过多, 重新引导用户触发验证即可 Try too many times, lead the user to request verification again
+            } else if (code == "-10") {
+              // 预判断时被封禁, 不会再进行图形验证 Banned during pre-judgment, and no more image captcha verification
+            } else if (code == "-2") {
+              // Dart 调用异常 Call exception
+            } else if (code == "-1") {
+              // Gt3RegisterData 参数不合法  Parameter is invalid
+            } else {
+              // 更多错误码参考开发文档 More error codes refer to the development document
+              // https://docs.geetest.com/sensebot/apirefer/errorcode/ios
             }
-          })
+          }
+        },
+      )
       ..startCaptcha(registerData);
   }
 
@@ -218,23 +221,27 @@ class LoginPageController extends GetxController
     try {
       var result = await Request().get(
         "/x/member/web/account",
-        options: Options(headers: {
-          "cookie": cookieTextController.text,
-        }, extra: {
-          'account': AnonymousAccount()
-        }),
+        options: Options(
+          headers: {
+            "cookie": cookieTextController.text,
+          },
+          extra: {'account': AnonymousAccount()},
+        ),
       );
       if (result.data['code'] == 0) {
         try {
           await LoginAccount(
-                  BiliCookieJar.fromJson(Map.fromEntries(
-                      cookieTextController.text.split(';').map((item) {
-                    final list = item.split('=');
-                    return MapEntry(list.first, list.skip(1).join());
-                  }))),
-                  null,
-                  null)
-              .onChange();
+            BiliCookieJar.fromJson(
+              Map.fromEntries(
+                cookieTextController.text.split(';').map((item) {
+                  final list = item.split('=');
+                  return MapEntry(list.first, list.skip(1).join());
+                }),
+              ),
+            ),
+            null,
+            null,
+          ).onChange();
           if (!Accounts.main.isLogin) await switchAccountDialog(Get.context!);
           SmartDialog.showToast('登录成功');
           Get.back();
@@ -288,11 +295,14 @@ class LoginPageController extends GetxController
         String url = data['url']!;
         Uri currentUri = Uri.parse(url);
         var safeCenterRes = await LoginHttp.safeCenterGetInfo(
-            tmpCode: currentUri.queryParameters['tmp_token']!);
+          tmpCode: currentUri.queryParameters['tmp_token']!,
+        );
         //{"code":0,"message":"0","ttl":1,"data":{"account_info":{"hide_tel":"111*****111","hide_mail":"aaa*****aaaa.aaa","bind_mail":true,"bind_tel":true,"tel_verify":true,"mail_verify":true,"unneeded_check":false,"bind_safe_question":false,"mid":1111111},"member_info":{"nickname":"xxxxxxx","face":"https://i0.hdslb.com/bfs/face/xxxxxxx.jpg","realname_status":false},"sns_info":{"bind_google":false,"bind_fb":false,"bind_apple":false,"bind_qq":true,"bind_weibo":true,"bind_wechat":false},"account_safe":{"score":80}}}
         if (!safeCenterRes['status']) {
-          SmartDialog.showToast("获取安全验证信息失败，请尝试其它登录方式\n"
-              "(${safeCenterRes['code']}) ${safeCenterRes['msg']}");
+          SmartDialog.showToast(
+            "获取安全验证信息失败，请尝试其它登录方式\n"
+            "(${safeCenterRes['code']}) ${safeCenterRes['msg']}",
+          );
           return;
         }
         Map<String, String> accountInfo = {
@@ -307,11 +317,17 @@ class LoginPageController extends GetxController
         String captchaKey = '';
         Get.dialog(
           AlertDialog(
-            titlePadding:
-                const EdgeInsets.only(left: 16, top: 18, right: 16, bottom: 12),
+            titlePadding: const EdgeInsets.only(
+              left: 16,
+              top: 18,
+              right: 16,
+              bottom: 12,
+            ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            actionsPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            actionsPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
             title: const Text(
               "本次登录需要验证您的手机号",
               textAlign: TextAlign.center,
@@ -353,15 +369,19 @@ class LoginPageController extends GetxController
                   var preCaptureRes = await LoginHttp.preCapture();
                   if (!preCaptureRes['status'] ||
                       preCaptureRes['data'] == null) {
-                    SmartDialog.showToast("获取验证码失败，请尝试其它登录方式\n"
-                        "(${preCaptureRes['code']}) ${preCaptureRes['msg']} ${preCaptureRes['data']}");
+                    SmartDialog.showToast(
+                      "获取验证码失败，请尝试其它登录方式\n"
+                      "(${preCaptureRes['code']}) ${preCaptureRes['msg']} ${preCaptureRes['data']}",
+                    );
                   }
                   String? geeGt = preCaptureRes['data']['gee_gt'];
                   String? geeChallenge = preCaptureRes['data']['gee_challenge'];
                   captchaData.token = preCaptureRes['data']['recaptcha_token'];
                   if (!isGeeArgumentValid(geeGt, geeChallenge)) {
-                    SmartDialog.showToast("获取极验参数为空，请尝试其它登录方式\n"
-                        "(${preCaptureRes['code']}) ${preCaptureRes['msg']} ${preCaptureRes['data']}");
+                    SmartDialog.showToast(
+                      "获取极验参数为空，请尝试其它登录方式\n"
+                      "(${preCaptureRes['code']}) ${preCaptureRes['msg']} ${preCaptureRes['data']}",
+                    );
                     return;
                   }
 
@@ -371,16 +391,18 @@ class LoginPageController extends GetxController
                     () async {
                       var safeCenterSendSmsCodeRes =
                           await LoginHttp.safeCenterSmsCode(
-                        tmpCode: currentUri.queryParameters['tmp_token']!,
-                        geeChallenge: geeChallenge,
-                        geeSeccode: captchaData.seccode,
-                        geeValidate: captchaData.validate,
-                        recaptchaToken: captchaData.token,
-                        refererUrl: url,
-                      );
+                            tmpCode: currentUri.queryParameters['tmp_token']!,
+                            geeChallenge: geeChallenge,
+                            geeSeccode: captchaData.seccode,
+                            geeValidate: captchaData.validate,
+                            recaptchaToken: captchaData.token,
+                            refererUrl: url,
+                          );
                       if (!safeCenterSendSmsCodeRes['status']) {
-                        SmartDialog.showToast("发送短信验证码失败，请尝试其它登录方式\n"
-                            "(${safeCenterSendSmsCodeRes['code']}) ${safeCenterSendSmsCodeRes['msg']}");
+                        SmartDialog.showToast(
+                          "发送短信验证码失败，请尝试其它登录方式\n"
+                          "(${safeCenterSendSmsCodeRes['code']}) ${safeCenterSendSmsCodeRes['msg']}",
+                        );
                         return;
                       }
                       SmartDialog.showToast("短信验证码已发送，请查收");
@@ -406,16 +428,18 @@ class LoginPageController extends GetxController
                   }
                   var safeCenterSmsVerifyRes =
                       await LoginHttp.safeCenterSmsVerify(
-                    code: code,
-                    tmpCode: currentUri.queryParameters['tmp_token']!,
-                    requestId: currentUri.queryParameters['request_id']!,
-                    source: currentUri.queryParameters['source']!,
-                    captchaKey: captchaKey,
-                    refererUrl: url,
-                  );
+                        code: code,
+                        tmpCode: currentUri.queryParameters['tmp_token']!,
+                        requestId: currentUri.queryParameters['request_id']!,
+                        source: currentUri.queryParameters['source']!,
+                        captchaKey: captchaKey,
+                        refererUrl: url,
+                      );
                   if (!safeCenterSmsVerifyRes['status']) {
-                    SmartDialog.showToast("验证短信验证码失败，请尝试其它登录方式\n"
-                        "(${safeCenterSmsVerifyRes['code']}) ${safeCenterSmsVerifyRes['msg']}");
+                    SmartDialog.showToast(
+                      "验证短信验证码失败，请尝试其它登录方式\n"
+                      "(${safeCenterSmsVerifyRes['code']}) ${safeCenterSmsVerifyRes['msg']}",
+                    );
                     return;
                   }
                   SmartDialog.showToast("验证成功，正在登录");
@@ -423,20 +447,25 @@ class LoginPageController extends GetxController
                     code: safeCenterSmsVerifyRes['data']['code'],
                   );
                   if (!oauth2AccessTokenRes['status']) {
-                    SmartDialog.showToast("登录失败，请尝试其它登录方式\n"
-                        "(${oauth2AccessTokenRes['code']}) ${oauth2AccessTokenRes['msg']}");
+                    SmartDialog.showToast(
+                      "登录失败，请尝试其它登录方式\n"
+                      "(${oauth2AccessTokenRes['code']}) ${oauth2AccessTokenRes['msg']}",
+                    );
                     return;
                   }
                   var data = oauth2AccessTokenRes['data'];
                   if (data['token_info'] == null ||
                       data['cookie_info'] == null) {
                     SmartDialog.showToast(
-                        '登录异常，接口未返回身份信息，可能是因为账号风控，请尝试其它登录方式。\n${oauth2AccessTokenRes["msg"]}，\n $data');
+                      '登录异常，接口未返回身份信息，可能是因为账号风控，请尝试其它登录方式。\n${oauth2AccessTokenRes["msg"]}，\n $data',
+                    );
                     return;
                   }
                   SmartDialog.showToast('正在保存身份信息');
                   await setAccount(
-                      data['token_info'], data['cookie_info']['cookies']);
+                    data['token_info'],
+                    data['cookie_info']['cookies'],
+                  );
                   Get
                     ..back()
                     ..back();
@@ -451,7 +480,8 @@ class LoginPageController extends GetxController
       }
       if (data['token_info'] == null || data['cookie_info'] == null) {
         SmartDialog.showToast(
-            '登录异常，接口未返回身份信息，可能是因为账号风控，请尝试其它登录方式。\n${res["msg"]}，\n $data');
+          '登录异常，接口未返回身份信息，可能是因为账号风控，请尝试其它登录方式。\n${res["msg"]}，\n $data',
+        );
         return;
       }
       SmartDialog.showToast('正在保存身份信息');
@@ -587,8 +617,9 @@ class LoginPageController extends GetxController
       smsSendTimestamp = DateTime.now().millisecondsSinceEpoch;
       smsSendCooldown.value = 60;
       captchaKey = res['data']['captcha_key'];
-      smsSendCooldownTimer =
-          Timer.periodic(const Duration(seconds: 1), (timer) {
+      smsSendCooldownTimer = Timer.periodic(const Duration(seconds: 1), (
+        timer,
+      ) {
         smsSendCooldown.value = 60 - timer.tick;
         if (smsSendCooldown <= 0) {
           smsSendCooldownTimer?.cancel();
@@ -613,12 +644,15 @@ class LoginPageController extends GetxController
           if (!isGeeArgumentValid(geeGt, geeChallenge)) {
             if (kDebugMode) {
               debugPrint(
-                  '验证信息错误：${res["msg"]}\n返回内容：${res["data"]}，尝试另一个验证码接口');
+                '验证信息错误：${res["msg"]}\n返回内容：${res["data"]}，尝试另一个验证码接口',
+              );
             }
             var preCaptureRes = await LoginHttp.preCapture();
             if (!preCaptureRes['status'] || preCaptureRes['data'] == null) {
-              SmartDialog.showToast("获取验证码失败，请尝试其它登录方式\n"
-                  "(${preCaptureRes['code']}) ${preCaptureRes['msg']} ${preCaptureRes['data']}");
+              SmartDialog.showToast(
+                "获取验证码失败，请尝试其它登录方式\n"
+                "(${preCaptureRes['code']}) ${preCaptureRes['msg']} ${preCaptureRes['data']}",
+              );
               return;
             }
             geeGt = preCaptureRes['data']['gee_gt'];
@@ -649,8 +683,11 @@ class LoginPageController extends GetxController
   }
 
   Future<void> setAccount(Map tokenInfo, List cookieInfo) async {
-    final account = LoginAccount(BiliCookieJar.fromList(cookieInfo),
-        tokenInfo['access_token'], tokenInfo['refresh_token']);
+    final account = LoginAccount(
+      BiliCookieJar.fromList(cookieInfo),
+      tokenInfo['access_token'],
+      tokenInfo['refresh_token'],
+    );
     await Future.wait([account.onChange(), AnonymousAccount().delete()]);
     Accounts.accountMode.updateAll((_, a) => a == account ? account : a);
     if (Accounts.main.isLogin) {
@@ -668,62 +705,63 @@ class LoginPageController extends GetxController
     final selectAccount = Map.of(Accounts.accountMode);
     final options = {
       AnonymousAccount(): '0',
-      ...Accounts.account
-          .toMap()
-          .cast<String, Account>()
-          .map((k, v) => MapEntry(v, k))
+      ...Accounts.account.toMap().cast<String, Account>().map(
+        (k, v) => MapEntry(v, k),
+      ),
     };
     return showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(builder: (context, setState) {
-        return AlertDialog(
-          title: const Text('选择账号mid, 为0时使用匿名'),
-          titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
-          contentPadding: const EdgeInsets.symmetric(vertical: 5),
-          actionsPadding: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: 10,
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: AccountType.values
-                  .map(
-                    (e) => WrapRadioOptionsGroup<Account>(
-                      groupTitle: e.title,
-                      options: options,
-                      selectedValue: selectAccount[e],
-                      onChanged: (v) => setState(() => selectAccount[e] = v!),
-                    ),
-                  )
-                  .toList(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('选择账号mid, 为0时使用匿名'),
+            titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
+            contentPadding: const EdgeInsets.symmetric(vertical: 5),
+            actionsPadding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              bottom: 10,
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: Get.back,
-              child: Text(
-                '取消',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: AccountType.values
+                    .map(
+                      (e) => WrapRadioOptionsGroup<Account>(
+                        groupTitle: e.title,
+                        options: options,
+                        selectedValue: selectAccount[e],
+                        onChanged: (v) => setState(() => selectAccount[e] = v!),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
-            TextButton(
-              onPressed: () {
-                for (var i in selectAccount.entries) {
-                  if (i.value != Accounts.get(i.key)) {
-                    Accounts.set(i.key, i.value);
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  for (var i in selectAccount.entries) {
+                    if (i.value != Accounts.get(i.key)) {
+                      Accounts.set(i.key, i.value);
+                    }
                   }
-                }
-                Get.back();
-              },
-              child: const Text('确定'),
-            ),
-          ],
-        );
-      }),
+                  Get.back();
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

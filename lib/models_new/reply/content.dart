@@ -18,13 +18,13 @@ class ReplyContent {
   });
 
   factory ReplyContent.fromJson(Map<String, dynamic> json) => ReplyContent(
-        message: json['message'] as String?,
-        members: json['members'] as List<dynamic>?,
-        jumpUrl: json['jump_url'],
-        maxLine: json['max_line'] as int?,
-        pictures: (json['pictures'] as List<dynamic>?)
-            ?.map((e) => ReplyPicture.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        pictureScale: (json['picture_scale'] as num?)?.toDouble(),
-      );
+    message: json['message'] as String?,
+    members: json['members'] as List<dynamic>?,
+    jumpUrl: json['jump_url'],
+    maxLine: json['max_line'] as int?,
+    pictures: (json['pictures'] as List<dynamic>?)
+        ?.map((e) => ReplyPicture.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    pictureScale: (json['picture_scale'] as num?)?.toDouble(),
+  );
 }

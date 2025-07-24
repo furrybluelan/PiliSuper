@@ -2,16 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:auto_orientation/auto_orientation.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-
-Timer? screenTimer;
-void stopScreenTimer() {
-  screenTimer?.cancel();
-  screenTimer = null;
-}
 
 //横屏
 Future<void> landScape() async {
@@ -22,8 +16,9 @@ Future<void> landScape() async {
     } else if (Platform.isAndroid || Platform.isIOS) {
       await AutoOrientation.landscapeAutoMode(forceSensor: true);
     } else if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-      await const MethodChannel('com.alexmercerind/media_kit_video')
-          .invokeMethod(
+      await const MethodChannel(
+        'com.alexmercerind/media_kit_video',
+      ).invokeMethod(
         'Utils.EnterNativeFullscreen',
       );
     }
@@ -40,10 +35,7 @@ Future<void> verticalScreenForTwoSeconds() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  screenTimer = Timer(const Duration(seconds: 2), () {
-    autoScreen();
-    screenTimer = null;
-  });
+  await autoScreen();
 }
 
 //竖屏
@@ -54,8 +46,9 @@ Future<void> verticalScreen() async {
 }
 
 //全向
+bool allowRotateScreen = Pref.allowRotateScreen;
 Future<void> autoScreen() async {
-  if (!Pref.allowRotateScreen) {
+  if (!allowRotateScreen) {
     return;
   }
   await SystemChrome.setPreferredOrientations([
@@ -84,8 +77,7 @@ Future<void> showStatusBar() async {
     if (kIsWeb) {
       document.exitFullscreen();
     } else if (Platform.isAndroid || Platform.isIOS) {
-      if (Platform.isAndroid &&
-          (await DeviceInfoPlugin().androidInfo).version.sdkInt < 29) {
+      if (Platform.isAndroid && (await Utils.sdkInt < 29)) {
         mode = SystemUiMode.manual;
       }
       await SystemChrome.setEnabledSystemUIMode(
@@ -93,8 +85,9 @@ Future<void> showStatusBar() async {
         overlays: SystemUiOverlay.values,
       );
     } else if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-      await const MethodChannel('com.alexmercerind/media_kit_video')
-          .invokeMethod(
+      await const MethodChannel(
+        'com.alexmercerind/media_kit_video',
+      ).invokeMethod(
         'Utils.ExitNativeFullscreen',
       );
     }

@@ -45,8 +45,10 @@ class ShutdownTimerService with WidgetsBindingObserver {
       return;
     }
     SmartDialog.showToast("设置 $scheduledExitInMinutes 分钟后定时关闭");
-    _shutdownTimer =
-        Timer(Duration(minutes: scheduledExitInMinutes), _shutdownDecider);
+    _shutdownTimer = Timer(
+      Duration(minutes: scheduledExitInMinutes),
+      _shutdownDecider,
+    );
   }
 
   void _showTimeUpButPauseDialog() {

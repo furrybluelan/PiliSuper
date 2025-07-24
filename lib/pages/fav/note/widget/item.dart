@@ -66,40 +66,45 @@ class FavNoteItem extends StatelessWidget {
                           Positioned.fill(
                             child: IgnorePointer(
                               child: LayoutBuilder(
-                                builder: (context, constraints) =>
-                                    AnimatedOpacity(
+                                builder: (context, constraints) => AnimatedOpacity(
                                   opacity: item.checked == true ? 1 : 0,
                                   duration: const Duration(milliseconds: 200),
                                   child: Container(
                                     alignment: Alignment.center,
                                     height: constraints.maxHeight,
-                                    width: constraints.maxHeight *
+                                    width:
+                                        constraints.maxHeight *
                                         StyleString.aspectRatio,
                                     decoration: BoxDecoration(
                                       borderRadius: StyleString.mdRadius,
-                                      color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.6,
+                                      ),
                                     ),
                                     child: SizedBox(
                                       width: 34,
                                       height: 34,
                                       child: AnimatedScale(
                                         scale: item.checked == true ? 1 : 0,
-                                        duration:
-                                            const Duration(milliseconds: 250),
+                                        duration: const Duration(
+                                          milliseconds: 250,
+                                        ),
                                         curve: Curves.easeInOut,
                                         child: IconButton(
                                           tooltip: '取消选择',
                                           style: ButtonStyle(
                                             padding: WidgetStateProperty.all(
-                                                EdgeInsets.zero),
+                                              EdgeInsets.zero,
+                                            ),
                                             backgroundColor:
                                                 WidgetStateProperty.resolveWith(
-                                              (states) {
-                                                return theme.colorScheme.surface
-                                                    .withValues(alpha: 0.8);
-                                              },
-                                            ),
+                                                  (states) {
+                                                    return theme
+                                                        .colorScheme
+                                                        .surface
+                                                        .withValues(alpha: 0.8);
+                                                  },
+                                                ),
                                           ),
                                           onPressed: null,
                                           icon: Icon(

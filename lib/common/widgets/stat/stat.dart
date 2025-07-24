@@ -18,7 +18,8 @@ class StatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color = this.color ??
+    Color color =
+        this.color ??
         Theme.of(context).colorScheme.outline.withValues(alpha: 0.8);
     return Row(
       spacing: 2,

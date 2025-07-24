@@ -15,8 +15,8 @@ void showConfirmDialog({
         content: content is String
             ? Text(content)
             : content is Widget
-                ? content
-                : null,
+            ? content
+            : null,
         actions: [
           TextButton(
             onPressed: Get.back,
@@ -99,7 +99,7 @@ void showPgcFollowDialog({
               Get.back();
               onUpdateStatus(-1);
             },
-          )
+          ),
         ],
       ),
     ),

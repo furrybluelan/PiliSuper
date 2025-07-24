@@ -37,12 +37,13 @@ class _GroupPanelState extends State<GroupPanel> {
     MemberHttp.followUpTags().then((res) {
       if (mounted) {
         if (res['status']) {
-          List<MemberTagItemModel> tagsList = (res['data']
-              as List<MemberTagItemModel>)
-            ..removeWhere((item) => item.tagid == 0)
-            ..map((item) {
-              return item.checked = widget.tags?.contains(item.tagid) == true;
-            }).toList();
+          List<MemberTagItemModel> tagsList =
+              (res['data'] as List<MemberTagItemModel>)
+                ..removeWhere((item) => item.tagid == 0)
+                ..map((item) {
+                  return item.checked =
+                      widget.tags?.contains(item.tagid) == true;
+                }).toList();
           showDefaultBtn.value = !tagsList.any((e) => e.checked == true);
           loadingState = Success(tagsList);
         } else {
@@ -61,12 +62,14 @@ class _GroupPanelState extends State<GroupPanel> {
     feedBack();
     // 是否有选中的 有选中的带id，没选使用默认0
     List<MemberTagItemModel> tagsList = loadingState.data;
-    final bool anyHasChecked =
-        tagsList.any((MemberTagItemModel e) => e.checked == true);
+    final bool anyHasChecked = tagsList.any(
+      (MemberTagItemModel e) => e.checked == true,
+    );
     late List<int> tagidList;
     if (anyHasChecked) {
-      final List<MemberTagItemModel> checkedList =
-          tagsList.where((MemberTagItemModel e) => e.checked == true).toList();
+      final List<MemberTagItemModel> checkedList = tagsList
+          .where((MemberTagItemModel e) => e.checked == true)
+          .toList();
       tagidList = checkedList.map<int>((e) => e.tagid!).toList();
     } else {
       tagidList = [0];
@@ -83,47 +86,49 @@ class _GroupPanelState extends State<GroupPanel> {
     return switch (loadingState) {
       Loading() => loadingWidget,
       Success(:var response) => ListView.builder(
-          controller: widget.scrollController,
-          itemCount: response.length,
-          itemBuilder: (context, index) {
-            final item = response[index];
-            return Material(
-              type: MaterialType.transparency,
-              child: Builder(
-                builder: (context) {
-                  void onTap() {
-                    item.checked = !item.checked!;
-                    (context as Element).markNeedsBuild();
-                    showDefaultBtn.value =
-                        !response.any((e) => e.checked == true);
-                  }
-
-                  return ListTile(
-                    onTap: onTap,
-                    dense: true,
-                    leading: const Icon(Icons.group_outlined),
-                    minLeadingWidth: 0,
-                    title: Text(item.name ?? ''),
-                    subtitle:
-                        item.tip?.isNotEmpty == true ? Text(item.tip!) : null,
-                    trailing: Transform.scale(
-                      scale: 0.9,
-                      child: Checkbox(
-                        value: item.checked,
-                        onChanged: (bool? checkValue) => onTap(),
-                      ),
-                    ),
+        controller: widget.scrollController,
+        itemCount: response.length,
+        itemBuilder: (context, index) {
+          final item = response[index];
+          return Material(
+            type: MaterialType.transparency,
+            child: Builder(
+              builder: (context) {
+                void onTap() {
+                  item.checked = !item.checked!;
+                  (context as Element).markNeedsBuild();
+                  showDefaultBtn.value = !response.any(
+                    (e) => e.checked == true,
                   );
-                },
-              ),
-            );
-          },
-        ),
+                }
+
+                return ListTile(
+                  onTap: onTap,
+                  dense: true,
+                  leading: const Icon(Icons.group_outlined),
+                  minLeadingWidth: 0,
+                  title: Text(item.name ?? ''),
+                  subtitle: item.tip?.isNotEmpty == true
+                      ? Text(item.tip!)
+                      : null,
+                  trailing: Transform.scale(
+                    scale: 0.9,
+                    child: Checkbox(
+                      value: item.checked,
+                      onChanged: (bool? checkValue) => onTap(),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
       Error(:var errMsg) => scrollErrorWidget(
-          controller: widget.scrollController,
-          errMsg: errMsg,
-          onReload: _query,
-        ),
+        controller: widget.scrollController,
+        errMsg: errMsg,
+        onReload: _query,
+      ),
     };
   }
 
@@ -135,9 +140,10 @@ class _GroupPanelState extends State<GroupPanel> {
         AppBar(
           backgroundColor: Colors.transparent,
           leading: IconButton(
-              tooltip: '关闭',
-              onPressed: Get.back,
-              icon: const Icon(Icons.close_outlined)),
+            tooltip: '关闭',
+            onPressed: Get.back,
+            icon: const Icon(Icons.close_outlined),
+          ),
           title: const Text('设置关注分组'),
         ),
         Expanded(child: _buildBody),

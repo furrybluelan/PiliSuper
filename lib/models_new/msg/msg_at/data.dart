@@ -8,11 +8,11 @@ class MsgAtData {
   MsgAtData({this.cursor, this.items});
 
   factory MsgAtData.fromJson(Map<String, dynamic> json) => MsgAtData(
-        cursor: json['cursor'] == null
-            ? null
-            : Cursor.fromJson(json['cursor'] as Map<String, dynamic>),
-        items: (json['items'] as List<dynamic>?)
-            ?.map((e) => MsgAtItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    cursor: json['cursor'] == null
+        ? null
+        : Cursor.fromJson(json['cursor'] as Map<String, dynamic>),
+    items: (json['items'] as List<dynamic>?)
+        ?.map((e) => MsgAtItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

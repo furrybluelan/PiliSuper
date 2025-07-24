@@ -8,10 +8,10 @@ class FollowData {
   FollowData({this.list, this.reVersion, this.total});
 
   factory FollowData.fromJson(Map<String, dynamic> json) => FollowData(
-        list: (json['list'] as List<dynamic>?)
-            ?.map((e) => FollowItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        reVersion: json['re_version'] as int?,
-        total: json['total'] as int?,
-      );
+    list: (json['list'] as List<dynamic>?)
+        ?.map((e) => FollowItemModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    reVersion: json['re_version'] as int?,
+    total: json['total'] as int?,
+  );
 }

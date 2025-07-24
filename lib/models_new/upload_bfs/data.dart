@@ -4,8 +4,12 @@ class UploadBfsResData {
   int? imageHeight;
   double? imgSize;
 
-  UploadBfsResData(
-      {this.imageUrl, this.imageWidth, this.imageHeight, this.imgSize});
+  UploadBfsResData({
+    this.imageUrl,
+    this.imageWidth,
+    this.imageHeight,
+    this.imgSize,
+  });
 
   factory UploadBfsResData.fromJson(Map<String, dynamic> json) =>
       UploadBfsResData(

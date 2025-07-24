@@ -24,8 +24,9 @@ class WhisperLinkSettingController extends GetxController {
 
   final int talkerUid;
   RxBool isPinned = false.obs;
-  late final sessionId =
-      SessionId(privateId: PrivateId(talkerUid: Int64(talkerUid)));
+  late final sessionId = SessionId(
+    privateId: PrivateId(talkerUid: Int64(talkerUid)),
+  );
 
   @override
   void onInit() {

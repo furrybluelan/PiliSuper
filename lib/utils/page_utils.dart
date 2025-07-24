@@ -33,8 +33,10 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PageUtils {
-  static Future<void> pmShare(BuildContext context,
-      {required Map content}) async {
+  static Future<void> pmShare(
+    BuildContext context, {
+    required Map content,
+  }) async {
     // if (kDebugMode) debugPrint(content.toString());
 
     int? selectedIndex;
@@ -42,13 +44,17 @@ class PageUtils {
 
     final shareListRes = await ImGrpc.shareList(size: 3);
     if (shareListRes.isSuccess && shareListRes.data.sessionList.isNotEmpty) {
-      userList.addAll(shareListRes.data.sessionList
-          .map<UserModel>((item) => UserModel(
+      userList.addAll(
+        shareListRes.data.sessionList
+            .map<UserModel>(
+              (item) => UserModel(
                 mid: item.talkerId.toInt(),
                 name: item.talkerUname,
                 avatar: item.talkerIcon,
-              ))
-          .toList());
+              ),
+            )
+            .toList(),
+      );
     } else if (context.mounted) {
       UserModel? userModel = await Navigator.of(context).push(
         GetPageRoute(page: () => const ContactPage()),
@@ -74,8 +80,11 @@ class PageUtils {
     }
   }
 
-  static void scheduleExit(BuildContext context, isFullScreen,
-      [bool isLive = false]) {
+  static void scheduleExit(
+    BuildContext context,
+    isFullScreen, [
+    bool isLive = false,
+  ]) {
     if (!context.mounted) {
       return;
     }
@@ -153,7 +162,8 @@ class PageUtils {
                       ...[
                         ...scheduleTimeChoices,
                         if (!scheduleTimeChoices.contains(
-                            shutdownTimerService.scheduledExitInMinutes))
+                          shutdownTimerService.scheduledExitInMinutes,
+                        ))
                           shutdownTimerService.scheduledExitInMinutes,
                       ]..sort(),
                       -1,
@@ -165,11 +175,12 @@ class PageUtils {
                           choice == -1
                               ? '自定义'
                               : choice == 0
-                                  ? "禁用"
-                                  : "$choice分钟后",
+                              ? "禁用"
+                              : "$choice分钟后",
                           style: titleStyle,
                         ),
-                        trailing: shutdownTimerService.scheduledExitInMinutes ==
+                        trailing:
+                            shutdownTimerService.scheduledExitInMinutes ==
                                 choice
                             ? Icon(
                                 size: 20,
@@ -195,14 +206,16 @@ class PageUtils {
                               scale: 0.8,
                               child: Switch(
                                 thumbIcon:
-                                    WidgetStateProperty.resolveWith<Icon?>(
-                                        (Set<WidgetState> states) {
-                                  if (states.isNotEmpty &&
-                                      states.first == WidgetState.selected) {
-                                    return const Icon(Icons.done);
-                                  }
-                                  return null;
-                                }),
+                                    WidgetStateProperty.resolveWith<Icon?>((
+                                      Set<WidgetState> states,
+                                    ) {
+                                      if (states.isNotEmpty &&
+                                          states.first ==
+                                              WidgetState.selected) {
+                                        return const Icon(Icons.done);
+                                      }
+                                      return null;
+                                    }),
                                 value: shutdownTimerService
                                     .waitForPlayingCompleted,
                                 onChanged: (value) {
@@ -335,8 +348,8 @@ class PageUtils {
           aspectRatio: aspectRatio.fitsInAndroidRequirements
               ? aspectRatio
               : height > width
-                  ? const Rational.vertical()
-                  : const Rational.landscape(),
+              ? const Rational.vertical()
+              : const Rational.landscape(),
         ),
       );
     } else {
@@ -344,8 +357,11 @@ class PageUtils {
     }
   }
 
-  static Future<void> pushDynDetail(DynamicItemModel item, floor,
-      {action = 'all'}) async {
+  static Future<void> pushDynDetail(
+    DynamicItemModel item,
+    floor, {
+    action = 'all',
+  }) async {
     feedBack();
 
     void push() {
@@ -378,13 +394,16 @@ class PageUtils {
     switch (item.type) {
       case 'DYNAMIC_TYPE_AV':
         if (item.modules.moduleDynamic?.major?.archive?.type == 2) {
-          if (item.modules.moduleDynamic!.major!.archive!.jumpUrl!
-              .startsWith('//')) {
+          if (item.modules.moduleDynamic!.major!.archive!.jumpUrl!.startsWith(
+            '//',
+          )) {
             item.modules.moduleDynamic!.major!.archive!.jumpUrl =
                 'https:${item.modules.moduleDynamic!.major!.archive!.jumpUrl!}';
           }
           String? redirectUrl = await UrlUtils.parseRedirectUrl(
-              item.modules.moduleDynamic!.major!.archive!.jumpUrl!, false);
+            item.modules.moduleDynamic!.major!.archive!.jumpUrl!,
+            false,
+          );
           if (redirectUrl != null) {
             viewPgcFromUri(redirectUrl);
             return;
@@ -622,10 +641,12 @@ class PageUtils {
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         Offset begin =
             MediaQuery.orientationOf(Get.context!) == Orientation.portrait
-                ? const Offset(0.0, 1.0)
-                : const Offset(1.0, 0.0);
-        var tween = Tween(begin: begin, end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeInOut));
+            ? const Offset(0.0, 1.0)
+            : const Offset(1.0, 0.0);
+        var tween = Tween(
+          begin: begin,
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeInOut));
         return SlideTransition(
           position: animation.drive(tween),
           child: child,
@@ -678,8 +699,11 @@ class PageUtils {
     return false;
   }
 
-  static Future<void> viewPgc(
-      {dynamic seasonId, dynamic epId, String? progress}) async {
+  static Future<void> viewPgc({
+    dynamic seasonId,
+    dynamic epId,
+    String? progress,
+  }) async {
     try {
       SmartDialog.showLoading(msg: '资源获取中');
       var result = await SearchHttp.pgcInfo(seasonId: seasonId, epId: epId);
@@ -711,7 +735,8 @@ class PageUtils {
                         'pic': item.cover,
                         'heroTag': Utils.makeHeroTag(item.cid),
                         'videoType': SearchType.video,
-                        if (progress != null) 'progress': int.tryParse(progress)
+                        if (progress != null)
+                          'progress': int.tryParse(progress),
                       },
                       preventDuplicates: false,
                     );
@@ -730,9 +755,9 @@ class PageUtils {
 
         episode ??= data.userStatus?.progress?.lastEpId != null
             ? data.episodes!.firstWhereOrNull(
-                  (item) => item.epId == data.userStatus?.progress?.lastEpId,
-                ) ??
-                data.episodes!.first
+                    (item) => item.epId == data.userStatus?.progress?.lastEpId,
+                  ) ??
+                  data.episodes!.first
             : data.episodes!.first;
         toVideoPage(
           'bvid=${episode.bvid}&cid=${episode.cid}&seasonId=${data.seasonId}&epId=${episode.epId}&type=${data.type}',
@@ -741,7 +766,7 @@ class PageUtils {
             'heroTag': Utils.makeHeroTag(episode.cid),
             'videoType': SearchType.media_bangumi,
             'pgcItem': data,
-            if (progress != null) 'progress': int.tryParse(progress)
+            if (progress != null) 'progress': int.tryParse(progress),
           },
           preventDuplicates: false,
         );

@@ -62,8 +62,9 @@ class DateUtil {
       return '昨天 ${_twoDigits(date.hour)}:${_twoDigits(date.minute)}';
     }
     if (isHistory) {
-      final DateFormat sdf =
-          now.year == date.year ? _shortFormatD : longFormatD;
+      final DateFormat sdf = now.year == date.year
+          ? _shortFormatD
+          : longFormatD;
       return sdf.format(date);
     }
     return longFormatD.format(date);

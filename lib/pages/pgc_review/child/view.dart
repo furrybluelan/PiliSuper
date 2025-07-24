@@ -45,7 +45,8 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
   @override
   void dispose() {
     Get.delete<PgcReviewController>(
-        tag: '${widget.mediaId}${widget.type.name}');
+      tag: '${widget.mediaId}${widget.type.name}',
+    );
     super.dispose();
   }
 
@@ -62,9 +63,11 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
           _buildHeader(theme),
           SliverPadding(
             padding: EdgeInsets.only(
-                bottom: MediaQuery.paddingOf(context).bottom + 100),
-            sliver:
-                Obx(() => _buildBody(theme, _controller.loadingState.value)),
+              bottom: MediaQuery.paddingOf(context).bottom + 100,
+            ),
+            sliver: Obx(
+              () => _buildBody(theme, _controller.loadingState.value),
+            ),
           ),
         ],
       ),
@@ -72,38 +75,41 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<PgcReviewItemModel>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<PgcReviewItemModel>?> loadingState,
+  ) {
     late final divider = Divider(
       height: 1,
       color: theme.colorScheme.outline.withValues(alpha: 0.1),
     );
     return switch (loadingState) {
       Loading() => SliverToBoxAdapter(
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return const VideoReplySkeleton();
-            },
-            itemCount: 8,
-          ),
+        child: ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return const VideoReplySkeleton();
+          },
+          itemCount: 8,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.separated(
-              itemBuilder: (context, index) {
-                if (index == response.length - 1) {
-                  _controller.onLoadMore();
-                }
-                return _itemWidget(theme, index, response[index]);
-              },
-              itemCount: response!.length,
-              separatorBuilder: (context, index) => divider,
-            )
-          : HttpError(onReload: _controller.onReload),
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.separated(
+                itemBuilder: (context, index) {
+                  if (index == response.length - 1) {
+                    _controller.onLoadMore();
+                  }
+                  return _itemWidget(theme, index, response[index]);
+                },
+                itemCount: response!.length,
+                separatorBuilder: (context, index) => divider,
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 
@@ -113,85 +119,85 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
       child: InkWell(
         onTap: isLongReview
             ? () => Get.toNamed(
-                  '/articlePage',
-                  parameters: {
-                    'id': item.articleId!.toString(),
-                    'type': 'read',
-                  },
-                )
+                '/articlePage',
+                parameters: {
+                  'id': item.articleId!.toString(),
+                  'type': 'read',
+                },
+              )
             : null,
         onLongPress: isLongReview
             ? null
             : () => showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    clipBehavior: Clip.hardEdge,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (item.author!.mid == Accounts.main.mid) ...[
-                          ListTile(
-                            dense: true,
-                            title: const Text(
-                              '编辑',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            onTap: () {
-                              Get.back();
-                              showModalBottomSheet(
-                                context: context,
-                                useSafeArea: true,
-                                isScrollControlled: true,
-                                builder: (context) {
-                                  return PgcReviewPostPanel(
-                                    name: widget.name,
-                                    mediaId: widget.mediaId,
-                                    reviewId: item.reviewId,
-                                    content: item.content,
-                                    score: item.score,
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                          ListTile(
-                            dense: true,
-                            title: const Text(
-                              '删除',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            onTap: () {
-                              Get.back();
-                              showConfirmDialog(
-                                context: context,
-                                title: '删除短评，同时删除评分？',
-                                onConfirm: () =>
-                                    _controller.onDel(index, item.reviewId),
-                              );
-                            },
-                          ),
-                        ],
+                context: context,
+                builder: (context) => AlertDialog(
+                  clipBehavior: Clip.hardEdge,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (item.author!.mid == Accounts.main.mid) ...[
                         ListTile(
                           dense: true,
                           title: const Text(
-                            '举报',
+                            '编辑',
                             style: TextStyle(fontSize: 14),
                           ),
-                          onTap: () => Get
-                            ..back()
-                            ..toNamed(
-                              '/webview',
-                              parameters: {
-                                'url':
-                                    'https://www.bilibili.com/appeal/?reviewId=${item.reviewId}&type=shortComment&mediaId=${widget.mediaId}'
+                          onTap: () {
+                            Get.back();
+                            showModalBottomSheet(
+                              context: context,
+                              useSafeArea: true,
+                              isScrollControlled: true,
+                              builder: (context) {
+                                return PgcReviewPostPanel(
+                                  name: widget.name,
+                                  mediaId: widget.mediaId,
+                                  reviewId: item.reviewId,
+                                  content: item.content,
+                                  score: item.score,
+                                );
                               },
-                            ),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          dense: true,
+                          title: const Text(
+                            '删除',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          onTap: () {
+                            Get.back();
+                            showConfirmDialog(
+                              context: context,
+                              title: '删除短评，同时删除评分？',
+                              onConfirm: () =>
+                                  _controller.onDel(index, item.reviewId),
+                            );
+                          },
                         ),
                       ],
-                    ),
+                      ListTile(
+                        dense: true,
+                        title: const Text(
+                          '举报',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        onTap: () => Get
+                          ..back()
+                          ..toNamed(
+                            '/webview',
+                            parameters: {
+                              'url':
+                                  'https://www.bilibili.com/appeal/?reviewId=${item.reviewId}&type=shortComment&mediaId=${widget.mediaId}',
+                            },
+                          ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -222,7 +228,8 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
                             Text(
                               item.author!.uname!,
                               style: TextStyle(
-                                color: item.author?.vip?.status != null &&
+                                color:
+                                    item.author?.vip?.status != null &&
                                         item.author!.vip!.status > 0 &&
                                         item.author!.vip!.type == 2
                                     ? context.vipColor
@@ -266,9 +273,9 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
                               },
                             ),
                           ],
-                        )
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -312,7 +319,10 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
                           child: TextButton(
                             style: style,
                             onPressed: () => _controller.onDislike(
-                                item, isDislike, item.reviewId),
+                              item,
+                              isDislike,
+                              item.reviewId,
+                            ),
                             child: Icon(
                               isDislike
                                   ? FontAwesomeIcons.solidThumbsDown
@@ -329,7 +339,10 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
                           onPressed: isLongReview
                               ? null
                               : () => _controller.onLike(
-                                  item, isLike, item.reviewId),
+                                  item,
+                                  isLike,
+                                  item.reviewId,
+                                ),
                           child: Row(
                             spacing: 4,
                             children: [
@@ -363,50 +376,53 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
   }
 
   Widget _buildHeader(ThemeData theme) => SliverPersistentHeader(
-        pinned: false,
-        floating: true,
-        delegate: CustomSliverPersistentHeaderDelegate(
-          extent: 40,
-          bgColor: theme.colorScheme.surface,
-          child: Container(
-            height: 40,
-            padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Obx(
-                  () => _controller.count.value == null
-                      ? const SizedBox.shrink()
-                      : Text(
-                          '${NumUtil.numFormat(_controller.count.value)}条点评',
-                          style: const TextStyle(fontSize: 13),
-                        ),
+    pinned: false,
+    floating: true,
+    delegate: CustomSliverPersistentHeaderDelegate(
+      extent: 40,
+      bgColor: theme.colorScheme.surface,
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Obx(
+              () {
+                final count = _controller.count.value;
+                return count == null
+                    ? const SizedBox.shrink()
+                    : Text(
+                        '${NumUtil.numFormat(count)}条点评',
+                        style: const TextStyle(fontSize: 13),
+                      );
+              },
+            ),
+            SizedBox(
+              height: 35,
+              child: TextButton.icon(
+                onPressed: _controller.queryBySort,
+                icon: Icon(
+                  Icons.sort,
+                  size: 16,
+                  color: theme.colorScheme.secondary,
                 ),
-                SizedBox(
-                  height: 35,
-                  child: TextButton.icon(
-                    onPressed: _controller.queryBySort,
-                    icon: Icon(
-                      Icons.sort,
-                      size: 16,
+                label: Obx(
+                  () => Text(
+                    _controller.sortType.value.label,
+                    style: TextStyle(
+                      fontSize: 13,
                       color: theme.colorScheme.secondary,
                     ),
-                    label: Obx(
-                      () => Text(
-                        _controller.sortType.value.label,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.colorScheme.secondary,
-                        ),
-                      ),
-                    ),
                   ),
-                )
-              ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 
   @override
   bool get wantKeepAlive => true;

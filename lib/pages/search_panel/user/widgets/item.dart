@@ -66,7 +66,7 @@ class SearchUserItem extends StatelessWidget {
                     style: style,
                   ),
               ],
-            )
+            ),
           ],
         ),
       ),

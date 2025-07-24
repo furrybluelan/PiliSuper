@@ -6,8 +6,8 @@ class Pendants {
   Pendants({this.frame});
 
   factory Pendants.fromJson(Map<String, dynamic> json) => Pendants(
-        frame: json['frame'] == null
-            ? null
-            : Frame.fromJson(json['frame'] as Map<String, dynamic>),
-      );
+    frame: json['frame'] == null
+        ? null
+        : Frame.fromJson(json['frame'] as Map<String, dynamic>),
+  );
 }

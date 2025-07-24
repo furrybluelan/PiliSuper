@@ -23,7 +23,8 @@ class AiConclusionData {
         modelResult: json['model_result'] == null
             ? null
             : AiConclusionResult.fromJson(
-                json['model_result'] as Map<String, dynamic>),
+                json['model_result'] as Map<String, dynamic>,
+              ),
         stid: json['stid'] as String?,
         status: json['status'] as int?,
         likeNum: json['like_num'] as int?,

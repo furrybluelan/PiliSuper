@@ -7,9 +7,9 @@ class Comic {
   Comic({this.count, this.item});
 
   factory Comic.fromJson(Map<String, dynamic> json) => Comic(
-        count: json['count'] as int?,
-        item: (json['item'] as List<dynamic>?)
-            ?.map((e) => SpaceArchiveItem.fromJson(e))
-            .toList(),
-      );
+    count: json['count'] as int?,
+    item: (json['item'] as List<dynamic>?)
+        ?.map((e) => SpaceArchiveItem.fromJson(e))
+        .toList(),
+  );
 }

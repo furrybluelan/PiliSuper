@@ -28,11 +28,11 @@ class MediaController
       icon: Icons.create_outlined,
       title: '创作中心',
       onTap: () => Get.toNamed(
-            '/webview',
-            parameters: {
-              'url': 'https://member.bilibili.com/platform/home',
-            },
-          ),
+        '/webview',
+        parameters: {
+          'url': 'https://member.bilibili.com/platform/home',
+        },
+      ),
     ),
   ];
   RxInt count = (-1).obs;

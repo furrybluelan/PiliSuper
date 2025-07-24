@@ -28,17 +28,17 @@ class ElecList {
   });
 
   factory ElecList.fromJson(Map<String, dynamic> json) => ElecList(
-        title: json['title'] as String?,
-        elecNum: json['elec_num'] as int?,
-        isCustomize: json['is_customize'] as int?,
-        bpNum: json['bp_num'] as String?,
-        minBp: json['min_bp'] as String?,
-        maxBp: json['max_bp'] as String?,
-        bpNumFen: json['bp_num_fen'] as int?,
-        isDefault: json['is_default'] as int?,
-        minElec: json['min_elec'] as int?,
-        maxElec: json['max_elec'] as int?,
-        minBpFen: json['min_bp_fen'] as int?,
-        maxBpFen: json['max_bp_fen'] as int?,
-      );
+    title: json['title'] as String?,
+    elecNum: json['elec_num'] as int?,
+    isCustomize: json['is_customize'] as int?,
+    bpNum: json['bp_num'] as String?,
+    minBp: json['min_bp'] as String?,
+    maxBp: json['max_bp'] as String?,
+    bpNumFen: json['bp_num_fen'] as int?,
+    isDefault: json['is_default'] as int?,
+    minElec: json['min_elec'] as int?,
+    maxElec: json['max_elec'] as int?,
+    minBpFen: json['min_bp_fen'] as int?,
+    maxBpFen: json['max_bp_fen'] as int?,
+  );
 }

@@ -39,7 +39,8 @@ class _MemberCoinArcPageState extends State<MemberCoinArcPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            '${widget.mid == accountService.mid ? '我' : '${widget.name}'}的最近投币'),
+          '${widget.mid == accountService.mid ? '我' : '${widget.name}'}的最近投币',
+        ),
       ),
       body: SafeArea(
         top: false,
@@ -68,40 +69,41 @@ class _MemberCoinArcPageState extends State<MemberCoinArcPage> {
   Widget _buildBody(LoadingState<List<CoinLikeArcItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid.builder(
-          gridDelegate: SliverGridDelegateWithExtentAndRatio(
-            mainAxisSpacing: StyleString.cardSpace,
-            crossAxisSpacing: StyleString.cardSpace,
-            maxCrossAxisExtent: Grid.smallCardWidth,
-            childAspectRatio: StyleString.aspectRatio,
-            mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
-          ),
-          itemCount: 16,
-          itemBuilder: (context, index) {
-            return const VideoCardVSkeleton();
-          },
+        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+          mainAxisSpacing: StyleString.cardSpace,
+          crossAxisSpacing: StyleString.cardSpace,
+          maxCrossAxisExtent: Grid.smallCardWidth,
+          childAspectRatio: StyleString.aspectRatio,
+          mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid.builder(
-              gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                mainAxisSpacing: StyleString.cardSpace,
-                crossAxisSpacing: StyleString.cardSpace,
-                maxCrossAxisExtent: Grid.smallCardWidth,
-                childAspectRatio: StyleString.aspectRatio,
-                mainAxisExtent: MediaQuery.textScalerOf(context).scale(75),
-              ),
-              itemCount: response!.length,
-              itemBuilder: (context, index) {
-                if (index == response.length - 1) {
-                  _ctr.onLoadMore();
-                }
-                return MemberCoinLikeItem(item: response[index]);
-              },
-            )
-          : HttpError(onReload: _ctr.onReload),
+        itemCount: 16,
+        itemBuilder: (context, index) {
+          return const VideoCardVSkeleton();
+        },
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid.builder(
+                gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                  mainAxisSpacing: StyleString.cardSpace,
+                  crossAxisSpacing: StyleString.cardSpace,
+                  maxCrossAxisExtent: Grid.smallCardWidth,
+                  childAspectRatio: StyleString.aspectRatio,
+                  mainAxisExtent: MediaQuery.textScalerOf(context).scale(75),
+                ),
+                itemCount: response!.length,
+                itemBuilder: (context, index) {
+                  if (index == response.length - 1) {
+                    _ctr.onLoadMore();
+                  }
+                  return MemberCoinLikeItem(item: response[index]);
+                },
+              )
+            : HttpError(onReload: _ctr.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _ctr.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _ctr.onReload,
+      ),
     };
   }
 }

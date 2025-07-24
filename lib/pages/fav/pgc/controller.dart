@@ -41,11 +41,11 @@ class FavPgcController
 
   @override
   Future<LoadingState<FavPgcData>> customGetData() => FavHttp.favPgc(
-        mid: Accounts.main.mid,
-        type: type,
-        followStatus: followStatus,
-        pn: page,
-      );
+    mid: Accounts.main.mid,
+    type: type,
+    followStatus: followStatus,
+    pn: page,
+  );
 
   void onDisable() {
     if (checkedCount.value != 0) {
@@ -67,24 +67,28 @@ class FavPgcController
 
   Future<void> onUpdateList(int followStatus) async {
     List<FavPgcItemModel> dataList = loadingState.value.data!;
-    Set<FavPgcItemModel> updateList =
-        dataList.where((item) => item.checked == true).toSet();
+    Set<FavPgcItemModel> updateList = dataList
+        .where((item) => item.checked == true)
+        .toSet();
     final res = await VideoHttp.pgcUpdate(
       seasonId: updateList.map((item) => item.seasonId).toList(),
       status: followStatus,
     );
     if (res['status']) {
-      List<FavPgcItemModel> remainList =
-          dataList.toSet().difference(updateList).toList();
+      List<FavPgcItemModel> remainList = dataList
+          .toSet()
+          .difference(updateList)
+          .toList();
       loadingState.value = Success(remainList);
       enableMultiSelect.value = false;
       try {
         final ctr = Get.find<FavPgcController>(tag: '$type$followStatus');
         if (ctr.loadingState.value.isSuccess) {
           ctr.loadingState
-            ..value
-                .data!
-                .insertAll(0, updateList.map((item) => item..checked = null))
+            ..value.data!.insertAll(
+              0,
+              updateList.map((item) => item..checked = null),
+            )
             ..refresh();
           ctr.allSelected.value = false;
         }

@@ -63,8 +63,9 @@ class _MediaListPanelState
   void init() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        int index = widget.mediaList
-            .indexWhere((item) => item.bvid == widget.getBvId());
+        int index = widget.mediaList.indexWhere(
+          (item) => item.bvid == widget.getBvId(),
+        );
         if (index > 0) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             try {
@@ -93,16 +94,19 @@ class _MediaListPanelState
             backgroundColor: Colors.transparent,
             actions: [
               Obx(
-                () => mediumButton(
-                  tooltip: desc.value ? '顺序播放' : '倒序播放',
-                  icon: desc.value
-                      ? MdiIcons.sortAscending
-                      : MdiIcons.sortDescending,
-                  onPressed: () {
-                    widget.onReverse();
-                    desc.value = !desc.value;
-                  },
-                ),
+                () {
+                  final desc = this.desc.value;
+                  return mediumButton(
+                    tooltip: desc ? '顺序播放' : '倒序播放',
+                    icon: desc
+                        ? MdiIcons.sortAscending
+                        : MdiIcons.sortDescending,
+                    onPressed: () {
+                      widget.onReverse();
+                      this.desc.value = !desc;
+                    },
+                  );
+                },
               ),
               mediumButton(
                 tooltip: '关闭',
@@ -135,189 +139,187 @@ class _MediaListPanelState
   }
 
   Widget _buildList(ThemeData theme) => Obx(
-        () {
-          final showDelBtn =
-              widget.onDelete != null && widget.mediaList.length > 1;
-          return ScrollablePositionedList.separated(
-            itemScrollController: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: widget.mediaList.length,
-            padding: EdgeInsets.only(
-              top: 7,
-              bottom: MediaQuery.paddingOf(context).bottom + 80,
-            ),
-            itemBuilder: ((context, index) {
-              var item = widget.mediaList[index];
-              if (index == widget.mediaList.length - 1 &&
-                  (widget.count == null ||
-                      widget.mediaList.length < widget.count!)) {
-                widget.loadMoreMedia();
-              }
-              final isCurr = item.bvid == widget.getBvId();
-              return SizedBox(
-                height: 98,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    onTap: () async {
-                      if (item.type != 2) {
-                        SmartDialog.showToast('不支持播放该类型视频');
-                        return;
-                      }
-                      Get.back();
-                      String bvid = item.bvid!;
-                      int? aid = item.aid;
-                      String cover = item.cover ?? '';
-                      final int? cid = item.cid ??
-                          await SearchHttp.ab2c(aid: aid, bvid: bvid);
-                      if (cid != null) {
-                        widget.changeMediaList?.call(bvid, cid, aid, cover);
-                      }
-                    },
-                    onLongPress: () => imageSaveDialog(
-                      title: item.title,
-                      cover: item.cover,
-                      aid: item.aid,
-                      bvid: item.bvid,
-                    ),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 5,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AspectRatio(
-                                aspectRatio: StyleString.aspectRatio,
-                                child: LayoutBuilder(
-                                  builder: (context, boxConstraints) {
-                                    return Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        NetworkImgLayer(
-                                          src: item.cover,
-                                          width: boxConstraints.maxWidth,
-                                          height: boxConstraints.maxHeight,
-                                        ),
-                                        if (item.badge?.text?.isNotEmpty ==
-                                            true)
-                                          PBadge(
-                                            text: item.badge?.text,
-                                            right: 6.0,
-                                            top: 6.0,
-                                            type: switch (item.badge?.text) {
-                                              '充电专属' => PBadgeType.error,
-                                              _ => PBadgeType.primary,
-                                            },
-                                          ),
-                                        PBadge(
-                                          text: DurationUtil.formatDuration(
-                                              item.duration),
-                                          right: 6.0,
-                                          bottom: 6.0,
-                                          type: PBadgeType.gray,
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+    () {
+      final showDelBtn = widget.onDelete != null && widget.mediaList.length > 1;
+      return ScrollablePositionedList.separated(
+        itemScrollController: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: widget.mediaList.length,
+        padding: EdgeInsets.only(
+          top: 7,
+          bottom: MediaQuery.paddingOf(context).bottom + 80,
+        ),
+        itemBuilder: ((context, index) {
+          var item = widget.mediaList[index];
+          if (index == widget.mediaList.length - 1 &&
+              (widget.count == null ||
+                  widget.mediaList.length < widget.count!)) {
+            widget.loadMoreMedia();
+          }
+          final isCurr = item.bvid == widget.getBvId();
+          return SizedBox(
+            height: 98,
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: () async {
+                  if (item.type != 2) {
+                    SmartDialog.showToast('不支持播放该类型视频');
+                    return;
+                  }
+                  Get.back();
+                  String bvid = item.bvid!;
+                  int? aid = item.aid;
+                  String cover = item.cover ?? '';
+                  final int? cid =
+                      item.cid ?? await SearchHttp.ab2c(aid: aid, bvid: bvid);
+                  if (cid != null) {
+                    widget.changeMediaList?.call(bvid, cid, aid, cover);
+                  }
+                },
+                onLongPress: () => imageSaveDialog(
+                  title: item.title,
+                  cover: item.cover,
+                  aid: item.aid,
+                  bvid: item.bvid,
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AspectRatio(
+                            aspectRatio: StyleString.aspectRatio,
+                            child: LayoutBuilder(
+                              builder: (context, boxConstraints) {
+                                return Stack(
+                                  clipBehavior: Clip.none,
                                   children: [
-                                    Text(
-                                      item.title!,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontWeight:
-                                            isCurr ? FontWeight.bold : null,
-                                        color: isCurr
-                                            ? theme.colorScheme.primary
-                                            : null,
-                                      ),
+                                    NetworkImgLayer(
+                                      src: item.cover,
+                                      width: boxConstraints.maxWidth,
+                                      height: boxConstraints.maxHeight,
                                     ),
-                                    if (item.type == 24 &&
-                                        item.intro?.isNotEmpty == true) ...[
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        item.intro!,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: theme.colorScheme.outline,
-                                        ),
+                                    if (item.badge?.text?.isNotEmpty == true)
+                                      PBadge(
+                                        text: item.badge?.text,
+                                        right: 6.0,
+                                        top: 6.0,
+                                        type: switch (item.badge?.text) {
+                                          '充电专属' => PBadgeType.error,
+                                          _ => PBadgeType.primary,
+                                        },
                                       ),
-                                    ],
-                                    const Spacer(),
-                                    Text(
-                                      item.upper!.name!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: theme.colorScheme.outline,
+                                    PBadge(
+                                      text: DurationUtil.formatDuration(
+                                        item.duration,
                                       ),
+                                      right: 6.0,
+                                      bottom: 6.0,
+                                      type: PBadgeType.gray,
                                     ),
-                                    if (item.type == 2) ...[
-                                      const SizedBox(height: 3),
-                                      Row(
-                                        spacing: 8,
-                                        children: [
-                                          StatWidget(
-                                            type: StatType.play,
-                                            value: item.cntInfo!.play,
-                                          ),
-                                          StatWidget(
-                                            type: StatType.danmaku,
-                                            value: item.cntInfo!.danmaku,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
                                   ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (showDelBtn && !isCurr)
-                          Positioned(
-                            right: 12,
-                            bottom: -6,
-                            child: InkWell(
-                              customBorder: const CircleBorder(),
-                              onTap: () => showConfirmDialog(
-                                context: context,
-                                title: '确定移除该视频？',
-                                onConfirm: () => widget.onDelete!(item, index),
-                              ),
-                              onLongPress: () => widget.onDelete!(item, index),
-                              child: Padding(
-                                padding: const EdgeInsets.all(9),
-                                child: Icon(
-                                  Icons.clear,
-                                  size: 18,
-                                  color: theme.colorScheme.outline,
-                                ),
-                              ),
+                                );
+                              },
                             ),
                           ),
-                      ],
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontWeight: isCurr ? FontWeight.bold : null,
+                                    color: isCurr
+                                        ? theme.colorScheme.primary
+                                        : null,
+                                  ),
+                                ),
+                                if (item.type == 24 &&
+                                    item.intro?.isNotEmpty == true) ...[
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    item.intro!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: theme.colorScheme.outline,
+                                    ),
+                                  ),
+                                ],
+                                const Spacer(),
+                                Text(
+                                  item.upper!.name!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.outline,
+                                  ),
+                                ),
+                                if (item.type == 2) ...[
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    spacing: 8,
+                                    children: [
+                                      StatWidget(
+                                        type: StatType.play,
+                                        value: item.cntInfo!.play,
+                                      ),
+                                      StatWidget(
+                                        type: StatType.danmaku,
+                                        value: item.cntInfo!.danmaku,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    if (showDelBtn && !isCurr)
+                      Positioned(
+                        right: 12,
+                        bottom: -6,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => showConfirmDialog(
+                            context: context,
+                            title: '确定移除该视频？',
+                            onConfirm: () => widget.onDelete!(item, index),
+                          ),
+                          onLongPress: () => widget.onDelete!(item, index),
+                          child: Padding(
+                            padding: const EdgeInsets.all(9),
+                            child: Icon(
+                              Icons.clear,
+                              size: 18,
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              );
-            }),
-            separatorBuilder: (context, index) => const SizedBox(height: 2),
+              ),
+            ),
           );
-        },
+        }),
+        separatorBuilder: (context, index) => const SizedBox(height: 2),
       );
+    },
+  );
 }

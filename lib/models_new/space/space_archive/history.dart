@@ -5,7 +5,7 @@ class History {
   History({this.progress, this.duration});
 
   factory History.fromJson(Map<String, dynamic> json) => History(
-        progress: json['progress'] as int?,
-        duration: json['duration'] as int?,
-      );
+    progress: json['progress'] as int?,
+    duration: json['duration'] as int?,
+  );
 }

@@ -17,12 +17,12 @@ class MentionItem with MultiSelectData {
   });
 
   factory MentionItem.fromJson(Map<String, dynamic> json) => MentionItem(
-        face: json['face'] as String?,
-        fans: json['fans'] as int?,
-        name: json['name'] as String?,
-        officialVerifyType: json['official_verify_type'] as int?,
-        uid: json['uid'] as String?,
-      );
+    face: json['face'] as String?,
+    fans: json['fans'] as int?,
+    name: json['name'] as String?,
+    officialVerifyType: json['official_verify_type'] as int?,
+    uid: json['uid'] as String?,
+  );
 
   @override
   bool operator ==(Object other) {

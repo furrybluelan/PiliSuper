@@ -1,3 +1,4 @@
+import 'package:PiliPlus/models/common/fav_order_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/data.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/media.dart';
 import 'package:PiliPlus/pages/common/common_search_page.dart';
@@ -16,13 +17,43 @@ class FavSearchPage extends CommonSearchPage {
   State<FavSearchPage> createState() => _FavSearchPageState();
 }
 
-class _FavSearchPageState extends CommonSearchPageState<FavSearchPage,
-    FavDetailData, FavDetailItemModel> {
+class _FavSearchPageState
+    extends
+        CommonSearchPageState<
+          FavSearchPage,
+          FavDetailData,
+          FavDetailItemModel
+        > {
   @override
   final FavSearchController controller = Get.put(
     FavSearchController(),
     tag: Utils.generateRandomString(8),
   );
+
+  @override
+  List<Widget>? get extraActions => [
+    Obx(
+      () {
+        return PopupMenuButton<FavOrderType>(
+          icon: const Icon(Icons.sort),
+          requestFocus: false,
+          initialValue: controller.order.value,
+          tooltip: '排序方式',
+          onSelected: (value) => controller
+            ..order.value = value
+            ..onReload(),
+          itemBuilder: (context) => FavOrderType.values
+              .map(
+                (e) => PopupMenuItem(
+                  value: e,
+                  child: Text(e.label),
+                ),
+              )
+              .toList(),
+        );
+      },
+    ),
+  ];
 
   @override
   Widget buildList(List<FavDetailItemModel> list) {
@@ -39,10 +70,10 @@ class _FavSearchPageState extends CommonSearchPageState<FavSearchPage,
             item: item,
             onDelFav: controller.isOwner == true
                 ? () => controller.onCancelFav(
-                      index,
-                      item.id!,
-                      item.type,
-                    )
+                    index,
+                    item.id!,
+                    item.type,
+                  )
                 : null,
             onViewFav: () => PageUtils.toVideoPage(
               'bvid=${item.bvid}&cid=${item.ugc?.firstCid}',

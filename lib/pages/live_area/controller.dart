@@ -39,14 +39,16 @@ class LiveAreaController
       LiveHttp.liveAreaList(isLogin: accountService.isLogin.value);
 
   Future<void> queryFavTags() async {
-    favState.value =
-        await LiveHttp.getLiveFavTag(isLogin: accountService.isLogin.value);
+    favState.value = await LiveHttp.getLiveFavTag(
+      isLogin: accountService.isLogin.value,
+    );
   }
 
   Future<void> setFavTag() async {
     if (favState.value.isSuccess) {
       final res = await LiveHttp.setLiveFavTag(
-          ids: favState.value.data.map((e) => e.id).toList());
+        ids: favState.value.data.map((e) => e.id).toList(),
+      );
       if (res['status']) {
         isEditing.value = !isEditing.value;
         SmartDialog.showToast('设置成功');

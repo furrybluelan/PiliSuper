@@ -164,7 +164,8 @@ class SpaceData {
     nftShowModule = json['nft_show_module'] == null
         ? null
         : NftShowModule.fromJson(
-            json['nft_show_module'] as Map<String, dynamic>);
+            json['nft_show_module'] as Map<String, dynamic>,
+          );
     tab2 = (json['tab2'] as List<dynamic>?)
         ?.map((e) => SpaceTab2.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -177,7 +178,8 @@ class SpaceData {
         ?.map((e) => SpaceButtonList.fromJson(e as Map<String, dynamic>))
         .toList();
     relSpecial = (json['rel_special'] as num?)?.toInt();
-    hasItem = archive?.item?.isNotEmpty == true ||
+    hasItem =
+        archive?.item?.isNotEmpty == true ||
         favourite2?.item?.isNotEmpty == true ||
         coinArchive?.item?.isNotEmpty == true ||
         likeArchive?.item?.isNotEmpty == true ||

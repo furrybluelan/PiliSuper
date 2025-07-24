@@ -10,13 +10,16 @@ class FollowHttp {
     int? ps,
     String orderType = '',
   }) async {
-    var res = await Request().get(Api.followings, queryParameters: {
-      'vmid': vmid,
-      'pn': pn,
-      'ps': ps,
-      'order': 'desc',
-      'order_type': orderType,
-    });
+    var res = await Request().get(
+      Api.followings,
+      queryParameters: {
+        'vmid': vmid,
+        'pn': pn,
+        'ps': ps,
+        'order': 'desc',
+        'order_type': orderType,
+      },
+    );
     if (res.data['code'] == 0) {
       return Success(
         FollowData.fromJson(res.data['data']),
@@ -32,13 +35,16 @@ class FollowHttp {
     int? ps,
     String orderType = '', // ''=>最近关注，'attention'=>最常访问
   }) async {
-    var res = await Request().get(Api.followings, queryParameters: {
-      'vmid': vmid,
-      'pn': pn,
-      'ps': ps,
-      'order': 'desc',
-      'order_type': orderType,
-    });
+    var res = await Request().get(
+      Api.followings,
+      queryParameters: {
+        'vmid': vmid,
+        'pn': pn,
+        'ps': ps,
+        'order': 'desc',
+        'order_type': orderType,
+      },
+    );
 
     if (res.data['code'] == 0) {
       return Success(

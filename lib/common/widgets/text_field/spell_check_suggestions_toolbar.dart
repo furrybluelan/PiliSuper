@@ -31,9 +31,11 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ///
   /// [buttonItems] must not contain more than four items, generally three
   /// suggestions and one delete button.
-  const SpellCheckSuggestionsToolbar(
-      {super.key, required this.anchor, required this.buttonItems})
-      : assert(buttonItems.length <= _kMaxSuggestions + 1);
+  const SpellCheckSuggestionsToolbar({
+    super.key,
+    required this.anchor,
+    required this.buttonItems,
+  }) : assert(buttonItems.length <= _kMaxSuggestions + 1);
 
   /// Constructs a [SpellCheckSuggestionsToolbar] with the default children for
   /// an [EditableText].
@@ -44,9 +46,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   SpellCheckSuggestionsToolbar.editableText({
     super.key,
     required EditableTextState editableTextState,
-  })  : buttonItems =
-            buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
-        anchor = getToolbarAnchor(editableTextState.contextMenuAnchors);
+  }) : buttonItems =
+           buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
+       anchor = getToolbarAnchor(editableTextState.contextMenuAnchors);
 
   /// {@template flutter.material.SpellCheckSuggestionsToolbar.anchor}
   /// The focal point below which the toolbar attempts to position itself.
@@ -72,12 +74,13 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-      EditableTextState editableTextState) {
+    EditableTextState editableTextState,
+  ) {
     // Determine if composing region is misspelled.
-    final SuggestionSpan? spanAtCursorIndex =
-        editableTextState.findSuggestionSpanAtCursorIndex(
-      editableTextState.currentTextEditingValue.selection.baseOffset,
-    );
+    final SuggestionSpan? spanAtCursorIndex = editableTextState
+        .findSuggestionSpanAtCursorIndex(
+          editableTextState.currentTextEditingValue.selection.baseOffset,
+        );
 
     if (spanAtCursorIndex == null) {
       return null;
@@ -86,8 +89,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
-    for (final String suggestion
-        in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {
+    for (final String suggestion in spanAtCursorIndex.suggestions.take(
+      _kMaxSuggestions,
+    )) {
       buttonItems.add(
         ContextMenuButtonItem(
           onPressed: () {
@@ -95,7 +99,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
               return;
             }
             _replaceText(
-                editableTextState, suggestion, spanAtCursorIndex.range);
+              editableTextState,
+              suggestion,
+              spanAtCursorIndex.range,
+            );
           },
           label: suggestion,
         ),
@@ -108,8 +115,11 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
         if (!editableTextState.mounted) {
           return;
         }
-        _replaceText(editableTextState, '',
-            editableTextState.currentTextEditingValue.composing);
+        _replaceText(
+          editableTextState,
+          '',
+          editableTextState.currentTextEditingValue.composing,
+        );
       },
       type: ContextMenuButtonType.delete,
     );
@@ -124,22 +134,27 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     TextRange replacementRange,
   ) {
     // Replacement cannot be performed if the text is read only or obscured.
-    assert(!editableTextState.widget.readOnly &&
-        !editableTextState.widget.obscureText);
-
-    final TextEditingValue newValue =
-        editableTextState.textEditingValue.replaced(
-      replacementRange,
-      text,
+    assert(
+      !editableTextState.widget.readOnly &&
+          !editableTextState.widget.obscureText,
     );
+
+    final TextEditingValue newValue = editableTextState.textEditingValue
+        .replaced(
+          replacementRange,
+          text,
+        );
     editableTextState.userUpdateTextEditingValue(
-        newValue, SelectionChangedCause.toolbar);
+      newValue,
+      SelectionChangedCause.toolbar,
+    );
 
     // Schedule a call to bringIntoView() after renderEditable updates.
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (editableTextState.mounted) {
-        editableTextState
-            .bringIntoView(editableTextState.textEditingValue.selection.extent);
+        editableTextState.bringIntoView(
+          editableTextState.textEditingValue.selection.extent,
+        );
       }
     }, debugLabel: 'SpellCheckerSuggestionsToolbar.bringIntoView');
     editableTextState.hideToolbar();
@@ -159,23 +174,24 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     return buttonItems.map((ContextMenuButtonItem buttonItem) {
       final TextSelectionToolbarTextButton button =
           TextSelectionToolbarTextButton(
-        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-        onPressed: buttonItem.onPressed,
-        alignment: Alignment.centerLeft,
-        child: Text(
-          AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem),
-          style: buttonItem.type == ContextMenuButtonType.delete
-              ? const TextStyle(color: Colors.blue)
-              : null,
-        ),
-      );
+            padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+            onPressed: buttonItem.onPressed,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem),
+              style: buttonItem.type == ContextMenuButtonType.delete
+                  ? const TextStyle(color: Colors.blue)
+                  : null,
+            ),
+          );
 
       if (buttonItem.type != ContextMenuButtonType.delete) {
         return button;
       }
       return DecoratedBox(
         decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: Colors.grey))),
+          border: Border(top: BorderSide(color: Colors.grey)),
+        ),
         child: button,
       );
     }).toList();
@@ -194,7 +210,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     final double softKeyboardViewInsetsBottom =
         mediaQueryData.viewInsets.bottom;
-    final double paddingAbove = mediaQueryData.padding.top +
+    final double paddingAbove =
+        mediaQueryData.padding.top +
         CupertinoTextSelectionToolbar.kToolbarScreenPadding;
     // Makes up for the Padding.
     final Offset localAdjustment = Offset(
@@ -212,7 +229,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
       ),
       child: CustomSingleChildLayout(
         delegate: SpellCheckSuggestionsToolbarLayoutDelegate(
-            anchor: anchor - localAdjustment),
+          anchor: anchor - localAdjustment,
+        ),
         child: AnimatedSize(
           // This duration was eyeballed on a Pixel 2 emulator running Android
           // API 28 for the Material TextSelectionToolbar.
@@ -230,8 +248,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 /// The Material-styled toolbar outline for the spell check suggestions
 /// toolbar.
 class _SpellCheckSuggestionsToolbarContainer extends StatelessWidget {
-  const _SpellCheckSuggestionsToolbarContainer(
-      {required this.height, required this.children});
+  const _SpellCheckSuggestionsToolbarContainer({
+    required this.height,
+    required this.children,
+  });
 
   final double height;
   final List<Widget> children;

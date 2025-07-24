@@ -108,8 +108,10 @@ class CustomTooltipState extends State<CustomTooltip>
   }
 
   Widget _buildCustomTooltipOverlay(BuildContext context) {
-    final OverlayState overlayState =
-        Overlay.of(context, debugRequiredFor: widget);
+    final OverlayState overlayState = Overlay.of(
+      context,
+      debugRequiredFor: widget,
+    );
     final RenderBox box = this.context.findRenderObject()! as RenderBox;
     final Offset target = box.localToGlobal(
       box.size.center(Offset.zero),
@@ -238,8 +240,10 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
         }
 
         if (hasChild('overlay')) {
-          final overlaySize =
-              layoutChild('overlay', BoxConstraints.loose(size));
+          final overlaySize = layoutChild(
+            'overlay',
+            BoxConstraints.loose(size),
+          );
           Offset offset = positionDependentBox(
             type: type,
             size: size,
@@ -268,8 +272,10 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
         }
 
         if (hasChild('overlay')) {
-          final overlaySize =
-              layoutChild('overlay', BoxConstraints.loose(size));
+          final overlaySize = layoutChild(
+            'overlay',
+            BoxConstraints.loose(size),
+          );
           Offset offset = positionDependentBox(
             type: type,
             size: size,
@@ -353,8 +359,9 @@ Offset positionDependentBox({
           target.dy + verticalOffset + childSize.height <= size.height - margin;
       final bool fitsAbove =
           target.dy - verticalOffset - childSize.height >= margin;
-      final bool tooltipBelow =
-          fitsAbove == fitsBelow ? preferBelow : fitsBelow;
+      final bool tooltipBelow = fitsAbove == fitsBelow
+          ? preferBelow
+          : fitsBelow;
       final double y;
       if (tooltipBelow) {
         y = math.min(target.dy + verticalOffset, size.height - margin);
@@ -367,12 +374,17 @@ Offset positionDependentBox({
           // child.
           ? flexibleSpace / 2.0
           : clampDouble(
-              target.dx - childSize.width / 2, margin, flexibleSpace - margin);
+              target.dx - childSize.width / 2,
+              margin,
+              flexibleSpace - margin,
+            );
       return Offset(x, y);
     case TooltipType.right:
       final double dy = math.max(margin, target.dy - childSize.height / 2);
       final double dx = math.min(
-          target.dx + horizontslOffset, size.width - childSize.width - margin);
+        target.dx + horizontslOffset,
+        size.width - childSize.width - margin,
+      );
       return Offset(dx, dy);
   }
 }

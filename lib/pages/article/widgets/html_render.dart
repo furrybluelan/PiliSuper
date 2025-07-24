@@ -35,9 +35,9 @@ Widget htmlRender({
           }
 
           String? clazz = attributes['class'];
-          String? height = RegExp(r'max-height:(\d+)px')
-              .firstMatch('${attributes['style']}')
-              ?.group(1);
+          String? height = RegExp(
+            r'max-height:(\d+)px',
+          ).firstMatch('${attributes['style']}')?.group(1);
           if (clazz?.contains('cut-off') == true || height != null) {
             return CachedNetworkImage(
               width: maxWidth,

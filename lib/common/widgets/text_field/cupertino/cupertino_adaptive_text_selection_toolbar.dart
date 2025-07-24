@@ -98,18 +98,18 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onShare,
     required VoidCallback? onLiveTextInput,
     required this.anchors,
-  })  : children = null,
-        buttonItems = EditableText.getEditableButtonItems(
-          clipboardStatus: clipboardStatus,
-          onCopy: onCopy,
-          onCut: onCut,
-          onPaste: onPaste,
-          onSelectAll: onSelectAll,
-          onLookUp: onLookUp,
-          onSearchWeb: onSearchWeb,
-          onShare: onShare,
-          onLiveTextInput: onLiveTextInput,
-        );
+  }) : children = null,
+       buttonItems = EditableText.getEditableButtonItems(
+         clipboardStatus: clipboardStatus,
+         onCopy: onCopy,
+         onCut: onCut,
+         onPaste: onPaste,
+         onSelectAll: onSelectAll,
+         onLookUp: onLookUp,
+         onSearchWeb: onSearchWeb,
+         onShare: onShare,
+         onLiveTextInput: onLiveTextInput,
+       );
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// default children for an [EditableText].
@@ -125,9 +125,9 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   CupertinoAdaptiveTextSelectionToolbar.editableText({
     super.key,
     required EditableTextState editableTextState,
-  })  : children = null,
-        buttonItems = editableTextState.contextMenuButtonItems,
-        anchors = editableTextState.contextMenuAnchors;
+  }) : children = null,
+       buttonItems = editableTextState.contextMenuButtonItems,
+       anchors = editableTextState.contextMenuAnchors;
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// default children for selectable, but not editable, content.
@@ -146,14 +146,13 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback onSelectAll,
     required SelectionGeometry selectionGeometry,
     required this.anchors,
-  })  : children = null,
-        buttonItems = SelectableRegion.getSelectableButtonItems(
-          selectionGeometry: selectionGeometry,
-          onCopy: onCopy,
-          onSelectAll: onSelectAll,
-          onShare:
-              null, // See https://github.com/flutter/flutter/issues/141775.
-        );
+  }) : children = null,
+       buttonItems = SelectableRegion.getSelectableButtonItems(
+         selectionGeometry: selectionGeometry,
+         onCopy: onCopy,
+         onSelectAll: onSelectAll,
+         onShare: null, // See https://github.com/flutter/flutter/issues/141775.
+       );
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.anchors}
   final TextSelectionToolbarAnchors anchors;
@@ -193,14 +192,16 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
       case TargetPlatform.iOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
           return CupertinoTextSelectionToolbarButton.buttonItem(
-              buttonItem: buttonItem);
+            buttonItem: buttonItem,
+          );
         });
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
           return CupertinoDesktopTextSelectionToolbarButton.buttonItem(
-              buttonItem: buttonItem);
+            buttonItem: buttonItem,
+          );
         });
     }
   }

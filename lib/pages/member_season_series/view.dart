@@ -55,61 +55,63 @@ class _SeasonSeriesPageState extends State<SeasonSeriesPage>
   Widget _buildBody(LoadingState<List<SpaceSsModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: Grid.videoCardHDelegate(context),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardHSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: Grid.videoCardHDelegate(context),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardHSkeleton();
+          },
+          childCount: 10,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _controller.onLoadMore();
-                  }
-                  SpaceSsModel item = response[index];
-                  return SeasonSeriesCard(
-                    item: item,
-                    onTap: () {
-                      bool isSeason = item.meta!.seasonId != null;
-                      dynamic id =
-                          isSeason ? item.meta!.seasonId : item.meta!.seriesId;
-                      Get.to(
-                        Scaffold(
-                          appBar: AppBar(
-                            title: Text(item.meta!.name!),
-                          ),
-                          body: SafeArea(
-                            top: false,
-                            bottom: false,
-                            child: MemberVideo(
-                              type: isSeason
-                                  ? ContributeType.season
-                                  : ContributeType.series,
-                              heroTag: widget.heroTag,
-                              mid: widget.mid,
-                              seasonId: isSeason ? id : null,
-                              seriesId: isSeason ? null : id,
-                              title: item.meta!.name,
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _controller.onLoadMore();
+                    }
+                    SpaceSsModel item = response[index];
+                    return SeasonSeriesCard(
+                      item: item,
+                      onTap: () {
+                        bool isSeason = item.meta!.seasonId != null;
+                        dynamic id = isSeason
+                            ? item.meta!.seasonId
+                            : item.meta!.seriesId;
+                        Get.to(
+                          Scaffold(
+                            appBar: AppBar(
+                              title: Text(item.meta!.name!),
+                            ),
+                            body: SafeArea(
+                              top: false,
+                              bottom: false,
+                              child: MemberVideo(
+                                type: isSeason
+                                    ? ContributeType.season
+                                    : ContributeType.series,
+                                heroTag: widget.heroTag,
+                                mid: widget.mid,
+                                seasonId: isSeason ? id : null,
+                                seriesId: isSeason ? null : id,
+                                title: item.meta!.name,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: _controller.onReload),
+                        );
+                      },
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

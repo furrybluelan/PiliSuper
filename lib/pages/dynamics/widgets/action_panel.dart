@@ -98,7 +98,8 @@ class _ActionPanelState extends State<ActionPanel> {
             label: Text(
               widget.item.modules.moduleStat!.forward!.count != null
                   ? NumUtil.numFormat(
-                      widget.item.modules.moduleStat!.forward!.count)
+                      widget.item.modules.moduleStat!.forward!.count,
+                    )
                   : '转发',
             ),
           ),
@@ -121,7 +122,8 @@ class _ActionPanelState extends State<ActionPanel> {
             label: Text(
               widget.item.modules.moduleStat!.comment!.count != null
                   ? NumUtil.numFormat(
-                      widget.item.modules.moduleStat!.comment!.count)
+                      widget.item.modules.moduleStat!.comment!.count,
+                    )
                   : '评论',
             ),
           ),
@@ -138,8 +140,9 @@ class _ActionPanelState extends State<ActionPanel> {
               color: widget.item.modules.moduleStat!.like!.status!
                   ? primary
                   : color,
-              semanticLabel:
-                  widget.item.modules.moduleStat!.like!.status! ? "已赞" : "点赞",
+              semanticLabel: widget.item.modules.moduleStat!.like!.status!
+                  ? "已赞"
+                  : "点赞",
             ),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
@@ -153,11 +156,13 @@ class _ActionPanelState extends State<ActionPanel> {
               child: Text(
                 widget.item.modules.moduleStat!.like!.count != null
                     ? NumUtil.numFormat(
-                        widget.item.modules.moduleStat!.like!.count)
+                        widget.item.modules.moduleStat!.like!.count,
+                      )
                     : '点赞',
                 key: ValueKey<String>(
-                    widget.item.modules.moduleStat!.like!.count?.toString() ??
-                        '点赞'),
+                  widget.item.modules.moduleStat!.like!.count?.toString() ??
+                      '点赞',
+                ),
                 style: TextStyle(
                   color: widget.item.modules.moduleStat!.like!.status!
                       ? primary
@@ -166,7 +171,7 @@ class _ActionPanelState extends State<ActionPanel> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

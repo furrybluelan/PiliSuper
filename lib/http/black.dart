@@ -5,8 +5,10 @@ import 'package:PiliPlus/models_new/blacklist/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 
 class BlackHttp {
-  static Future<LoadingState<BlackListData>> blackList(
-      {required int pn, int? ps}) async {
+  static Future<LoadingState<BlackListData>> blackList({
+    required int pn,
+    int? ps,
+  }) async {
     var res = await Request().get(
       Api.blackLst,
       queryParameters: {

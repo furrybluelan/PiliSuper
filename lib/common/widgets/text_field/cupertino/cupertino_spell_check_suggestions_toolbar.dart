@@ -41,9 +41,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   CupertinoSpellCheckSuggestionsToolbar.editableText({
     super.key,
     required EditableTextState editableTextState,
-  })  : buttonItems =
-            buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
-        anchors = editableTextState.contextMenuAnchors;
+  }) : buttonItems =
+           buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
+       anchors = editableTextState.contextMenuAnchors;
 
   /// The location on which to anchor the menu.
   final TextSelectionToolbarAnchors anchors;
@@ -66,12 +66,13 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-      EditableTextState editableTextState) {
+    EditableTextState editableTextState,
+  ) {
     // Determine if composing region is misspelled.
-    final SuggestionSpan? spanAtCursorIndex =
-        editableTextState.findSuggestionSpanAtCursorIndex(
-      editableTextState.currentTextEditingValue.selection.baseOffset,
-    );
+    final SuggestionSpan? spanAtCursorIndex = editableTextState
+        .findSuggestionSpanAtCursorIndex(
+          editableTextState.currentTextEditingValue.selection.baseOffset,
+        );
 
     if (spanAtCursorIndex == null) {
       return null;
@@ -83,16 +84,18 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       );
       return <ContextMenuButtonItem>[
         ContextMenuButtonItem(
-            onPressed: null,
-            label: localizations.noSpellCheckReplacementsLabel),
+          onPressed: null,
+          label: localizations.noSpellCheckReplacementsLabel,
+        ),
       ];
     }
 
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
-    for (final String suggestion
-        in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {
+    for (final String suggestion in spanAtCursorIndex.suggestions.take(
+      _kMaxSuggestions,
+    )) {
       buttonItems.add(
         ContextMenuButtonItem(
           onPressed: () {
@@ -100,7 +103,10 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
               return;
             }
             _replaceText(
-                editableTextState, suggestion, spanAtCursorIndex.range);
+              editableTextState,
+              suggestion,
+              spanAtCursorIndex.range,
+            );
           },
           label: suggestion,
         ),
@@ -115,22 +121,29 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     TextRange replacementRange,
   ) {
     // Replacement cannot be performed if the text is read only or obscured.
-    assert(!editableTextState.widget.readOnly &&
-        !editableTextState.widget.obscureText);
+    assert(
+      !editableTextState.widget.readOnly &&
+          !editableTextState.widget.obscureText,
+    );
 
     final TextEditingValue newValue = editableTextState.textEditingValue
         .replaced(replacementRange, text)
         .copyWith(
-            selection: TextSelection.collapsed(
-                offset: replacementRange.start + text.length));
+          selection: TextSelection.collapsed(
+            offset: replacementRange.start + text.length,
+          ),
+        );
     editableTextState.userUpdateTextEditingValue(
-        newValue, SelectionChangedCause.toolbar);
+      newValue,
+      SelectionChangedCause.toolbar,
+    );
 
     // Schedule a call to bringIntoView() after renderEditable updates.
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (editableTextState.mounted) {
-        editableTextState
-            .bringIntoView(editableTextState.textEditingValue.selection.extent);
+        editableTextState.bringIntoView(
+          editableTextState.textEditingValue.selection.extent,
+        );
       }
     }, debugLabel: 'SpellCheckSuggestions.bringIntoView');
     editableTextState.hideToolbar();
@@ -140,7 +153,8 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   List<Widget> _buildToolbarButtons(BuildContext context) {
     return buttonItems.map((ContextMenuButtonItem buttonItem) {
       return CupertinoTextSelectionToolbarButton.buttonItem(
-          buttonItem: buttonItem);
+        buttonItem: buttonItem,
+      );
     }).toList();
   }
 

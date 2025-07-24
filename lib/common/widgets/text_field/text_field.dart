@@ -66,25 +66,27 @@ export 'package:flutter/services.dart'
 // late FocusNode myFocusNode;
 
 /// Signature for the [RichTextField.buildCounter] callback.
-typedef InputCounterWidgetBuilder = Widget? Function(
-  /// The build context for the TextField.
-  BuildContext context, {
-  /// The length of the string currently in the input.
-  required int currentLength,
+typedef InputCounterWidgetBuilder =
+    Widget? Function(
+      /// The build context for the TextField.
+      BuildContext context, {
 
-  /// The maximum string length that can be entered into the TextField.
-  required int? maxLength,
+      /// The length of the string currently in the input.
+      required int currentLength,
 
-  /// Whether or not the TextField is currently focused. Mainly provided for
-  /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
-  required bool isFocused,
-});
+      /// The maximum string length that can be entered into the TextField.
+      required int? maxLength,
+
+      /// Whether or not the TextField is currently focused. Mainly provided for
+      /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
+      required bool isFocused,
+    });
 
 class _TextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({required RichTextFieldState state})
-      : _state = state,
-        super(delegate: state);
+    : _state = state,
+      super(delegate: state);
 
   final RichTextFieldState _state;
 
@@ -343,37 +345,44 @@ class RichTextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-  })  : assert(obscuringCharacter.length == 1),
-        smartDashesType = smartDashesType ??
-            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ??
-            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        assert(maxLines == null || maxLines > 0),
-        assert(minLines == null || minLines > 0),
-        assert(
-          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          "minLines can't be greater than maxLines",
-        ),
-        assert(
-          !expands || (maxLines == null && minLines == null),
-          'minLines and maxLines must be null when expands is true.',
-        ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
-        assert(maxLength == null ||
-            maxLength == RichTextField.noMaxLength ||
-            maxLength > 0),
-        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-        assert(
-          !identical(textInputAction, TextInputAction.newline) ||
-              maxLines == 1 ||
-              !identical(keyboardType, TextInputType.text),
-          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
-        ),
-        keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText);
+  }) : assert(obscuringCharacter.length == 1),
+       smartDashesType =
+           smartDashesType ??
+           (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType =
+           smartQuotesType ??
+           (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         "minLines can't be greater than maxLines",
+       ),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
+       assert(
+         !obscureText || maxLines == 1,
+         'Obscured fields cannot be multiline.',
+       ),
+       assert(
+         maxLength == null ||
+             maxLength == RichTextField.noMaxLength ||
+             maxLength > 0,
+       ),
+       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+       assert(
+         !identical(textInputAction, TextInputAction.newline) ||
+             maxLines == 1 ||
+             !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+       ),
+       keyboardType =
+           keyboardType ??
+           (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       enableInteractiveSelection =
+           enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// The configuration for the magnifier of this text field.
   ///
@@ -507,7 +516,7 @@ class RichTextField extends StatefulWidget {
   /// to its controller. When the widget gains the or loses the focus it will
   /// [WidgetStatesController.update] its controller's [WidgetStatesController.value]
   /// and notify listeners of the change.
-  final MaterialStatesController? statesController;
+  final WidgetStatesController? statesController;
 
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
   final String obscuringCharacter;
@@ -883,10 +892,12 @@ class RichTextField extends StatefulWidget {
     if (defaultTargetPlatform == TargetPlatform.iOS &&
         SystemContextMenu.isSupported(context)) {
       return SystemContextMenu.editableText(
-          editableTextState: editableTextState);
+        editableTextState: editableTextState,
+      );
     }
     return AdaptiveTextSelectionToolbar.editableText(
-        editableTextState: editableTextState);
+      editableTextState: editableTextState,
+    );
   }
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
@@ -936,7 +947,8 @@ class RichTextField extends StatefulWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return SpellCheckSuggestionsToolbar.editableText(
-            editableTextState: editableTextState);
+          editableTextState: editableTextState,
+        );
     }
   }
 
@@ -951,11 +963,12 @@ class RichTextField extends StatefulWidget {
       return const SpellCheckConfiguration.disabled();
     }
     return configuration.copyWith(
-      misspelledTextStyle: configuration.misspelledTextStyle ??
+      misspelledTextStyle:
+          configuration.misspelledTextStyle ??
           RichTextField.materialMisspelledTextStyle,
       spellCheckSuggestionsToolbarBuilder:
           configuration.spellCheckSuggestionsToolbarBuilder ??
-              RichTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+          RichTextField.defaultSpellCheckSuggestionsToolbarBuilder,
     );
   }
 
@@ -967,11 +980,19 @@ class RichTextField extends StatefulWidget {
     super.debugFillProperties(properties);
     properties
       ..add(
-        DiagnosticsProperty<RichTextEditingController>('controller', controller,
-            defaultValue: null),
+        DiagnosticsProperty<RichTextEditingController>(
+          'controller',
+          controller,
+          defaultValue: null,
+        ),
       )
-      ..add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-          defaultValue: null))
+      ..add(
+        DiagnosticsProperty<FocusNode>(
+          'focusNode',
+          focusNode,
+          defaultValue: null,
+        ),
+      )
       ..add(
         DiagnosticsProperty<UndoHistoryController>(
           'undoController',
@@ -995,35 +1016,54 @@ class RichTextField extends StatefulWidget {
         ),
       )
       ..add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null))
-      ..add(DiagnosticsProperty<bool>('autofocus', autofocus,
-          defaultValue: false))
       ..add(
-        DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter,
-            defaultValue: '•'),
+        DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false),
       )
-      ..add(DiagnosticsProperty<bool>('obscureText', obscureText,
-          defaultValue: false))
-      ..add(DiagnosticsProperty<bool>('autocorrect', autocorrect,
-          defaultValue: true))
+      ..add(
+        DiagnosticsProperty<String>(
+          'obscuringCharacter',
+          obscuringCharacter,
+          defaultValue: '•',
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'obscureText',
+          obscureText,
+          defaultValue: false,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'autocorrect',
+          autocorrect,
+          defaultValue: true,
+        ),
+      )
       ..add(
         EnumProperty<SmartDashesType>(
           'smartDashesType',
           smartDashesType,
-          defaultValue:
-              obscureText ? SmartDashesType.disabled : SmartDashesType.enabled,
+          defaultValue: obscureText
+              ? SmartDashesType.disabled
+              : SmartDashesType.enabled,
         ),
       )
       ..add(
         EnumProperty<SmartQuotesType>(
           'smartQuotesType',
           smartQuotesType,
-          defaultValue:
-              obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled,
+          defaultValue: obscureText
+              ? SmartQuotesType.disabled
+              : SmartQuotesType.enabled,
         ),
       )
       ..add(
-        DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions,
-            defaultValue: true),
+        DiagnosticsProperty<bool>(
+          'enableSuggestions',
+          enableSuggestions,
+          defaultValue: true,
+        ),
       )
       ..add(IntProperty('maxLines', maxLines, defaultValue: 1))
       ..add(IntProperty('minLines', minLines, defaultValue: null))
@@ -1037,8 +1077,11 @@ class RichTextField extends StatefulWidget {
         ),
       )
       ..add(
-        EnumProperty<TextInputAction>('textInputAction', textInputAction,
-            defaultValue: null),
+        EnumProperty<TextInputAction>(
+          'textInputAction',
+          textInputAction,
+          defaultValue: null,
+        ),
       )
       ..add(
         EnumProperty<TextCapitalization>(
@@ -1047,8 +1090,13 @@ class RichTextField extends StatefulWidget {
           defaultValue: TextCapitalization.none,
         ),
       )
-      ..add(EnumProperty<TextAlign>('textAlign', textAlign,
-          defaultValue: TextAlign.start))
+      ..add(
+        EnumProperty<TextAlign>(
+          'textAlign',
+          textAlign,
+          defaultValue: TextAlign.start,
+        ),
+      )
       ..add(
         DiagnosticsProperty<TextAlignVertical>(
           'textAlignVertical',
@@ -1056,24 +1104,39 @@ class RichTextField extends StatefulWidget {
           defaultValue: null,
         ),
       )
-      ..add(EnumProperty<TextDirection>('textDirection', textDirection,
-          defaultValue: null))
+      ..add(
+        EnumProperty<TextDirection>(
+          'textDirection',
+          textDirection,
+          defaultValue: null,
+        ),
+      )
       ..add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0))
       ..add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null))
-      ..add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius,
-          defaultValue: null))
+      ..add(
+        DiagnosticsProperty<Radius>(
+          'cursorRadius',
+          cursorRadius,
+          defaultValue: null,
+        ),
+      )
       ..add(
         DiagnosticsProperty<bool>(
-            'cursorOpacityAnimates', cursorOpacityAnimates,
-            defaultValue: null),
+          'cursorOpacityAnimates',
+          cursorOpacityAnimates,
+          defaultValue: null,
+        ),
       )
       ..add(ColorProperty('cursorColor', cursorColor, defaultValue: null))
-      ..add(ColorProperty('cursorErrorColor', cursorErrorColor,
-          defaultValue: null))
+      ..add(
+        ColorProperty('cursorErrorColor', cursorErrorColor, defaultValue: null),
+      )
       ..add(
         DiagnosticsProperty<Brightness>(
-            'keyboardAppearance', keyboardAppearance,
-            defaultValue: null),
+          'keyboardAppearance',
+          keyboardAppearance,
+          defaultValue: null,
+        ),
       )
       ..add(
         DiagnosticsProperty<EdgeInsetsGeometry>(
@@ -1105,16 +1168,25 @@ class RichTextField extends StatefulWidget {
         ),
       )
       ..add(
-        DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics,
-            defaultValue: null),
+        DiagnosticsProperty<ScrollPhysics>(
+          'scrollPhysics',
+          scrollPhysics,
+          defaultValue: null,
+        ),
       )
       ..add(
-        DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
-            defaultValue: Clip.hardEdge),
+        DiagnosticsProperty<Clip>(
+          'clipBehavior',
+          clipBehavior,
+          defaultValue: Clip.hardEdge,
+        ),
       )
       ..add(
-        DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled,
-            defaultValue: true),
+        DiagnosticsProperty<bool>(
+          'scribbleEnabled',
+          scribbleEnabled,
+          defaultValue: true,
+        ),
       )
       ..add(
         DiagnosticsProperty<bool>(
@@ -1163,7 +1235,8 @@ class RichTextFieldState extends State<RichTextField>
   MaxLengthEnforcement get _effectiveMaxLengthEnforcement =>
       widget.maxLengthEnforcement ??
       LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
-          Theme.of(context).platform);
+        Theme.of(context).platform,
+      );
 
   bool _isHovering = false;
 
@@ -1175,7 +1248,7 @@ class RichTextFieldState extends State<RichTextField>
   bool _showSelectionHandles = false;
 
   late _TextFieldSelectionGestureDetectorBuilder
-      _selectionGestureDetectorBuilder;
+  _selectionGestureDetectorBuilder;
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
@@ -1197,13 +1270,12 @@ class RichTextFieldState extends State<RichTextField>
       widget.maxLength != null &&
       widget.maxLength! > 0 &&
       (
-          // widget.controller == null
-          //   ? !restorePending &&
-          //       _effectiveController.value.text.characters.length >
-          //           widget.maxLength!
-          //   :
-          _effectiveController.value.text.characters.length >
-              widget.maxLength!);
+      // widget.controller == null
+      //   ? !restorePending &&
+      //       _effectiveController.value.text.characters.length >
+      //           widget.maxLength!
+      //   :
+      _effectiveController.value.text.characters.length > widget.maxLength!);
 
   bool get _hasError =>
       widget.decoration?.errorText != null ||
@@ -1216,8 +1288,9 @@ class RichTextFieldState extends State<RichTextField>
       Theme.of(context).colorScheme.error;
 
   InputDecoration _getEffectiveDecoration() {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     final ThemeData themeData = Theme.of(context);
     final InputDecoration effectiveDecoration =
         (widget.decoration ?? const InputDecoration())
@@ -1249,7 +1322,10 @@ class RichTextFieldState extends State<RichTextField>
       // If buildCounter returns null, don't add a counter widget to the field.
       if (builtCounter != null) {
         counter = Semantics(
-            container: true, liveRegion: isFocused, child: builtCounter);
+          container: true,
+          liveRegion: isFocused,
+          child: builtCounter,
+        );
       }
       return effectiveDecoration.copyWith(counter: counter);
     }
@@ -1265,16 +1341,20 @@ class RichTextFieldState extends State<RichTextField>
     if (widget.maxLength! > 0) {
       // Show the maxLength in the counter
       counterText += '/${widget.maxLength}';
-      final int remaining =
-          (widget.maxLength! - currentLength).clamp(0, widget.maxLength!);
-      semanticCounterText =
-          localizations.remainingTextFieldCharacterCount(remaining);
+      final int remaining = (widget.maxLength! - currentLength).clamp(
+        0,
+        widget.maxLength!,
+      );
+      semanticCounterText = localizations.remainingTextFieldCharacterCount(
+        remaining,
+      );
     }
 
     if (_hasIntrinsicError) {
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',
-        counterStyle: effectiveDecoration.errorStyle ??
+        counterStyle:
+            effectiveDecoration.errorStyle ??
             (themeData.useMaterial3
                 ? _m3CounterErrorStyle(context)
                 : _m2CounterErrorStyle(context)),
@@ -1345,10 +1425,10 @@ class RichTextFieldState extends State<RichTextField>
 
     if (widget.statesController == oldWidget.statesController) {
       _statesController
-        ..update(MaterialState.disabled, !_isEnabled)
-        ..update(MaterialState.hovered, _isHovering)
-        ..update(MaterialState.focused, _effectiveFocusNode.hasFocus)
-        ..update(MaterialState.error, _hasError);
+        ..update(WidgetState.disabled, !_isEnabled)
+        ..update(WidgetState.hovered, _isHovering)
+        ..update(WidgetState.focused, _effectiveFocusNode.hasFocus)
+        ..update(WidgetState.error, _hasError);
     } else {
       oldWidget.statesController?.removeListener(_handleStatesControllerChange);
       if (widget.statesController != null) {
@@ -1436,12 +1516,13 @@ class RichTextFieldState extends State<RichTextField>
       // Rebuild the widget on focus change to show/hide the text selection
       // highlight.
     });
-    _statesController.update(
-        MaterialState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
   }
 
   void _handleSelectionChanged(
-      TextSelection selection, SelectionChangedCause? cause) {
+    TextSelection selection,
+    SelectionChangedCause? cause,
+  ) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -1487,30 +1568,29 @@ class RichTextFieldState extends State<RichTextField>
       setState(() {
         _isHovering = hovering;
       });
-      _statesController.update(MaterialState.hovered, _isHovering);
+      _statesController.update(WidgetState.hovered, _isHovering);
     }
   }
 
   // Material states controller.
-  MaterialStatesController? _internalStatesController;
+  WidgetStatesController? _internalStatesController;
 
   void _handleStatesControllerChange() {
     // Force a rebuild to resolve MaterialStateProperty properties.
     setState(() {});
   }
 
-  MaterialStatesController get _statesController =>
+  WidgetStatesController get _statesController =>
       widget.statesController ?? _internalStatesController!;
 
   void _initStatesController() {
     if (widget.statesController == null) {
-      _internalStatesController = MaterialStatesController();
+      _internalStatesController = WidgetStatesController();
     }
-    _statesController.update(MaterialState.disabled, !_isEnabled);
-    _statesController.update(MaterialState.hovered, _isHovering);
-    _statesController.update(
-        MaterialState.focused, _effectiveFocusNode.hasFocus);
-    _statesController.update(MaterialState.error, _hasError);
+    _statesController.update(WidgetState.disabled, !_isEnabled);
+    _statesController.update(WidgetState.hovered, _isHovering);
+    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(WidgetState.error, _hasError);
     _statesController.addListener(_handleStatesControllerChange);
   }
 
@@ -1524,8 +1604,9 @@ class RichTextFieldState extends State<RichTextField>
 
   @override
   TextInputConfiguration get textInputConfiguration {
-    final List<String>? autofillHints =
-        widget.autofillHints?.toList(growable: false);
+    final List<String>? autofillHints = widget.autofillHints?.toList(
+      growable: false,
+    );
     final AutofillConfiguration autofillConfiguration = autofillHints != null
         ? AutofillConfiguration(
             uniqueIdentifier: autofillId,
@@ -1543,14 +1624,16 @@ class RichTextFieldState extends State<RichTextField>
 
   TextStyle _getInputStyleForState(TextStyle style) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle stateStyle = MaterialStateProperty.resolveAs(
+    final TextStyle stateStyle = WidgetStateProperty.resolveAs(
       theme.useMaterial3
           ? _m3StateInputStyle(context)!
           : _m2StateInputStyle(context)!,
       _statesController.value,
     );
-    final TextStyle providedStyle =
-        MaterialStateProperty.resolveAs(style, _statesController.value);
+    final TextStyle providedStyle = WidgetStateProperty.resolveAs(
+      style,
+      _statesController.value,
+    );
     return providedStyle.merge(stateStyle);
   }
 
@@ -1568,9 +1651,10 @@ class RichTextFieldState extends State<RichTextField>
     );
 
     final ThemeData theme = Theme.of(context);
-    final DefaultSelectionStyle selectionStyle =
-        DefaultSelectionStyle.of(context);
-    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(
+    final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(
+      context,
+    );
+    final TextStyle? providedStyle = WidgetStateProperty.resolveAs(
       widget.style,
       _statesController.value,
     );
@@ -1601,16 +1685,16 @@ class RichTextFieldState extends State<RichTextField>
       case TargetPlatform.macOS:
         spellCheckConfiguration =
             CupertinoRichTextField.inferIOSSpellCheckConfiguration(
-          widget.spellCheckConfiguration,
-        );
+              widget.spellCheckConfiguration,
+            );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         spellCheckConfiguration =
             RichTextField.inferAndroidSpellCheckConfiguration(
-          widget.spellCheckConfiguration,
-        );
+              widget.spellCheckConfiguration,
+            );
     }
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
@@ -1634,13 +1718,16 @@ class RichTextFieldState extends State<RichTextField>
         cursorColor = _hasError
             ? _errorColor
             : widget.cursorColor ??
-                selectionStyle.cursorColor ??
-                cupertinoTheme.primaryColor;
-        selectionColor = selectionStyle.selectionColor ??
+                  selectionStyle.cursorColor ??
+                  cupertinoTheme.primaryColor;
+        selectionColor =
+            selectionStyle.selectionColor ??
             cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(
-            iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
+          iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context),
+          0,
+        );
         autocorrectionTextRectColor = selectionColor;
 
       case TargetPlatform.macOS:
@@ -1652,13 +1739,16 @@ class RichTextFieldState extends State<RichTextField>
         cursorColor = _hasError
             ? _errorColor
             : widget.cursorColor ??
-                selectionStyle.cursorColor ??
-                cupertinoTheme.primaryColor;
-        selectionColor = selectionStyle.selectionColor ??
+                  selectionStyle.cursorColor ??
+                  cupertinoTheme.primaryColor;
+        selectionColor =
+            selectionStyle.selectionColor ??
             cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(
-            iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
+          iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context),
+          0,
+        );
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus &&
@@ -1679,9 +1769,10 @@ class RichTextFieldState extends State<RichTextField>
         cursorColor = _hasError
             ? _errorColor
             : widget.cursorColor ??
-                selectionStyle.cursorColor ??
-                theme.colorScheme.primary;
-        selectionColor = selectionStyle.selectionColor ??
+                  selectionStyle.cursorColor ??
+                  theme.colorScheme.primary;
+        selectionColor =
+            selectionStyle.selectionColor ??
             theme.colorScheme.primary.withOpacity(0.40);
 
       case TargetPlatform.linux:
@@ -1692,9 +1783,10 @@ class RichTextFieldState extends State<RichTextField>
         cursorColor = _hasError
             ? _errorColor
             : widget.cursorColor ??
-                selectionStyle.cursorColor ??
-                theme.colorScheme.primary;
-        selectionColor = selectionStyle.selectionColor ??
+                  selectionStyle.cursorColor ??
+                  theme.colorScheme.primary;
+        selectionColor =
+            selectionStyle.selectionColor ??
             theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
@@ -1715,9 +1807,10 @@ class RichTextFieldState extends State<RichTextField>
         cursorColor = _hasError
             ? _errorColor
             : widget.cursorColor ??
-                selectionStyle.cursorColor ??
-                theme.colorScheme.primary;
-        selectionColor = selectionStyle.selectionColor ??
+                  selectionStyle.cursorColor ??
+                  theme.colorScheme.primary;
+        selectionColor =
+            selectionStyle.selectionColor ??
             theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
@@ -1762,8 +1855,9 @@ class RichTextFieldState extends State<RichTextField>
           expands: widget.expands,
           // Only show the selection highlight when the text field is focused.
           selectionColor: focusNode.hasFocus ? selectionColor : null,
-          selectionControls:
-              widget.selectionEnabled ? textSelectionControls : null,
+          selectionControls: widget.selectionEnabled
+              ? textSelectionControls
+              : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
@@ -1802,7 +1896,8 @@ class RichTextFieldState extends State<RichTextField>
           contentInsertionConfiguration: widget.contentInsertionConfiguration,
           contextMenuBuilder: widget.contextMenuBuilder,
           spellCheckConfiguration: spellCheckConfiguration,
-          magnifierConfiguration: widget.magnifierConfiguration ??
+          magnifierConfiguration:
+              widget.magnifierConfiguration ??
               TextMagnifier.adaptiveMagnifierConfiguration,
         ),
       ),
@@ -1828,10 +1923,10 @@ class RichTextFieldState extends State<RichTextField>
       );
     }
     final MouseCursor effectiveMouseCursor =
-        MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.textable,
-      _statesController.value,
-    );
+        WidgetStateProperty.resolveAs<MouseCursor>(
+          widget.mouseCursor ?? WidgetStateMouseCursor.textable,
+          _statesController.value,
+        );
 
     final int? semanticsMaxValueLength;
     if (_effectiveMaxLengthEnforcement != MaxLengthEnforcement.none &&
@@ -1862,8 +1957,8 @@ class RichTextFieldState extends State<RichTextField>
                         if (!_effectiveController.selection.isValid) {
                           _effectiveController.selection =
                               TextSelection.collapsed(
-                            offset: _effectiveController.text.length,
-                          );
+                                offset: _effectiveController.text.length,
+                              );
                         }
                         _requestKeyboard();
                       },
@@ -1918,18 +2013,17 @@ class RichTextFieldState extends State<RichTextField>
 }
 
 TextStyle? _m2StateInputStyle(BuildContext context) =>
-    MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       final ThemeData theme = Theme.of(context);
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return TextStyle(color: theme.disabledColor);
       }
       return TextStyle(color: theme.textTheme.titleMedium?.color);
     });
 
-TextStyle _m2CounterErrorStyle(BuildContext context) => Theme.of(context)
-    .textTheme
-    .bodySmall!
-    .copyWith(color: Theme.of(context).colorScheme.error);
+TextStyle _m2CounterErrorStyle(BuildContext context) => Theme.of(
+  context,
+).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // BEGIN GENERATED TOKEN PROPERTIES - TextField
 
@@ -1940,8 +2034,8 @@ TextStyle _m2CounterErrorStyle(BuildContext context) => Theme.of(context)
 
 // dart format off
 TextStyle? _m3StateInputStyle(BuildContext context) =>
-    MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return TextStyle(
             color: Theme.of(context)
                 .textTheme

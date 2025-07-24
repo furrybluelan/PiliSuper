@@ -17,8 +17,10 @@ class CreateReservePage extends StatefulWidget {
 }
 
 class _CreateReservePageState extends State<CreateReservePage> {
-  late final _controller = Get.put(CreateReserveController(widget.sid),
-      tag: Utils.generateRandomString(6));
+  late final _controller = Get.put(
+    CreateReserveController(widget.sid),
+    tag: Utils.generateRandomString(6),
+  );
   late TextStyle _leadingStyle;
 
   @override
@@ -71,8 +73,9 @@ class _CreateReservePageState extends State<CreateReservePage> {
                       ),
                     ];
                   },
-                  child:
-                      Text(_controller.subType.value == 0 ? '公开直播' : '大航海直播'),
+                  child: Text(
+                    _controller.subType.value == 0 ? '公开直播' : '大航海直播',
+                  ),
                 ),
               ),
             ],
@@ -99,8 +102,9 @@ class _CreateReservePageState extends State<CreateReservePage> {
                     if (newDate != null && context.mounted) {
                       TimeOfDay? newTime = await showTimePicker(
                         context: context,
-                        initialTime:
-                            TimeOfDay.fromDateTime(_controller.date.value),
+                        initialTime: TimeOfDay.fromDateTime(
+                          _controller.date.value,
+                        ),
                       );
                       if (newTime != null) {
                         final newEndtime = DateTime(
@@ -123,7 +127,8 @@ class _CreateReservePageState extends State<CreateReservePage> {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Obx(
                       () => Text(
-                          DateUtil.longFormatD.format(_controller.date.value)),
+                        DateUtil.longFormatD.format(_controller.date.value),
+                      ),
                     ),
                   ),
                 ),
@@ -148,8 +153,9 @@ class _CreateReservePageState extends State<CreateReservePage> {
           const SizedBox(height: 25),
           Obx(() {
             return FilledButton.tonal(
-              onPressed:
-                  _controller.canCreate.value ? _controller.onCreate : null,
+              onPressed: _controller.canCreate.value
+                  ? _controller.onCreate
+                  : null,
               child: const Text('添加预约'),
             );
           }),

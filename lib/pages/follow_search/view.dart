@@ -21,8 +21,9 @@ class FollowSearchPage extends CommonSearchPage {
   State<FollowSearchPage> createState() => _FollowSearchPageState();
 }
 
-class _FollowSearchPageState extends CommonSearchPageState<FollowSearchPage,
-    FollowData, FollowItemModel> {
+class _FollowSearchPageState
+    extends
+        CommonSearchPageState<FollowSearchPage, FollowData, FollowItemModel> {
   @override
   late final FollowSearchController controller = Get.put(
     FollowSearchController(widget.mid ?? Get.arguments['mid']),

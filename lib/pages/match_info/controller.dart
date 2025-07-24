@@ -38,10 +38,10 @@ class MatchInfoController extends ReplyController<MainListReply> {
 
   @override
   Future<LoadingState<MainListReply>> customGetData() => ReplyGrpc.mainList(
-        type: replyType,
-        oid: cid,
-        mode: mode.value,
-        cursorNext: cursorNext,
-        offset: paginationReply?.nextOffset,
-      );
+    type: replyType,
+    oid: cid,
+    mode: mode.value,
+    cursorNext: cursorNext,
+    offset: paginationReply?.nextOffset,
+  );
 }

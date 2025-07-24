@@ -22,8 +22,9 @@ class ReplySearchPage extends StatefulWidget {
 
 class _ReplySearchPageState extends State<ReplySearchPage> {
   late final _controller = Get.put(
-      ReplySearchController(widget.type, widget.oid),
-      tag: Utils.generateRandomString(8));
+    ReplySearchController(widget.type, widget.oid),
+    tag: Utils.generateRandomString(8),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class _ReplySearchPageState extends State<ReplySearchPage> {
             onPressed: _controller.submit,
             icon: const Icon(Icons.search, size: 22),
           ),
-          const SizedBox(width: 10)
+          const SizedBox(width: 10),
         ],
         title: TextField(
           autofocus: true,

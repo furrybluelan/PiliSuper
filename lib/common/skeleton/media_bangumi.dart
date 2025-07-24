@@ -16,7 +16,11 @@ class _MediaPgcSkeletonState extends State<MediaPgcSkeleton> {
     return Skeleton(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-            StyleString.safeSpace, 7, StyleString.safeSpace, 7),
+          StyleString.safeSpace,
+          7,
+          StyleString.safeSpace,
+          7,
+        ),
         child: Row(
           children: [
             Container(
@@ -62,8 +66,9 @@ class _MediaPgcSkeletonState extends State<MediaPgcSkeleton> {
                       width: 90,
                       height: 35,
                       decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(20)),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(20),
+                        ),
                         color: bgColor,
                       ),
                     ),

@@ -32,7 +32,7 @@ class MemberAudioController
 
   @override
   Future<LoadingState<SpaceAudioData>> customGetData() => MemberHttp.spaceAudio(
-        page: page,
-        mid: mid,
-      );
+    page: page,
+    mid: mid,
+  );
 }

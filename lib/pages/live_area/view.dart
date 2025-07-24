@@ -40,7 +40,8 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
                     visualDensity: VisualDensity.compact,
                   ),
                   child: Obx(
-                      () => Text(_controller.isEditing.value ? '完成' : '编辑')),
+                    () => Text(_controller.isEditing.value ? '完成' : '编辑'),
+                  ),
                 ),
                 const SizedBox(width: 16),
               ]
@@ -55,8 +56,9 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
             if (_controller.accountService.isLogin.value)
               Obx(() => _buildFavWidget(theme, _controller.favState.value)),
             Expanded(
-              child:
-                  Obx(() => _buildBody(theme, _controller.loadingState.value)),
+              child: Obx(
+                () => _buildBody(theme, _controller.loadingState.value),
+              ),
             ),
           ],
         ),
@@ -65,22 +67,25 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<AreaList>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<AreaList>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
-      Success(:var response) => response?.isNotEmpty == true
-          ? DefaultTabController(
-              length: response!.length,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TabBar(
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    tabs: response.map((e) => Tab(text: e.name)).toList(),
-                  ),
-                  Expanded(
-                    child: tabBarView(
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? DefaultTabController(
+                length: response!.length,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      tabs: response.map((e) => Tab(text: e.name)).toList(),
+                    ),
+                    Expanded(
+                      child: tabBarView(
                         children: response
                             .map(
                               (e) => KeepAliveWrapper(
@@ -93,15 +98,15 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
                                       top: 12,
                                       bottom:
                                           MediaQuery.paddingOf(context).bottom +
-                                              80,
+                                          80,
                                     ),
                                     gridDelegate:
                                         const SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: 100,
-                                      mainAxisSpacing: 10,
-                                      crossAxisSpacing: 10,
-                                      mainAxisExtent: 80,
-                                    ),
+                                          maxCrossAxisExtent: 100,
+                                          mainAxisSpacing: 10,
+                                          crossAxisSpacing: 10,
+                                          mainAxisExtent: 80,
+                                        ),
                                     itemCount: e.areaList!.length,
                                     itemBuilder: (context, index) {
                                       final item = e.areaList![index];
@@ -123,7 +128,9 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
                                           } else {
                                             // check
                                             if (_controller
-                                                .favState.value.isSuccess) {
+                                                .favState
+                                                .value
+                                                .isSuccess) {
                                               _controller.favInfo[item.id] =
                                                   true;
                                               _controller.favState
@@ -140,21 +147,24 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
                                 },
                               ),
                             )
-                            .toList()),
-                  )
-                ],
-              ),
-            )
-          : scrollErrorWidget(onReload: _controller.onReload),
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : scrollErrorWidget(onReload: _controller.onReload),
       Error(:var errMsg) => scrollErrorWidget(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 
   Widget _buildFavWidget(
-      ThemeData theme, LoadingState<List<AreaItem>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<AreaItem>?> loadingState,
+  ) {
     if (loadingState.isSuccess) {
       final List<AreaItem>? list = loadingState.data;
       return Padding(
@@ -349,7 +359,7 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
             }
             return const SizedBox.shrink();
           }),
-        )
+        ),
       ],
     );
   }

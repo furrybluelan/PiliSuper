@@ -123,87 +123,86 @@ class FavPgcItemModel with MultiSelectData {
     this.subtitle25,
   });
 
-  factory FavPgcItemModel.fromJson(Map<String, dynamic> json) =>
-      FavPgcItemModel(
-        seasonId: json['season_id'] as int?,
-        mediaId: json['media_id'] as int?,
-        seasonType: json['season_type'] as int?,
-        seasonTypeName: json['season_type_name'] as String?,
-        title: json['title'] as String?,
-        cover: json['cover'] as String?,
-        totalCount: json['total_count'] as int?,
-        isFinish: json['is_finish'] as int?,
-        isStarted: json['is_started'] as int?,
-        isPlay: json['is_play'] as int?,
-        badge: json['badge'] as String?,
-        badgeType: json['badge_type'] as int?,
-        rights: json['rights'] == null
-            ? null
-            : Rights.fromJson(json['rights'] as Map<String, dynamic>),
-        stat: json['stat'] == null
-            ? null
-            : Stat.fromJson(json['stat'] as Map<String, dynamic>),
-        newEp: json['new_ep'] == null
-            ? null
-            : NewEp.fromJson(json['new_ep'] as Map<String, dynamic>),
-        rating: json['rating'] == null
-            ? null
-            : Rating.fromJson(json['rating'] as Map<String, dynamic>),
-        squareCover: json['square_cover'] as String?,
-        seasonStatus: json['season_status'] as int?,
-        seasonTitle: json['season_title'] as String?,
-        badgeEp: json['badge_ep'] as String?,
-        mediaAttr: json['media_attr'] as int?,
-        seasonAttr: json['season_attr'] as int?,
-        evaluate: json['evaluate'] as String?,
-        areas: (json['areas'] as List<dynamic>?)
-            ?.map((e) => Area.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        subtitle: json['subtitle'] as String?,
-        firstEp: json['first_ep'] as int?,
-        canWatch: json['can_watch'] as int?,
-        series: json['series'] == null
-            ? null
-            : Series.fromJson(json['series'] as Map<String, dynamic>),
-        publish: json['publish'] == null
-            ? null
-            : Publish.fromJson(json['publish'] as Map<String, dynamic>),
-        mode: json['mode'] as int?,
-        section: (json['section'] as List<dynamic>?)
-            ?.map((e) => Section.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        url: json['url'] as String?,
-        badgeInfo: json['badge_info'] == null
-            ? null
-            : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
-        renewalTime: json['renewal_time'] as String?,
-        firstEpInfo: json['first_ep_info'] == null
-            ? null
-            : FirstEpInfo.fromJson(
-                json['first_ep_info'] as Map<String, dynamic>),
-        formalEpCount: json['formal_ep_count'] as int?,
-        shortUrl: json['short_url'] as String?,
-        badgeInfos: json['badge_infos'] == null
-            ? null
-            : BadgeInfos.fromJson(json['badge_infos'] as Map<String, dynamic>),
-        seasonVersion: json['season_version'] as String?,
-        horizontalCover169: json['horizontal_cover_16_9'] as String?,
-        horizontalCover1610: json['horizontal_cover_16_10'] as String?,
-        subtitle14: json['subtitle_14'] as String?,
-        viewableCrowdType: json['viewable_crowd_type'] as int?,
-        producers: (json['producers'] as List<dynamic>?)
-            ?.map((e) => Producer.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        summary: json['summary'] as String?,
-        styles: (json['styles'] as List?)?.cast(),
-        configAttrs: json['config_attrs'] == null
-            ? null
-            : ConfigAttrs.fromJson(
-                json['config_attrs'] as Map<String, dynamic>),
-        followStatus: json['follow_status'] as int?,
-        isNew: json['is_new'] as int?,
-        progress: json['progress'] == '' ? null : json['progress'],
-        bothFollow: json['both_follow'] as bool?,
-        subtitle25: json['subtitle_25'] as String?,
-      );
+  factory FavPgcItemModel.fromJson(
+    Map<String, dynamic> json,
+  ) => FavPgcItemModel(
+    seasonId: json['season_id'] as int?,
+    mediaId: json['media_id'] as int?,
+    seasonType: json['season_type'] as int?,
+    seasonTypeName: json['season_type_name'] as String?,
+    title: json['title'] as String?,
+    cover: json['cover'] as String?,
+    totalCount: json['total_count'] as int?,
+    isFinish: json['is_finish'] as int?,
+    isStarted: json['is_started'] as int?,
+    isPlay: json['is_play'] as int?,
+    badge: json['badge'] as String?,
+    badgeType: json['badge_type'] as int?,
+    rights: json['rights'] == null
+        ? null
+        : Rights.fromJson(json['rights'] as Map<String, dynamic>),
+    stat: json['stat'] == null
+        ? null
+        : Stat.fromJson(json['stat'] as Map<String, dynamic>),
+    newEp: json['new_ep'] == null
+        ? null
+        : NewEp.fromJson(json['new_ep'] as Map<String, dynamic>),
+    rating: json['rating'] == null
+        ? null
+        : Rating.fromJson(json['rating'] as Map<String, dynamic>),
+    squareCover: json['square_cover'] as String?,
+    seasonStatus: json['season_status'] as int?,
+    seasonTitle: json['season_title'] as String?,
+    badgeEp: json['badge_ep'] as String?,
+    mediaAttr: json['media_attr'] as int?,
+    seasonAttr: json['season_attr'] as int?,
+    evaluate: json['evaluate'] as String?,
+    areas: (json['areas'] as List<dynamic>?)
+        ?.map((e) => Area.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    subtitle: json['subtitle'] as String?,
+    firstEp: json['first_ep'] as int?,
+    canWatch: json['can_watch'] as int?,
+    series: json['series'] == null
+        ? null
+        : Series.fromJson(json['series'] as Map<String, dynamic>),
+    publish: json['publish'] == null
+        ? null
+        : Publish.fromJson(json['publish'] as Map<String, dynamic>),
+    mode: json['mode'] as int?,
+    section: (json['section'] as List<dynamic>?)
+        ?.map((e) => Section.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    url: json['url'] as String?,
+    badgeInfo: json['badge_info'] == null
+        ? null
+        : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
+    renewalTime: json['renewal_time'] as String?,
+    firstEpInfo: json['first_ep_info'] == null
+        ? null
+        : FirstEpInfo.fromJson(json['first_ep_info'] as Map<String, dynamic>),
+    formalEpCount: json['formal_ep_count'] as int?,
+    shortUrl: json['short_url'] as String?,
+    badgeInfos: json['badge_infos'] == null
+        ? null
+        : BadgeInfos.fromJson(json['badge_infos'] as Map<String, dynamic>),
+    seasonVersion: json['season_version'] as String?,
+    horizontalCover169: json['horizontal_cover_16_9'] as String?,
+    horizontalCover1610: json['horizontal_cover_16_10'] as String?,
+    subtitle14: json['subtitle_14'] as String?,
+    viewableCrowdType: json['viewable_crowd_type'] as int?,
+    producers: (json['producers'] as List<dynamic>?)
+        ?.map((e) => Producer.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    summary: json['summary'] as String?,
+    styles: (json['styles'] as List?)?.cast(),
+    configAttrs: json['config_attrs'] == null
+        ? null
+        : ConfigAttrs.fromJson(json['config_attrs'] as Map<String, dynamic>),
+    followStatus: json['follow_status'] as int?,
+    isNew: json['is_new'] as int?,
+    progress: json['progress'] == '' ? null : json['progress'],
+    bothFollow: json['both_follow'] as bool?,
+    subtitle25: json['subtitle_25'] as String?,
+  );
 }

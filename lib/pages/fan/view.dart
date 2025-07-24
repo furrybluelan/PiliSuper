@@ -38,7 +38,8 @@ class _FansPageState extends State<FansPage> {
   void initState() {
     super.initState();
     AccountService accountService = Get.find<AccountService>();
-    mid = widget.mid ??
+    mid =
+        widget.mid ??
         (Get.parameters['mid'] != null
             ? int.parse(Get.parameters['mid']!)
             : accountService.mid);
@@ -63,9 +64,11 @@ class _FansPageState extends State<FansPage> {
             slivers: [
               SliverPadding(
                 padding: EdgeInsets.only(
-                    bottom: MediaQuery.paddingOf(context).bottom + 80),
-                sliver:
-                    Obx(() => _buildBody(_fansController.loadingState.value)),
+                  bottom: MediaQuery.paddingOf(context).bottom + 80,
+                ),
+                sliver: Obx(
+                  () => _buildBody(_fansController.loadingState.value),
+                ),
               ),
             ],
           ),
@@ -77,80 +80,83 @@ class _FansPageState extends State<FansPage> {
   Widget _buildBody(LoadingState<List<FansItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: Grid.smallCardWidth * 2,
-            mainAxisExtent: 66,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const MsgFeedTopSkeleton();
-            },
-            childCount: 16,
-          ),
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: Grid.smallCardWidth * 2,
+          mainAxisExtent: 66,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                mainAxisExtent: 66,
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const MsgFeedTopSkeleton();
+          },
+          childCount: 16,
+        ),
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: Grid.smallCardWidth * 2,
+                  mainAxisExtent: 66,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    if (index == response.length - 1) {
+                      _fansController.onLoadMore();
+                    }
+                    final item = response[index];
+                    return ListTile(
+                      onTap: () {
+                        if (widget.onSelect != null) {
+                          widget.onSelect!(
+                            UserModel(
+                              mid: item.mid!,
+                              name: item.uname!,
+                              avatar: item.face!,
+                            ),
+                          );
+                          return;
+                        }
+                        Get.toNamed('/member?mid=${item.mid}');
+                      },
+                      onLongPress: widget.onSelect != null
+                          ? null
+                          : isOwner
+                          ? () => showConfirmDialog(
+                              context: context,
+                              title: '确定移除 ${item.uname} ？',
+                              onConfirm: () =>
+                                  _fansController.onRemoveFan(index, item.mid!),
+                            )
+                          : null,
+                      leading: NetworkImgLayer(
+                        width: 45,
+                        height: 45,
+                        type: ImageType.avatar,
+                        src: item.face,
+                      ),
+                      title: Text(
+                        item.uname!,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      subtitle: Text(
+                        item.sign ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      dense: true,
+                      trailing: const SizedBox(width: 6),
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(
+                onReload: _fansController.onReload,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  if (index == response.length - 1) {
-                    _fansController.onLoadMore();
-                  }
-                  final item = response[index];
-                  return ListTile(
-                    onTap: () {
-                      if (widget.onSelect != null) {
-                        widget.onSelect!(UserModel(
-                          mid: item.mid!,
-                          name: item.uname!,
-                          avatar: item.face!,
-                        ));
-                        return;
-                      }
-                      Get.toNamed('/member?mid=${item.mid}');
-                    },
-                    onLongPress: widget.onSelect != null
-                        ? null
-                        : isOwner
-                            ? () => showConfirmDialog(
-                                  context: context,
-                                  title: '确定移除 ${item.uname} ？',
-                                  onConfirm: () => _fansController.onRemoveFan(
-                                      index, item.mid!),
-                                )
-                            : null,
-                    leading: NetworkImgLayer(
-                      width: 45,
-                      height: 45,
-                      type: ImageType.avatar,
-                      src: item.face,
-                    ),
-                    title: Text(
-                      item.uname!,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      item.sign ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    dense: true,
-                    trailing: const SizedBox(width: 6),
-                  );
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(
-              onReload: _fansController.onReload,
-            ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _fansController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _fansController.onReload,
+      ),
     };
   }
 }

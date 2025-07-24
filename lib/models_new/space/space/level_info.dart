@@ -18,14 +18,15 @@ class LevelInfo {
   });
 
   factory LevelInfo.fromJson(Map<String, dynamic> json) => LevelInfo(
-        currentLevel: json['current_level'] as int?,
-        currentMin: json['current_min'] as int?,
-        currentExp: json['current_exp'] as int?,
-        nextExp: json['next_exp'] as dynamic,
-        identity: json['identity'] as int?,
-        seniorInquiry: json['senior_inquiry'] == null
-            ? null
-            : SeniorInquiry.fromJson(
-                json['senior_inquiry'] as Map<String, dynamic>),
-      );
+    currentLevel: json['current_level'] as int?,
+    currentMin: json['current_min'] as int?,
+    currentExp: json['current_exp'] as int?,
+    nextExp: json['next_exp'] as dynamic,
+    identity: json['identity'] as int?,
+    seniorInquiry: json['senior_inquiry'] == null
+        ? null
+        : SeniorInquiry.fromJson(
+            json['senior_inquiry'] as Map<String, dynamic>,
+          ),
+  );
 }

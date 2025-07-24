@@ -146,7 +146,8 @@ class VideoCustomActions {
                                 );
                                 SmartDialog.dismiss();
                                 SmartDialog.showToast(
-                                    res['status'] ? "成功" : res['msg']);
+                                  res['status'] ? "成功" : res['msg'],
+                                );
                                 Get.back();
                               },
                               style: FilledButton.styleFrom(
@@ -181,7 +182,9 @@ class VideoCustomActions {
                                   Get.back();
                                   SmartDialog.showLoading(msg: '正在提交');
                                   var res = await VideoHttp.dislikeVideo(
-                                      bvid: videoItem.bvid!, type: true);
+                                    bvid: videoItem.bvid!,
+                                    type: true,
+                                  );
                                   SmartDialog.dismiss();
                                   SmartDialog.showToast(
                                     res['status'] ? "点踩成功" : res['msg'],
@@ -200,10 +203,13 @@ class VideoCustomActions {
                                   Get.back();
                                   SmartDialog.showLoading(msg: '正在提交');
                                   var res = await VideoHttp.dislikeVideo(
-                                      bvid: videoItem.bvid!, type: false);
+                                    bvid: videoItem.bvid!,
+                                    type: false,
+                                  );
                                   SmartDialog.dismiss();
                                   SmartDialog.showToast(
-                                      res['status'] ? "取消踩" : res['msg']);
+                                    res['status'] ? "取消踩" : res['msg'],
+                                  );
                                 },
                                 style: FilledButton.styleFrom(
                                   visualDensity: VisualDensity.compact,
@@ -211,7 +217,7 @@ class VideoCustomActions {
                                 child: const Text("撤销"),
                               ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -231,16 +237,18 @@ class VideoCustomActions {
             builder: (context) {
               return AlertDialog(
                 title: const Text('提示'),
-                content:
-                    Text('确定拉黑:${videoItem.owner.name}(${videoItem.owner.mid})?'
-                        '\n\n注：被拉黑的Up可以在隐私设置-黑名单管理中解除'),
+                content: Text(
+                  '确定拉黑:${videoItem.owner.name}(${videoItem.owner.mid})?'
+                  '\n\n注：被拉黑的Up可以在隐私设置-黑名单管理中解除',
+                ),
                 actions: [
                   TextButton(
                     onPressed: Get.back,
                     child: Text(
                       '点错了',
                       style: TextStyle(
-                          color: Theme.of(context).colorScheme.outline),
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
                   ),
                   TextButton(
@@ -258,7 +266,7 @@ class VideoCustomActions {
                       SmartDialog.showToast(res['msg'] ?? '成功');
                     },
                     child: const Text('确认'),
-                  )
+                  ),
                 ],
               );
             },
@@ -271,7 +279,7 @@ class VideoCustomActions {
             ? const Icon(MdiIcons.incognitoOff, size: 16)
             : const Icon(MdiIcons.incognito, size: 16),
         MineController.onChangeAnonymity,
-      )
+      ),
     ];
   }
 }
@@ -295,34 +303,35 @@ class VideoPopupMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-        child: SizedBox(
-      width: size,
-      height: size,
-      child: PopupMenuButton<String>(
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          Icons.more_vert_outlined,
-          color: Theme.of(context).colorScheme.outline,
-          size: iconSize,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: PopupMenuButton<String>(
+          padding: EdgeInsets.zero,
+          icon: Icon(
+            Icons.more_vert_outlined,
+            color: Theme.of(context).colorScheme.outline,
+            size: iconSize,
+          ),
+          position: PopupMenuPosition.under,
+          onSelected: (String type) {},
+          itemBuilder: (BuildContext context) =>
+              VideoCustomActions(videoItem, context, onRemove).actions.map((e) {
+                return PopupMenuItem<String>(
+                  value: e.value,
+                  height: menuItemHeight,
+                  onTap: e.onTap,
+                  child: Row(
+                    children: [
+                      e.icon,
+                      const SizedBox(width: 6),
+                      Text(e.title, style: const TextStyle(fontSize: 13)),
+                    ],
+                  ),
+                );
+              }).toList(),
         ),
-        position: PopupMenuPosition.under,
-        onSelected: (String type) {},
-        itemBuilder: (BuildContext context) =>
-            VideoCustomActions(videoItem, context, onRemove).actions.map((e) {
-          return PopupMenuItem<String>(
-            value: e.value,
-            height: menuItemHeight,
-            onTap: e.onTap,
-            child: Row(
-              children: [
-                e.icon,
-                const SizedBox(width: 6),
-                Text(e.title, style: const TextStyle(fontSize: 13))
-              ],
-            ),
-          );
-        }).toList(),
       ),
-    ));
+    );
   }
 }

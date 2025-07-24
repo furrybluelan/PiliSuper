@@ -40,8 +40,10 @@ class DynamicDetailPage extends StatefulWidget {
 
 class _DynamicDetailPageState extends State<DynamicDetailPage>
     with TickerProviderStateMixin {
-  final _controller =
-      Get.put(DynamicDetailController(), tag: Utils.generateRandomString(8));
+  final _controller = Get.put(
+    DynamicDetailController(),
+    tag: Utils.generateRandomString(8),
+  );
   late final AnimationController _fabAnimationCtr;
   late final Animation<Offset> _anim;
 
@@ -59,44 +61,44 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
 
   Function(dynamic imgList, dynamic index)? get _getImageCallback =>
       _horizontalPreview
-          ? (imgList, index) {
-              _imageStatus = true;
-              bool isFabVisible = _isFabVisible;
+      ? (imgList, index) {
+          _imageStatus = true;
+          bool isFabVisible = _isFabVisible;
+          if (isFabVisible) {
+            _hideFab();
+          }
+          final ctr = AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 200),
+          )..forward();
+          PageUtils.onHorizontalPreview(
+            _key,
+            AnimationController(
+              vsync: this,
+              duration: Duration.zero,
+            ),
+            ctr,
+            imgList,
+            index,
+            (value) async {
+              _imageStatus = null;
               if (isFabVisible) {
-                _hideFab();
+                isFabVisible = false;
+                _showFab();
               }
-              final ctr = AnimationController(
-                vsync: this,
-                duration: const Duration(milliseconds: 200),
-              )..forward();
-              PageUtils.onHorizontalPreview(
-                _key,
-                AnimationController(
-                  vsync: this,
-                  duration: Duration.zero,
-                ),
-                ctr,
-                imgList,
-                index,
-                (value) async {
-                  _imageStatus = null;
-                  if (isFabVisible) {
-                    isFabVisible = false;
-                    _showFab();
-                  }
-                  if (value == false) {
-                    await ctr.reverse();
-                  }
-                  try {
-                    ctr.dispose();
-                  } catch (_) {}
-                  if (value == false) {
-                    Get.back();
-                  }
-                },
-              );
-            }
-          : null;
+              if (value == false) {
+                await ctr.reverse();
+              }
+              try {
+                ctr.dispose();
+              } catch (_) {}
+              if (value == false) {
+                Get.back();
+              }
+            },
+          );
+        }
+      : null;
 
   @override
   void initState() {
@@ -105,13 +107,16 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _anim = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _fabAnimationCtr,
-      curve: Curves.easeInOut,
-    ));
+    _anim =
+        Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _fabAnimationCtr,
+            curve: Curves.easeInOut,
+          ),
+        );
     _fabAnimationCtr.forward();
     _controller.scrollController.addListener(listener);
   }
@@ -124,28 +129,27 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
       Widget replyReplyPage({
         bool automaticallyImplyLeading = true,
         VoidCallback? onDispose,
-      }) =>
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('评论详情'),
-              titleSpacing: automaticallyImplyLeading ? null : 12,
-              automaticallyImplyLeading: automaticallyImplyLeading,
-            ),
-            body: SafeArea(
-              top: false,
-              bottom: false,
-              child: VideoReplyReplyPanel(
-                enableSlide: false,
-                id: id,
-                oid: oid,
-                rpid: rpid,
-                isVideoDetail: false,
-                replyType: _controller.replyType,
-                firstFloor: replyItem,
-                onDispose: onDispose,
-              ),
-            ),
-          );
+      }) => Scaffold(
+        appBar: AppBar(
+          title: const Text('评论详情'),
+          titleSpacing: automaticallyImplyLeading ? null : 12,
+          automaticallyImplyLeading: automaticallyImplyLeading,
+        ),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: VideoReplyReplyPanel(
+            enableSlide: false,
+            id: id,
+            oid: oid,
+            rpid: rpid,
+            isVideoDetail: false,
+            replyType: _controller.replyType,
+            firstFloor: replyItem,
+            onDispose: onDispose,
+          ),
+        ),
+      );
       if (this.context.orientation == Orientation.portrait) {
         Get.to(
           replyReplyPage,
@@ -324,252 +328,345 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
   }
 
   Widget _buildBody(Orientation orientation, ThemeData theme) => Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Builder(
-            builder: (context) {
-              double padding = max(context.width / 2 - Grid.smallCardWidth, 0);
-              if (orientation == Orientation.portrait) {
-                return CustomScrollView(
-                  controller: _controller.scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: DynamicPanel(
-                        item: _controller.dynItem,
-                        isDetail: true,
-                        callback: _getImageCallback,
-                      ),
-                    ),
-                    replyPersistentHeader(theme),
-                    Obx(
-                      () => replyList(theme, _controller.loadingState.value),
-                    ),
-                  ]
-                      .map<Widget>((e) => SliverPadding(
+    clipBehavior: Clip.none,
+    children: [
+      Builder(
+        builder: (context) {
+          double padding = max(context.width / 2 - Grid.smallCardWidth, 0);
+          if (orientation == Orientation.portrait) {
+            return CustomScrollView(
+              controller: _controller.scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers:
+                  [
+                        SliverToBoxAdapter(
+                          child: DynamicPanel(
+                            item: _controller.dynItem,
+                            isDetail: true,
+                            callback: _getImageCallback,
+                          ),
+                        ),
+                        replyPersistentHeader(theme),
+                        Obx(
+                          () =>
+                              replyList(theme, _controller.loadingState.value),
+                        ),
+                      ]
+                      .map<Widget>(
+                        (e) => SliverPadding(
                           padding: EdgeInsets.symmetric(horizontal: padding),
-                          sliver: e))
+                          sliver: e,
+                        ),
+                      )
                       .toList(),
-                );
-              } else {
-                return Row(
-                  children: [
-                    Expanded(
-                      flex: _ratio[0].toInt(),
+            );
+          } else {
+            return Row(
+              children: [
+                Expanded(
+                  flex: _ratio[0].toInt(),
+                  child: CustomScrollView(
+                    controller: _controller.scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverPadding(
+                        padding: EdgeInsets.only(
+                          left: padding / 4,
+                          bottom: MediaQuery.paddingOf(context).bottom + 80,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: DynamicPanel(
+                            item: _controller.dynItem,
+                            isDetail: true,
+                            callback: _getImageCallback,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: _ratio[1].toInt(),
+                  child: Scaffold(
+                    key: _key,
+                    backgroundColor: Colors.transparent,
+                    body: refreshIndicator(
+                      onRefresh: _controller.onRefresh,
                       child: CustomScrollView(
                         controller: _controller.scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
                         slivers: [
                           SliverPadding(
-                            padding: EdgeInsets.only(
-                              left: padding / 4,
-                              bottom: MediaQuery.paddingOf(context).bottom + 80,
-                            ),
-                            sliver: SliverToBoxAdapter(
-                              child: DynamicPanel(
-                                item: _controller.dynItem,
-                                isDetail: true,
-                                callback: _getImageCallback,
+                            padding: EdgeInsets.only(right: padding / 4),
+                            sliver: replyPersistentHeader(theme),
+                          ),
+                          SliverPadding(
+                            padding: EdgeInsets.only(right: padding / 4),
+                            sliver: Obx(
+                              () => replyList(
+                                theme,
+                                _controller.loadingState.value,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Expanded(
-                      flex: _ratio[1].toInt(),
-                      child: Scaffold(
-                        key: _key,
-                        backgroundColor: Colors.transparent,
-                        body: refreshIndicator(
-                          onRefresh: _controller.onRefresh,
-                          child: CustomScrollView(
-                            controller: _controller.scrollController,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            slivers: [
-                              SliverPadding(
-                                padding: EdgeInsets.only(right: padding / 4),
-                                sliver: replyPersistentHeader(theme),
-                              ),
-                              SliverPadding(
-                                padding: EdgeInsets.only(right: padding / 4),
-                                sliver: Obx(
-                                  () => replyList(
-                                      theme, _controller.loadingState.value),
-                                ),
-                              ),
-                            ],
-                          ),
+                  ),
+                ),
+              ],
+            );
+          }
+        },
+      ),
+      Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: SlideTransition(
+          position: _anim,
+          child: Builder(
+            builder: (context) {
+              Widget button() => FloatingActionButton(
+                heroTag: null,
+                onPressed: () {
+                  feedBack();
+                  _controller.onReply(
+                    context,
+                    oid: _controller.oid,
+                    replyType: _controller.replyType,
+                  );
+                },
+                tooltip: '评论动态',
+                child: const Icon(Icons.reply),
+              );
+              return !_controller.showDynActionBar
+                  ? Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: 14,
+                          bottom: MediaQuery.paddingOf(context).bottom + 14,
                         ),
+                        child: button(),
                       ),
-                    ),
-                  ],
-                );
-              }
-            },
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SlideTransition(
-              position: _anim,
-              child: Builder(
-                builder: (context) {
-                  Widget button() => FloatingActionButton(
-                        heroTag: null,
-                        onPressed: () {
-                          feedBack();
-                          _controller.onReply(
-                            context,
-                            oid: _controller.oid,
-                            replyType: _controller.replyType,
-                          );
-                        },
-                        tooltip: '评论动态',
-                        child: const Icon(Icons.reply),
-                      );
-                  return !_controller.showDynActionBar
-                      ? Align(
-                          alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              right: 14,
-                              bottom: MediaQuery.paddingOf(context).bottom + 14,
-                            ),
-                            child: button(),
-                          ),
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(right: 14, bottom: 14),
-                              child: button(),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surface,
-                                border: Border(
-                                  top: BorderSide(
-                                    color: theme.colorScheme.outline
-                                        .withValues(alpha: 0.08),
-                                  ),
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 14, bottom: 14),
+                          child: button(),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            border: Border(
+                              top: BorderSide(
+                                color: theme.colorScheme.outline.withValues(
+                                  alpha: 0.08,
                                 ),
                               ),
-                              padding: EdgeInsets.only(
-                                  bottom: MediaQuery.paddingOf(context).bottom),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Expanded(
-                                    child: Builder(
-                                      builder: (btnContext) => TextButton.icon(
-                                        onPressed: () => showModalBottomSheet(
-                                          context: context,
-                                          isScrollControlled: true,
-                                          useSafeArea: true,
-                                          builder: (context) => RepostPanel(
-                                            item: _controller.dynItem,
-                                            callback: () {
-                                              int count = _controller
-                                                      .dynItem
-                                                      .modules
-                                                      .moduleStat
-                                                      ?.forward
-                                                      ?.count ??
-                                                  0;
-                                              _controller.dynItem.modules
-                                                      .moduleStat ??=
-                                                  ModuleStatModel();
+                            ),
+                          ),
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.paddingOf(context).bottom,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: Builder(
+                                  builder: (btnContext) => TextButton.icon(
+                                    onPressed: () => showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      useSafeArea: true,
+                                      builder: (context) => RepostPanel(
+                                        item: _controller.dynItem,
+                                        callback: () {
+                                          int count =
                                               _controller
                                                   .dynItem
                                                   .modules
                                                   .moduleStat
-                                                  ?.forward ??= DynamicStat();
+                                                  ?.forward
+                                                  ?.count ??
+                                              0;
+                                          _controller
+                                                  .dynItem
+                                                  .modules
+                                                  .moduleStat ??=
+                                              ModuleStatModel();
+                                          _controller
+                                                  .dynItem
+                                                  .modules
+                                                  .moduleStat
+                                                  ?.forward ??=
+                                              DynamicStat();
+                                          _controller
+                                                  .dynItem
+                                                  .modules
+                                                  .moduleStat!
+                                                  .forward!
+                                                  .count =
+                                              count + 1;
+                                          if (btnContext.mounted) {
+                                            (btnContext as Element?)
+                                                ?.markNeedsBuild();
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    icon: Icon(
+                                      FontAwesomeIcons.shareFromSquare,
+                                      size: 16,
+                                      color: theme.colorScheme.outline,
+                                      semanticLabel: "转发",
+                                    ),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        15,
+                                        0,
+                                        15,
+                                        0,
+                                      ),
+                                      foregroundColor:
+                                          theme.colorScheme.outline,
+                                    ),
+                                    label: Text(
+                                      _controller
+                                                  .dynItem
+                                                  .modules
+                                                  .moduleStat
+                                                  ?.forward
+                                                  ?.count !=
+                                              null
+                                          ? NumUtil.numFormat(
                                               _controller
                                                   .dynItem
                                                   .modules
                                                   .moduleStat!
                                                   .forward!
-                                                  .count = count + 1;
-                                              if (btnContext.mounted) {
-                                                (btnContext as Element?)
-                                                    ?.markNeedsBuild();
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                        icon: Icon(
-                                          FontAwesomeIcons.shareFromSquare,
-                                          size: 16,
-                                          color: theme.colorScheme.outline,
-                                          semanticLabel: "转发",
-                                        ),
-                                        style: TextButton.styleFrom(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              15, 0, 15, 0),
-                                          foregroundColor:
-                                              theme.colorScheme.outline,
-                                        ),
-                                        label: Text(
-                                          _controller.dynItem.modules.moduleStat
-                                                      ?.forward?.count !=
-                                                  null
-                                              ? NumUtil.numFormat(_controller
+                                                  .count,
+                                            )
+                                          : '转发',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextButton.icon(
+                                  onPressed: () => Utils.shareText(
+                                    '${HttpString.dynamicShareBaseUrl}/${_controller.dynItem.idStr}',
+                                  ),
+                                  icon: Icon(
+                                    CustomIcon.share_node,
+                                    size: 16,
+                                    color: theme.colorScheme.outline,
+                                    semanticLabel: "分享",
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      15,
+                                      0,
+                                      15,
+                                      0,
+                                    ),
+                                    foregroundColor: theme.colorScheme.outline,
+                                  ),
+                                  label: const Text('分享'),
+                                ),
+                              ),
+                              Expanded(
+                                child: Builder(
+                                  builder: (context) => TextButton.icon(
+                                    onPressed: () => RequestUtils.onLikeDynamic(
+                                      _controller.dynItem,
+                                      () {
+                                        if (context.mounted) {
+                                          (context as Element?)
+                                              ?.markNeedsBuild();
+                                        }
+                                      },
+                                    ),
+                                    icon: Icon(
+                                      _controller
                                                   .dynItem
                                                   .modules
-                                                  .moduleStat!
-                                                  .forward!
-                                                  .count)
-                                              : '转发',
-                                        ),
-                                      ),
+                                                  .moduleStat
+                                                  ?.like
+                                                  ?.status ==
+                                              true
+                                          ? FontAwesomeIcons.solidThumbsUp
+                                          : FontAwesomeIcons.thumbsUp,
+                                      size: 16,
+                                      color:
+                                          _controller
+                                                  .dynItem
+                                                  .modules
+                                                  .moduleStat
+                                                  ?.like
+                                                  ?.status ==
+                                              true
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.outline,
+                                      semanticLabel:
+                                          _controller
+                                                  .dynItem
+                                                  .modules
+                                                  .moduleStat
+                                                  ?.like
+                                                  ?.status ==
+                                              true
+                                          ? "已赞"
+                                          : "点赞",
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: TextButton.icon(
-                                      onPressed: () => Utils.shareText(
-                                          '${HttpString.dynamicShareBaseUrl}/${_controller.dynItem.idStr}'),
-                                      icon: Icon(
-                                        CustomIcon.share_node,
-                                        size: 16,
-                                        color: theme.colorScheme.outline,
-                                        semanticLabel: "分享",
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        15,
+                                        0,
+                                        15,
+                                        0,
                                       ),
-                                      style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            15, 0, 15, 0),
-                                        foregroundColor:
-                                            theme.colorScheme.outline,
-                                      ),
-                                      label: const Text('分享'),
+                                      foregroundColor:
+                                          theme.colorScheme.outline,
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Builder(
-                                      builder: (context) => TextButton.icon(
-                                        onPressed: () =>
-                                            RequestUtils.onLikeDynamic(
-                                          _controller.dynItem,
-                                          () {
-                                            if (context.mounted) {
-                                              (context as Element?)
-                                                  ?.markNeedsBuild();
-                                            }
+                                    label: AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 400,
+                                      ),
+                                      transitionBuilder:
+                                          (
+                                            Widget child,
+                                            Animation<double> animation,
+                                          ) {
+                                            return ScaleTransition(
+                                              scale: animation,
+                                              child: child,
+                                            );
                                           },
-                                        ),
-                                        icon: Icon(
-                                          _controller.dynItem.modules.moduleStat
-                                                      ?.like?.status ==
-                                                  true
-                                              ? FontAwesomeIcons.solidThumbsUp
-                                              : FontAwesomeIcons.thumbsUp,
-                                          size: 16,
-                                          color: _controller
+                                      child: Text(
+                                        _controller
+                                                    .dynItem
+                                                    .modules
+                                                    .moduleStat
+                                                    ?.like
+                                                    ?.count !=
+                                                null
+                                            ? NumUtil.numFormat(
+                                                _controller
+                                                    .dynItem
+                                                    .modules
+                                                    .moduleStat!
+                                                    .like!
+                                                    .count,
+                                              )
+                                            : '点赞',
+                                        style: TextStyle(
+                                          color:
+                                              _controller
                                                       .dynItem
                                                       .modules
                                                       .moduleStat
@@ -578,72 +675,23 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                                                   true
                                               ? theme.colorScheme.primary
                                               : theme.colorScheme.outline,
-                                          semanticLabel: _controller
-                                                      .dynItem
-                                                      .modules
-                                                      .moduleStat
-                                                      ?.like
-                                                      ?.status ==
-                                                  true
-                                              ? "已赞"
-                                              : "点赞",
-                                        ),
-                                        style: TextButton.styleFrom(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              15, 0, 15, 0),
-                                          foregroundColor:
-                                              theme.colorScheme.outline,
-                                        ),
-                                        label: AnimatedSwitcher(
-                                          duration:
-                                              const Duration(milliseconds: 400),
-                                          transitionBuilder: (Widget child,
-                                              Animation<double> animation) {
-                                            return ScaleTransition(
-                                                scale: animation, child: child);
-                                          },
-                                          child: Text(
-                                            _controller
-                                                        .dynItem
-                                                        .modules
-                                                        .moduleStat
-                                                        ?.like
-                                                        ?.count !=
-                                                    null
-                                                ? NumUtil.numFormat(_controller
-                                                    .dynItem
-                                                    .modules
-                                                    .moduleStat!
-                                                    .like!
-                                                    .count)
-                                                : '点赞',
-                                            style: TextStyle(
-                                              color: _controller
-                                                          .dynItem
-                                                          .modules
-                                                          .moduleStat
-                                                          ?.like
-                                                          ?.status ==
-                                                      true
-                                                  ? theme.colorScheme.primary
-                                                  : theme.colorScheme.outline,
-                                            ),
-                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                },
-              ),
-            ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+            },
           ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 
   SliverPersistentHeader replyPersistentHeader(ThemeData theme) {
     return SliverPersistentHeader(
@@ -659,8 +707,8 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                   duration: const Duration(milliseconds: 400),
                   transitionBuilder:
                       (Widget child, Animation<double> animation) {
-                    return ScaleTransition(scale: animation, child: child);
-                  },
+                        return ScaleTransition(scale: animation, child: child);
+                      },
                   child: Text(
                     '${_controller.count.value == -1 ? 0 : NumUtil.numFormat(_controller.count.value)}条回复',
                     key: ValueKey<int>(_controller.count.value),
@@ -677,15 +725,17 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                     size: 16,
                     color: theme.colorScheme.secondary,
                   ),
-                  label: Obx(() => Text(
-                        _controller.sortType.value.label,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.colorScheme.secondary,
-                        ),
-                      )),
+                  label: Obx(
+                    () => Text(
+                      _controller.sortType.value.label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: theme.colorScheme.secondary,
+                      ),
+                    ),
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -695,66 +745,70 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
   }
 
   Widget replyList(
-      ThemeData theme, LoadingState<List<ReplyInfo>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<ReplyInfo>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => SliverList.builder(
-          itemBuilder: (context, index) {
-            return const VideoReplySkeleton();
-          },
-          itemCount: 8,
-        ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.builder(
-              itemBuilder: (context, index) {
-                if (index == response.length) {
-                  _controller.onLoadMore();
-                  return Container(
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.only(
-                        bottom: MediaQuery.paddingOf(context).bottom),
-                    height: 125,
-                    child: Text(
-                      _controller.isEnd ? '没有更多了' : '加载中...',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.outline,
+        itemBuilder: (context, index) {
+          return const VideoReplySkeleton();
+        },
+        itemCount: 8,
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.builder(
+                itemBuilder: (context, index) {
+                  if (index == response.length) {
+                    _controller.onLoadMore();
+                    return Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(
+                        bottom: MediaQuery.paddingOf(context).bottom,
                       ),
-                    ),
-                  );
-                } else {
-                  return ReplyItemGrpc(
-                    replyItem: response[index],
-                    replyLevel: 1,
-                    replyReply: (replyItem, id) =>
-                        replyReply(context, replyItem, id),
-                    onReply: (replyItem) => _controller.onReply(
-                      context,
-                      replyItem: replyItem,
-                    ),
-                    onDelete: (item, subIndex) =>
-                        _controller.onRemove(index, item, subIndex),
-                    upMid: _controller.upMid,
-                    callback: _getImageCallback,
-                    onCheckReply: (item) =>
-                        _controller.onCheckReply(item, isManual: true),
-                    onToggleTop: (item) => _controller.onToggleTop(
-                      item,
-                      index,
-                      _controller.oid,
-                      _controller.replyType,
-                    ),
-                  );
-                }
-              },
-              itemCount: response!.length + 1,
-            )
-          : HttpError(
-              onReload: _controller.onReload,
-            ),
+                      height: 125,
+                      child: Text(
+                        _controller.isEnd ? '没有更多了' : '加载中...',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.outline,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return ReplyItemGrpc(
+                      replyItem: response[index],
+                      replyLevel: 1,
+                      replyReply: (replyItem, id) =>
+                          replyReply(context, replyItem, id),
+                      onReply: (replyItem) => _controller.onReply(
+                        context,
+                        replyItem: replyItem,
+                      ),
+                      onDelete: (item, subIndex) =>
+                          _controller.onRemove(index, item, subIndex),
+                      upMid: _controller.upMid,
+                      callback: _getImageCallback,
+                      onCheckReply: (item) =>
+                          _controller.onCheckReply(item, isManual: true),
+                      onToggleTop: (item) => _controller.onToggleTop(
+                        item,
+                        index,
+                        _controller.oid,
+                        _controller.replyType,
+                      ),
+                    );
+                  }
+                },
+                itemCount: response!.length + 1,
+              )
+            : HttpError(
+                onReload: _controller.onReload,
+              ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

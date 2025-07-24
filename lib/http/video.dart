@@ -16,6 +16,7 @@ import 'package:PiliPlus/models_new/pgc/pgc_rank/pgc_rank_item_model.dart';
 import 'package:PiliPlus/models_new/triple/pgc_triple.dart';
 import 'package:PiliPlus/models_new/triple/ugc_triple.dart';
 import 'package:PiliPlus/models_new/video/video_ai_conclusion/data.dart';
+import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/video_detail_response.dart';
 import 'package:PiliPlus/models_new/video/video_note_list/data.dart';
 import 'package:PiliPlus/models_new/video/video_play_info/data.dart';
@@ -38,8 +39,10 @@ class VideoHttp {
   static bool enableFilter = zoneRegExp.pattern.isNotEmpty;
 
   // 首页推荐视频
-  static Future<LoadingState> rcmdVideoList(
-      {required int ps, required int freshIdx}) async {
+  static Future<LoadingState> rcmdVideoList({
+    required int ps,
+    required int freshIdx,
+  }) async {
     var res = await Request().get(
       Api.recommendListWeb,
       queryParameters: {
@@ -49,7 +52,7 @@ class VideoHttp {
         'ps': ps,
         'fresh_idx': freshIdx,
         'brush': freshIdx,
-        'fresh_type': 4
+        'fresh_type': 4,
       },
     );
     if (res.data['code'] == 0) {
@@ -100,26 +103,28 @@ class VideoHttp {
       's_locale': 'zh_CN',
       'splash_id': '',
       'statistics': Constants.statistics,
-      'voice_balance': '0'
+      'voice_balance': '0',
     };
     var res = await Request().get(
       Api.recommendListApp,
       queryParameters: data,
-      options: Options(headers: {
-        'buvid': LoginHttp.buvid,
-        'fp_local':
-            '1111111111111111111111111111111111111111111111111111111111111111',
-        'fp_remote':
-            '1111111111111111111111111111111111111111111111111111111111111111',
-        'session_id': '11111111',
-        'env': 'prod',
-        'app-key': 'android_hd',
-        'User-Agent': Constants.userAgent,
-        'x-bili-trace-id': Constants.traceId,
-        'x-bili-aurora-eid': '',
-        'x-bili-aurora-zone': '',
-        'bili-http-engine': 'cronet',
-      }),
+      options: Options(
+        headers: {
+          'buvid': LoginHttp.buvid,
+          'fp_local':
+              '1111111111111111111111111111111111111111111111111111111111111111',
+          'fp_remote':
+              '1111111111111111111111111111111111111111111111111111111111111111',
+          'session_id': '11111111',
+          'env': 'prod',
+          'app-key': 'android_hd',
+          'User-Agent': Constants.userAgent,
+          'x-bili-trace-id': Constants.traceId,
+          'x-bili-aurora-eid': '',
+          'x-bili-aurora-zone': '',
+          'bili-http-engine': 'cronet',
+        },
+      ),
     );
     if (res.data['code'] == 0) {
       List<RecVideoItemAppModel> list = <RecVideoItemAppModel>[];
@@ -149,8 +154,10 @@ class VideoHttp {
   }
 
   // 最热视频
-  static Future<LoadingState<List<HotVideoItemModel>>> hotVideoList(
-      {required int pn, required int ps}) async {
+  static Future<LoadingState<List<HotVideoItemModel>>> hotVideoList({
+    required int pn,
+    required int ps,
+  }) async {
     var res = await Request().get(
       Api.hotList,
       queryParameters: {'pn': pn, 'ps': ps},
@@ -161,7 +168,9 @@ class VideoHttp {
         if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
             !RecommendFilter.filterTitle(i['title']) &&
             !RecommendFilter.filterLikeRatio(
-                i['stat']['like'], i['stat']['view'])) {
+              i['stat']['like'],
+              i['stat']['view'],
+            )) {
           if (enableFilter &&
               i['tname'] != null &&
               zoneRegExp.hasMatch(i['tname'])) {
@@ -187,10 +196,10 @@ class VideoHttp {
     bool? forcePgcApi,
   }) async {
     final params = await WbiSign.makSign({
-      if (avid != null) 'avid': avid,
-      if (bvid != null) 'bvid': bvid,
-      if (epid != null) 'ep_id': epid,
-      if (seasonId != null) 'season_id': seasonId,
+      'avid': ?avid,
+      'bvid': ?bvid,
+      'ep_id': ?epid,
+      'season_id': ?seasonId,
       'cid': cid,
       'qn': qn ?? 80,
       // 获取所有格式的视频
@@ -218,8 +227,8 @@ class VideoHttp {
         late PlayUrlModel data;
         if (epid != null && usePgcApi) {
           data = PlayUrlModel.fromJson(res.data['result']['video_info'])
-            ..lastPlayTime = res.data['result']['play_view_business_info']
-                ['user_status']['watch_progress']['current_watch_progress'];
+            ..lastPlayTime = res
+                .data['result']['play_view_business_info']['user_status']['watch_progress']['current_watch_progress'];
         } else {
           data = PlayUrlModel.fromJson(res.data['data']);
         }
@@ -251,30 +260,18 @@ class VideoHttp {
   }
 
   // 视频信息 标题、简介
-  static Future videoIntro({required String bvid}) async {
-    var res =
-        await Request().get(Api.videoIntro, queryParameters: {'bvid': bvid});
-    VideoDetailResponse result = VideoDetailResponse.fromJson(res.data);
-    if (result.code == 0) {
-      return {
-        'status': true,
-        'data': result.data!,
-      };
+  static Future<LoadingState<VideoDetailData>> videoIntro({
+    required String bvid,
+  }) async {
+    var res = await Request().get(
+      Api.videoIntro,
+      queryParameters: {'bvid': bvid},
+    );
+    VideoDetailResponse data = VideoDetailResponse.fromJson(res.data);
+    if (data.code == 0) {
+      return Success(data.data!);
     } else {
-      // Map errMap = {
-      //   -400: '请求错误',
-      //   -403: '权限不足',
-      //   -404: '视频资源失效',
-      //   62002: '稿件不可见',
-      //   62004: '稿件审核中',
-      // };
-      return {
-        'status': false,
-        'data': result.data,
-        'code': result.code,
-        'msg': result.message,
-        // 'msg': errMap[result.code] ?? '请求异常',
-      };
+      return Error(data.message);
     }
   }
 
@@ -300,13 +297,17 @@ class VideoHttp {
   }
 
   // 相关视频
-  static Future<LoadingState<List<HotVideoItemModel>?>> relatedVideoList(
-      {required String bvid}) async {
-    var res =
-        await Request().get(Api.relatedList, queryParameters: {'bvid': bvid});
+  static Future<LoadingState<List<HotVideoItemModel>?>> relatedVideoList({
+    required String bvid,
+  }) async {
+    var res = await Request().get(
+      Api.relatedList,
+      queryParameters: {'bvid': bvid},
+    );
     if (res.data['code'] == 0) {
-      final items = (res.data['data'] as List?)
-          ?.map((i) => HotVideoItemModel.fromJson(i));
+      final items = (res.data['data'] as List?)?.map(
+        (i) => HotVideoItemModel.fromJson(i),
+      );
       final list = RecommendFilter.applyFilterToRelatedVideos
           ? items?.where((i) => !RecommendFilter.filterAll(i)).toList()
           : items?.toList();
@@ -440,29 +441,33 @@ class VideoHttp {
     } else {
       return {
         'status': false,
-        'msg': res.data is String ? res.data : res.data['message']
+        'msg': res.data is String ? res.data : res.data['message'],
       };
     }
   }
 
   // 推送不感兴趣反馈
-  static Future feedDislike(
-      {required String goto,
-      required int id,
-      int? reasonId,
-      int? feedbackId}) async {
+  static Future feedDislike({
+    required String goto,
+    required int id,
+    int? reasonId,
+    int? feedbackId,
+  }) async {
     if (Accounts.get(AccountType.recommend).accessKey.isNullOrEmpty) {
       return {'status': false, 'msg': "请退出账号后重新登录"};
     }
     assert((reasonId != null) ^ (feedbackId != null));
-    var res = await Request().get(Api.feedDislike, queryParameters: {
-      'goto': goto,
-      'id': id,
-      if (reasonId != null) 'reason_id': reasonId,
-      if (feedbackId != null) 'feedback_id': feedbackId,
-      'build': '1',
-      'mobi_app': 'android',
-    });
+    var res = await Request().get(
+      Api.feedDislike,
+      queryParameters: {
+        'goto': goto,
+        'id': id,
+        'reason_id': ?reasonId,
+        'feedback_id': ?feedbackId,
+        'build': '1',
+        'mobi_app': 'android',
+      },
+    );
     if (res.data['code'] == 0) {
       return {'status': true};
     } else {
@@ -471,22 +476,26 @@ class VideoHttp {
   }
 
   // 推送不感兴趣取消
-  static Future feedDislikeCancel(
-      {required String goto,
-      required int id,
-      int? reasonId,
-      int? feedbackId}) async {
+  static Future feedDislikeCancel({
+    required String goto,
+    required int id,
+    int? reasonId,
+    int? feedbackId,
+  }) async {
     if (Accounts.get(AccountType.recommend).accessKey.isNullOrEmpty) {
       return {'status': false, 'msg': "请退出账号后重新登录"};
     }
-    var res = await Request().get(Api.feedDislikeCancel, queryParameters: {
-      'goto': goto,
-      'id': id,
-      if (reasonId != null) 'reason_id': reasonId,
-      if (feedbackId != null) 'feedback_id': feedbackId,
-      'build': '1',
-      'mobi_app': 'android',
-    });
+    var res = await Request().get(
+      Api.feedDislikeCancel,
+      queryParameters: {
+        'goto': goto,
+        'id': id,
+        'reason_id': ?reasonId,
+        'feedback_id': ?feedbackId,
+        'build': '1',
+        'mobi_app': 'android',
+      },
+    );
     if (res.data['code'] == 0) {
       return {'status': true};
     } else {
@@ -545,12 +554,15 @@ class VideoHttp {
     required int oid,
     required int rpid,
   }) async {
-    var res = await Request().post(Api.replyDel, queryParameters: {
-      'type': type, //type.index
-      'oid': oid,
-      'rpid': rpid,
-      'csrf': Accounts.main.csrf,
-    });
+    var res = await Request().post(
+      Api.replyDel,
+      queryParameters: {
+        'type': type, //type.index
+        'oid': oid,
+        'rpid': rpid,
+        'csrf': Accounts.main.csrf,
+      },
+    );
     log(res.toString());
     if (res.data['code'] == 0) {
       return {'status': true};
@@ -560,8 +572,11 @@ class VideoHttp {
   }
 
   // 操作用户关系
-  static Future relationMod(
-      {required int mid, required int act, required int reSrc}) async {
+  static Future relationMod({
+    required int mid,
+    required int act,
+    required int reSrc,
+  }) async {
     var res = await Request().post(
       Api.relationMod,
       queryParameters: {
@@ -617,11 +632,14 @@ class VideoHttp {
     aid,
     type,
   }) async {
-    await Request().post(Api.historyReport, queryParameters: {
-      if (aid != null) 'aid': aid,
-      if (type != null) 'type': type,
-      'csrf': Accounts.main.csrf,
-    });
+    await Request().post(
+      Api.historyReport,
+      queryParameters: {
+        'aid': ?aid,
+        'type': ?type,
+        'csrf': Accounts.main.csrf,
+      },
+    );
   }
 
   // 视频播放进度
@@ -633,16 +651,19 @@ class VideoHttp {
     seasonId,
     subType,
   }) async {
-    await Request().post(Api.heartBeat, queryParameters: {
-      'bvid': bvid,
-      'cid': cid,
-      if (epid != null) 'epid': epid,
-      if (seasonId != null) 'sid': seasonId,
-      if (epid != null) 'type': 4,
-      if (subType != null) 'sub_type': subType,
-      'played_time': progress,
-      'csrf': Accounts.main.csrf,
-    });
+    await Request().post(
+      Api.heartBeat,
+      queryParameters: {
+        'bvid': bvid,
+        'cid': cid,
+        'epid': ?epid,
+        'sid': ?seasonId,
+        if (epid != null) 'type': 4,
+        'sub_type': ?subType,
+        'played_time': progress,
+        'csrf': Accounts.main.csrf,
+      },
+    );
   }
 
   static Future medialistHistory({
@@ -650,52 +671,65 @@ class VideoHttp {
     required dynamic oid,
     required dynamic upperMid,
   }) async {
-    await Request().post(Api.mediaListHistory, queryParameters: {
-      'desc': desc,
-      'oid': oid,
-      'upper_mid': upperMid,
-      'csrf': Accounts.main.csrf,
-    });
+    await Request().post(
+      Api.mediaListHistory,
+      queryParameters: {
+        'desc': desc,
+        'oid': oid,
+        'upper_mid': upperMid,
+        'csrf': Accounts.main.csrf,
+      },
+    );
   }
 
   // 添加追番
   static Future pgcAdd({int? seasonId}) async {
-    var res = await Request().post(Api.pgcAdd, queryParameters: {
-      'season_id': seasonId,
-      'csrf': Accounts.main.csrf,
-    });
+    var res = await Request().post(
+      Api.pgcAdd,
+      queryParameters: {
+        'season_id': seasonId,
+        'csrf': Accounts.main.csrf,
+      },
+    );
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'msg':
-            res.data['result'] == null ? 'failed' : res.data['result']['toast']
+        'msg': res.data['result'] == null
+            ? 'failed'
+            : res.data['result']['toast'],
       };
     } else {
       return {
         'status': false,
-        'msg':
-            res.data['result'] == null ? 'failed' : res.data['result']['toast']
+        'msg': res.data['result'] == null
+            ? 'failed'
+            : res.data['result']['toast'],
       };
     }
   }
 
   // 取消追番
   static Future pgcDel({int? seasonId}) async {
-    var res = await Request().post(Api.pgcDel, queryParameters: {
-      'season_id': seasonId,
-      'csrf': Accounts.main.csrf,
-    });
+    var res = await Request().post(
+      Api.pgcDel,
+      queryParameters: {
+        'season_id': seasonId,
+        'csrf': Accounts.main.csrf,
+      },
+    );
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'msg':
-            res.data['result'] == null ? 'failed' : res.data['result']['toast']
+        'msg': res.data['result'] == null
+            ? 'failed'
+            : res.data['result']['toast'],
       };
     } else {
       return {
         'status': false,
-        'msg':
-            res.data['result'] == null ? 'failed' : res.data['result']['toast']
+        'msg': res.data['result'] == null
+            ? 'failed'
+            : res.data['result']['toast'],
       };
     }
   }
@@ -717,17 +751,22 @@ class VideoHttp {
     );
     return {
       'status': res.data['code'] == 0,
-      'msg': res.data['result'] == null ? 'failed' : res.data['result']['toast']
+      'msg': res.data['result'] == null
+          ? 'failed'
+          : res.data['result']['toast'],
     };
   }
 
   // 查看视频同时在看人数
   static Future onlineTotal({int? aid, String? bvid, int? cid}) async {
-    var res = await Request().get(Api.onlineTotal, queryParameters: {
-      'aid': aid,
-      'bvid': bvid,
-      'cid': cid,
-    });
+    var res = await Request().get(
+      Api.onlineTotal,
+      queryParameters: {
+        'aid': aid,
+        'bvid': bvid,
+        'cid': cid,
+      },
+    );
     if (res.data['code'] == 0) {
       return {'status': true, 'data': res.data['data']['total']};
     } else {
@@ -761,8 +800,8 @@ class VideoHttp {
     var res = await Request().get(
       Api.playInfo,
       queryParameters: {
-        if (aid != null) 'aid': aid,
-        if (bvid != null) 'bvid': bvid,
+        'aid': ?aid,
+        'bvid': ?bvid,
         'cid': cid,
       },
     );
@@ -791,9 +830,12 @@ class VideoHttp {
     String processList(List list) {
       final sb = StringBuffer('WEBVTT\n\n')
         ..writeAll(
-            list.map((item) =>
-                '${item?['sid'] ?? 0}\n${subtitleTimecode(item['from'])} --> ${subtitleTimecode(item['to'])}\n${item['content'].trim()}'),
-            '\n\n');
+          list.map(
+            (item) =>
+                '${item?['sid'] ?? 0}\n${subtitleTimecode(item['from'])} --> ${subtitleTimecode(item['to'])}\n${item['content'].trim()}',
+          ),
+          '\n\n',
+        );
       return sb.toString();
     }
 
@@ -807,7 +849,8 @@ class VideoHttp {
 
   // 视频排行
   static Future<LoadingState<List<HotVideoItemModel>>> getRankVideoList(
-      int rid) async {
+    int rid,
+  ) async {
     var res = await Request().get(
       Api.getRankApi,
       queryParameters: await WbiSign.makSign({
@@ -821,7 +864,9 @@ class VideoHttp {
         if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
             !RecommendFilter.filterTitle(i['title']) &&
             !RecommendFilter.filterLikeRatio(
-                i['stat']['like'], i['stat']['view'])) {
+              i['stat']['like'],
+              i['stat']['view'],
+            )) {
           if (enableFilter &&
               i['tname'] != null &&
               zoneRegExp.hasMatch(i['tname'])) {
@@ -837,8 +882,10 @@ class VideoHttp {
   }
 
   // pgc 排行
-  static Future<LoadingState> pgcRankList(
-      {int day = 3, required int seasonType}) async {
+  static Future<LoadingState> pgcRankList({
+    int day = 3,
+    required int seasonType,
+  }) async {
     var res = await Request().get(
       Api.pgcRank,
       queryParameters: await WbiSign.makSign({
@@ -847,17 +894,21 @@ class VideoHttp {
       }),
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['result']?['list'] as List?)
-          ?.map((e) => PgcRankItemModel.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['result']?['list'] as List?)
+            ?.map((e) => PgcRankItemModel.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
   }
 
   // pgc season 排行
-  static Future<LoadingState> pgcSeasonRankList(
-      {int day = 3, required int seasonType}) async {
+  static Future<LoadingState> pgcSeasonRankList({
+    int day = 3,
+    required int seasonType,
+  }) async {
     var res = await Request().get(
       Api.pgcSeasonRank,
       queryParameters: await WbiSign.makSign({
@@ -866,9 +917,11 @@ class VideoHttp {
       }),
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['data']?['list'] as List?)
-          ?.map((e) => PgcRankItemModel.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['data']?['list'] as List?)
+            ?.map((e) => PgcRankItemModel.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -887,7 +940,7 @@ class VideoHttp {
         'oid_type': 0,
         'pn': page,
         'ps': 10,
-        if (uperMid != null) 'uper_mid': uperMid,
+        'uper_mid': ?uperMid,
       },
     );
     if (res.data['code'] == 0) {

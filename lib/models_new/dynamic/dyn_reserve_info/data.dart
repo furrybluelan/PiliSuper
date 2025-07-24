@@ -35,14 +35,14 @@ class ReserveInfoData {
       );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'stime': stime,
-        'etime': etime,
-        'type': type,
-        'live_plan_start_time': livePlanStartTime,
-        'lottery_type': lotteryType,
-        'lottery_id': lotteryId,
-        'sub_type': subType,
-      };
+    'id': id,
+    'title': title,
+    'stime': stime,
+    'etime': etime,
+    'type': type,
+    'live_plan_start_time': livePlanStartTime,
+    'lottery_type': lotteryType,
+    'lottery_id': lotteryId,
+    'sub_type': subType,
+  };
 }

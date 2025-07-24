@@ -14,10 +14,10 @@ class Series {
   });
 
   factory Series.fromJson(Map<String, dynamic> json) => Series(
-        seriesId: json['series_id'] as int?,
-        title: json['title'] as String?,
-        seasonCount: json['season_count'] as int?,
-        newSeasonId: json['new_season_id'] as int?,
-        seriesOrd: json['series_ord'] as int?,
-      );
+    seriesId: json['series_id'] as int?,
+    title: json['title'] as String?,
+    seasonCount: json['season_count'] as int?,
+    newSeasonId: json['new_season_id'] as int?,
+    seriesOrd: json['series_ord'] as int?,
+  );
 }

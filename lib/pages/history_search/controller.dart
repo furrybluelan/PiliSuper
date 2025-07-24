@@ -9,9 +9,9 @@ class HistorySearchController
     extends CommonSearchController<HistoryData, HistoryItemModel> {
   @override
   Future<LoadingState<HistoryData>> customGetData() => UserHttp.searchHistory(
-        pn: page,
-        keyword: editController.value.text,
-      );
+    pn: page,
+    keyword: editController.value.text,
+  );
 
   @override
   List<HistoryItemModel>? getDataList(HistoryData response) {

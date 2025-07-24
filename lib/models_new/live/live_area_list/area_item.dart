@@ -20,15 +20,15 @@ class AreaItem {
   });
 
   factory AreaItem.fromJson(Map<String, dynamic> json) => AreaItem(
-        id: json['id'],
-        name: json['name'] as String?,
-        link: json['link'] as String?,
-        pic: json['pic'] as String?,
-        parentId: json['parent_id'],
-        parentName: json['parent_name'] as String?,
-        areaType: json['area_type'] as int?,
-        tagType: json['tag_type'] as int?,
-      );
+    id: json['id'],
+    name: json['name'] as String?,
+    link: json['link'] as String?,
+    pic: json['pic'] as String?,
+    parentId: json['parent_id'],
+    parentName: json['parent_name'] as String?,
+    areaType: json['area_type'] as int?,
+    tagType: json['tag_type'] as int?,
+  );
 
   @override
   bool operator ==(Object other) {

@@ -12,10 +12,10 @@ class LiveEmoteDatum {
   });
 
   factory LiveEmoteDatum.fromJson(Map<String, dynamic> json) => LiveEmoteDatum(
-        emoticons: (json['emoticons'] as List<dynamic>?)
-            ?.map((e) => Emoticon.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        pkgType: json['pkg_type'] as int?,
-        currentCover: json['current_cover'] as String?,
-      );
+    emoticons: (json['emoticons'] as List<dynamic>?)
+        ?.map((e) => Emoticon.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    pkgType: json['pkg_type'] as int?,
+    currentCover: json['current_cover'] as String?,
+  );
 }

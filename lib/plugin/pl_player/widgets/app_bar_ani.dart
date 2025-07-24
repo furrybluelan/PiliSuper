@@ -18,13 +18,16 @@ class AppBarAni extends StatelessWidget {
   Widget build(BuildContext context) {
     visible ? controller.forward() : controller.reverse();
     return SlideTransition(
-      position: Tween<Offset>(
-        begin: Offset(0, position! == 'top' ? -1 : 1.1),
-        end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: Curves.linear,
-      )),
+      position:
+          Tween<Offset>(
+            begin: Offset(0, position! == 'top' ? -1 : 1.1),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(
+              parent: controller,
+              curve: Curves.linear,
+            ),
+          ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: position! == 'top'

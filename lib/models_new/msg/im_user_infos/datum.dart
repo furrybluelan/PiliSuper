@@ -64,7 +64,8 @@ class ImUserInfosData {
         official: json['official'] == null
             ? null
             : BaseOfficialVerify.fromJson(
-                json['official'] as Map<String, dynamic>),
+                json['official'] as Map<String, dynamic>,
+              ),
         birthday: json['birthday'] as int?,
         isFakeAccount: json['is_fake_account'] as int?,
         isDeleted: json['is_deleted'] as int?,

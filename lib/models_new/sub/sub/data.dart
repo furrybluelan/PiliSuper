@@ -8,10 +8,10 @@ class SubData {
   SubData({this.count, this.list, this.hasMore});
 
   factory SubData.fromJson(Map<String, dynamic> json) => SubData(
-        count: json['count'] as int?,
-        list: (json['list'] as List<dynamic>?)
-            ?.map((e) => SubItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        hasMore: json['has_more'] as bool?,
-      );
+    count: json['count'] as int?,
+    list: (json['list'] as List<dynamic>?)
+        ?.map((e) => SubItemModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    hasMore: json['has_more'] as bool?,
+  );
 }

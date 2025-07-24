@@ -6,8 +6,8 @@ class UrlInfo {
   UrlInfo({this.host, this.extra, this.streamTtl});
 
   factory UrlInfo.fromJson(Map<String, dynamic> json) => UrlInfo(
-        host: json['host'] as String?,
-        extra: json['extra'] as String?,
-        streamTtl: json['stream_ttl'] as int?,
-      );
+    host: json['host'] as String?,
+    extra: json['extra'] as String?,
+    streamTtl: json['stream_ttl'] as int?,
+  );
 }

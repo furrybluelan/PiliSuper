@@ -4,6 +4,6 @@ class CcOnLock {
   CcOnLock({this.typeUrl});
 
   factory CcOnLock.fromJson(Map<String, dynamic> json) => CcOnLock(
-        typeUrl: json['type_url'] as String?,
-      );
+    typeUrl: json['type_url'] as String?,
+  );
 }

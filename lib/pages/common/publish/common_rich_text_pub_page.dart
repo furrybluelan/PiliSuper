@@ -40,9 +40,9 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
   @override
   late final RichTextEditingController editController =
       RichTextEditingController(
-    items: widget.items,
-    onMention: onMention,
-  );
+        items: widget.items,
+        onMention: onMention,
+      );
 
   @override
   void initPubState() {
@@ -58,8 +58,9 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
   }
 
   Widget buildImage(int index, double height) {
-    final color =
-        Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5);
+    final color = Theme.of(
+      context,
+    ).colorScheme.secondaryContainer.withValues(alpha: 0.5);
 
     void onClear() {
       pathList.removeAt(index);
@@ -76,10 +77,12 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
             controller.keepChatPanel();
             await context.imageView(
               imgList: pathList
-                  .map((path) => SourceModel(
-                        url: path,
-                        sourceType: SourceType.fileImage,
-                      ))
+                  .map(
+                    (path) => SourceModel(
+                      url: path,
+                      sourceType: SourceType.fileImage,
+                    ),
+                  )
                   .toList(),
               initialPage: index,
             );
@@ -145,28 +148,31 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
   }
 
   void onPickImage([VoidCallback? callback]) {
-    EasyThrottle.throttle('imagePicker', const Duration(milliseconds: 500),
-        () async {
-      try {
-        List<XFile> pickedFiles = await imagePicker.pickMultiImage(
-          limit: limit,
-          imageQuality: 100,
-        );
-        if (pickedFiles.isNotEmpty) {
-          for (int i = 0; i < pickedFiles.length; i++) {
-            if (pathList.length == limit) {
-              SmartDialog.showToast('最多选择$limit张图片');
-              break;
-            } else {
-              pathList.add(pickedFiles[i].path);
+    EasyThrottle.throttle(
+      'imagePicker',
+      const Duration(milliseconds: 500),
+      () async {
+        try {
+          List<XFile> pickedFiles = await imagePicker.pickMultiImage(
+            limit: limit,
+            imageQuality: 100,
+          );
+          if (pickedFiles.isNotEmpty) {
+            for (int i = 0; i < pickedFiles.length; i++) {
+              if (pathList.length == limit) {
+                SmartDialog.showToast('最多选择$limit张图片');
+                break;
+              } else {
+                pathList.add(pickedFiles[i].path);
+              }
             }
+            callback?.call();
           }
-          callback?.call();
+        } catch (e) {
+          SmartDialog.showToast(e.toString());
         }
-      } catch (e) {
-        SmartDialog.showToast(e.toString());
-      }
-    });
+      },
+    );
   }
 
   void onChooseEmote(dynamic emote, double? width, double? height) {
@@ -294,8 +300,10 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
           delta = RichTextEditingDeltaReplacement(
             oldText: oldValue.text,
             replacementText: text,
-            replacedRange:
-                TextRange(start: selection.start - 1, end: selection.end),
+            replacedRange: TextRange(
+              start: selection.start - 1,
+              end: selection.end,
+            ),
             selection: TextSelection.collapsed(
               offset: selection.start - 1 + text.length,
             ),
@@ -376,49 +384,49 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
   }
 
   Widget get emojiBtn => Obx(
-        () {
-          final isEmoji = panelType.value == PanelType.emoji;
-          return ToolbarIconButton(
-            tooltip: isEmoji ? '输入' : '表情',
-            onPressed: () {
-              if (isEmoji) {
-                updatePanelType(PanelType.keyboard);
-              } else {
-                updatePanelType(PanelType.emoji);
-              }
-            },
-            icon: isEmoji
-                ? const Icon(Icons.keyboard, size: 22)
-                : const Icon(Icons.emoji_emotions, size: 22),
-            selected: isEmoji,
-          );
+    () {
+      final isEmoji = panelType.value == PanelType.emoji;
+      return ToolbarIconButton(
+        tooltip: isEmoji ? '输入' : '表情',
+        onPressed: () {
+          if (isEmoji) {
+            updatePanelType(PanelType.keyboard);
+          } else {
+            updatePanelType(PanelType.emoji);
+          }
         },
+        icon: isEmoji
+            ? const Icon(Icons.keyboard, size: 22)
+            : const Icon(Icons.emoji_emotions, size: 22),
+        selected: isEmoji,
       );
+    },
+  );
 
   Widget get atBtn => ToolbarIconButton(
-        onPressed: () => onMention(true),
-        icon: const Icon(Icons.alternate_email, size: 22),
-        tooltip: '@',
-        selected: false,
-      );
+    onPressed: () => onMention(true),
+    icon: const Icon(Icons.alternate_email, size: 22),
+    tooltip: '@',
+    selected: false,
+  );
 
   Widget get moreBtn => Obx(
-        () {
-          final isMore = panelType.value == PanelType.more;
-          return ToolbarIconButton(
-            tooltip: isMore ? '输入' : '更多',
-            onPressed: () {
-              if (isMore) {
-                updatePanelType(PanelType.keyboard);
-              } else {
-                updatePanelType(PanelType.more);
-              }
-            },
-            icon: isMore
-                ? const Icon(Icons.keyboard, size: 22)
-                : const Icon(Icons.add_circle_outline, size: 22),
-            selected: isMore,
-          );
+    () {
+      final isMore = panelType.value == PanelType.more;
+      return ToolbarIconButton(
+        tooltip: isMore ? '输入' : '更多',
+        onPressed: () {
+          if (isMore) {
+            updatePanelType(PanelType.keyboard);
+          } else {
+            updatePanelType(PanelType.more);
+          }
         },
+        icon: isMore
+            ? const Icon(Icons.keyboard, size: 22)
+            : const Icon(Icons.add_circle_outline, size: 22),
+        selected: isMore,
       );
+    },
+  );
 }

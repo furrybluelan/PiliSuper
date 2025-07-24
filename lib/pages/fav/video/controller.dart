@@ -34,8 +34,8 @@ class FavController extends CommonListController<FavFolderData, FavFolderInfo> {
 
   @override
   Future<LoadingState<FavFolderData>> customGetData() => FavHttp.userfavFolder(
-        pn: page,
-        ps: 20,
-        mid: accountService.mid,
-      );
+    pn: page,
+    ps: 20,
+    mid: accountService.mid,
+  );
 }

@@ -52,7 +52,8 @@ class ChatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isPic = item.msgType == MsgType.EN_MSG_TYPE_PIC.value; // 图片
     bool isRevoke = item.msgType == MsgType.EN_MSG_TYPE_DRAW_BACK.value; // 撤回消息
-    bool isSystem = item.msgType == MsgType.EN_MSG_TYPE_VIDEO_CARD.value ||
+    bool isSystem =
+        item.msgType == MsgType.EN_MSG_TYPE_VIDEO_CARD.value ||
         item.msgType == MsgType.EN_MSG_TYPE_TIP_MESSAGE.value ||
         item.msgType == MsgType.EN_MSG_TYPE_NOTIFY_MSG.value ||
         item.msgType == MsgType.EN_MSG_TYPE_PICTURE_CARD.value ||
@@ -138,17 +139,18 @@ class ChatItem extends StatelessWidget {
                                   Divider(
                                     height: 10,
                                     thickness: 1,
-                                    color: theme.colorScheme.outline
-                                        .withValues(alpha: 0.2),
+                                    color: theme.colorScheme.outline.withValues(
+                                      alpha: 0.2,
+                                    ),
                                   ),
                                   Text(
                                     '此条消息为自动回复',
-                                    style:
-                                        theme.textTheme.labelMedium!.copyWith(
-                                      color: theme.colorScheme.outline,
-                                    ),
+                                    style: theme.textTheme.labelMedium!
+                                        .copyWith(
+                                          color: theme.colorScheme.outline,
+                                        ),
                                   ),
-                                ]
+                                ],
                               ],
                             ),
                           ),
@@ -313,8 +315,9 @@ class ChatItem extends StatelessWidget {
             for (var i in content['sub_cards'])
               GestureDetector(
                 onTap: () async {
-                  String? bvid =
-                      IdUtils.bvRegex.firstMatch(i['jump_url'])?.group(0);
+                  String? bvid = IdUtils.bvRegex
+                      .firstMatch(i['jump_url'])
+                      ?.group(0);
                   if (bvid != null) {
                     try {
                       SmartDialog.showLoading();
@@ -323,7 +326,7 @@ class ChatItem extends StatelessWidget {
                       if (cid != null) {
                         PageUtils.toVideoPage(
                           'bvid=$bvid&cid=$cid',
-                          arguments: <String, String?>{
+                          arguments: {
                             'pic': i['cover_url'],
                             'heroTag': Utils.makeHeroTag(bvid),
                           },
@@ -413,7 +416,7 @@ class ChatItem extends StatelessWidget {
                     PageUtils.toVideoPage(
                       'bvid=$bvid&cid=$cid',
                       arguments: {
-                        'pic': content['thumb'],
+                        'pic': content['cover'],
                         'heroTag': Utils.makeHeroTag(bvid),
                       },
                     );
@@ -442,12 +445,14 @@ class ChatItem extends StatelessWidget {
                         text: content['times'] == 0
                             ? '--:--'
                             : DurationUtil.formatDuration(content['times']),
-                      )
+                      ),
                     ],
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     child: Text(
                       content['times'] == 0 ? '内容已失效' : content['title'],
                       style: TextStyle(
@@ -496,7 +501,7 @@ class ChatItem extends StatelessWidget {
           if (cid != null) {
             PageUtils.toVideoPage(
               'bvid=$bvid&cid=$cid',
-              arguments: <String, String?>{
+              arguments: {
                 'pic': content['thumb'],
                 'heroTag': Utils.makeHeroTag(bvid),
               },
@@ -509,12 +514,12 @@ class ChatItem extends StatelessWidget {
       case 6:
         type = '专栏';
         onTap = () => Get.toNamed(
-              '/articlePage',
-              parameters: {
-                'id': '${content['id']}',
-                'type': 'read',
-              },
-            );
+          '/articlePage',
+          parameters: {
+            'id': '${content['id']}',
+            'type': 'read',
+          },
+        );
         break;
 
       // dynamic
@@ -530,7 +535,8 @@ class ChatItem extends StatelessWidget {
 
       default:
         onTap = () => SmartDialog.showToast(
-            'unsupported source type: ${content['source']}');
+          'unsupported source type: ${content['source']}',
+        );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -698,15 +704,21 @@ class ChatItem extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   children: modules!.indexed
-                      .map((e) => TextSpan(children: [
+                      .map(
+                        (e) => TextSpan(
+                          children: [
                             TextSpan(
-                                text: e.$2['title'],
-                                style: TextStyle(
-                                    color: theme.colorScheme.outline)),
+                              text: e.$2['title'],
+                              style: TextStyle(
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
                             TextSpan(text: '    ${e.$2['detail']}'),
                             if (e.$1 != modules.length - 1)
                               const TextSpan(text: '\n'),
-                          ]))
+                          ],
+                        ),
+                      )
                       .toList(),
                 ),
               ),

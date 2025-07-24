@@ -3,6 +3,8 @@ import 'package:PiliPlus/models_new/fav/fav_folder/data.dart';
 import 'package:PiliPlus/models_new/video/video_tag/data.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -12,18 +14,18 @@ abstract class CommonIntroController extends GetxController {
   String bvid = Get.parameters['bvid']!;
 
   // 是否点赞
-  RxBool hasLike = false.obs;
+  final RxBool hasLike = false.obs;
   // 投币数量
   final RxNum coinNum = RxNum(0);
   // 是否投币
   bool get hasCoin => coinNum.value != 0;
   // 是否收藏
-  RxBool hasFav = false.obs;
+  final RxBool hasFav = false.obs;
 
-  List<VideoTagItem>? videoTags;
+  final Rx<List<VideoTagItem>?> videoTags = Rx<List<VideoTagItem>?>(null);
 
   Set? favIds;
-  Rx<FavFolderData> favFolderData = FavFolderData().obs;
+  final Rx<FavFolderData> favFolderData = FavFolderData().obs;
 
   AccountService accountService = Get.find<AccountService>();
 
@@ -32,6 +34,24 @@ abstract class CommonIntroController extends GetxController {
   Future<void> actionFavVideo({String type = 'choose'});
 
   late final enableQuickFav = Pref.enableQuickFav;
+  int? quickFavId;
+
+  int get favFolderId {
+    if (this.quickFavId != null) {
+      return this.quickFavId!;
+    }
+    final quickFavId = Pref.quickFavId;
+    final list = favFolderData.value.list!;
+    if (quickFavId != null) {
+      final folderInfo = list.firstWhereOrNull((e) => e.id == quickFavId);
+      if (folderInfo != null) {
+        return this.quickFavId = quickFavId;
+      } else {
+        GStorage.setting.delete(SettingBoxKey.quickFavId);
+      }
+    }
+    return this.quickFavId = list.first.id;
+  }
 
   // 收藏
   void showFavBottomSheet(BuildContext context, {type = 'tap'}) {
@@ -54,10 +74,11 @@ abstract class CommonIntroController extends GetxController {
   }
 
   Future<void> queryVideoTags() async {
-    videoTags = null;
     var result = await UserHttp.videoTags(bvid: bvid);
     if (result['status']) {
-      videoTags = result['data'];
+      videoTags.value = result['data'];
+    } else {
+      videoTags.value = null;
     }
   }
 }

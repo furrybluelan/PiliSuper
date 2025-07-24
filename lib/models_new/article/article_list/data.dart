@@ -10,8 +10,13 @@ class ArticleListData {
   Last? last;
   bool? attention;
 
-  ArticleListData(
-      {this.list, this.articles, this.author, this.last, this.attention});
+  ArticleListData({
+    this.list,
+    this.articles,
+    this.author,
+    this.last,
+    this.attention,
+  });
 
   factory ArticleListData.fromJson(Map<String, dynamic> json) =>
       ArticleListData(
@@ -20,7 +25,8 @@ class ArticleListData {
             : ArticleListInfo.fromJson(json['list'] as Map<String, dynamic>),
         articles: (json['articles'] as List<dynamic>?)
             ?.map(
-                (e) => ArticleListItemModel.fromJson(e as Map<String, dynamic>))
+              (e) => ArticleListItemModel.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
         author: json['author'] == null
             ? null

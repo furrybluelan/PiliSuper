@@ -33,7 +33,8 @@ class SearchText extends StatelessWidget {
         onLongPress: onLongPress != null ? () => onLongPress!(text) : null,
         borderRadius: const BorderRadius.all(Radius.circular(6)),
         child: Padding(
-          padding: padding ??
+          padding:
+              padding ??
               const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
           child: Text(
             text,

@@ -136,21 +136,24 @@ class _SettingPageState extends State<SettingPage> {
                     removeLeft: true,
                     removeTop: true,
                     child: switch (_type) {
-                      'privacySetting' =>
-                        const PrivacySetting(showAppBar: false),
-                      'recommendSetting' =>
-                        const RecommendSetting(showAppBar: false),
+                      'privacySetting' => const PrivacySetting(
+                        showAppBar: false,
+                      ),
+                      'recommendSetting' => const RecommendSetting(
+                        showAppBar: false,
+                      ),
                       'videoSetting' => const VideoSetting(showAppBar: false),
                       'playSetting' => const PlaySetting(showAppBar: false),
                       'styleSetting' => const StyleSetting(showAppBar: false),
                       'extraSetting' => const ExtraSetting(showAppBar: false),
-                      'webdavSetting' =>
-                        const WebDavSettingPage(showAppBar: false),
+                      'webdavSetting' => const WebDavSettingPage(
+                        showAppBar: false,
+                      ),
                       'about' => const AboutPage(showAppBar: false),
                       _ => const SizedBox.shrink(),
                     },
                   ),
-                )
+                ),
               ],
             ),
     );
@@ -175,12 +178,15 @@ class _SettingPageState extends State<SettingPage> {
 
   Widget _buildList(ThemeData theme) {
     TextStyle titleStyle = theme.textTheme.titleMedium!;
-    TextStyle subTitleStyle =
-        theme.textTheme.labelMedium!.copyWith(color: theme.colorScheme.outline);
+    TextStyle subTitleStyle = theme.textTheme.labelMedium!.copyWith(
+      color: theme.colorScheme.outline,
+    );
     return ListView(
       children: [
         _buildSearchItem(theme),
-        ..._items.sublist(0, _items.length - 1).map(
+        ..._items
+            .sublist(0, _items.length - 1)
+            .map(
               (item) => ListTile(
                 tileColor: _getTileColor(theme, item.name),
                 onTap: () => _toPage(item.name),
@@ -234,84 +240,86 @@ class _SettingPageState extends State<SettingPage> {
     }
 
     showDialog(
-        context: context,
-        builder: (context) {
-          final theme = Theme.of(context);
-          return AlertDialog(
-            title: const Text('提示'),
-            content: Text(
-                "确认要退出以下账号登录吗\n\n${result!.map((i) => i.mid.toString()).join('\n')}"),
-            actions: [
-              TextButton(
-                onPressed: Get.back,
-                child: Text(
-                  '点错了',
-                  style: TextStyle(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Get.back();
-                  logout();
-                },
-                child: Text(
-                  '仅登出',
-                  style: TextStyle(color: theme.colorScheme.error),
-                ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  SmartDialog.showLoading();
-                  final res = await LoginHttp.logout(Accounts.main);
-                  if (res['status']) {
-                    SmartDialog.dismiss();
-                    logout();
-                    Get.back();
-                  } else {
-                    SmartDialog.dismiss();
-                    SmartDialog.showToast(res['msg'].toString());
-                  }
-                },
-                child: const Text('确认'),
-              )
-            ],
-          );
-        });
-  }
-
-  Widget _buildSearchItem(ThemeData theme) => Padding(
-        padding: EdgeInsets.only(
-          left: 16 + MediaQuery.paddingOf(context).left,
-          right: 16,
-          bottom: 8,
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: () => Get.toNamed('/settingsSearch'),
-            borderRadius: const BorderRadius.all(Radius.circular(50)),
-            child: Ink(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(50)),
-                color: theme.colorScheme.onInverseSurface,
-              ),
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      size: MediaQuery.textScalerOf(context).scale(18),
-                      Icons.search,
-                    ),
-                    const Text(' 搜索'),
-                  ],
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          title: const Text('提示'),
+          content: Text(
+            "确认要退出以下账号登录吗\n\n${result!.map((i) => i.mid.toString()).join('\n')}",
+          ),
+          actions: [
+            TextButton(
+              onPressed: Get.back,
+              child: Text(
+                '点错了',
+                style: TextStyle(
+                  color: theme.colorScheme.outline,
                 ),
               ),
             ),
+            TextButton(
+              onPressed: () {
+                Get.back();
+                logout();
+              },
+              child: Text(
+                '仅登出',
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                SmartDialog.showLoading();
+                final res = await LoginHttp.logout(Accounts.main);
+                if (res['status']) {
+                  SmartDialog.dismiss();
+                  logout();
+                  Get.back();
+                } else {
+                  SmartDialog.dismiss();
+                  SmartDialog.showToast(res['msg'].toString());
+                }
+              },
+              child: const Text('确认'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSearchItem(ThemeData theme) => Padding(
+    padding: EdgeInsets.only(
+      left: 16 + MediaQuery.paddingOf(context).left,
+      right: 16,
+      bottom: 8,
+    ),
+    child: Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () => Get.toNamed('/settingsSearch'),
+        borderRadius: const BorderRadius.all(Radius.circular(50)),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(50)),
+            color: theme.colorScheme.onInverseSurface,
+          ),
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  size: MediaQuery.textScalerOf(context).scale(18),
+                  Icons.search,
+                ),
+                const Text(' 搜索'),
+              ],
+            ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

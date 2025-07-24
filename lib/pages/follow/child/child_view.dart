@@ -56,8 +56,8 @@ class _FollowChildPageState extends State<FollowChildPage>
               onPressed: () => _followController
                 ..orderType.value =
                     _followController.orderType.value == FollowOrderType.def
-                        ? FollowOrderType.attention
-                        : FollowOrderType.def
+                    ? FollowOrderType.attention
+                    : FollowOrderType.def
                 ..onReload(),
               icon: const Icon(Icons.format_list_bulleted, size: 20),
               label: Obx(() => Text(_followController.orderType.value.title)),
@@ -70,53 +70,54 @@ class _FollowChildPageState extends State<FollowChildPage>
   }
 
   Widget get _child => refreshIndicator(
-        onRefresh: _followController.onRefresh,
-        child: CustomScrollView(
-          controller: _followController.scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.paddingOf(context).bottom + 80),
-              sliver:
-                  Obx(() => _buildBody(_followController.loadingState.value)),
-            ),
-          ],
+    onRefresh: _followController.onRefresh,
+    child: CustomScrollView(
+      controller: _followController.scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.paddingOf(context).bottom + 80,
+          ),
+          sliver: Obx(() => _buildBody(_followController.loadingState.value)),
         ),
-      );
+      ],
+    ),
+  );
 
   Widget _buildBody(LoadingState<List<FollowItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverList.builder(
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            return const MsgFeedTopSkeleton();
-          },
-        ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.builder(
-              itemCount: response!.length,
-              itemBuilder: (context, index) {
-                if (index == response.length - 1) {
-                  _followController.onLoadMore();
-                }
-                final item = response[index];
-                return FollowItem(
-                  item: item,
-                  isOwner: widget.controller?.isOwner,
-                  onSelect: widget.onSelect,
-                  callback: (attr) {
-                    item.attribute = attr == 0 ? -1 : 0;
-                    _followController.loadingState.refresh();
-                  },
-                );
-              },
-            )
-          : HttpError(onReload: _followController.onReload),
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          return const MsgFeedTopSkeleton();
+        },
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.builder(
+                itemCount: response!.length,
+                itemBuilder: (context, index) {
+                  if (index == response.length - 1) {
+                    _followController.onLoadMore();
+                  }
+                  final item = response[index];
+                  return FollowItem(
+                    item: item,
+                    isOwner: widget.controller?.isOwner,
+                    onSelect: widget.onSelect,
+                    callback: (attr) {
+                      item.attribute = attr == 0 ? -1 : 0;
+                      _followController.loadingState.refresh();
+                    },
+                  );
+                },
+              )
+            : HttpError(onReload: _followController.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _followController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _followController.onReload,
+      ),
     };
   }
 

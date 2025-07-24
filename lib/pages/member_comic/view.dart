@@ -25,8 +25,10 @@ class MemberComic extends StatefulWidget {
 
 class _MemberComicState extends State<MemberComic>
     with AutomaticKeepAliveClientMixin {
-  late final _controller =
-      Get.put(MemberComicController(widget.mid), tag: widget.heroTag);
+  late final _controller = Get.put(
+    MemberComicController(widget.mid),
+    tag: widget.heroTag,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -50,24 +52,25 @@ class _MemberComicState extends State<MemberComic>
   Widget _buildBody(LoadingState<List<SpaceArchiveItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => linearLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _controller.onLoadMore();
-                  }
-                  return MemberComicItem(item: response[index]);
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: _controller.onReload),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _controller.onLoadMore();
+                    }
+                    return MemberComicItem(item: response[index]);
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

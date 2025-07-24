@@ -8,9 +8,9 @@ class PbpData {
   });
 
   factory PbpData.fromJson(Map<String, dynamic> json) => PbpData(
-        stepSec: json["step_sec"],
-        events: json["events"] == null ? null : Events.fromJson(json["events"]),
-      );
+    stepSec: json["step_sec"],
+    events: json["events"] == null ? null : Events.fromJson(json["events"]),
+  );
 }
 
 class Events {
@@ -21,8 +21,8 @@ class Events {
   });
 
   factory Events.fromJson(Map<String, dynamic> json) => Events(
-        eDefault: (json["default"] as List?)
-            ?.map((e) => (e as num).toDouble())
-            .toList(),
-      );
+    eDefault: (json["default"] as List?)
+        ?.map((e) => (e as num).toDouble())
+        .toList(),
+  );
 }

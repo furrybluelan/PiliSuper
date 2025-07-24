@@ -47,36 +47,37 @@ class _SubPageState extends State<SubPage> {
   Widget _buildBody(LoadingState<List<SubItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: Grid.videoCardHDelegate(context),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => const VideoCardHSkeleton(),
-            childCount: 10,
-          ),
+        gridDelegate: Grid.videoCardHDelegate(context),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => const VideoCardHSkeleton(),
+          childCount: 10,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                childCount: response!.length,
-                (BuildContext context, int index) {
-                  if (index == response.length - 1) {
-                    _subController.onLoadMore();
-                  }
-                  final item = response[index];
-                  return SubItem(
-                    item: item,
-                    cancelSub: () => _subController.cancelSub(item),
-                  );
-                },
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  childCount: response!.length,
+                  (BuildContext context, int index) {
+                    if (index == response.length - 1) {
+                      _subController.onLoadMore();
+                    }
+                    final item = response[index];
+                    return SubItem(
+                      item: item,
+                      cancelSub: () => _subController.cancelSub(item),
+                    );
+                  },
+                ),
+              )
+            : HttpError(
+                onReload: _subController.onReload,
               ),
-            )
-          : HttpError(
-              onReload: _subController.onReload,
-            ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _subController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _subController.onReload,
+      ),
     };
   }
 }

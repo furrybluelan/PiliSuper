@@ -95,8 +95,9 @@ class FollowItem extends StatelessWidget {
                   ),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                    foregroundColor:
-                        item.attribute == -1 ? null : theme.colorScheme.outline,
+                    foregroundColor: item.attribute == -1
+                        ? null
+                        : theme.colorScheme.outline,
                     backgroundColor: item.attribute == -1
                         ? null
                         : theme.colorScheme.onInverseSurface,

@@ -19,8 +19,9 @@ class ArticleContentModel {
     format = json['format'] == null ? null : Format.fromJson(json['format']);
     line = json['line'] == null ? null : Line.fromJson(json['line']);
     pic = json['pic'] == null ? null : Pic.fromJson(json['pic']);
-    linkCard =
-        json['link_card'] == null ? null : LinkCard.fromJson(json['link_card']);
+    linkCard = json['link_card'] == null
+        ? null
+        : LinkCard.fromJson(json['link_card']);
     code = json['code'] == null ? null : Code.fromJson(json['code']);
     list = json['list'] == null ? null : L1st.fromJson(json['list']);
   }
@@ -79,8 +80,9 @@ class Text {
   List<Node>? nodes;
 
   Text.fromJson(Map<String, dynamic> json) {
-    nodes =
-        (json['nodes'] as List?)?.map((item) => Node.fromJson(item)).toList();
+    nodes = (json['nodes'] as List?)
+        ?.map((item) => Node.fromJson(item))
+        .toList();
   }
 }
 
@@ -95,8 +97,9 @@ class Node {
     nodeType = json['node_type'];
     word = json['word'] == null ? null : Word.fromJson(json['word']);
     rich = json['rich'] == null ? null : Rich.fromJson(json['rich']);
-    formula =
-        json['formula'] == null ? null : Formula.fromJson(json['formula']);
+    formula = json['formula'] == null
+        ? null
+        : Formula.fromJson(json['formula']);
     type = json['type'];
   }
 }
@@ -122,8 +125,10 @@ class Word {
     style = json['style'] == null ? null : Style.fromJson(json['style']);
     color = json['color'] == null
         ? null
-        : int.tryParse('FF${(json['color'] as String).substring(1)}',
-            radix: 16);
+        : int.tryParse(
+            'FF${(json['color'] as String).substring(1)}',
+            radix: 16,
+          );
     fontLevel = json['font_level'];
   }
 }
@@ -203,8 +208,9 @@ class Card {
     oid = json['oid'];
     type = json['type'];
     ugc = json['ugc'] == null ? null : Ugc.fromJson(json['ugc']);
-    itemNull =
-        json['item_null'] == null ? null : ItemNull.fromJson(json['item_null']);
+    itemNull = json['item_null'] == null
+        ? null
+        : ItemNull.fromJson(json['item_null']);
     common = json['common'] == null ? null : Common.fromJson(json['common']);
     live = json['live'] == null ? null : Live.fromJson(json['live']);
     opus = json['opus'] == null ? null : Opus.fromJson(json['opus']);

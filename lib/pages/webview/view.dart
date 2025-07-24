@@ -129,18 +129,24 @@ class _WebviewPageState extends State<WebviewPage> {
                   itemBuilder: (context) => <PopupMenuEntry<WebviewMenuItem>>[
                     ...WebviewMenuItem.values
                         .sublist(0, WebviewMenuItem.values.length - 1)
-                        .map((item) => PopupMenuItem(
-                            value: item, child: Text(item.title))),
+                        .map(
+                          (item) => PopupMenuItem(
+                            value: item,
+                            child: Text(item.title),
+                          ),
+                        ),
                     const PopupMenuDivider(),
                     PopupMenuItem(
-                        value: WebviewMenuItem.goBack,
-                        child: Text(
-                          WebviewMenuItem.goBack.title,
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.error),
-                        )),
+                      value: WebviewMenuItem.goBack,
+                      child: Text(
+                        WebviewMenuItem.goBack.title,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
                   ],
-                )
+                ),
               ],
             ),
       body: SafeArea(
@@ -155,8 +161,9 @@ class _WebviewPageState extends State<WebviewPage> {
             userAgent: Request.headerUa(type: uaType),
             mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
           ),
-          initialUrlRequest:
-              URLRequest(url: WebUri.uri(Uri.tryParse(_url) ?? Uri())),
+          initialUrlRequest: URLRequest(
+            url: WebUri.uri(Uri.tryParse(_url) ?? Uri()),
+          ),
           onWebViewCreated: (InAppWebViewController controller) {
             _webViewController = controller;
             controller
@@ -190,16 +197,20 @@ class _WebviewPageState extends State<WebviewPage> {
             final url = uri.toString();
             if (url.startsWith('https://www.bilibili.com/h5/note-app')) {
               controller
-                ..evaluateJavascript(source: """
+                ..evaluateJavascript(
+                  source: """
   document.querySelector('.finish-btn').addEventListener('click', function() {
       window.flutter_inappwebview.callHandler('finishButtonClicked');
   });
-""")
-                ..evaluateJavascript(source: """
+""",
+                )
+                ..evaluateJavascript(
+                  source: """
   document.querySelector('.info-bar').addEventListener('click', function() {
       window.flutter_inappwebview.callHandler('infoBarClicked');
   });
-""");
+""",
+                );
             } else if (url.startsWith('https://live.bilibili.com')) {
               controller.evaluateJavascript(
                 source: '''
@@ -218,43 +229,47 @@ class _WebviewPageState extends State<WebviewPage> {
           onDownloadStartRequest: Platform.isAndroid
               ? (controller, request) {
                   showDialog(
-                      context: context,
-                      builder: (context) {
-                        String suggestedFilename =
-                            request.suggestedFilename.toString();
-                        String fileSize = CacheManage.formatSize(
-                            request.contentLength.toDouble());
-                        try {
-                          suggestedFilename =
-                              Uri.decodeComponent(suggestedFilename);
-                        } catch (e) {
-                          if (kDebugMode) debugPrint(e.toString());
-                        }
-                        return AlertDialog(
-                          title: Text(
-                            '下载文件: $suggestedFilename ?',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                          content: SelectableText(request.url.toString()),
-                          actions: [
-                            TextButton(
-                              onPressed: Get.back,
-                              child: Text(
-                                '取消',
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
+                    context: context,
+                    builder: (context) {
+                      String suggestedFilename = request.suggestedFilename
+                          .toString();
+                      String fileSize = CacheManage.formatSize(
+                        request.contentLength.toDouble(),
+                      );
+                      try {
+                        suggestedFilename = Uri.decodeComponent(
+                          suggestedFilename,
+                        );
+                      } catch (e) {
+                        if (kDebugMode) debugPrint(e.toString());
+                      }
+                      return AlertDialog(
+                        title: Text(
+                          '下载文件: $suggestedFilename ?',
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        content: SelectableText(request.url.toString()),
+                        actions: [
+                          TextButton(
+                            onPressed: Get.back,
+                            child: Text(
+                              '取消',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline,
                               ),
                             ),
-                            TextButton(
-                                onPressed: () {
-                                  Get.back();
-                                  PageUtils.launchURL(request.url.toString());
-                                },
-                                child: Text('确定 ($fileSize)')),
-                          ],
-                        );
-                      });
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Get.back();
+                              PageUtils.launchURL(request.url.toString());
+                            },
+                            child: Text('确定 ($fileSize)'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                   progress.value = 1;
                 }
               : null,
@@ -263,16 +278,18 @@ class _WebviewPageState extends State<WebviewPage> {
             if (url.startsWith('//api.bilibili.com/x/note/add') &&
                 widget.title != null) {
               return ajaxRequest
-                ..data = ajaxRequest.data
-                    .toString()
-                    .replaceFirst('&title=--&', '&title=${widget.title}&');
+                ..data = ajaxRequest.data.toString().replaceFirst(
+                  '&title=--&',
+                  '&title=${widget.title}&',
+                );
             }
             return null;
           },
           shouldInterceptRequest: (controller, request) async {
             String url = request.url.toString();
             if (url.startsWith(
-                'https://passport.bilibili.com/x/passport-login/web')) {
+              'https://passport.bilibili.com/x/passport-login/web',
+            )) {
               progress.value = 1;
               return WebResourceResponse();
             }
@@ -292,8 +309,10 @@ class _WebviewPageState extends State<WebviewPage> {
             if (hasMatch) {
               progress.value = 1;
               return NavigationActionPolicy.CANCEL;
-            } else if (RegExp(r'^(?!(https?://))\S+://', caseSensitive: false)
-                .hasMatch(url)) {
+            } else if (RegExp(
+              r'^(?!(https?://))\S+://',
+              caseSensitive: false,
+            ).hasMatch(url)) {
               if (context.mounted) {
                 SnackBar snackBar = SnackBar(
                   content: const Text('当前网页将要打开外部链接，是否打开'),

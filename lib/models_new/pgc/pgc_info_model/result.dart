@@ -116,90 +116,89 @@ class PgcInfoModel {
   });
 
   factory PgcInfoModel.fromJson(Map<String, dynamic> json) => PgcInfoModel(
-        activity: json['activity'] == null
-            ? null
-            : Activity.fromJson(json['activity'] as Map<String, dynamic>),
-        actors: json['actors'] as String?,
-        alias: json['alias'] as String?,
-        areas: (json['areas'] as List<dynamic>?)
-            ?.map((e) => Area.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        bkgCover: json['bkg_cover'] as String?,
-        cover: json['cover'] as String?,
-        deliveryFragmentVideo: json['delivery_fragment_video'] as bool?,
-        enableVt: json['enable_vt'] as bool?,
-        episodes: (json['episodes'] as List<dynamic>?)
-            ?.map((e) => EpisodeItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        evaluate: json['evaluate'] as String?,
-        freya: json['freya'] == null
-            ? null
-            : Freya.fromJson(json['freya'] as Map<String, dynamic>),
-        hideEpVvVtDm: json['hide_ep_vv_vt_dm'] as int?,
-        iconFont: json['icon_font'] == null
-            ? null
-            : IconFont.fromJson(json['icon_font'] as Map<String, dynamic>),
-        jpTitle: json['jp_title'] as String?,
-        link: json['link'] as String?,
-        mediaId: json['media_id'] as int?,
-        mode: json['mode'] as int?,
-        newEp: json['new_ep'] == null
-            ? null
-            : NewEp.fromJson(json['new_ep'] as Map<String, dynamic>),
-        payment: json['payment'] == null
-            ? null
-            : Payment.fromJson(json['payment'] as Map<String, dynamic>),
-        playStrategy: json['play_strategy'] == null
-            ? null
-            : PlayStrategy.fromJson(
-                json['play_strategy'] as Map<String, dynamic>),
-        positive: json['positive'] == null
-            ? null
-            : Positive.fromJson(json['positive'] as Map<String, dynamic>),
-        publish: json['publish'] == null
-            ? null
-            : Publish.fromJson(json['publish'] as Map<String, dynamic>),
-        rating: json['rating'] == null
-            ? null
-            : Rating.fromJson(json['rating'] as Map<String, dynamic>),
-        record: json['record'] as String?,
-        rights: json['rights'] == null
-            ? null
-            : Rights.fromJson(json['rights'] as Map<String, dynamic>),
-        seasonId: json['season_id'] as int?,
-        seasonTitle: json['season_title'] as String?,
-        seasons: (json['seasons'] as List<dynamic>?)
-            ?.map((e) => Season.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        section: (json['section'] as List<dynamic>?)
-            ?.map((e) => Section.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        series: json['series'] == null
-            ? null
-            : Series.fromJson(json['series'] as Map<String, dynamic>),
-        shareCopy: json['share_copy'] as String?,
-        shareSubTitle: json['share_sub_title'] as String?,
-        shareUrl: json['share_url'] as String?,
-        show: json['show'] == null
-            ? null
-            : Show.fromJson(json['show'] as Map<String, dynamic>),
-        showSeasonType: json['show_season_type'] as int?,
-        squareCover: json['square_cover'] as String?,
-        staff: json['staff'] as String?,
-        stat: json['stat'] == null
-            ? null
-            : Stat.fromJson(json['stat'] as Map<String, dynamic>),
-        status: json['status'] as int?,
-        styles: json['styles'],
-        subtitle: json['subtitle'] as String?,
-        title: json['title'] as String?,
-        total: json['total'] as int?,
-        type: json['type'] as int?,
-        upInfo: json['up_info'] == null
-            ? null
-            : UpInfo.fromJson(json['up_info'] as Map<String, dynamic>),
-        userStatus: json['user_status'] == null
-            ? null
-            : UserStatus.fromJson(json['user_status'] as Map<String, dynamic>),
-      );
+    activity: json['activity'] == null
+        ? null
+        : Activity.fromJson(json['activity'] as Map<String, dynamic>),
+    actors: json['actors'] as String?,
+    alias: json['alias'] as String?,
+    areas: (json['areas'] as List<dynamic>?)
+        ?.map((e) => Area.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    bkgCover: json['bkg_cover'] as String?,
+    cover: json['cover'] as String?,
+    deliveryFragmentVideo: json['delivery_fragment_video'] as bool?,
+    enableVt: json['enable_vt'] as bool?,
+    episodes: (json['episodes'] as List<dynamic>?)
+        ?.map((e) => EpisodeItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    evaluate: json['evaluate'] as String?,
+    freya: json['freya'] == null
+        ? null
+        : Freya.fromJson(json['freya'] as Map<String, dynamic>),
+    hideEpVvVtDm: json['hide_ep_vv_vt_dm'] as int?,
+    iconFont: json['icon_font'] == null
+        ? null
+        : IconFont.fromJson(json['icon_font'] as Map<String, dynamic>),
+    jpTitle: json['jp_title'] as String?,
+    link: json['link'] as String?,
+    mediaId: json['media_id'] as int?,
+    mode: json['mode'] as int?,
+    newEp: json['new_ep'] == null
+        ? null
+        : NewEp.fromJson(json['new_ep'] as Map<String, dynamic>),
+    payment: json['payment'] == null
+        ? null
+        : Payment.fromJson(json['payment'] as Map<String, dynamic>),
+    playStrategy: json['play_strategy'] == null
+        ? null
+        : PlayStrategy.fromJson(json['play_strategy'] as Map<String, dynamic>),
+    positive: json['positive'] == null
+        ? null
+        : Positive.fromJson(json['positive'] as Map<String, dynamic>),
+    publish: json['publish'] == null
+        ? null
+        : Publish.fromJson(json['publish'] as Map<String, dynamic>),
+    rating: json['rating'] == null
+        ? null
+        : Rating.fromJson(json['rating'] as Map<String, dynamic>),
+    record: json['record'] as String?,
+    rights: json['rights'] == null
+        ? null
+        : Rights.fromJson(json['rights'] as Map<String, dynamic>),
+    seasonId: json['season_id'] as int?,
+    seasonTitle: json['season_title'] as String?,
+    seasons: (json['seasons'] as List<dynamic>?)
+        ?.map((e) => Season.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    section: (json['section'] as List<dynamic>?)
+        ?.map((e) => Section.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    series: json['series'] == null
+        ? null
+        : Series.fromJson(json['series'] as Map<String, dynamic>),
+    shareCopy: json['share_copy'] as String?,
+    shareSubTitle: json['share_sub_title'] as String?,
+    shareUrl: json['share_url'] as String?,
+    show: json['show'] == null
+        ? null
+        : Show.fromJson(json['show'] as Map<String, dynamic>),
+    showSeasonType: json['show_season_type'] as int?,
+    squareCover: json['square_cover'] as String?,
+    staff: json['staff'] as String?,
+    stat: json['stat'] == null
+        ? null
+        : Stat.fromJson(json['stat'] as Map<String, dynamic>),
+    status: json['status'] as int?,
+    styles: json['styles'],
+    subtitle: json['subtitle'] as String?,
+    title: json['title'] as String?,
+    total: json['total'] as int?,
+    type: json['type'] as int?,
+    upInfo: json['up_info'] == null
+        ? null
+        : UpInfo.fromJson(json['up_info'] as Map<String, dynamic>),
+    userStatus: json['user_status'] == null
+        ? null
+        : UserStatus.fromJson(json['user_status'] as Map<String, dynamic>),
+  );
 }

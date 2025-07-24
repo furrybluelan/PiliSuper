@@ -37,14 +37,15 @@ class VideoCardV extends StatelessWidget {
         break;
       case 'av':
         String bvid = videoItem.bvid ?? IdUtils.av2bv(videoItem.aid!);
-        int? cid = videoItem.cid ??
+        int? cid =
+            videoItem.cid ??
             await SearchHttp.ab2c(aid: videoItem.aid, bvid: bvid);
         if (cid != null) {
           PageUtils.toVideoPage(
             'bvid=$bvid&cid=$cid',
             arguments: {
-              'pic': videoItem.cover,
               'heroTag': heroTag,
+              'videoItem': videoItem,
             },
           );
         }
@@ -83,32 +84,35 @@ class VideoCardV extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: StyleString.aspectRatio,
-                  child: LayoutBuilder(builder: (context, boxConstraints) {
-                    double maxWidth = boxConstraints.maxWidth;
-                    double maxHeight = boxConstraints.maxHeight;
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        NetworkImgLayer(
-                          src: videoItem.cover,
-                          width: maxWidth,
-                          height: maxHeight,
-                          radius: 0,
-                        ),
-                        if (videoItem.duration > 0)
-                          PBadge(
-                            bottom: 6,
-                            right: 7,
-                            size: PBadgeSize.small,
-                            type: PBadgeType.gray,
-                            text:
-                                DurationUtil.formatDuration(videoItem.duration),
-                          )
-                      ],
-                    );
-                  }),
+                  child: LayoutBuilder(
+                    builder: (context, boxConstraints) {
+                      double maxWidth = boxConstraints.maxWidth;
+                      double maxHeight = boxConstraints.maxHeight;
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          NetworkImgLayer(
+                            src: videoItem.cover,
+                            width: maxWidth,
+                            height: maxHeight,
+                            radius: 0,
+                          ),
+                          if (videoItem.duration > 0)
+                            PBadge(
+                              bottom: 6,
+                              right: 7,
+                              size: PBadgeSize.small,
+                              type: PBadgeType.gray,
+                              text: DurationUtil.formatDuration(
+                                videoItem.duration,
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
-                content(context)
+                content(context),
               ],
             ),
           ),
@@ -193,7 +197,7 @@ class VideoCardV extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (videoItem.goto == 'av') const SizedBox(width: 10)
+                if (videoItem.goto == 'av') const SizedBox(width: 10),
               ],
             ),
           ],
@@ -236,7 +240,7 @@ class VideoCardV extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 2),
-        ]
+        ],
         // deprecated
         //  else if (videoItem is RecVideoItemAppModel &&
         //     videoItem.desc != null &&

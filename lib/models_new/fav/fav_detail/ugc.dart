@@ -4,6 +4,6 @@ class Ugc {
   Ugc({this.firstCid});
 
   factory Ugc.fromJson(Map<String, dynamic> json) => Ugc(
-        firstCid: json['first_cid'] as int?,
-      );
+    firstCid: json['first_cid'] as int?,
+  );
 }

@@ -16,12 +16,12 @@ class Result {
   });
 
   factory Result.fromJson(Map<String, dynamic> json) => Result(
-        date: json['date'] as String?,
-        dateTs: json['date_ts'] as int?,
-        dayOfWeek: json['day_of_week'] as int?,
-        episodes: (json['episodes'] as List<dynamic>?)
-            ?.map((e) => Episode.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        isToday: json['is_today'] as int?,
-      );
+    date: json['date'] as String?,
+    dateTs: json['date_ts'] as int?,
+    dayOfWeek: json['day_of_week'] as int?,
+    episodes: (json['episodes'] as List<dynamic>?)
+        ?.map((e) => Episode.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    isToday: json['is_today'] as int?,
+  );
 }

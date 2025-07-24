@@ -8,10 +8,10 @@ class MentionGroup {
   MentionGroup({this.groupName, this.groupType, this.items});
 
   factory MentionGroup.fromJson(Map<String, dynamic> json) => MentionGroup(
-        groupName: json['group_name'] as String?,
-        groupType: json['group_type'] as int?,
-        items: (json['items'] as List<dynamic>?)
-            ?.map((e) => MentionItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    groupName: json['group_name'] as String?,
+    groupType: json['group_type'] as int?,
+    items: (json['items'] as List<dynamic>?)
+        ?.map((e) => MentionItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

@@ -44,15 +44,15 @@ class NetworkImgLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return src?.isNotEmpty == true
         ? type == ImageType.avatar
-            ? ClipOval(child: _buildImage(context))
-            : radius == 0 || type == ImageType.emote
-                ? _buildImage(context)
-                : ClipRRect(
-                    borderRadius: radius != null
-                        ? BorderRadius.circular(radius!)
-                        : StyleString.mdRadius,
-                    child: _buildImage(context),
-                  )
+              ? ClipOval(child: _buildImage(context))
+              : radius == 0 || type == ImageType.emote
+              ? _buildImage(context)
+              : ClipRRect(
+                  borderRadius: radius != null
+                      ? BorderRadius.circular(radius!)
+                      : StyleString.mdRadius,
+                  child: _buildImage(context),
+                )
         : getPlaceHolder?.call() ?? placeholder(context);
   }
 
@@ -70,8 +70,9 @@ class NetworkImgLayer extends StatelessWidget {
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
       fit: boxFit ?? BoxFit.cover,
-      alignment:
-          isLongPic?.call() == true ? Alignment.topCenter : Alignment.center,
+      alignment: isLongPic?.call() == true
+          ? Alignment.topCenter
+          : Alignment.center,
       fadeOutDuration: fadeOutDuration ?? const Duration(milliseconds: 120),
       fadeInDuration: fadeInDuration ?? const Duration(milliseconds: 120),
       filterQuality: FilterQuality.low,
@@ -89,16 +90,15 @@ class NetworkImgLayer extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         shape: type == ImageType.avatar ? BoxShape.circle : BoxShape.rectangle,
-        color: Theme.of(context)
-            .colorScheme
-            .onInverseSurface
-            .withValues(alpha: 0.4),
+        color: Theme.of(
+          context,
+        ).colorScheme.onInverseSurface.withValues(alpha: 0.4),
         borderRadius:
             type == ImageType.avatar || type == ImageType.emote || radius == 0
-                ? null
-                : radius != null
-                    ? BorderRadius.circular(radius!)
-                    : StyleString.mdRadius,
+            ? null
+            : radius != null
+            ? BorderRadius.circular(radius!)
+            : StyleString.mdRadius,
       ),
       child: Center(
         child: Image.asset(

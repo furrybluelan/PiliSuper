@@ -54,8 +54,9 @@ class _LogsPageState extends State<LogsPage> {
     List contentList = fileContent.split(splitToken).map((item) {
       return item
           .replaceAll(
-              '============================== CATCHER 2 LOG ==============================',
-              'PiliPlus错误日志\n********************')
+            '============================== CATCHER 2 LOG ==============================',
+            'PiliPlus错误日志\n********************',
+          )
           .replaceAll('DEVICE INFO', '设备信息')
           .replaceAll('APP INFO', '应用信息')
           .replaceAll('ERROR', '错误信息')
@@ -129,7 +130,8 @@ class _LogsPageState extends State<LogsPage> {
                   break;
                 case 'feedback':
                   PageUtils.launchURL(
-                      'https://github.com/bggRGjQaUbCoE/PiliPlus/issues');
+                    'https://github.com/bggRGjQaUbCoE/PiliPlus/issues',
+                  );
                   break;
                 case 'clear':
                   clearLogsHandle();
@@ -185,10 +187,9 @@ class _LogsPageState extends State<LogsPage> {
                             Text(
                               log['date'].toString(),
                               style: TextStyle(
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .fontSize,
+                                fontSize: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium!.fontSize,
                               ),
                             ),
                             TextButton.icon(
@@ -197,8 +198,10 @@ class _LogsPageState extends State<LogsPage> {
                                 visualDensity: VisualDensity.compact,
                               ),
                               onPressed: () {
-                                Utils.copyText('```\n${log['body']}\n```',
-                                    needToast: false);
+                                Utils.copyText(
+                                  '```\n${log['body']}\n```',
+                                  needToast: false,
+                                );
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -211,7 +214,7 @@ class _LogsPageState extends State<LogsPage> {
                               },
                               icon: const Icon(Icons.copy_outlined, size: 16),
                               label: const Text('复制'),
-                            )
+                            ),
                           ],
                         ),
                         Card(

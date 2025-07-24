@@ -8,11 +8,10 @@ class BaseInfo {
   BaseInfo({this.uname, this.face, this.officialInfo});
 
   factory BaseInfo.fromJson(Map<String, dynamic> json) => BaseInfo(
-        uname: json['uname'] as String?,
-        face: json['face'] as String?,
-        officialInfo: json['official_info'] == null
-            ? null
-            : OfficialInfo.fromJson(
-                json['official_info'] as Map<String, dynamic>),
-      );
+    uname: json['uname'] as String?,
+    face: json['face'] as String?,
+    officialInfo: json['official_info'] == null
+        ? null
+        : OfficialInfo.fromJson(json['official_info'] as Map<String, dynamic>),
+  );
 }

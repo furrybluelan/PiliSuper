@@ -71,7 +71,8 @@ void main() async {
 
   if (Pref.enableLog) {
     // 异常捕获 logo记录
-    String buildConfig = '''\n
+    String buildConfig =
+        '''\n
 Build Time: ${DateUtil.format(BuildConfig.buildTime, format: DateUtil.longFormatDs)}
 Commit Hash: ${BuildConfig.commitHash}''';
     final Catcher2Options debugConfig = Catcher2Options(
@@ -82,7 +83,7 @@ Commit Hash: ${BuildConfig.commitHash}''';
           enableDeviceParameters: false,
           enableApplicationParameters: false,
           enableCustomParameters: true,
-        )
+        ),
       ],
       customParameters: {
         'BuildConfig': buildConfig,
@@ -95,7 +96,7 @@ Commit Hash: ${BuildConfig.commitHash}''';
         FileHandler(await getLogsPath()),
         ConsoleHandler(
           enableCustomParameters: true,
-        )
+        ),
       ],
       customParameters: {
         'BuildConfig': buildConfig,
@@ -115,12 +116,14 @@ Commit Hash: ${BuildConfig.commitHash}''';
 
   // 小白条、导航栏沉浸
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-    statusBarColor: Colors.transparent,
-    systemNavigationBarContrastEnforced: false,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      statusBarColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+    ),
+  );
   Data.init();
   PiliScheme.init();
 }
@@ -144,8 +147,10 @@ class MyApp extends StatelessWidget {
         var storageDisplay = GStorage.setting.get(SettingBoxKey.displayMode);
         DisplayMode f = DisplayMode.auto;
         if (storageDisplay != null) {
-          f = modes.firstWhere((e) => e.toString() == storageDisplay,
-              orElse: () => f);
+          f = modes.firstWhere(
+            (e) => e.toString() == storageDisplay,
+            orElse: () => f,
+          );
         }
         DisplayMode preferred = modes.toList().firstWhere((el) => el == f);
         FlutterDisplayMode.setPreferredMode(preferred);
@@ -211,7 +216,8 @@ class MyApp extends StatelessWidget {
             builder: (context, child) {
               return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
-                    textScaler: TextScaler.linear(Pref.defaultTextScale)),
+                  textScaler: TextScaler.linear(Pref.defaultTextScale),
+                ),
                 child: child!,
               );
             },

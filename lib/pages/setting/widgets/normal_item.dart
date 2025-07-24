@@ -44,14 +44,17 @@ class _NormalItemState extends State<NormalItem> {
       onTap: () => widget.onTap?.call(() {
         setState(() {});
       }),
-      title: Text(widget.title ?? widget.getTitle?.call(),
-          style: widget.titleStyle ?? Theme.of(context).textTheme.titleMedium!),
+      title: Text(
+        widget.title ?? widget.getTitle?.call(),
+        style: widget.titleStyle ?? Theme.of(context).textTheme.titleMedium!,
+      ),
       subtitle: widget.subtitle != null || widget.getSubtitle != null
-          ? Text(widget.subtitle ?? widget.getSubtitle?.call(),
-              style: Theme.of(context)
-                  .textTheme
-                  .labelMedium!
-                  .copyWith(color: Theme.of(context).colorScheme.outline))
+          ? Text(
+              widget.subtitle ?? widget.getSubtitle?.call(),
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            )
           : null,
       leading: widget.leading,
       trailing: widget.getTrailing?.call(),

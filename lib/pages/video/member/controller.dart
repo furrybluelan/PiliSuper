@@ -93,8 +93,8 @@ class HorizontalMemberPageController
         aid: page == 1
             ? currAid
             : isLoadPrevious
-                ? firstAid
-                : lastAid,
+            ? firstAid
+            : lastAid,
         order: order.value,
         sort: page != 1 && isLoadPrevious ? 'asc' : null,
         pn: null,

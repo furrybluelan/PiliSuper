@@ -6,8 +6,8 @@ class EmoteModelData {
   EmoteModelData({this.packages});
 
   factory EmoteModelData.fromJson(Map<String, dynamic> json) => EmoteModelData(
-        packages: (json['packages'] as List<dynamic>?)
-            ?.map((e) => Package.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    packages: (json['packages'] as List<dynamic>?)
+        ?.map((e) => Package.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

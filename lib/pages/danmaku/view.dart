@@ -100,8 +100,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
     }
     latestAddedPosition = currentPosition;
 
-    List<DanmakuElem>? currentDanmakuList =
-        _plDanmakuController.getCurrentDanmaku(currentPosition);
+    List<DanmakuElem>? currentDanmakuList = _plDanmakuController
+        .getCurrentDanmaku(currentPosition);
     if (currentDanmakuList != null) {
       for (DanmakuElem e in currentDanmakuList) {
         if (e.mode == 7) {
@@ -122,7 +122,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
                   ? Colors.white
                   : DmUtils.decimalToColor(e.color),
               type: DmUtils.getPosition(e.mode),
-              isColorful: playerController.showVipDanmaku &&
+              isColorful:
+                  playerController.showVipDanmaku &&
                       e.colorful == DmColorfulType.VipGradualColor
                   ? true
                   : null,
@@ -147,39 +148,43 @@ class _PlDanmakuState extends State<PlDanmaku> {
 
   double _getFontSize(bool isFullScreen) =>
       !isFullScreen || widget.isPipMode == true
-          ? 15 * playerController.danmakuFontScale
-          : 15 * playerController.danmakuFontScaleFS;
+      ? 15 * playerController.danmakuFontScale
+      : 15 * playerController.danmakuFontScaleFS;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, box) {
-      // double initDuration = box.maxWidth / 12;
-      return Obx(
-        () => AnimatedOpacity(
-          opacity: playerController.enableShowDanmaku.value ? 1 : 0,
-          duration: const Duration(milliseconds: 100),
-          child: DanmakuScreen(
-            createdController: (DanmakuController e) {
-              playerController.danmakuController = _controller = e;
-            },
-            option: DanmakuOption(
-              fontSize: _getFontSize(playerController.isFullScreen.value),
-              fontWeight: playerController.fontWeight,
-              area: playerController.showArea,
-              opacity: playerController.danmakuOpacity,
-              hideTop: playerController.blockTypes.contains(5),
-              hideScroll: playerController.blockTypes.contains(2),
-              hideBottom: playerController.blockTypes.contains(4),
-              duration: playerController.danmakuDuration /
-                  playerController.playbackSpeed,
-              staticDuration: playerController.danmakuStaticDuration /
-                  playerController.playbackSpeed,
-              strokeWidth: playerController.strokeWidth,
-              lineHeight: playerController.danmakuLineHeight,
+    return LayoutBuilder(
+      builder: (context, box) {
+        // double initDuration = box.maxWidth / 12;
+        return Obx(
+          () => AnimatedOpacity(
+            opacity: playerController.enableShowDanmaku.value ? 1 : 0,
+            duration: const Duration(milliseconds: 100),
+            child: DanmakuScreen(
+              createdController: (DanmakuController e) {
+                playerController.danmakuController = _controller = e;
+              },
+              option: DanmakuOption(
+                fontSize: _getFontSize(playerController.isFullScreen.value),
+                fontWeight: playerController.fontWeight,
+                area: playerController.showArea,
+                opacity: playerController.danmakuOpacity,
+                hideTop: playerController.blockTypes.contains(5),
+                hideScroll: playerController.blockTypes.contains(2),
+                hideBottom: playerController.blockTypes.contains(4),
+                duration:
+                    playerController.danmakuDuration /
+                    playerController.playbackSpeed,
+                staticDuration:
+                    playerController.danmakuStaticDuration /
+                    playerController.playbackSpeed,
+                strokeWidth: playerController.strokeWidth,
+                lineHeight: playerController.danmakuLineHeight,
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }

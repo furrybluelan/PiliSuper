@@ -44,8 +44,10 @@ class PayCoinsPage extends StatefulWidget {
           const end = 1.0;
           const curve = Curves.linear;
 
-          var tween = Tween<double>(begin: begin, end: end)
-              .chain(CurveTween(curve: curve));
+          var tween = Tween<double>(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
 
           return FadeTransition(
             opacity: animation.drive(tween),
@@ -162,8 +164,10 @@ class _PayCoinsPageState extends State<PayCoinsPage>
       vsync: this,
       duration: const Duration(milliseconds: 100),
     );
-    _coinFadeAnim =
-        Tween<double>(begin: 1, end: 0).animate(_coinFadeController);
+    _coinFadeAnim = Tween<double>(
+      begin: 1,
+      end: 0,
+    ).animate(_coinFadeController);
     _boxAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 50),
@@ -204,240 +208,238 @@ class _PayCoinsPageState extends State<PayCoinsPage>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      bool isV = constraints.maxHeight > constraints.maxWidth;
-      return isV
-          ? _buildBody(isV)
-          : Row(
-              children: [
-                const Spacer(),
-                Expanded(flex: 3, child: _buildBody(isV)),
-                const Spacer(),
-              ],
-            );
-    });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool isV = constraints.maxHeight > constraints.maxWidth;
+        return isV
+            ? _buildBody(isV)
+            : Row(
+                children: [
+                  const Spacer(),
+                  Expanded(flex: 3, child: _buildBody(isV)),
+                  const Spacer(),
+                ],
+              );
+      },
+    );
   }
 
   Widget _buildBody(bool isV) => Stack(
-        key: _key,
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          Visibility(
-            visible: _showThunder,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            child: Image.asset(_images[_showThunder ? _imageIndex : 0]),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+    key: _key,
+    clipBehavior: Clip.none,
+    alignment: Alignment.center,
+    children: [
+      Visibility(
+        visible: _showThunder,
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: Image.asset(_images[_showThunder ? _imageIndex : 0]),
+      ),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Visibility(
-                        visible: !_isPaying && widget.copyright == 1,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: GestureDetector(
-                          onTap: _index == 0 ? null : () => _onScroll(0),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 12),
-                            child: Image.asset(
-                              width: 16,
-                              height: 28,
-                              _index == 0
-                                  ? 'assets/images/paycoins/ic_left_disable.png'
-                                  : 'assets/images/paycoins/ic_left.png',
-                            ),
-                          ),
+                  Visibility(
+                    visible: !_isPaying && widget.copyright == 1,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: GestureDetector(
+                      onTap: _index == 0 ? null : () => _onScroll(0),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: Image.asset(
+                          width: 16,
+                          height: 28,
+                          _index == 0
+                              ? 'assets/images/paycoins/ic_left_disable.png'
+                              : 'assets/images/paycoins/ic_left.png',
                         ),
                       ),
-                      Expanded(
-                        child: SizedBox(
-                          height: 100,
-                          child: PageView.builder(
-                            key: const PageStorageKey('PageView'),
-                            physics: const ClampingScrollPhysics(),
-                            itemCount: widget.copyright == 1 ? 2 : 1,
-                            controller: _controller,
-                            onPageChanged: (index) => setState(_scale),
-                            itemBuilder: (context, index) {
-                              return ListenableBuilder(
-                                listenable: _controller,
-                                builder: (context, child) {
-                                  double factor = index == 0 ? 1 : 0;
-                                  if (_controller
-                                      .position.hasContentDimensions) {
-                                    factor =
-                                        1 - (_controller.page! - index).abs();
-                                  }
-                                  return Visibility(
-                                    visible: !_isPaying || _index == index,
-                                    child: Center(
-                                      child: SizedBox(
-                                        height: 70 + (factor * 30),
-                                        width: 70 + (factor * 30),
-                                        child: ColorFiltered(
-                                          colorFilter: ColorFilter.mode(
-                                            _getColorFilter(index),
-                                            BlendMode.srcATop,
+                    ),
+                  ),
+                  Expanded(
+                    child: SizedBox(
+                      height: 100,
+                      child: PageView.builder(
+                        key: const PageStorageKey('PageView'),
+                        physics: const ClampingScrollPhysics(),
+                        itemCount: widget.copyright == 1 ? 2 : 1,
+                        controller: _controller,
+                        onPageChanged: (index) => setState(_scale),
+                        itemBuilder: (context, index) {
+                          return ListenableBuilder(
+                            listenable: _controller,
+                            builder: (context, child) {
+                              double factor = index == 0 ? 1 : 0;
+                              if (_controller.position.hasContentDimensions) {
+                                factor = 1 - (_controller.page! - index).abs();
+                              }
+                              return Visibility(
+                                visible: !_isPaying || _index == index,
+                                child: Center(
+                                  child: SizedBox(
+                                    height: 70 + (factor * 30),
+                                    width: 70 + (factor * 30),
+                                    child: ColorFiltered(
+                                      colorFilter: ColorFilter.mode(
+                                        _getColorFilter(index),
+                                        BlendMode.srcATop,
+                                      ),
+                                      child: Stack(
+                                        clipBehavior: Clip.none,
+                                        alignment: Alignment.center,
+                                        children: [
+                                          SlideTransition(
+                                            position: _boxAnim,
+                                            child: Image.asset(
+                                              'assets/images/paycoins/ic_pay_coins_box.png',
+                                            ),
                                           ),
-                                          child: Stack(
-                                            clipBehavior: Clip.none,
-                                            alignment: Alignment.center,
-                                            children: [
-                                              SlideTransition(
-                                                position: _boxAnim,
-                                                child: Image.asset(
-                                                  'assets/images/paycoins/ic_pay_coins_box.png',
-                                                ),
+                                          SlideTransition(
+                                            position: _coinSlideAnim,
+                                            child: FadeTransition(
+                                              opacity: _coinFadeAnim,
+                                              child: Image.asset(
+                                                height: 35 + (factor * 15),
+                                                width: 35 + (factor * 15),
+                                                index == 0
+                                                    ? 'assets/images/paycoins/ic_coins_one.png'
+                                                    : 'assets/images/paycoins/ic_coins_two.png',
                                               ),
-                                              SlideTransition(
-                                                position: _coinSlideAnim,
-                                                child: FadeTransition(
-                                                  opacity: _coinFadeAnim,
-                                                  child: Image.asset(
-                                                    height: 35 + (factor * 15),
-                                                    width: 35 + (factor * 15),
-                                                    index == 0
-                                                        ? 'assets/images/paycoins/ic_coins_one.png'
-                                                        : 'assets/images/paycoins/ic_coins_two.png',
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
                                     ),
-                                  );
-                                },
+                                  ),
+                                ),
                               );
                             },
-                          ),
-                        ),
-                      ),
-                      Visibility(
-                        visible: !_isPaying && widget.copyright == 1,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: GestureDetector(
-                          onTap: _index == 1 ? null : () => _onScroll(1),
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: Image.asset(
-                              width: 16,
-                              height: 28,
-                              _index == 1
-                                  ? 'assets/images/paycoins/ic_right_disable.png'
-                                  : 'assets/images/paycoins/ic_right.png',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: isV ? 25 : 10),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onPanUpdate: _handlePanUpdate,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 155,
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: _canPay ? _onPayCoin : null,
-                          onPanUpdate:
-                              _canPay ? (e) => _handlePanUpdate(e, true) : null,
-                          child: ScaleTransition(
-                            scale: _scale22Anim,
-                            child: SlideTransition(
-                              position: _slide22Anim,
-                              child: SizedBox(
-                                width: 110,
-                                height: 155,
-                                child: Image.asset(_getImage),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_coins != null || widget.hasCoin) ...[
-                    const SizedBox(height: 10),
-                    Center(
-                      child: Text(
-                        '${_coins != null ? '硬币余额：${_coins!.toDouble().toPrecision(1)}' : ''}${widget.hasCoin ? '${_coins != null ? '，' : ''}已投1枚硬币' : ''}',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 13),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 10),
-                  Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _coinWithLike.value = !_coinWithLike.value;
-                          GStorage.setting.put(
-                            SettingBoxKey.coinWithLike,
-                            _coinWithLike.value,
                           );
                         },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(width: 12),
-                            Obx(
-                              () => Icon(
-                                _coinWithLike.value
-                                    ? Icons.check_box_outlined
-                                    : Icons.check_box_outline_blank,
-                                size: 20,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const Text(
-                              ' 同时点赞',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: !_isPaying && widget.copyright == 1,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: GestureDetector(
+                      onTap: _index == 1 ? null : () => _onScroll(1),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Image.asset(
+                          width: 16,
+                          height: 28,
+                          _index == 1
+                              ? 'assets/images/paycoins/ic_right_disable.png'
+                              : 'assets/images/paycoins/ic_right.png',
                         ),
                       ),
-                      Center(
-                        child: GestureDetector(
-                          onTap: Get.back,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: isV ? 25 : 10),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanUpdate: _handlePanUpdate,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 155,
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: _canPay ? _onPayCoin : null,
+                      onPanUpdate: _canPay
+                          ? (e) => _handlePanUpdate(e, true)
+                          : null,
+                      child: ScaleTransition(
+                        scale: _scale22Anim,
+                        child: SlideTransition(
+                          position: _slide22Anim,
                           child: SizedBox(
-                            width: 30,
-                            height: 30,
-                            child: Image.asset(
-                              'assets/images/paycoins/ic_panel_close.png',
-                            ),
+                            width: 110,
+                            height: 155,
+                            child: Image.asset(_getImage),
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                  SizedBox(
-                      height: (isV ? 50 : 10) +
-                          MediaQuery.paddingOf(context).bottom),
+                ),
+              ),
+              if (_coins != null || widget.hasCoin) ...[
+                const SizedBox(height: 10),
+                Center(
+                  child: Text(
+                    '${_coins != null ? '硬币余额：${_coins!.toDouble().toPrecision(1)}' : ''}${widget.hasCoin ? '${_coins != null ? '，' : ''}已投1枚硬币' : ''}',
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 10),
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.centerLeft,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      final newVal = !_coinWithLike.value;
+                      _coinWithLike.value = newVal;
+                      GStorage.setting.put(SettingBoxKey.coinWithLike, newVal);
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(width: 12),
+                        Obx(
+                          () => Icon(
+                            _coinWithLike.value
+                                ? Icons.check_box_outlined
+                                : Icons.check_box_outline_blank,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const Text(
+                          ' 同时点赞',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Center(
+                    child: GestureDetector(
+                      onTap: Get.back,
+                      child: SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: Image.asset(
+                          'assets/images/paycoins/ic_panel_close.png',
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              SizedBox(
+                height: (isV ? 50 : 10) + MediaQuery.paddingOf(context).bottom,
+              ),
+            ],
           ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 
   void _handlePanUpdate(DragUpdateDetails e, [bool needV = false]) {
     if (needV && e.delta.dy.abs() > max(2, e.delta.dx.abs())) {

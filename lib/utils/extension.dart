@@ -29,8 +29,11 @@ extension ScrollControllerExt on ScrollController {
     if (offset >= Get.mediaQuery.size.height * 7) {
       jumpTo(0);
     } else {
-      animateTo(0,
-          duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+      animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -141,20 +144,32 @@ extension RationalExt on Rational {
 
 extension ThreeDotItemTypeExt on ThreeDotItemType {
   Icon get icon => switch (this) {
-        ThreeDotItemType.THREE_DOT_ITEM_TYPE_MSG_SETTING =>
-          const Icon(Icons.settings, size: 20),
-        ThreeDotItemType.THREE_DOT_ITEM_TYPE_READ_ALL =>
-          const Icon(Icons.cleaning_services, size: 20),
-        ThreeDotItemType.THREE_DOT_ITEM_TYPE_CLEAR_LIST =>
-          const Icon(Icons.delete_forever_outlined, size: 20),
-        ThreeDotItemType.THREE_DOT_ITEM_TYPE_UP_HELPER =>
-          const Icon(Icons.live_tv, size: 20),
-        ThreeDotItemType.THREE_DOT_ITEM_TYPE_CONTACTS =>
-          const Icon(Icons.account_box_outlined, size: 20),
-        ThreeDotItemType.THREE_DOT_ITEM_TYPE_FANS_GROUP_HELPER =>
-          const Icon(Icons.notifications_none, size: 20),
-        _ => const Icon(MdiIcons.circleMedium, size: 20),
-      };
+    ThreeDotItemType.THREE_DOT_ITEM_TYPE_MSG_SETTING => const Icon(
+      Icons.settings,
+      size: 20,
+    ),
+    ThreeDotItemType.THREE_DOT_ITEM_TYPE_READ_ALL => const Icon(
+      Icons.cleaning_services,
+      size: 20,
+    ),
+    ThreeDotItemType.THREE_DOT_ITEM_TYPE_CLEAR_LIST => const Icon(
+      Icons.delete_forever_outlined,
+      size: 20,
+    ),
+    ThreeDotItemType.THREE_DOT_ITEM_TYPE_UP_HELPER => const Icon(
+      Icons.live_tv,
+      size: 20,
+    ),
+    ThreeDotItemType.THREE_DOT_ITEM_TYPE_CONTACTS => const Icon(
+      Icons.account_box_outlined,
+      size: 20,
+    ),
+    ThreeDotItemType.THREE_DOT_ITEM_TYPE_FANS_GROUP_HELPER => const Icon(
+      Icons.notifications_none,
+      size: 20,
+    ),
+    _ => const Icon(MdiIcons.circleMedium, size: 20),
+  };
 
   void action({
     required BuildContext context,
@@ -176,9 +191,11 @@ extension ThreeDotItemTypeExt on ThreeDotItemType {
           onConfirm: controller.onDeleteList,
         );
       case ThreeDotItemType.THREE_DOT_ITEM_TYPE_MSG_SETTING:
-        Get.to(const WhisperSettingsPage(
-          imSettingType: IMSettingType.SETTING_TYPE_NEED_ALL,
-        ));
+        Get.to(
+          const WhisperSettingsPage(
+            imSettingType: IMSettingType.SETTING_TYPE_NEED_ALL,
+          ),
+        );
       case ThreeDotItemType.THREE_DOT_ITEM_TYPE_UP_HELPER:
         Get.toNamed(
           '/whisperDetail',

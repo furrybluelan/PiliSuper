@@ -33,34 +33,36 @@ class PgcCardVTimeline extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 0.75,
-              child: LayoutBuilder(builder: (context, boxConstraints) {
-                final double maxWidth = boxConstraints.maxWidth;
-                final double maxHeight = boxConstraints.maxHeight;
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    NetworkImgLayer(
-                      src: item.cover,
-                      width: maxWidth,
-                      height: maxHeight,
-                    ),
-                    if (item.follow == 1)
-                      const PBadge(
-                        text: '已追番',
-                        right: 6,
-                        top: 6,
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  final double maxWidth = boxConstraints.maxWidth;
+                  final double maxHeight = boxConstraints.maxHeight;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      NetworkImgLayer(
+                        src: item.cover,
+                        width: maxWidth,
+                        height: maxHeight,
                       ),
-                    PBadge(
-                      text: '${item.pubTime}',
-                      left: 6,
-                      bottom: 6,
-                      type: PBadgeType.gray,
-                    ),
-                  ],
-                );
-              }),
+                      if (item.follow == 1)
+                        const PBadge(
+                          text: '已追番',
+                          right: 6,
+                          top: 6,
+                        ),
+                      PBadge(
+                        text: '${item.pubTime}',
+                        left: 6,
+                        bottom: 6,
+                        type: PBadgeType.gray,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-            content(context)
+            content(context),
           ],
         ),
       ),

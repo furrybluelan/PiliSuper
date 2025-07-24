@@ -3,6 +3,7 @@ import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/http/reply.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
 import 'package:PiliPlus/models/common/reply/reply_option_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
@@ -19,7 +20,6 @@ import 'package:PiliPlus/models_new/dynamic/dyn_topic_feed/topic_card_list.dart'
 import 'package:PiliPlus/models_new/dynamic/dyn_topic_top/top_details.dart';
 import 'package:PiliPlus/models_new/dynamic/dyn_topic_top/topic_item.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
@@ -158,8 +158,8 @@ class DynamicsHttp {
           },
           if (privatePub != null || replyOption != null || publishTime != null)
             "option": {
-              if (privatePub != null) 'private_pub': privatePub,
-              if (publishTime != null) "timer_pub_time": publishTime,
+              'private_pub': ?privatePub,
+              "timer_pub_time": ?publishTime,
               if (replyOption == ReplyOptionType.close)
                 "close_comment": 1
               else if (replyOption == ReplyOptionType.choose)
@@ -168,16 +168,16 @@ class DynamicsHttp {
           "scene": rid != null
               ? 5
               : dynIdStr != null
-                  ? 4
-                  : pics != null
-                      ? 2
-                      : 1,
-          if (pics != null) 'pics': pics,
+              ? 4
+              : pics != null
+              ? 2
+              : 1,
+          'pics': ?pics,
           "attach_card": attachCard,
           "upload_id":
               "${rid != null ? 0 : mid}_${DateTime.now().millisecondsSinceEpoch ~/ 1000}_${Utils.random.nextInt(9000) + 1000}",
           "meta": {
-            "app_meta": {"from": "create.dynamic.web", "mobi_app": "web"}
+            "app_meta": {"from": "create.dynamic.web", "mobi_app": "web"},
           },
           if (topic != null)
             "topic": {
@@ -185,17 +185,17 @@ class DynamicsHttp {
               "name": topic.second,
               "from_source": "dyn.web.list",
               "from_topic_id": 0,
-            }
+            },
         },
         if (dynIdStr != null || rid != null)
           "web_repost_src": {
-            if (dynIdStr != null) "dyn_id_str": dynIdStr,
+            "dyn_id_str": ?dynIdStr,
             if (rid != null)
               "revs_id": {
                 "dyn_type": dynType,
                 "rid": rid,
-              }
-          }
+              },
+          },
       },
     );
     if (res.data['code'] == 0) {
@@ -222,9 +222,9 @@ class DynamicsHttp {
       Api.dynamicDetail,
       queryParameters: {
         'timezone_offset': -480,
-        if (id != null) 'id': id,
-        if (rid != null) 'rid': rid,
-        if (type != null) 'type': type,
+        'id': ?id,
+        'rid': ?rid,
+        'type': ?type,
         'features': 'itemOpusStyle',
         'gaia_source': 'Athena',
         'web_location': '333.1330',
@@ -232,9 +232,7 @@ class DynamicsHttp {
             '{"platform":"web","device":"pc","spmid":"333.1330"}',
         if (!clearCookie && Accounts.main.isLogin) 'csrf': Accounts.main.csrf,
       },
-      options: clearCookie
-          ? Options(extra: {'account': AnonymousAccount(), 'checkReply': true})
-          : null,
+      options: clearCookie ? ReplyHttp.options : null,
     );
     if (res.data['code'] == 0) {
       try {
@@ -309,15 +307,16 @@ class DynamicsHttp {
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'data': ArticleInfoData.fromJson(res.data['data'])
+        'data': ArticleInfoData.fromJson(res.data['data']),
       };
     } else {
       return {'status': false, 'msg': res.data['message']};
     }
   }
 
-  static Future<LoadingState<ArticleViewData>> articleView(
-      {required dynamic cvId}) async {
+  static Future<LoadingState<ArticleViewData>> articleView({
+    required dynamic cvId,
+  }) async {
     final res = await Request().get(
       Api.articleView,
       queryParameters: await WbiSign.makSign({
@@ -333,8 +332,9 @@ class DynamicsHttp {
     }
   }
 
-  static Future<LoadingState<DynamicItemModel>> opusDetail(
-      {required dynamic opusId}) async {
+  static Future<LoadingState<DynamicItemModel>> opusDetail({
+    required dynamic opusId,
+  }) async {
     final res = await Request().get(
       Api.opusDetail,
       queryParameters: await WbiSign.makSign({
@@ -351,8 +351,10 @@ class DynamicsHttp {
   }
 
   static Future<LoadingState<VoteInfo>> voteInfo(dynamic voteId) async {
-    final res =
-        await Request().get(Api.voteInfo, queryParameters: {'vote_id': voteId});
+    final res = await Request().get(
+      Api.voteInfo,
+      queryParameters: {'vote_id': voteId},
+    );
     if (res.data['code'] == 0) {
       return Success(VoteInfo.fromSeparatedJson(res.data['data']));
     } else {
@@ -375,12 +377,14 @@ class DynamicsHttp {
       'op_bit': 0,
       'dynamic_id': dynamicId ?? 0,
       'csrf_token': csrf,
-      'csrf': csrf
+      'csrf': csrf,
     };
-    final res = await Request().post(Api.doVote,
-        queryParameters: {'csrf': csrf},
-        data: data,
-        options: Options(contentType: Headers.jsonContentType));
+    final res = await Request().post(
+      Api.doVote,
+      queryParameters: {'csrf': csrf},
+      data: data,
+      options: Options(contentType: Headers.jsonContentType),
+    );
     if (res.data['code'] == 0) {
       return Success(VoteInfo.fromJson(res.data['data']['vote_info']));
     } else {
@@ -471,15 +475,16 @@ class DynamicsHttp {
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'data': DynReserveData.fromJson(res.data['data'])
+        'data': DynReserveData.fromJson(res.data['data']),
       };
     } else {
       return {'status': false, 'msg': res.data['message']};
     }
   }
 
-  static Future<LoadingState<List<TopicItem>?>> dynTopicRcmd(
-      {int ps = 25}) async {
+  static Future<LoadingState<List<TopicItem>?>> dynTopicRcmd({
+    int ps = 25,
+  }) async {
     final res = await Request().get(
       Api.dynTopicRcmd,
       queryParameters: {
@@ -489,9 +494,11 @@ class DynamicsHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['data']?['topic_items'] as List?)
-          ?.map((e) => TopicItem.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['data']?['topic_items'] as List?)
+            ?.map((e) => TopicItem.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -506,16 +513,19 @@ class DynamicsHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['data'] as List?)
-          ?.map((e) => OpusPicModel.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['data'] as List?)
+            ?.map((e) => OpusPicModel.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
   }
 
-  static Future<LoadingState<List<MentionGroup>?>> dynMention(
-      {String? keyword}) async {
+  static Future<LoadingState<List<MentionGroup>?>> dynMention({
+    String? keyword,
+  }) async {
     final res = await Request().get(
       Api.dynMention,
       queryParameters: {

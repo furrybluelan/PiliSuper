@@ -10,8 +10,8 @@ class SpaceRelation {
   });
 
   factory SpaceRelation.fromJson(Map<String, dynamic> json) => SpaceRelation(
-        status: json['status'] as int?,
-        isFollow: json['is_follow'] as int?,
-        isFollowed: json['is_followed'] as int?,
-      );
+    status: json['status'] as int?,
+    isFollow: json['is_follow'] as int?,
+    isFollowed: json['is_followed'] as int?,
+  );
 }

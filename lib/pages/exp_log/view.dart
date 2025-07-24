@@ -47,78 +47,81 @@ class _ExpLogPageState extends State<ExpLogPage> {
   Widget _buildBody(LoadingState<List<CoinLogItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => linearLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? Builder(
-              builder: (context) {
-                final them = Theme.of(context);
-                final outline = them.colorScheme.outline.withValues(alpha: 0.1);
-                final divider = Divider(
-                  height: 1,
-                  color: outline,
-                );
-                final sliverDivider = SliverToBoxAdapter(
-                  child: divider,
-                );
-                final dividerV = VerticalDivider(
-                  width: 1,
-                  color: outline,
-                );
-                return SliverMainAxisGroup(
-                  slivers: [
-                    sliverDivider,
-                    SliverToBoxAdapter(
-                      child: ColoredBox(
-                        color: them.colorScheme.onInverseSurface,
-                        child: _item(
-                          const CoinLogItem(
-                            time: '时间',
-                            delta: '变化',
-                            reason: '原因',
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? Builder(
+                builder: (context) {
+                  final them = Theme.of(context);
+                  final outline = them.colorScheme.outline.withValues(
+                    alpha: 0.1,
+                  );
+                  final divider = Divider(
+                    height: 1,
+                    color: outline,
+                  );
+                  final sliverDivider = SliverToBoxAdapter(
+                    child: divider,
+                  );
+                  final dividerV = VerticalDivider(
+                    width: 1,
+                    color: outline,
+                  );
+                  return SliverMainAxisGroup(
+                    slivers: [
+                      sliverDivider,
+                      SliverToBoxAdapter(
+                        child: ColoredBox(
+                          color: them.colorScheme.onInverseSurface,
+                          child: _item(
+                            const CoinLogItem(
+                              time: '时间',
+                              delta: '变化',
+                              reason: '原因',
+                            ),
+                            dividerV,
+                            isHeader: true,
                           ),
-                          dividerV,
-                          isHeader: true,
                         ),
                       ),
-                    ),
-                    sliverDivider,
-                    SliverList.separated(
-                      itemCount: response!.length,
-                      itemBuilder: (context, index) {
-                        return _item(response[index], dividerV);
-                      },
-                      separatorBuilder: (context, index) => divider,
-                    ),
-                    sliverDivider,
-                  ],
-                );
-              },
-            )
-          : HttpError(onReload: _controller.onReload),
+                      sliverDivider,
+                      SliverList.separated(
+                        itemCount: response!.length,
+                        itemBuilder: (context, index) {
+                          return _item(response[index], dividerV);
+                        },
+                        separatorBuilder: (context, index) => divider,
+                      ),
+                      sliverDivider,
+                    ],
+                  );
+                },
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 
   Widget _item(CoinLogItem item, Widget divider, {bool isHeader = false}) {
     Widget text(int flex, String text) => Expanded(
-          flex: flex,
-          child: Padding(
-            padding: isHeader
-                ? const EdgeInsets.symmetric(vertical: 6)
-                : const EdgeInsets.symmetric(vertical: 8),
-            child: Center(
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: isHeader
-                    ? const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)
-                    : const TextStyle(fontSize: 13),
-              ),
-            ),
+      flex: flex,
+      child: Padding(
+        padding: isHeader
+            ? const EdgeInsets.symmetric(vertical: 6)
+            : const EdgeInsets.symmetric(vertical: 8),
+        child: Center(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: isHeader
+                ? const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)
+                : const TextStyle(fontSize: 13),
           ),
-        );
+        ),
+      ),
+    );
     Widget content = Row(
       children: [
         divider,

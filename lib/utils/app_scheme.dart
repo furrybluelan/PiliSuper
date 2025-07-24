@@ -127,8 +127,10 @@ class PiliScheme {
                         IconButton(
                           tooltip: '前往原视频',
                           onPressed: () {
-                            String? enterUri =
-                                uri.toString().split('?').first; // to check
+                            String? enterUri = uri
+                                .toString()
+                                .split('?')
+                                .first; // to check
                             routePush(Uri.parse(enterUri));
                           },
                           icon: const Icon(Icons.open_in_new),
@@ -167,7 +169,6 @@ class PiliScheme {
                 PageUtils.toVideoPage(
                   'bvid=$bvid&cid=${queryParameters['cid']}',
                   arguments: {
-                    'pic': null,
                     'heroTag': Utils.makeHeroTag(aid),
                     if (queryParameters['dm_progress'] != null)
                       'progress': int.tryParse(queryParameters['dm_progress']!),
@@ -241,7 +242,9 @@ class PiliScheme {
               int type = int.parse(pathSegments[1]); // business_id
               int oid = int.parse(pathSegments[2]); // subject_id
               int rootId = int.parse(pathSegments[3]); // root_id // target_id
-              int? rpId = queryParameters['anchor'] != null // source_id
+              int? rpId =
+                  queryParameters['anchor'] !=
+                      null // source_id
                   ? int.tryParse(queryParameters['anchor']!)
                   : null;
               // int subType = int.parse(queryParameters['subType'] ?? '0');
@@ -267,7 +270,8 @@ class PiliScheme {
                             routePush(Uri.parse(enterUri));
                           } else {
                             routePush(
-                                Uri.parse('bilibili://following/detail/$oid'));
+                              Uri.parse('bilibili://following/detail/$oid'),
+                            );
                           }
                         },
                         icon: const Icon(Icons.open_in_new),
@@ -346,9 +350,10 @@ class PiliScheme {
             // businessId == 17 => dynId == oid
             // bilibili://following/detail/832703053858603029 (dynId)
             // bilibili://following/detail/12345678?comment_root_id=654321\u0026comment_on=1
-            String? cvid = RegExp(r'^/detail/cv(\d+)', caseSensitive: false)
-                .matchAsPrefix(path)
-                ?.group(1);
+            String? cvid = RegExp(
+              r'^/detail/cv(\d+)',
+              caseSensitive: false,
+            ).matchAsPrefix(path)?.group(1);
             if (cvid != null) {
               PageUtils.toDupNamed(
                 '/articlePage',
@@ -612,10 +617,12 @@ class PiliScheme {
         return hasMatch;
       case 'playlist':
         // http://m.bilibili.com/playlist/pl12345678?bvid=BVxxxxxxxx&page_type=4
-        String? mediaId = RegExp(r'/pl(\d+)', caseSensitive: false)
-            .firstMatch(path)
-            ?.group(1);
-        String? bvid = uri.queryParameters['bvid'] ??
+        String? mediaId = RegExp(
+          r'/pl(\d+)',
+          caseSensitive: false,
+        ).firstMatch(path)?.group(1);
+        String? bvid =
+            uri.queryParameters['bvid'] ??
             IdUtils.bvRegex.firstMatch(path)?.group(0);
         if (bvid != null) {
           if (mediaId != null) {
@@ -671,9 +678,10 @@ class PiliScheme {
         return false;
       case 'read':
         if (path.contains('readlist')) {
-          String? id = RegExp(r'/rl(\d+)', caseSensitive: false)
-              .firstMatch(path)
-              ?.group(1);
+          String? id = RegExp(
+            r'/rl(\d+)',
+            caseSensitive: false,
+          ).firstMatch(path)?.group(1);
           if (id != null) {
             PageUtils.toDupNamed(
               '/articleList',
@@ -686,8 +694,10 @@ class PiliScheme {
           return false;
         }
         // if (kDebugMode) debugPrint('专栏');
-        String? id =
-            RegExp(r'cv(\d+)', caseSensitive: false).firstMatch(path)?.group(1);
+        String? id = RegExp(
+          r'cv(\d+)',
+          caseSensitive: false,
+        ).firstMatch(path)?.group(1);
         if (id != null) {
           PageUtils.toDupNamed(
             '/articlePage',
@@ -877,7 +887,6 @@ class PiliScheme {
         PageUtils.toVideoPage(
           'bvid=$bvid&cid=$cid',
           arguments: {
-            'pic': null,
             'heroTag': Utils.makeHeroTag(aid),
             if (progress != null) 'progress': int.tryParse(progress),
           },

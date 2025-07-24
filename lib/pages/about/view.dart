@@ -47,8 +47,9 @@ class _AboutPageState extends State<AboutPage> {
   }
 
   Future<void> getCacheSize() async {
-    cacheSize.value =
-        CacheManage.formatSize(await CacheManage().loadApplicationCache());
+    cacheSize.value = CacheManage.formatSize(
+      await CacheManage().loadApplicationCache(),
+    );
   }
 
   Future<void> getCurrentApp() async {
@@ -64,8 +65,9 @@ class _AboutPageState extends State<AboutPage> {
     final outline = theme.colorScheme.outline;
     final subTitleStyle = TextStyle(fontSize: 13, color: outline);
     return Scaffold(
-      appBar:
-          widget.showAppBar == false ? null : AppBar(title: const Text('关于')),
+      appBar: widget.showAppBar == false
+          ? null
+          : AppBar(title: const Text('关于')),
       body: ListView(
         children: [
           GestureDetector(
@@ -143,7 +145,8 @@ Commit Hash: ${BuildConfig.commitHash}''',
             ),
             leading: const Icon(Icons.info_outline),
             onTap: () => PageUtils.launchURL(
-                'https://github.com/bggRGjQaUbCoE/PiliPlus/commit/${BuildConfig.commitHash}'),
+              'https://github.com/bggRGjQaUbCoE/PiliPlus/commit/${BuildConfig.commitHash}',
+            ),
             onLongPress: () => Utils.copyText(BuildConfig.commitHash),
           ),
           Divider(
@@ -236,8 +239,9 @@ Commit Hash: ${BuildConfig.commitHash}''',
                     title: const Text('导入', style: style),
                     onTap: () async {
                       Get.back();
-                      ClipboardData? data =
-                          await Clipboard.getData('text/plain');
+                      ClipboardData? data = await Clipboard.getData(
+                        'text/plain',
+                      );
                       if (data?.text?.isNotEmpty != true) {
                         SmartDialog.showToast('剪贴板无数据');
                         return;
@@ -264,19 +268,24 @@ Commit Hash: ${BuildConfig.commitHash}''',
                                   Get.back();
                                   try {
                                     final res = (jsonDecode(data.text!) as Map)
-                                        .map((key, value) => MapEntry(
-                                            key, LoginAccount.fromJson(value)));
+                                        .map(
+                                          (key, value) => MapEntry(
+                                            key,
+                                            LoginAccount.fromJson(value),
+                                          ),
+                                        );
                                     Accounts.account
                                         .putAll(res)
                                         .whenComplete(() => Accounts.refresh())
                                         .whenComplete(() {
-                                      MineController.anonymity.value =
-                                          !Accounts.get(AccountType.heartbeat)
-                                              .isLogin;
-                                      if (Accounts.main.isLogin) {
-                                        return LoginUtils.onLoginMain();
-                                      }
-                                    });
+                                          MineController.anonymity.value =
+                                              !Accounts.get(
+                                                AccountType.heartbeat,
+                                              ).isLogin;
+                                          if (Accounts.main.isLogin) {
+                                            return LoginUtils.onLoginMain();
+                                          }
+                                        });
                                   } catch (e) {
                                     SmartDialog.showToast('导入失败：$e');
                                   }
@@ -318,8 +327,9 @@ Commit Hash: ${BuildConfig.commitHash}''',
                       title: const Text('从剪贴板导入设置', style: style),
                       onTap: () async {
                         Get.back();
-                        ClipboardData? data =
-                            await Clipboard.getData('text/plain');
+                        ClipboardData? data = await Clipboard.getData(
+                          'text/plain',
+                        );
                         if (data == null ||
                             data.text == null ||
                             data.text!.isEmpty) {
@@ -348,7 +358,8 @@ Commit Hash: ${BuildConfig.commitHash}''',
                                     Get.back();
                                     try {
                                       await GStorage.importAllSettings(
-                                          data.text!);
+                                        data.text!,
+                                      );
                                       SmartDialog.showToast('导入成功');
                                     } catch (e) {
                                       SmartDialog.showToast('导入失败：$e');

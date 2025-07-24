@@ -45,8 +45,9 @@ class FavFolderItem extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.colorScheme.onInverseSurface
-                        .withValues(alpha: 0.4),
+                    color: theme.colorScheme.onInverseSurface.withValues(
+                      alpha: 0.4,
+                    ),
                     offset: const Offset(4, -12),
                     blurRadius: 0.0,
                     spreadRadius: 0.0,
@@ -73,9 +74,10 @@ class FavFolderItem extends StatelessWidget {
             ),
             Text(
               ' 共${item.mediaCount}条视频 · ${FavUtil.isPublicFavText(item.attr)}',
-              style: theme.textTheme.labelSmall!
-                  .copyWith(color: theme.colorScheme.outline),
-            )
+              style: theme.textTheme.labelSmall!.copyWith(
+                color: theme.colorScheme.outline,
+              ),
+            ),
           ],
         ),
       ),

@@ -7,9 +7,9 @@ class Stream {
   Stream({this.protocolName, this.format});
 
   factory Stream.fromJson(Map<String, dynamic> json) => Stream(
-        protocolName: json['protocol_name'] as String?,
-        format: (json['format'] as List<dynamic>?)
-            ?.map((e) => Format.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    protocolName: json['protocol_name'] as String?,
+    format: (json['format'] as List<dynamic>?)
+        ?.map((e) => Format.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

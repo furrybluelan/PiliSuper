@@ -2,6 +2,7 @@ import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/models/common/fav_order_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_article/data.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/data.dart';
 import 'package:PiliPlus/models_new/fav/fav_folder/data.dart';
@@ -48,13 +49,14 @@ class FavHttp {
     }
   }
 
-  static Future<LoadingState<FavDetailData>> userFavFolderDetail(
-      {required int mediaId,
-      required int pn,
-      required int ps,
-      String keyword = '',
-      String order = 'mtime',
-      int type = 0}) async {
+  static Future<LoadingState<FavDetailData>> userFavFolderDetail({
+    required int mediaId,
+    required int pn,
+    required int ps,
+    String keyword = '',
+    FavOrderType order = FavOrderType.mtime,
+    int type = 0,
+  }) async {
     var res = await Request().get(
       Api.favResourceList,
       queryParameters: {
@@ -62,10 +64,10 @@ class FavHttp {
         'pn': pn,
         'ps': ps,
         'keyword': keyword,
-        'order': order,
+        'order': order.name,
         'type': type,
         'tid': 0,
-        'platform': 'web'
+        'platform': 'web',
       },
     );
     if (res.data['code'] == 0) {
@@ -340,7 +342,7 @@ class FavHttp {
       queryParameters: {
         'vmid': mid,
         'type': type,
-        if (followStatus != null) 'follow_status': followStatus,
+        'follow_status': ?followStatus,
         'pn': pn,
       },
     );
@@ -442,15 +444,17 @@ class FavHttp {
   static Future deleteFolder({
     required List<dynamic> mediaIds,
   }) async {
-    var res = await Request().post(Api.deleteFolder,
-        data: {
-          'media_ids': mediaIds.join(','),
-          'platform': 'web',
-          'csrf': Accounts.main.csrf,
-        },
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-        ));
+    var res = await Request().post(
+      Api.deleteFolder,
+      data: {
+        'media_ids': mediaIds.join(','),
+        'platform': 'web',
+        'csrf': Accounts.main.csrf,
+      },
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+      ),
+    );
     if (res.data['code'] == 0) {
       return {'status': true, 'data': res.data['data']};
     } else {
@@ -466,18 +470,20 @@ class FavHttp {
     required String cover,
     required String intro,
   }) async {
-    var res = await Request().post(isAdd ? Api.addFolder : Api.editFolder,
-        data: {
-          'title': title,
-          'intro': intro,
-          'privacy': privacy,
-          'cover': cover.isNotEmpty ? Uri.encodeFull(cover) : cover,
-          'csrf': Accounts.main.csrf,
-          if (mediaId != null) 'media_id': mediaId,
-        },
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-        ));
+    var res = await Request().post(
+      isAdd ? Api.addFolder : Api.editFolder,
+      data: {
+        'title': title,
+        'intro': intro,
+        'privacy': privacy,
+        'cover': cover.isNotEmpty ? Uri.encodeFull(cover) : cover,
+        'csrf': Accounts.main.csrf,
+        'media_id': ?mediaId,
+      },
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+      ),
+    );
     if (res.data['code'] == 0) {
       return {'status': true, 'data': FavFolderInfo.fromJson(res.data['data'])};
     } else {
@@ -552,9 +558,11 @@ class FavHttp {
       ),
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['data'] as List?)
-          ?.map((e) => SpaceFavData.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['data'] as List?)
+            ?.map((e) => SpaceFavData.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -572,7 +580,7 @@ class FavHttp {
       data: {
         "entity": {
           "object_id_str": opusId,
-          "type": {"biz": 2}
+          "type": {"biz": 2},
         },
         "action": action, // 3 fav, 4 unfav
       },
@@ -585,16 +593,17 @@ class FavHttp {
   }
 
   // （取消）收藏
-  static Future delFav({
-    List? ids,
+  static Future favVideo({
+    required String resources,
+    String? addIds,
     String? delIds,
   }) async {
     var res = await Request().post(
-      Api.delFav,
+      Api.favVideo,
       data: {
-        'resources': ids?.join(','),
-        'media_id': delIds,
-        'platform': 'web',
+        'resources': resources,
+        'add_media_ids': addIds ?? '',
+        'del_media_ids': delIds ?? '',
         'csrf': Accounts.main.csrf,
       },
       options: Options(contentType: Headers.formUrlEncodedContentType),
@@ -607,19 +616,15 @@ class FavHttp {
   }
 
   // （取消）收藏
-  static Future favVideo({
-    int? aid,
-    String? addIds,
-    String? delIds,
-    int? type,
+  static Future unfavAll({
+    required rid,
+    required type,
   }) async {
     var res = await Request().post(
-      Api.favVideo,
+      Api.unfavAll,
       data: {
-        'rid': aid,
-        'type': type ?? 2,
-        'add_media_ids': addIds ?? '',
-        'del_media_ids': delIds ?? '',
+        'rid': rid,
+        'type': type,
         'csrf': Accounts.main.csrf,
       },
       options: Options(contentType: Headers.formUrlEncodedContentType),
@@ -642,15 +647,15 @@ class FavHttp {
     var res = await Request().post(
       isFav
           ? isCopy
-              ? Api.copyFav
-              : Api.moveFav
+                ? Api.copyFav
+                : Api.moveFav
           : isCopy
-              ? Api.copyToview
-              : Api.moveToview,
+          ? Api.copyToview
+          : Api.moveToview,
       data: {
-        if (srcMediaId != null) 'src_media_id': srcMediaId,
+        'src_media_id': ?srcMediaId,
         'tar_media_id': tarMediaId,
-        if (mid != null) 'mid': mid,
+        'mid': ?mid,
         'resources': resources.join(','),
         'platform': 'web',
         'csrf': Accounts.main.csrf,
@@ -687,7 +692,7 @@ class FavHttp {
       queryParameters: {
         'up_mid': mid,
         'rid': rid,
-        if (type != null) 'type': type,
+        'type': ?type,
       },
     );
     if (res.data['code'] == 0) {

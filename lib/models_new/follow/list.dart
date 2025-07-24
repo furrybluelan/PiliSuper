@@ -49,7 +49,8 @@ class FollowItemModel {
         officialVerify: json['official_verify'] == null
             ? null
             : BaseOfficialVerify.fromJson(
-                json['official_verify'] as Map<String, dynamic>),
+                json['official_verify'] as Map<String, dynamic>,
+              ),
         vip: json['vip'] == null
             ? null
             : Vip.fromJson(json['vip'] as Map<String, dynamic>),

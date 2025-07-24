@@ -34,51 +34,57 @@ class _RankPageState extends State<RankPage>
               RankType.values.length,
               (index) => IntrinsicHeight(
                 child: Obx(
-                  () => Material(
-                    color: index == _rankController.tabIndex.value
-                        ? theme.colorScheme.onInverseSurface
-                        : theme.colorScheme.surface,
-                    child: InkWell(
-                      onTap: () {
-                        if (_rankController.tabIndex.value != index) {
-                          _rankController.tabIndex.value = index;
-                          _rankController.tabController.animateTo(index);
-                        } else {
-                          _rankController.animateToTop();
-                        }
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            height: double.infinity,
-                            width: 3,
-                            color: index == _rankController.tabIndex.value
-                                ? theme.colorScheme.primary
-                                : Colors.transparent,
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Container(
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(vertical: 7),
-                              child: Text(
-                                RankType.values[index].label,
-                                style: TextStyle(
-                                  color: index == _rankController.tabIndex.value
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface,
-                                  fontSize: 15,
+                  () {
+                    final isCurr = index == _rankController.tabIndex.value;
+                    return Material(
+                      color: isCurr
+                          ? theme.colorScheme.onInverseSurface
+                          : theme.colorScheme.surface,
+                      child: InkWell(
+                        onTap: () {
+                          if (isCurr) {
+                            _rankController.animateToTop();
+                          } else {
+                            _rankController
+                              ..tabIndex.value = index
+                              ..tabController.animateTo(index);
+                          }
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              height: double.infinity,
+                              width: 3,
+                              color: isCurr
+                                  ? theme.colorScheme.primary
+                                  : Colors.transparent,
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Container(
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 7,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                child: Text(
+                                  RankType.values[index].label,
+                                  style: TextStyle(
+                                    color: isCurr
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface,
+                                    fontSize: 15,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -89,10 +95,12 @@ class _RankPageState extends State<RankPage>
             physics: const NeverScrollableScrollPhysics(),
             controller: _rankController.tabController,
             children: RankType.values
-                .map((item) => ZonePage(
-                      rid: item.rid,
-                      seasonType: item.seasonType,
-                    ))
+                .map(
+                  (item) => ZonePage(
+                    rid: item.rid,
+                    seasonType: item.seasonType,
+                  ),
+                )
                 .toList(),
           ),
         ),

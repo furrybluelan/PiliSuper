@@ -36,8 +36,7 @@ class SeasonSeriesCard extends StatelessWidget {
               AspectRatio(
                 aspectRatio: StyleString.aspectRatio,
                 child: LayoutBuilder(
-                  builder:
-                      (BuildContext context, BoxConstraints boxConstraints) {
+                  builder: (BuildContext context, BoxConstraints boxConstraints) {
                     final double maxWidth = boxConstraints.maxWidth;
                     final double maxHeight = boxConstraints.maxHeight;
                     return Stack(

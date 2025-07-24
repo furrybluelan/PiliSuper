@@ -21,8 +21,11 @@ class DurationUtil {
     if (data == null || data.isEmpty) {
       return 0;
     }
-    List<int> split =
-        data.split(':').reversed.map((e) => int.parse(e)).toList();
+    List<int> split = data
+        .split(':')
+        .reversed
+        .map((e) => int.parse(e))
+        .toList();
     int duration = 0;
     for (int i = 0; i < split.length; i++) {
       duration += split[i] * pow(60, i).toInt();

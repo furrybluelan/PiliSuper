@@ -82,8 +82,11 @@ class _MediaPageState extends CommonPageState<MediaPage, MediaController>
                     color: primary,
                   ),
                 ),
-                contentPadding:
-                    const EdgeInsets.only(left: 15, top: 2, bottom: 2),
+                contentPadding: const EdgeInsets.only(
+                  left: 15,
+                  top: 2,
+                  bottom: 2,
+                ),
                 minLeadingWidth: 0,
                 title: Text(
                   item.title,
@@ -94,7 +97,7 @@ class _MediaPageState extends CommonPageState<MediaPage, MediaController>
               () => controller.loadingState.value is Loading
                   ? const SizedBox.shrink()
                   : favFolder(theme),
-            )
+            ),
           ],
         ),
       ),
@@ -119,33 +122,37 @@ class _MediaPageState extends CommonPageState<MediaPage, MediaController>
           title: Padding(
             padding: const EdgeInsets.only(left: 10),
             child: Obx(
-              () => Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '我的收藏  ',
-                      style: TextStyle(
-                          fontSize: theme.textTheme.titleMedium!.fontSize,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    if (controller.count.value != -1)
+              () {
+                final count = controller.count.value;
+                return Text.rich(
+                  TextSpan(
+                    children: [
                       TextSpan(
-                        text: "${controller.count.value}  ",
+                        text: '我的收藏  ',
                         style: TextStyle(
-                          fontSize: theme.textTheme.titleSmall!.fontSize,
+                          fontSize: theme.textTheme.titleMedium!.fontSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (count != -1)
+                        TextSpan(
+                          text: "$count  ",
+                          style: TextStyle(
+                            fontSize: theme.textTheme.titleSmall!.fontSize,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      WidgetSpan(
+                        child: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 18,
                           color: theme.colorScheme.primary,
                         ),
                       ),
-                    WidgetSpan(
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 18,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
           trailing: IconButton(
@@ -168,69 +175,71 @@ class _MediaPageState extends CommonPageState<MediaPage, MediaController>
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
       Success(:var response) => Builder(
-          builder: (context) {
-            List<FavFolderInfo>? favFolderList = response.list;
-            if (favFolderList.isNullOrEmpty) {
-              return const SizedBox.shrink();
-            }
-            bool flag = controller.count.value > favFolderList!.length;
-            return ListView.separated(
-              padding: const EdgeInsets.only(left: 20),
-              itemCount: response.list.length + (flag ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (flag && index == favFolderList.length) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 14, bottom: 35),
-                    child: Center(
-                      child: IconButton(
-                        tooltip: '查看更多',
-                        style: ButtonStyle(
-                          padding: WidgetStateProperty.all(EdgeInsets.zero),
-                          backgroundColor:
-                              WidgetStateProperty.resolveWith((states) {
-                            return theme.colorScheme.primaryContainer
-                                .withValues(alpha: 0.5);
-                          }),
-                        ),
-                        onPressed: () async {
-                          await Get.toNamed('/fav');
-                          Future.delayed(const Duration(milliseconds: 150), () {
-                            controller.onRefresh();
-                          });
-                        },
-                        icon: Icon(
-                          Icons.arrow_forward_ios,
-                          size: 18,
-                          color: theme.colorScheme.primary,
-                        ),
+        builder: (context) {
+          List<FavFolderInfo>? favFolderList = response.list;
+          if (favFolderList.isNullOrEmpty) {
+            return const SizedBox.shrink();
+          }
+          bool flag = controller.count.value > favFolderList!.length;
+          return ListView.separated(
+            padding: const EdgeInsets.only(left: 20),
+            itemCount: response.list.length + (flag ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (flag && index == favFolderList.length) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 14, bottom: 35),
+                  child: Center(
+                    child: IconButton(
+                      tooltip: '查看更多',
+                      style: ButtonStyle(
+                        padding: WidgetStateProperty.all(EdgeInsets.zero),
+                        backgroundColor: WidgetStateProperty.resolveWith((
+                          states,
+                        ) {
+                          return theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.5,
+                          );
+                        }),
+                      ),
+                      onPressed: () async {
+                        await Get.toNamed('/fav');
+                        Future.delayed(const Duration(milliseconds: 150), () {
+                          controller.onRefresh();
+                        });
+                      },
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 18,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
-                  );
-                } else {
-                  return FavFolderItem(
-                    heroTag: Utils.generateRandomString(8),
-                    item: response.list[index],
-                    callback: () => Future.delayed(
-                      const Duration(milliseconds: 150),
-                      controller.onRefresh,
-                    ),
-                  );
-                }
-              },
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (context, index) => const SizedBox(width: 14),
-            );
-          },
-        ),
+                  ),
+                );
+              } else {
+                return FavFolderItem(
+                  heroTag: Utils.generateRandomString(8),
+                  item: response.list[index],
+                  callback: () => Future.delayed(
+                    const Duration(milliseconds: 150),
+                    controller.onRefresh,
+                  ),
+                );
+              }
+            },
+            scrollDirection: Axis.horizontal,
+            separatorBuilder: (context, index) => const SizedBox(width: 14),
+          );
+        },
+      ),
       Error(:var errMsg) => SizedBox(
-          height: 160,
-          child: Center(
-            child: Text(
-              errMsg ?? '',
-              textAlign: TextAlign.center,
-            ),
+        height: 160,
+        child: Center(
+          child: Text(
+            errMsg ?? '',
+            textAlign: TextAlign.center,
           ),
         ),
+      ),
     };
   }
 }

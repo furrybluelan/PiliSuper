@@ -99,13 +99,36 @@ class VideoCardVMemberHome extends StatelessWidget {
                           size: PBadgeSize.small,
                           type: PBadgeType.gray,
                           text: DurationUtil.formatDuration(videoItem.duration),
+                        ),
+                      if (videoItem.badges?.isNotEmpty == true)
+                        PBadge(
+                          text: videoItem.badges!
+                              .map((e) => e.text ?? '')
+                              .join('|'),
+                          top: 6,
+                          right: 6,
+                          type: videoItem.badges!.first.text == '充电专属'
+                              ? PBadgeType.error
+                              : PBadgeType.primary,
                         )
+                      else if (videoItem.isCooperation == true)
+                        const PBadge(
+                          text: '合作',
+                          top: 6,
+                          right: 6,
+                        )
+                      else if (videoItem.isSteins == true)
+                        const PBadge(
+                          text: '互动',
+                          top: 6,
+                          right: 6,
+                        ),
                     ],
                   );
                 },
               ),
             ),
-            content(context)
+            content(context),
           ],
         ),
       ),

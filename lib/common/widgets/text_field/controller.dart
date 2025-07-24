@@ -56,7 +56,7 @@ extension TextEditingDeltaExt on TextEditingDelta {
       type: composing.isValid ? RichTextType.composing : RichTextType.text,
       rawText: null,
       emote: null,
-      id: null
+      id: null,
     );
   }
 
@@ -85,7 +85,8 @@ class RichTextEditingDeltaInsertion extends TextEditingDeltaInsertion
     this.id,
     this.rawText,
   }) {
-    this.type = type ??
+    this.type =
+        type ??
         (composing.isValid ? RichTextType.composing : RichTextType.text);
   }
 
@@ -115,7 +116,8 @@ class RichTextEditingDeltaReplacement extends TextEditingDeltaReplacement
     this.id,
     this.rawText,
   }) {
-    this.type = type ??
+    this.type =
+        type ??
         (composing.isValid ? RichTextType.composing : RichTextType.text);
   }
 
@@ -305,8 +307,9 @@ class RichTextItem {
         '',
       );
       range = TextRange(start: range.start, end: range.start + text.length);
-      controller.newSelection =
-          TextSelection.collapsed(offset: deletedRange.start);
+      controller.newSelection = TextSelection.collapsed(
+        offset: deletedRange.start,
+      );
       return null;
     }
 
@@ -331,8 +334,9 @@ class RichTextItem {
         start: range.start,
         end: deletedRange.start,
       );
-      controller.newSelection =
-          TextSelection.collapsed(offset: deletedRange.start);
+      controller.newSelection = TextSelection.collapsed(
+        offset: deletedRange.start,
+      );
       return null;
     }
 
@@ -385,11 +389,14 @@ class RichTextItem {
           final end = range.start + text.length;
           range = TextRange(start: range.start, end: end);
           controller.newSelection = TextSelection.collapsed(
-              offset: replacedRange.start + delta.replacementText.length);
+            offset: replacedRange.start + delta.replacementText.length,
+          );
           return null;
         } else {
-          final leadingText =
-              text.substring(0, replacedRange.start - range.start);
+          final leadingText = text.substring(
+            0,
+            replacedRange.start - range.start,
+          );
           final trailString = text.substring(replacedRange.end - range.start);
           final insertEnd = replacedRange.start + delta.replacementText.length;
           controller.newSelection = TextSelection.collapsed(offset: insertEnd);
@@ -560,10 +567,10 @@ class RichTextEditingController extends TextEditingController {
     List<RichTextItem>? items,
     this.onMention,
   }) : super(
-          text: items != null && items.isNotEmpty
-              ? (StringBuffer()..writeAll(items.map((e) => e.text))).toString()
-              : null,
-        ) {
+         text: items != null && items.isNotEmpty
+             ? (StringBuffer()..writeAll(items.map((e) => e.text))).toString()
+             : null,
+       ) {
     if (items != null && items.isNotEmpty) {
       this.items.addAll(items);
     }
@@ -625,8 +632,9 @@ class RichTextEditingController extends TextEditingController {
               id: config.id,
             ),
           );
-          newSelection =
-              TextSelection.collapsed(offset: delta.textInserted.length);
+          newSelection = TextSelection.collapsed(
+            offset: delta.textInserted.length,
+          );
           return;
         }
         for (int index = 0; index < items.length; index++) {
@@ -654,15 +662,17 @@ class RichTextEditingController extends TextEditingController {
       case TextEditingDeltaReplacement e:
         for (int index = 0; index < items.length; index++) {
           final item = items[index];
-          ({bool remove, List<RichTextItem>? toAdd})? res =
-              item.onReplace(e, this);
+          ({bool remove, List<RichTextItem>? toAdd})? res = item.onReplace(
+            e,
+            this,
+          );
           if (res != null) {
             if (res.toAdd != null) {
               addIndex = res.remove
                   ? index
                   : (e.replacedRange.start == 0 && index == 0)
-                      ? 0
-                      : index + 1;
+                  ? 0
+                  : index + 1;
               (toAdd ??= <RichTextItem>[]).addAll(res.toAdd!);
             } else if (res.remove) {
               (toDel ??= <RichTextItem>[]).add(item);
@@ -675,7 +685,9 @@ class RichTextEditingController extends TextEditingController {
         if (newSelection.isCollapsed) {
           final newPos = dragOffset(newSelection.base);
           newSelection = newSelection.copyWith(
-              baseOffset: newPos.offset, extentOffset: newPos.offset);
+            baseOffset: newPos.offset,
+            extentOffset: newPos.offset,
+          );
         } else {
           final isNormalized =
               newSelection.baseOffset < newSelection.extentOffset;
@@ -742,8 +754,10 @@ class RichTextEditingController extends TextEditingController {
           case RichTextType.text:
             return TextSpan(text: e.text);
           case RichTextType.composing:
-            composingStyle ??= style?.merge(
-                    const TextStyle(decoration: TextDecoration.underline)) ??
+            composingStyle ??=
+                style?.merge(
+                  const TextStyle(decoration: TextDecoration.underline),
+                ) ??
                 const TextStyle(decoration: TextDecoration.underline);
             if (composingRegionOutOfRange) {
               e.type = RichTextType.text;
@@ -753,8 +767,9 @@ class RichTextEditingController extends TextEditingController {
               style: composingRegionOutOfRange ? null : composingStyle,
             );
           case RichTextType.at || RichTextType.common:
-            richStyle ??= (style ?? const TextStyle())
-                .copyWith(color: Theme.of(context).colorScheme.primary);
+            richStyle ??= (style ?? const TextStyle()).copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            );
             return TextSpan(
               text: e.text,
               style: richStyle,
@@ -778,8 +793,9 @@ class RichTextEditingController extends TextEditingController {
             }
             return TextSpan(text: e.text);
           case RichTextType.vote:
-            richStyle ??= (style ?? const TextStyle())
-                .copyWith(color: Theme.of(context).colorScheme.primary);
+            richStyle ??= (style ?? const TextStyle()).copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            );
             return TextSpan(
               children: [
                 WidgetSpan(
@@ -938,10 +954,14 @@ class RichTextEditingController extends TextEditingController {
         if (e.isRich) {
           if (offset < selection.baseOffset) {
             return newSelection.copyWith(
-                baseOffset: range.start, extentOffset: range.start);
+              baseOffset: range.start,
+              extentOffset: range.start,
+            );
           } else {
             return newSelection.copyWith(
-                baseOffset: range.end, extentOffset: range.end);
+              baseOffset: range.end,
+              extentOffset: range.end,
+            );
           }
         }
       }

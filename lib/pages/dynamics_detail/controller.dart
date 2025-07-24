@@ -56,10 +56,10 @@ class DynamicDetailController extends ReplyController<MainListReply> {
 
   @override
   Future<LoadingState<MainListReply>> customGetData() => ReplyGrpc.mainList(
-        type: replyType,
-        oid: oid,
-        mode: mode.value,
-        cursorNext: cursorNext,
-        offset: paginationReply?.nextOffset,
-      );
+    type: replyType,
+    oid: oid,
+    mode: mode.value,
+    cursorNext: cursorNext,
+    offset: paginationReply?.nextOffset,
+  );
 }

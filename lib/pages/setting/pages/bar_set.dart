@@ -62,7 +62,7 @@ class _BarSetPageState extends State<BarSetPage> {
         title: Text('$title编辑'),
         actions: [
           TextButton(onPressed: saveEdit, child: const Text('保存')),
-          const SizedBox(width: 12)
+          const SizedBox(width: 12),
         ],
       ),
       body: ReorderableListView(
@@ -70,23 +70,27 @@ class _BarSetPageState extends State<BarSetPage> {
         footer: SizedBox(
           height: MediaQuery.paddingOf(context).bottom + 30,
           child: const Align(
-              alignment: Alignment.centerRight, child: Text('*长按拖动排序        ')),
+            alignment: Alignment.centerRight,
+            child: Text('*长按拖动排序        '),
+          ),
         ),
         children: defaultBars
-            .map((i) => CheckboxListTile(
-                  key: Key(i.label),
-                  value: barIndex.containsKey(i.index),
-                  onChanged: (bool? value) {
-                    if (value!) {
-                      barIndex[i.index] = -1;
-                    } else {
-                      barIndex.remove(i.index);
-                    }
-                    setState(() {});
-                  },
-                  title: Text(i.label),
-                  secondary: const Icon(Icons.drag_indicator_rounded),
-                ))
+            .map(
+              (i) => CheckboxListTile(
+                key: Key(i.label),
+                value: barIndex.containsKey(i.index),
+                onChanged: (bool? value) {
+                  if (value!) {
+                    barIndex[i.index] = -1;
+                  } else {
+                    barIndex.remove(i.index);
+                  }
+                  setState(() {});
+                },
+                title: Text(i.label),
+                secondary: const Icon(Icons.drag_indicator_rounded),
+              ),
+            )
             .toList(),
       ),
     );

@@ -35,7 +35,8 @@ class _AtMePageState extends State<AtMePage> {
           IconButton(
             onPressed: () => Get.to(
               const WhisperSettingsPage(
-                  imSettingType: IMSettingType.SETTING_TYPE_OLD_AT_ME),
+                imSettingType: IMSettingType.SETTING_TYPE_OLD_AT_ME,
+              ),
             ),
             icon: Icon(
               size: 20,
@@ -53,9 +54,11 @@ class _AtMePageState extends State<AtMePage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.only(
-                  bottom: MediaQuery.paddingOf(context).bottom + 80),
+                bottom: MediaQuery.paddingOf(context).bottom + 80,
+              ),
               sliver: Obx(
-                  () => _buildBody(theme, _atMeController.loadingState.value)),
+                () => _buildBody(theme, _atMeController.loadingState.value),
+              ),
             ),
           ],
         ),
@@ -64,7 +67,9 @@ class _AtMePageState extends State<AtMePage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<MsgAtItem>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<MsgAtItem>?> loadingState,
+  ) {
     late final divider = Divider(
       indent: 72,
       endIndent: 20,
@@ -73,98 +78,102 @@ class _AtMePageState extends State<AtMePage> {
     );
     return switch (loadingState) {
       Loading() => SliverList.builder(
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            return const MsgFeedTopSkeleton();
-          },
-        ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.separated(
-              itemCount: response!.length,
-              itemBuilder: (context, int index) {
-                if (index == response.length - 1) {
-                  _atMeController.onLoadMore();
-                }
-                final item = response[index];
-                return ListTile(
-                  onTap: () {
-                    String? nativeUri = item.item?.nativeUri;
-                    if (nativeUri == null ||
-                        nativeUri.isEmpty ||
-                        nativeUri.startsWith('?')) {
-                      return;
-                    }
-                    PiliScheme.routePushFromUrl(nativeUri);
-                  },
-                  onLongPress: () => showConfirmDialog(
-                    context: context,
-                    title: '确定删除该通知?',
-                    onConfirm: () => _atMeController.onRemove(item.id, index),
-                  ),
-                  leading: GestureDetector(
-                    onTap: () => Get.toNamed('/member?mid=${item.user?.mid}'),
-                    child: NetworkImgLayer(
-                      width: 45,
-                      height: 45,
-                      type: ImageType.avatar,
-                      src: item.user?.avatar,
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          return const MsgFeedTopSkeleton();
+        },
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.separated(
+                itemCount: response!.length,
+                itemBuilder: (context, int index) {
+                  if (index == response.length - 1) {
+                    _atMeController.onLoadMore();
+                  }
+                  final item = response[index];
+                  return ListTile(
+                    onTap: () {
+                      String? nativeUri = item.item?.nativeUri;
+                      if (nativeUri == null ||
+                          nativeUri.isEmpty ||
+                          nativeUri.startsWith('?')) {
+                        return;
+                      }
+                      PiliScheme.routePushFromUrl(nativeUri);
+                    },
+                    onLongPress: () => showConfirmDialog(
+                      context: context,
+                      title: '确定删除该通知?',
+                      onConfirm: () => _atMeController.onRemove(item.id, index),
                     ),
-                  ),
-                  title: Text.rich(
-                    TextSpan(
+                    leading: GestureDetector(
+                      onTap: () => Get.toNamed('/member?mid=${item.user?.mid}'),
+                      child: NetworkImgLayer(
+                        width: 45,
+                        height: 45,
+                        type: ImageType.avatar,
+                        src: item.user?.avatar,
+                      ),
+                    ),
+                    title: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "${item.user?.nickname}",
+                            style: theme.textTheme.titleSmall!.copyWith(
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          TextSpan(
+                            text: " 在${item.item?.business}中@了我",
+                            style: theme.textTheme.titleSmall!.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextSpan(
-                          text: "${item.user?.nickname}",
-                          style: theme.textTheme.titleSmall!.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        TextSpan(
-                          text: " 在${item.item?.business}中@了我",
-                          style: theme.textTheme.titleSmall!.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (item.item?.sourceContent?.isNotEmpty == true) ...[
-                        const SizedBox(height: 4),
-                        Text(item.item!.sourceContent!,
+                        if (item.item?.sourceContent?.isNotEmpty == true) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            item.item!.sourceContent!,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium!
-                                .copyWith(color: theme.colorScheme.outline)),
-                      ],
-                      const SizedBox(height: 4),
-                      Text(
-                        DateUtil.dateFormat(item.atTime),
-                        style: theme.textTheme.bodyMedium!.copyWith(
-                          fontSize: 13,
-                          color: theme.colorScheme.outline,
+                            style: theme.textTheme.bodyMedium!.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
+                        Text(
+                          DateUtil.dateFormat(item.atTime),
+                          style: theme.textTheme.bodyMedium!.copyWith(
+                            fontSize: 13,
+                            color: theme.colorScheme.outline,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  trailing: item.item?.image != null && item.item?.image != ""
-                      ? NetworkImgLayer(
-                          width: 45,
-                          height: 45,
-                          src: item.item?.image,
-                        )
-                      : null,
-                );
-              },
-              separatorBuilder: (context, index) => divider,
-            )
-          : HttpError(onReload: _atMeController.onReload),
+                      ],
+                    ),
+                    trailing: item.item?.image != null && item.item?.image != ""
+                        ? NetworkImgLayer(
+                            width: 45,
+                            height: 45,
+                            src: item.item?.image,
+                          )
+                        : null,
+                  );
+                },
+                separatorBuilder: (context, index) => divider,
+              )
+            : HttpError(onReload: _atMeController.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _atMeController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _atMeController.onReload,
+      ),
     };
   }
 }

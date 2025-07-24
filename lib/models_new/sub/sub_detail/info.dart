@@ -25,18 +25,18 @@ class Info {
   });
 
   factory Info.fromJson(Map<String, dynamic> json) => Info(
-        id: json['id'] as int?,
-        seasonType: json['season_type'] as int?,
-        title: json['title'] as String?,
-        cover: json['cover'] as String?,
-        upper: json['upper'] == null
-            ? null
-            : Owner.fromJson(json['upper'] as Map<String, dynamic>),
-        cntInfo: json['cnt_info'] == null
-            ? null
-            : CntInfo.fromJson(json['cnt_info'] as Map<String, dynamic>),
-        mediaCount: json['media_count'] as int?,
-        intro: json['intro'] as String?,
-        enableVt: json['enable_vt'] as int?,
-      );
+    id: json['id'] as int?,
+    seasonType: json['season_type'] as int?,
+    title: json['title'] as String?,
+    cover: json['cover'] as String?,
+    upper: json['upper'] == null
+        ? null
+        : Owner.fromJson(json['upper'] as Map<String, dynamic>),
+    cntInfo: json['cnt_info'] == null
+        ? null
+        : CntInfo.fromJson(json['cnt_info'] as Map<String, dynamic>),
+    mediaCount: json['media_count'] as int?,
+    intro: json['intro'] as String?,
+    enableVt: json['enable_vt'] as int?,
+  );
 }

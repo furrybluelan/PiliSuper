@@ -71,44 +71,44 @@ class EpisodeItem {
   });
 
   factory EpisodeItem.fromJson(Map<String, dynamic> json) => EpisodeItem(
-        aid: json['aid'] as int?,
-        badge: json['badge'] as String?,
-        badgeInfo: json['badge_info'] == null
-            ? null
-            : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
-        badgeType: json['badge_type'] as int?,
-        bvid: json['bvid'] as String?,
-        cid: json['cid'] as int?,
-        cover: json['cover'] as String?,
-        dimension: json['dimension'] == null
-            ? null
-            : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
-        duration: json['duration'] as int?,
-        enableVt: json['enable_vt'] as bool?,
-        epId: json['ep_id'] as int?,
-        from: json['from'] as String?,
-        id: json['id'] as int?,
-        isViewHide: json['is_view_hide'] as bool?,
-        link: json['link'] as String?,
-        longTitle: json['long_title'] as String?,
-        pubTime: json['pub_time'] as int?,
-        pv: json['pv'] as int?,
-        releaseDate: json['release_date'] as String?,
-        rights: json['rights'] == null
-            ? null
-            : Rights.fromJson(json['rights'] as Map<String, dynamic>),
-        sectionType: json['section_type'] as int?,
-        shareCopy: json['share_copy'] as String?,
-        shareUrl: json['share_url'] as String?,
-        shortLink: json['short_link'] as String?,
-        showDrmLoginDialog: json['showDrmLoginDialog'] as bool?,
-        showTitle: json['show_title'] as String?,
-        skip: json['skip'] == null
-            ? null
-            : Skip.fromJson(json['skip'] as Map<String, dynamic>),
-        status: json['status'] as int?,
-        subtitle: json['subtitle'] as String?,
-        title: json['title'] as String?,
-        vid: json['vid'] as String?,
-      );
+    aid: json['aid'] as int?,
+    badge: json['badge'] as String?,
+    badgeInfo: json['badge_info'] == null
+        ? null
+        : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
+    badgeType: json['badge_type'] as int?,
+    bvid: json['bvid'] as String?,
+    cid: json['cid'] as int?,
+    cover: json['cover'] as String?,
+    dimension: json['dimension'] == null
+        ? null
+        : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
+    duration: json['duration'] as int?,
+    enableVt: json['enable_vt'] as bool?,
+    epId: json['ep_id'] as int?,
+    from: json['from'] as String?,
+    id: json['id'] as int?,
+    isViewHide: json['is_view_hide'] as bool?,
+    link: json['link'] as String?,
+    longTitle: json['long_title'] as String?,
+    pubTime: json['pub_time'] as int?,
+    pv: json['pv'] as int?,
+    releaseDate: json['release_date'] as String?,
+    rights: json['rights'] == null
+        ? null
+        : Rights.fromJson(json['rights'] as Map<String, dynamic>),
+    sectionType: json['section_type'] as int?,
+    shareCopy: json['share_copy'] as String?,
+    shareUrl: json['share_url'] as String?,
+    shortLink: json['short_link'] as String?,
+    showDrmLoginDialog: json['showDrmLoginDialog'] as bool?,
+    showTitle: json['show_title'] as String?,
+    skip: json['skip'] == null
+        ? null
+        : Skip.fromJson(json['skip'] as Map<String, dynamic>),
+    status: json['status'] as int?,
+    subtitle: json['subtitle'] as String?,
+    title: json['title'] as String?,
+    vid: json['vid'] as String?,
+  );
 }

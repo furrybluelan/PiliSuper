@@ -18,8 +18,13 @@ class SearchPgcPanel extends CommonSearchPanel {
   State<SearchPgcPanel> createState() => _SearchPgcPanelState();
 }
 
-class _SearchPgcPanelState extends CommonSearchPanelState<SearchPgcPanel,
-    SearchPgcData, SearchPgcItemModel> {
+class _SearchPgcPanelState
+    extends
+        CommonSearchPanelState<
+          SearchPgcPanel,
+          SearchPgcData,
+          SearchPgcItemModel
+        > {
   @override
   late final controller = Get.put(
     SearchPanelController<SearchPgcData, SearchPgcItemModel>(

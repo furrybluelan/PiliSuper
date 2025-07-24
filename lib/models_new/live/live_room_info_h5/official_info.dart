@@ -14,10 +14,10 @@ class OfficialInfo {
   });
 
   factory OfficialInfo.fromJson(Map<String, dynamic> json) => OfficialInfo(
-        role: json['role'] as int?,
-        title: json['title'] as String?,
-        desc: json['desc'] as String?,
-        isNft: json['is_nft'] as int?,
-        nftDmark: json['nft_dmark'] as String?,
-      );
+    role: json['role'] as int?,
+    title: json['title'] as String?,
+    desc: json['desc'] as String?,
+    isNft: json['is_nft'] as int?,
+    nftDmark: json['nft_dmark'] as String?,
+  );
 }

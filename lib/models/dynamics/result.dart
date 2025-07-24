@@ -13,8 +13,10 @@ class DynamicsDataModel {
   String? offset;
   int? total;
 
-  static RegExp banWordForDyn =
-      RegExp(Pref.banWordForDyn, caseSensitive: false);
+  static RegExp banWordForDyn = RegExp(
+    Pref.banWordForDyn,
+    caseSensitive: false,
+  );
   static bool enableFilter = banWordForDyn.pattern.isNotEmpty;
 
   static bool antiGoodsDyn = Pref.antiGoodsDyn;
@@ -41,12 +43,14 @@ class DynamicsDataModel {
           continue;
         }
         if (enableFilter &&
-            banWordForDyn.hasMatch((item.orig?.modules.moduleDynamic?.major
-                        ?.opus?.summary?.text ??
-                    '') +
-                (item.modules.moduleDynamic?.major?.opus?.summary?.text ?? '') +
-                (item.orig?.modules.moduleDynamic?.desc?.text ?? '') +
-                (item.modules.moduleDynamic?.desc?.text ?? ''))) {
+            banWordForDyn.hasMatch(
+              (item.orig?.modules.moduleDynamic?.major?.opus?.summary?.text ??
+                      '') +
+                  (item.modules.moduleDynamic?.major?.opus?.summary?.text ??
+                      '') +
+                  (item.orig?.modules.moduleDynamic?.desc?.text ?? '') +
+                  (item.modules.moduleDynamic?.desc?.text ?? ''),
+            )) {
           continue;
         }
         if (filterBan &&
@@ -97,7 +101,8 @@ class DynamicItemModel {
     modules = json['item']?['modules'] == null
         ? ItemModulesModel()
         : ItemModulesModel.fromOpusJson(
-            (json['item']['modules'] as List).cast());
+            (json['item']['modules'] as List).cast(),
+          );
 
     if (json['fallback'] != null) {
       fallback = Fallback.fromJson(json['fallback']);
@@ -115,9 +120,9 @@ class Fallback {
   });
 
   factory Fallback.fromJson(Map<String, dynamic> json) => Fallback(
-        id: json['id'],
-        type: json['type'],
-      );
+    id: json['id'],
+    type: json['type'],
+  );
 }
 
 // 单个动态详情
@@ -238,8 +243,9 @@ class ModuleTopDisplay {
   int? type;
 
   ModuleTopDisplay.fromJson(Map<String, dynamic> json) {
-    album =
-        json['album'] == null ? null : ModuleTopAlbum.fromJson(json['album']);
+    album = json['album'] == null
+        ? null
+        : ModuleTopAlbum.fromJson(json['album']);
     type = json['type'];
   }
 }
@@ -353,8 +359,9 @@ class ModuleAuthorModel extends Avatar {
     pubTs = json['pub_ts'] == 0 ? null : json['pub_ts'];
     type = json['type'];
     if (PendantAvatar.showDynDecorate) {
-      decorate =
-          json['decorate'] == null ? null : Decorate.fromJson(json['decorate']);
+      decorate = json['decorate'] == null
+          ? null
+          : Decorate.fromJson(json['decorate']);
     } else {
       pendant = null;
     }
@@ -379,13 +386,13 @@ class Decorate {
   });
 
   factory Decorate.fromJson(Map<String, dynamic> json) => Decorate(
-        cardUrl: json["card_url"],
-        fan: json["fan"] == null ? null : Fan.fromJson(json["fan"]),
-        id: json["id"],
-        jumpUrl: json["jump_url"],
-        name: json["name"],
-        type: json["type"],
-      );
+    cardUrl: json["card_url"],
+    fan: json["fan"] == null ? null : Fan.fromJson(json["fan"]),
+    id: json["id"],
+    jumpUrl: json["jump_url"],
+    name: json["name"],
+    type: json["type"],
+  );
 }
 
 class Fan {
@@ -404,12 +411,12 @@ class Fan {
   });
 
   factory Fan.fromJson(Map<String, dynamic> json) => Fan(
-        color: json["color"],
-        isFan: json["is_fan"],
-        numPrefix: json["num_prefix"],
-        numStr: json["num_str"],
-        number: json["number"],
-      );
+    color: json["color"],
+    isFan: json["is_fan"],
+    numPrefix: json["num_prefix"],
+    numStr: json["num_str"],
+    number: json["number"],
+  );
 }
 
 // 单个动态详情 - 动态信息
@@ -430,8 +437,9 @@ class ModuleDynamicModel {
     additional = json['additional'] != null
         ? DynamicAddModel.fromJson(json['additional'])
         : null;
-    desc =
-        json['desc'] != null ? DynamicDescModel.fromJson(json['desc']) : null;
+    desc = json['desc'] != null
+        ? DynamicDescModel.fromJson(json['desc'])
+        : null;
     if (json['major'] != null) {
       major = DynamicMajorModel.fromJson(json['major']);
     }
@@ -473,8 +481,9 @@ class DynamicAddModel {
     type = json['type'];
     vote = json['vote'] != null ? Vote.fromJson(json['vote']) : null;
     ugc = json['ugc'] != null ? Ugc.fromJson(json['ugc']) : null;
-    reserve =
-        json['reserve'] != null ? Reserve.fromJson(json['reserve']) : null;
+    reserve = json['reserve'] != null
+        ? Reserve.fromJson(json['reserve'])
+        : null;
     goods = json['goods'] != null ? Good.fromJson(json['goods']) : null;
     upowerLottery = json['upower_lottery'] != null
         ? UpowerLottery.fromJson(json['upower_lottery'])
@@ -500,14 +509,14 @@ class AddMatch {
   });
 
   factory AddMatch.fromJson(Map<String, dynamic> json) => AddMatch(
-        button: json["button"] == null ? null : Button.fromJson(json["button"]),
-        headText: json["head_text"],
-        idStr: json["id_str"],
-        jumpUrl: json["jump_url"],
-        matchInfo: json["match_info"] == null
-            ? null
-            : MatchInfo.fromJson(json["match_info"]),
-      );
+    button: json["button"] == null ? null : Button.fromJson(json["button"]),
+    headText: json["head_text"],
+    idStr: json["id_str"],
+    jumpUrl: json["jump_url"],
+    matchInfo: json["match_info"] == null
+        ? null
+        : MatchInfo.fromJson(json["match_info"]),
+  );
 }
 
 class MatchInfo {
@@ -530,18 +539,18 @@ class MatchInfo {
   });
 
   factory MatchInfo.fromJson(Map<String, dynamic> json) => MatchInfo(
-        centerBottom: json["center_bottom"],
-        centerTop: json["center_top"],
-        leftTeam: json["left_team"] == null
-            ? null
-            : TTeam.fromJson(json["left_team"]),
-        rightTeam: json["right_team"] == null
-            ? null
-            : TTeam.fromJson(json["right_team"]),
-        status: json["status"],
-        subTitle: json["sub_title"],
-        title: json["title"],
-      );
+    centerBottom: json["center_bottom"],
+    centerTop: json["center_top"],
+    leftTeam: json["left_team"] == null
+        ? null
+        : TTeam.fromJson(json["left_team"]),
+    rightTeam: json["right_team"] == null
+        ? null
+        : TTeam.fromJson(json["right_team"]),
+    status: json["status"],
+    subTitle: json["sub_title"],
+    title: json["title"],
+  );
 }
 
 class TTeam {
@@ -556,10 +565,10 @@ class TTeam {
   });
 
   factory TTeam.fromJson(Map<String, dynamic> json) => TTeam(
-        id: json["id"],
-        name: json["name"],
-        pic: json["pic"],
-      );
+    id: json["id"],
+    name: json["name"],
+    pic: json["pic"],
+  );
 }
 
 class AddCommon {
@@ -588,17 +597,17 @@ class AddCommon {
   });
 
   factory AddCommon.fromJson(Map<String, dynamic> json) => AddCommon(
-        button: json["button"] == null ? null : Button.fromJson(json["button"]),
-        cover: json["cover"],
-        desc1: json["desc1"],
-        desc2: json["desc2"],
-        headText: json["head_text"],
-        idStr: json["id_str"],
-        jumpUrl: json["jump_url"],
-        style: json["style"],
-        subType: json["sub_type"],
-        title: json["title"],
-      );
+    button: json["button"] == null ? null : Button.fromJson(json["button"]),
+    cover: json["cover"],
+    desc1: json["desc1"],
+    desc2: json["desc2"],
+    headText: json["head_text"],
+    idStr: json["id_str"],
+    jumpUrl: json["jump_url"],
+    style: json["style"],
+    subType: json["sub_type"],
+    title: json["title"],
+  );
 }
 
 class UpowerLottery {
@@ -627,17 +636,17 @@ class UpowerLottery {
   });
 
   factory UpowerLottery.fromJson(Map<String, dynamic> json) => UpowerLottery(
-        button: json["button"] == null ? null : Button.fromJson(json["button"]),
-        desc: json["desc"] == null ? null : Desc.fromJson(json["desc"]),
-        hint: json["hint"] == null ? null : Hint.fromJson(json["hint"]),
-        jumpUrl: json["jump_url"],
-        rid: json["rid"],
-        state: json["state"],
-        title: json["title"],
-        upMid: json["up_mid"],
-        upowerActionState: json["upower_action_state"],
-        upowerLevel: json["upower_level"],
-      );
+    button: json["button"] == null ? null : Button.fromJson(json["button"]),
+    desc: json["desc"] == null ? null : Desc.fromJson(json["desc"]),
+    hint: json["hint"] == null ? null : Hint.fromJson(json["hint"]),
+    jumpUrl: json["jump_url"],
+    rid: json["rid"],
+    state: json["state"],
+    title: json["title"],
+    upMid: json["up_mid"],
+    upowerActionState: json["upower_action_state"],
+    upowerLevel: json["upower_level"],
+  );
 }
 
 class Hint {
@@ -650,9 +659,9 @@ class Hint {
   });
 
   factory Hint.fromJson(Map<String, dynamic> json) => Hint(
-        style: json["style"],
-        text: json["text"],
-      );
+    style: json["style"],
+    text: json["text"],
+  );
 }
 
 class JumpStyle {
@@ -665,9 +674,9 @@ class JumpStyle {
   });
 
   factory JumpStyle.fromJson(Map<String, dynamic> json) => JumpStyle(
-        iconUrl: json["icon_url"],
-        text: json["text"],
-      );
+    iconUrl: json["icon_url"],
+    text: json["text"],
+  );
 }
 
 class Vote {
@@ -771,8 +780,9 @@ class Reserve {
   int? upMid;
 
   Reserve.fromJson(Map<String, dynamic> json) {
-    button =
-        json['button'] == null ? null : ReserveBtn.fromJson(json['button']);
+    button = json['button'] == null
+        ? null
+        : ReserveBtn.fromJson(json['button']);
     desc1 = json['desc1'] == null ? null : Desc.fromJson(json['desc1']);
     desc2 = json['desc2'] == null ? null : Desc.fromJson(json['desc2']);
     desc3 = json['desc3'] == null ? null : Desc.fromJson(json['desc3']);
@@ -948,22 +958,27 @@ class DynamicMajorModel {
     archive = json['archive'] != null
         ? DynamicArchiveModel.fromJson(json['archive'])
         : null;
-    draw =
-        json['draw'] != null ? DynamicDrawModel.fromJson(json['draw']) : null;
+    draw = json['draw'] != null
+        ? DynamicDrawModel.fromJson(json['draw'])
+        : null;
     ugcSeason = json['ugc_season'] != null
         ? DynamicArchiveModel.fromJson(json['ugc_season'])
         : null;
-    opus =
-        json['opus'] != null ? DynamicOpusModel.fromJson(json['opus']) : null;
-    pgc =
-        json['pgc'] != null ? DynamicArchiveModel.fromJson(json['pgc']) : null;
+    opus = json['opus'] != null
+        ? DynamicOpusModel.fromJson(json['opus'])
+        : null;
+    pgc = json['pgc'] != null
+        ? DynamicArchiveModel.fromJson(json['pgc'])
+        : null;
     liveRcmd = json['live_rcmd'] != null
         ? DynamicLiveModel.fromJson(json['live_rcmd'])
         : null;
-    live =
-        json['live'] != null ? DynamicLive2Model.fromJson(json['live']) : null;
-    none =
-        json['none'] != null ? DynamicNoneModel.fromJson(json['none']) : null;
+    live = json['live'] != null
+        ? DynamicLive2Model.fromJson(json['live'])
+        : null;
+    none = json['none'] != null
+        ? DynamicNoneModel.fromJson(json['none'])
+        : null;
     type = json['type'];
     courses = json['courses'];
     common = json['common'] == null ? null : Common.fromJson(json['common']);
@@ -1026,11 +1041,11 @@ class LiveRcmd {
   });
 
   factory LiveRcmd.fromJson(Map<String, dynamic> json) => LiveRcmd(
-        content: json["content"] == null
-            ? null
-            : LiveRcmdContent.fromJson(jsonDecode(json["content"])),
-        reserveType: json["reserve_type"],
-      );
+    content: json["content"] == null
+        ? null
+        : LiveRcmdContent.fromJson(jsonDecode(json["content"])),
+    reserveType: json["reserve_type"],
+  );
 }
 
 class LiveRcmdContent {
@@ -1091,26 +1106,26 @@ class LivePlayInfo {
   });
 
   factory LivePlayInfo.fromJson(Map<String, dynamic> json) => LivePlayInfo(
-        roomId: json["room_id"],
-        uid: json["uid"],
-        liveStatus: json["live_status"],
-        roomType: json["room_type"],
-        playType: json["play_type"],
-        title: json["title"],
-        cover: json["cover"],
-        online: json["online"],
-        areaId: json["area_id"],
-        areaName: json["area_name"],
-        parentAreaId: json["parent_area_id"],
-        parentAreaName: json["parent_area_name"],
-        liveScreenType: json["live_screen_type"],
-        liveStartTime: json["live_start_time"],
-        link: json["link"],
-        watchedShow: json["watched_show"] == null
-            ? null
-            : WatchedShow.fromJson(json["watched_show"]),
-        roomPaidType: json["room_paid_type"],
-      );
+    roomId: json["room_id"],
+    uid: json["uid"],
+    liveStatus: json["live_status"],
+    roomType: json["room_type"],
+    playType: json["play_type"],
+    title: json["title"],
+    cover: json["cover"],
+    online: json["online"],
+    areaId: json["area_id"],
+    areaName: json["area_name"],
+    parentAreaId: json["parent_area_id"],
+    parentAreaName: json["parent_area_name"],
+    liveScreenType: json["live_screen_type"],
+    liveStartTime: json["live_start_time"],
+    link: json["link"],
+    watchedShow: json["watched_show"] == null
+        ? null
+        : WatchedShow.fromJson(json["watched_show"]),
+    roomPaidType: json["room_paid_type"],
+  );
 }
 
 class DynamicTopicModel {
@@ -1224,8 +1239,9 @@ class DynamicOpusModel {
     pics = (json['pics'] as List?)
         ?.map<OpusPicModel>((e) => OpusPicModel.fromJson(e))
         .toList();
-    summary =
-        json['summary'] != null ? SummaryModel.fromJson(json['summary']) : null;
+    summary = json['summary'] != null
+        ? SummaryModel.fromJson(json['summary'])
+        : null;
     title = json['title'];
   }
 }
@@ -1273,8 +1289,8 @@ class RichTextNodeItem {
     pics = json['pics'] == null
         ? null
         : (json['pics'] as List?)
-            ?.map((e) => OpusPicModel.fromJson(e))
-            .toList();
+              ?.map((e) => OpusPicModel.fromJson(e))
+              .toList();
     jumpUrl = json['jump_url'];
   }
 }
@@ -1462,10 +1478,12 @@ class ModuleStatModel {
   // DynamicStat? coin;
 
   ModuleStatModel.fromJson(Map<String, dynamic> json) {
-    comment =
-        json['comment'] == null ? null : DynamicStat.fromJson(json['comment']);
-    forward =
-        json['forward'] == null ? null : DynamicStat.fromJson(json['forward']);
+    comment = json['comment'] == null
+        ? null
+        : DynamicStat.fromJson(json['comment']);
+    forward = json['forward'] == null
+        ? null
+        : DynamicStat.fromJson(json['forward']);
     like = json['like'] == null ? null : DynamicStat.fromJson(json['like']);
     if (json['favorite'] != null) {
       favorite = DynamicStat.fromJson(json['favorite']);
@@ -1492,11 +1510,11 @@ class DynamicStat {
   }
 
   static int? _parseInt(dynamic x) => switch (x) {
-        int() => x,
-        String() => int.tryParse(x),
-        double() => x.toInt(),
-        _ => null
-      };
+    int() => x,
+    String() => int.tryParse(x),
+    double() => x.toInt(),
+    _ => null,
+  };
 }
 
 class Stat {

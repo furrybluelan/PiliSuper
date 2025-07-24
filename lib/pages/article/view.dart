@@ -70,44 +70,44 @@ class _ArticlePageState extends State<ArticlePage>
 
   Function(dynamic imgList, dynamic index)? get _getImageCallback =>
       _horizontalPreview
-          ? (imgList, index) {
-              _imageStatus = true;
-              bool isFabVisible = _isFabVisible;
+      ? (imgList, index) {
+          _imageStatus = true;
+          bool isFabVisible = _isFabVisible;
+          if (isFabVisible) {
+            _hideFab();
+          }
+          final ctr = AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 200),
+          )..forward();
+          PageUtils.onHorizontalPreview(
+            _key,
+            AnimationController(
+              vsync: this,
+              duration: Duration.zero,
+            ),
+            ctr,
+            imgList,
+            index,
+            (value) async {
+              _imageStatus = null;
               if (isFabVisible) {
-                _hideFab();
+                isFabVisible = false;
+                _showFab();
               }
-              final ctr = AnimationController(
-                vsync: this,
-                duration: const Duration(milliseconds: 200),
-              )..forward();
-              PageUtils.onHorizontalPreview(
-                _key,
-                AnimationController(
-                  vsync: this,
-                  duration: Duration.zero,
-                ),
-                ctr,
-                imgList,
-                index,
-                (value) async {
-                  _imageStatus = null;
-                  if (isFabVisible) {
-                    isFabVisible = false;
-                    _showFab();
-                  }
-                  if (value == false) {
-                    await ctr.reverse();
-                  }
-                  try {
-                    ctr.dispose();
-                  } catch (_) {}
-                  if (value == false) {
-                    Get.back();
-                  }
-                },
-              );
-            }
-          : null;
+              if (value == false) {
+                await ctr.reverse();
+              }
+              try {
+                ctr.dispose();
+              } catch (_) {}
+              if (value == false) {
+                Get.back();
+              }
+            },
+          );
+        }
+      : null;
 
   @override
   void initState() {
@@ -116,13 +116,16 @@ class _ArticlePageState extends State<ArticlePage>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _anim = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: fabAnimationCtr,
-      curve: Curves.easeInOut,
-    ));
+    _anim =
+        Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: fabAnimationCtr,
+            curve: Curves.easeInOut,
+          ),
+        );
     fabAnimationCtr.forward();
     _articleCtr.scrollController.addListener(listener);
   }
@@ -182,28 +185,27 @@ class _ArticlePageState extends State<ArticlePage>
       Widget replyReplyPage({
         bool automaticallyImplyLeading = true,
         VoidCallback? onDispose,
-      }) =>
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('评论详情'),
-              titleSpacing: automaticallyImplyLeading ? null : 12,
-              automaticallyImplyLeading: automaticallyImplyLeading,
-            ),
-            body: SafeArea(
-              top: false,
-              bottom: false,
-              child: VideoReplyReplyPanel(
-                enableSlide: false,
-                id: id,
-                oid: oid,
-                rpid: rpid,
-                isVideoDetail: false,
-                replyType: _articleCtr.commentType,
-                firstFloor: replyItem,
-                onDispose: onDispose,
-              ),
-            ),
-          );
+      }) => Scaffold(
+        appBar: AppBar(
+          title: const Text('评论详情'),
+          titleSpacing: automaticallyImplyLeading ? null : 12,
+          automaticallyImplyLeading: automaticallyImplyLeading,
+        ),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: VideoReplyReplyPanel(
+            enableSlide: false,
+            id: id,
+            oid: oid,
+            rpid: rpid,
+            isVideoDetail: false,
+            replyType: _articleCtr.commentType,
+            firstFloor: replyItem,
+            onDispose: onDispose,
+          ),
+        ),
+      );
       if (this.context.orientation == Orientation.portrait) {
         Get.to(
           replyReplyPage,
@@ -266,32 +268,42 @@ class _ArticlePageState extends State<ArticlePage>
                 builder: (context) {
                   final isPortrait =
                       context.orientation == Orientation.portrait;
-                  double padding =
-                      max(context.width / 2 - Grid.smallCardWidth, 0);
+                  double padding = max(
+                    context.width / 2 - Grid.smallCardWidth,
+                    0,
+                  );
                   if (isPortrait) {
-                    return LayoutBuilder(builder: (context, constraints) {
-                      final maxWidth = constraints.maxWidth - 2 * padding - 24;
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: padding),
-                        child: CustomScrollView(
-                          controller: _articleCtr.scrollController,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          slivers: [
-                            _buildContent(theme, maxWidth),
-                            SliverToBoxAdapter(
-                              child: Divider(
-                                thickness: 8,
-                                color:
-                                    theme.dividerColor.withValues(alpha: 0.05),
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        final maxWidth =
+                            constraints.maxWidth - 2 * padding - 24;
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: padding),
+                          child: CustomScrollView(
+                            controller: _articleCtr.scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              _buildContent(theme, maxWidth),
+                              SliverToBoxAdapter(
+                                child: Divider(
+                                  thickness: 8,
+                                  color: theme.dividerColor.withValues(
+                                    alpha: 0.05,
+                                  ),
+                                ),
                               ),
-                            ),
-                            _buildReplyHeader(theme),
-                            Obx(() => _buildReplyList(
-                                theme, _articleCtr.loadingState.value)),
-                          ],
-                        ),
-                      );
-                    });
+                              _buildReplyHeader(theme),
+                              Obx(
+                                () => _buildReplyList(
+                                  theme,
+                                  _articleCtr.loadingState.value,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
                   } else {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,7 +323,7 @@ class _ArticlePageState extends State<ArticlePage>
                                       left: padding / 4,
                                       bottom:
                                           MediaQuery.paddingOf(context).bottom +
-                                              80,
+                                          80,
                                     ),
                                     sliver: _buildContent(theme, maxWidth),
                                   ),
@@ -339,8 +351,12 @@ class _ArticlePageState extends State<ArticlePage>
                                       const AlwaysScrollableScrollPhysics(),
                                   slivers: [
                                     _buildReplyHeader(theme),
-                                    Obx(() => _buildReplyList(
-                                        theme, _articleCtr.loadingState.value)),
+                                    Obx(
+                                      () => _buildReplyList(
+                                        theme,
+                                        _articleCtr.loadingState.value,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -361,286 +377,302 @@ class _ArticlePageState extends State<ArticlePage>
   }
 
   Widget _buildContent(ThemeData theme, double maxWidth) => SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        sliver: Obx(
-          () {
-            if (_articleCtr.isLoaded.value) {
-              late Widget content;
-              if (_articleCtr.opus != null) {
-                if (kDebugMode) debugPrint('json page');
-                content = OpusContent(
-                  opus: _articleCtr.opus!,
-                  callback: _getImageCallback,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    sliver: Obx(
+      () {
+        if (_articleCtr.isLoaded.value) {
+          late Widget content;
+          if (_articleCtr.opus != null) {
+            if (kDebugMode) debugPrint('json page');
+            content = OpusContent(
+              opus: _articleCtr.opus!,
+              callback: _getImageCallback,
+              maxWidth: maxWidth,
+            );
+          } else if (_articleCtr.opusData?.modules.moduleBlocked != null) {
+            if (kDebugMode) debugPrint('moduleBlocked');
+            final moduleBlocked = _articleCtr.opusData!.modules.moduleBlocked!;
+            content = SliverToBoxAdapter(
+              child: moduleBlockedItem(theme, moduleBlocked, maxWidth),
+            );
+          } else if (_articleCtr.articleData?.content != null) {
+            if (_articleCtr.articleData?.type == 3) {
+              // json
+              return ArticleOpus(ops: _articleCtr.articleData?.ops);
+            }
+            if (kDebugMode) debugPrint('html page');
+            final res = parser.parse(_articleCtr.articleData!.content!);
+            if (res.body!.children.isEmpty) {
+              content = SliverToBoxAdapter(
+                child: htmlRender(
+                  context: context,
+                  html: _articleCtr.articleData!.content!,
                   maxWidth: maxWidth,
-                );
-              } else if (_articleCtr.opusData?.modules.moduleBlocked != null) {
-                if (kDebugMode) debugPrint('moduleBlocked');
-                final moduleBlocked =
-                    _articleCtr.opusData!.modules.moduleBlocked!;
-                content = SliverToBoxAdapter(
-                  child: moduleBlockedItem(theme, moduleBlocked, maxWidth),
-                );
-              } else if (_articleCtr.articleData?.content != null) {
-                if (_articleCtr.articleData?.type == 3) {
-                  // json
-                  return ArticleOpus(ops: _articleCtr.articleData?.ops);
-                }
-                if (kDebugMode) debugPrint('html page');
-                final res = parser.parse(_articleCtr.articleData!.content!);
-                if (res.body!.children.isEmpty) {
-                  content = SliverToBoxAdapter(
-                    child: htmlRender(
-                      context: context,
-                      html: _articleCtr.articleData!.content!,
-                      maxWidth: maxWidth,
-                      callback: _getImageCallback,
-                    ),
+                  callback: _getImageCallback,
+                ),
+              );
+            } else {
+              content = SliverList.separated(
+                itemCount: res.body!.children.length,
+                itemBuilder: (context, index) {
+                  return htmlRender(
+                    context: context,
+                    element: res.body!.children[index],
+                    maxWidth: maxWidth,
+                    callback: _getImageCallback,
                   );
-                } else {
-                  content = SliverList.separated(
-                    itemCount: res.body!.children.length,
-                    itemBuilder: (context, index) {
-                      return htmlRender(
-                        context: context,
-                        element: res.body!.children[index],
-                        maxWidth: maxWidth,
-                        callback: _getImageCallback,
-                      );
-                    },
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 10),
-                  );
-                }
-              } else {
-                content = const SliverToBoxAdapter(child: Text('NULL'));
-              }
-
-              int? pubTime =
-                  _articleCtr.opusData?.modules.moduleAuthor?.pubTs ??
-                      _articleCtr.articleData?.publishTime;
-              return SliverMainAxisGroup(
-                slivers: [
-                  if (_articleCtr.type != 'read' &&
-                      _articleCtr.opusData?.modules.moduleTop?.display?.album
-                              ?.pics?.isNotEmpty ==
-                          true)
-                    SliverToBoxAdapter(
-                      child: Builder(
-                        builder: (context) {
-                          final pics = _articleCtr.opusData!.modules.moduleTop!
-                              .display!.album!.pics!;
-                          final length = pics.length;
-                          final first = pics.first;
-                          double height;
-                          double paddingRight;
-                          if (first.height != null && first.width != null) {
-                            final ratio = first.height! / first.width!;
-                            height = min(maxWidth * ratio, Get.height * 0.55);
-                            paddingRight = (maxWidth - height / ratio) / 2 + 12;
-                          } else {
-                            height = Get.height * 0.55;
-                            paddingRight = 12;
-                          }
-                          return Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                height: height,
-                                width: maxWidth,
-                                margin: const EdgeInsets.only(bottom: 10),
-                                child: PageView.builder(
-                                  physics: const ClampingScrollPhysics(),
-                                  onPageChanged: (value) {
-                                    _articleCtr.topIndex.value = value;
-                                  },
-                                  itemCount: length,
-                                  itemBuilder: (context, index) {
-                                    final pic = pics[index];
-                                    return GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: () => context.imageView(
-                                        quality: 60,
-                                        imgList: pics
-                                            .map(
-                                                (e) => SourceModel(url: e.url!))
-                                            .toList(),
-                                        initialPage: index,
-                                      ),
-                                      child: Hero(
-                                        tag: pic.url!,
-                                        child: Stack(
-                                          clipBehavior: Clip.none,
-                                          alignment: Alignment.center,
-                                          children: [
-                                            Positioned.fill(
-                                              child: CachedNetworkImage(
-                                                fit: pic.isLongPic == true
-                                                    ? BoxFit.cover
-                                                    : null,
-                                                imageUrl:
-                                                    ImageUtil.thumbnailUrl(
-                                                        pic.url, 60),
-                                                fadeInDuration: const Duration(
-                                                    milliseconds: 120),
-                                                fadeOutDuration: const Duration(
-                                                    milliseconds: 120),
-                                              ),
-                                            ),
-                                            if (pic.isLongPic == true)
-                                              PBadge(
-                                                text: '长图',
-                                                type: PBadgeType.primary,
-                                                right: paddingRight,
-                                                bottom: 12,
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              Obx(
-                                () => PBadge(
-                                    top: 12,
-                                    right: paddingRight,
-                                    type: PBadgeType.gray,
-                                    text:
-                                        '${_articleCtr.topIndex.value + 1}/$length'),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  if (_articleCtr.summary.title != null)
-                    SliverToBoxAdapter(
-                      child: Text(
-                        _articleCtr.summary.title!,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: GestureDetector(
-                        onTap: () => Get.toNamed(
-                            '/member?mid=${_articleCtr.summary.author?.mid}'),
-                        child: Row(
-                          children: [
-                            NetworkImgLayer(
-                              width: 40,
-                              height: 40,
-                              type: ImageType.avatar,
-                              src: _articleCtr.summary.author?.face,
-                            ),
-                            const SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _articleCtr.summary.author?.name ?? '',
-                                  style: TextStyle(
-                                    fontSize:
-                                        theme.textTheme.titleSmall!.fontSize,
-                                  ),
-                                ),
-                                if (pubTime != null)
-                                  Text(
-                                    DateUtil.format(pubTime),
-                                    style: TextStyle(
-                                      color: theme.colorScheme.outline,
-                                      fontSize:
-                                          theme.textTheme.labelSmall!.fontSize,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_articleCtr.type != 'read' &&
-                      _articleCtr.opusData?.modules.moduleCollection != null)
-                    SliverToBoxAdapter(
-                      child: opusCollection(
-                        theme,
-                        _articleCtr.opusData!.modules.moduleCollection!,
-                      ),
-                    ),
-                  content,
-                ],
+                },
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 10),
               );
             }
+          } else {
+            content = const SliverToBoxAdapter(child: Text('NULL'));
+          }
 
-            return const SliverToBoxAdapter();
-          },
-        ),
-      );
+          int? pubTime =
+              _articleCtr.opusData?.modules.moduleAuthor?.pubTs ??
+              _articleCtr.articleData?.publishTime;
+          return SliverMainAxisGroup(
+            slivers: [
+              if (_articleCtr.type != 'read' &&
+                  _articleCtr
+                          .opusData
+                          ?.modules
+                          .moduleTop
+                          ?.display
+                          ?.album
+                          ?.pics
+                          ?.isNotEmpty ==
+                      true)
+                SliverToBoxAdapter(
+                  child: Builder(
+                    builder: (context) {
+                      final pics = _articleCtr
+                          .opusData!
+                          .modules
+                          .moduleTop!
+                          .display!
+                          .album!
+                          .pics!;
+                      final length = pics.length;
+                      final first = pics.first;
+                      double height;
+                      double paddingRight;
+                      if (first.height != null && first.width != null) {
+                        final ratio = first.height! / first.width!;
+                        height = min(maxWidth * ratio, Get.height * 0.55);
+                        paddingRight = (maxWidth - height / ratio) / 2 + 12;
+                      } else {
+                        height = Get.height * 0.55;
+                        paddingRight = 12;
+                      }
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            height: height,
+                            width: maxWidth,
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: PageView.builder(
+                              physics: const ClampingScrollPhysics(),
+                              onPageChanged: (value) {
+                                _articleCtr.topIndex.value = value;
+                              },
+                              itemCount: length,
+                              itemBuilder: (context, index) {
+                                final pic = pics[index];
+                                return GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => context.imageView(
+                                    quality: 60,
+                                    imgList: pics
+                                        .map((e) => SourceModel(url: e.url!))
+                                        .toList(),
+                                    initialPage: index,
+                                  ),
+                                  child: Hero(
+                                    tag: pic.url!,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Positioned.fill(
+                                          child: CachedNetworkImage(
+                                            fit: pic.isLongPic == true
+                                                ? BoxFit.cover
+                                                : null,
+                                            imageUrl: ImageUtil.thumbnailUrl(
+                                              pic.url,
+                                              60,
+                                            ),
+                                            fadeInDuration: const Duration(
+                                              milliseconds: 120,
+                                            ),
+                                            fadeOutDuration: const Duration(
+                                              milliseconds: 120,
+                                            ),
+                                          ),
+                                        ),
+                                        if (pic.isLongPic == true)
+                                          PBadge(
+                                            text: '长图',
+                                            type: PBadgeType.primary,
+                                            right: paddingRight,
+                                            bottom: 12,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Obx(
+                            () => PBadge(
+                              top: 12,
+                              right: paddingRight,
+                              type: PBadgeType.gray,
+                              text: '${_articleCtr.topIndex.value + 1}/$length',
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              if (_articleCtr.summary.title != null)
+                SliverToBoxAdapter(
+                  child: Text(
+                    _articleCtr.summary.title!,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed(
+                      '/member?mid=${_articleCtr.summary.author?.mid}',
+                    ),
+                    child: Row(
+                      children: [
+                        NetworkImgLayer(
+                          width: 40,
+                          height: 40,
+                          type: ImageType.avatar,
+                          src: _articleCtr.summary.author?.face,
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _articleCtr.summary.author?.name ?? '',
+                              style: TextStyle(
+                                fontSize: theme.textTheme.titleSmall!.fontSize,
+                              ),
+                            ),
+                            if (pubTime != null)
+                              Text(
+                                DateUtil.format(pubTime),
+                                style: TextStyle(
+                                  color: theme.colorScheme.outline,
+                                  fontSize:
+                                      theme.textTheme.labelSmall!.fontSize,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (_articleCtr.type != 'read' &&
+                  _articleCtr.opusData?.modules.moduleCollection != null)
+                SliverToBoxAdapter(
+                  child: opusCollection(
+                    theme,
+                    _articleCtr.opusData!.modules.moduleCollection!,
+                  ),
+                ),
+              content,
+            ],
+          );
+        }
+
+        return const SliverToBoxAdapter();
+      },
+    ),
+  );
 
   Widget _buildReplyList(
-      ThemeData theme, LoadingState<List<ReplyInfo>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<ReplyInfo>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => SliverList.builder(
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            return const VideoReplySkeleton();
-          },
-        ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.builder(
-              itemCount: response!.length + 1,
-              itemBuilder: (context, index) {
-                if (index == response.length) {
-                  _articleCtr.onLoadMore();
-                  return Container(
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.only(
-                        bottom: MediaQuery.paddingOf(context).bottom),
-                    height: 125,
-                    child: Text(
-                      _articleCtr.isEnd ? '没有更多了' : '加载中...',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.outline,
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          return const VideoReplySkeleton();
+        },
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.builder(
+                itemCount: response!.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == response.length) {
+                    _articleCtr.onLoadMore();
+                    return Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(
+                        bottom: MediaQuery.paddingOf(context).bottom,
                       ),
-                    ),
-                  );
-                } else {
-                  return ReplyItemGrpc(
-                    replyItem: response[index],
-                    replyLevel: 1,
-                    replyReply: (replyItem, id) =>
-                        replyReply(context, replyItem, id),
-                    onReply: (replyItem) => _articleCtr.onReply(
-                      context,
-                      replyItem: replyItem,
-                    ),
-                    onDelete: (item, subIndex) =>
-                        _articleCtr.onRemove(index, item, subIndex),
-                    upMid: _articleCtr.upMid,
-                    callback: _getImageCallback,
-                    onCheckReply: (item) =>
-                        _articleCtr.onCheckReply(item, isManual: true),
-                    onToggleTop: (item) => _articleCtr.onToggleTop(
-                      item,
-                      index,
-                      _articleCtr.commentId,
-                      _articleCtr.commentType,
-                    ),
-                  );
-                }
-              },
-            )
-          : HttpError(onReload: _articleCtr.onReload),
+                      height: 125,
+                      child: Text(
+                        _articleCtr.isEnd ? '没有更多了' : '加载中...',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.outline,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return ReplyItemGrpc(
+                      replyItem: response[index],
+                      replyLevel: 1,
+                      replyReply: (replyItem, id) =>
+                          replyReply(context, replyItem, id),
+                      onReply: (replyItem) => _articleCtr.onReply(
+                        context,
+                        replyItem: replyItem,
+                      ),
+                      onDelete: (item, subIndex) =>
+                          _articleCtr.onRemove(index, item, subIndex),
+                      upMid: _articleCtr.upMid,
+                      callback: _getImageCallback,
+                      onCheckReply: (item) =>
+                          _articleCtr.onCheckReply(item, isManual: true),
+                      onToggleTop: (item) => _articleCtr.onToggleTop(
+                        item,
+                        index,
+                        _articleCtr.commentId,
+                        _articleCtr.commentType,
+                      ),
+                    );
+                  }
+                },
+              )
+            : HttpError(onReload: _articleCtr.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _articleCtr.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _articleCtr.onReload,
+      ),
     };
   }
 
@@ -656,8 +688,11 @@ class _ArticlePageState extends State<ArticlePage>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Obx(() => Text(
-                  '${_articleCtr.count.value == -1 ? 0 : NumUtil.numFormat(_articleCtr.count.value)}条回复')),
+              Obx(
+                () => Text(
+                  '${_articleCtr.count.value == -1 ? 0 : NumUtil.numFormat(_articleCtr.count.value)}条回复',
+                ),
+              ),
               SizedBox(
                 height: 35,
                 child: TextButton.icon(
@@ -670,7 +705,7 @@ class _ArticlePageState extends State<ArticlePage>
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -679,373 +714,398 @@ class _ArticlePageState extends State<ArticlePage>
   }
 
   PreferredSizeWidget get _buildAppBar => AppBar(
-        title: Obx(() {
-          if (_articleCtr.isLoaded.value && _articleCtr.showTitle.value) {
-            return Text(_articleCtr.summary.title ?? '');
-          }
-          return const SizedBox.shrink();
-        }),
-        actions: [
-          const SizedBox(width: 4),
-          if (context.orientation == Orientation.landscape)
-            IconButton(
-              tooltip: '页面比例调节',
-              onPressed: () => showDialog(
-                context: context,
-                builder: (context) => Align(
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    margin: const EdgeInsets.only(
-                      top: 56,
-                      right: 16,
-                    ),
-                    width: context.width / 4,
-                    height: 32,
-                    child: Builder(
-                      builder: (context) => Slider(
-                        min: 1,
-                        max: 100,
-                        value: _ratio.first,
-                        onChanged: (value) {
-                          if (value >= 10 && value <= 90) {
-                            _ratio[0] = value.toPrecision(2);
-                            _ratio[1] = 100 - value;
-                            GStorage.setting.put(
-                              SettingBoxKey.dynamicDetailRatio,
-                              _ratio,
-                            );
-                            (context as Element).markNeedsBuild();
-                            setState(() {});
-                          }
-                        },
-                      ),
-                    ),
+    title: Obx(() {
+      if (_articleCtr.isLoaded.value && _articleCtr.showTitle.value) {
+        return Text(_articleCtr.summary.title ?? '');
+      }
+      return const SizedBox.shrink();
+    }),
+    actions: [
+      const SizedBox(width: 4),
+      if (context.orientation == Orientation.landscape)
+        IconButton(
+          tooltip: '页面比例调节',
+          onPressed: () => showDialog(
+            context: context,
+            builder: (context) => Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                margin: const EdgeInsets.only(
+                  top: 56,
+                  right: 16,
+                ),
+                width: context.width / 4,
+                height: 32,
+                child: Builder(
+                  builder: (context) => Slider(
+                    min: 1,
+                    max: 100,
+                    value: _ratio.first,
+                    onChanged: (value) {
+                      if (value >= 10 && value <= 90) {
+                        _ratio[0] = value.toPrecision(2);
+                        _ratio[1] = 100 - value;
+                        GStorage.setting.put(
+                          SettingBoxKey.dynamicDetailRatio,
+                          _ratio,
+                        );
+                        (context as Element).markNeedsBuild();
+                        setState(() {});
+                      }
+                    },
                   ),
                 ),
-              ),
-              icon: Transform.rotate(
-                angle: pi / 2,
-                child: const Icon(Icons.splitscreen, size: 19),
               ),
             ),
-          IconButton(
-            tooltip: '浏览器打开',
-            onPressed: () => PageUtils.inAppWebview(_articleCtr.url),
-            icon: const Icon(Icons.open_in_browser_outlined, size: 19),
           ),
-          PopupMenuButton(
-            icon: const Icon(Icons.more_vert, size: 19),
-            itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-              PopupMenuItem(
-                onTap: () => Utils.shareText(_articleCtr.url),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.share_outlined, size: 19),
-                    SizedBox(width: 10),
-                    Text('分享'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                onTap: () => Utils.copyText(_articleCtr.url),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.copy_rounded, size: 19),
-                    SizedBox(width: 10),
-                    Text('复制链接'),
-                  ],
-                ),
-              ),
-              if (_articleCtr.commentType == 12 &&
-                  _articleCtr.stats.value != null &&
-                  _articleCtr.opusData?.modules.moduleBlocked == null)
-                PopupMenuItem(
-                  onTap: () async {
-                    try {
-                      if (_articleCtr.summary.cover == null) {
-                        if (!await _articleCtr.getArticleInfo(true)) {
-                          return;
-                        }
-                      }
-                      if (mounted) {
-                        PageUtils.pmShare(
-                          this.context,
-                          content: {
-                            "id": _articleCtr.commentId,
-                            "title": "- 哔哩哔哩专栏",
-                            "headline": _articleCtr.summary.title!, // throw
-                            "source": 6,
-                            "thumb": _articleCtr.summary.cover!,
-                            "author": _articleCtr.summary.author!.name,
-                            "author_id":
-                                _articleCtr.summary.author!.mid.toString(),
-                          },
-                        );
-                      }
-                    } catch (e) {
-                      SmartDialog.showToast(e.toString());
+          icon: Transform.rotate(
+            angle: pi / 2,
+            child: const Icon(Icons.splitscreen, size: 19),
+          ),
+        ),
+      IconButton(
+        tooltip: '浏览器打开',
+        onPressed: () => PageUtils.inAppWebview(_articleCtr.url),
+        icon: const Icon(Icons.open_in_browser_outlined, size: 19),
+      ),
+      PopupMenuButton(
+        icon: const Icon(Icons.more_vert, size: 19),
+        itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+          PopupMenuItem(
+            onTap: () => Utils.shareText(_articleCtr.url),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.share_outlined, size: 19),
+                SizedBox(width: 10),
+                Text('分享'),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            onTap: () => Utils.copyText(_articleCtr.url),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.copy_rounded, size: 19),
+                SizedBox(width: 10),
+                Text('复制链接'),
+              ],
+            ),
+          ),
+          if (_articleCtr.commentType == 12 &&
+              _articleCtr.stats.value != null &&
+              _articleCtr.opusData?.modules.moduleBlocked == null)
+            PopupMenuItem(
+              onTap: () async {
+                try {
+                  if (_articleCtr.summary.cover == null) {
+                    if (!await _articleCtr.getArticleInfo(true)) {
+                      return;
                     }
-                  },
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.forward_to_inbox, size: 19),
-                      SizedBox(width: 10),
-                      Text('分享至消息'),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(width: 6)
+                  }
+                  if (mounted) {
+                    PageUtils.pmShare(
+                      this.context,
+                      content: {
+                        "id": _articleCtr.commentId,
+                        "title": "- 哔哩哔哩专栏",
+                        "headline": _articleCtr.summary.title!, // throw
+                        "source": 6,
+                        "thumb": _articleCtr.summary.cover!,
+                        "author": _articleCtr.summary.author!.name,
+                        "author_id": _articleCtr.summary.author!.mid.toString(),
+                      },
+                    );
+                  }
+                } catch (e) {
+                  SmartDialog.showToast(e.toString());
+                }
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.forward_to_inbox, size: 19),
+                  SizedBox(width: 10),
+                  Text('分享至消息'),
+                ],
+              ),
+            ),
         ],
-      );
+      ),
+      const SizedBox(width: 6),
+    ],
+  );
 
   Widget _buildBottom(ThemeData theme) => Positioned(
-        left: 0,
-        bottom: 0,
-        right: 0,
-        child: SlideTransition(
-          position: _anim,
-          child: Builder(
-            builder: (context) {
-              Widget button() => FloatingActionButton(
-                    heroTag: null,
-                    onPressed: () {
-                      feedBack();
-                      _articleCtr.onReply(
-                        context,
-                        oid: _articleCtr.commentId,
-                        replyType: _articleCtr.commentType,
-                      );
-                    },
-                    tooltip: '评论动态',
-                    child: const Icon(Icons.reply),
-                  );
-              return !_articleCtr.showDynActionBar
-                  ? Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
+    left: 0,
+    bottom: 0,
+    right: 0,
+    child: SlideTransition(
+      position: _anim,
+      child: Builder(
+        builder: (context) {
+          Widget button() => FloatingActionButton(
+            heroTag: null,
+            onPressed: () {
+              feedBack();
+              _articleCtr.onReply(
+                context,
+                oid: _articleCtr.commentId,
+                replyType: _articleCtr.commentType,
+              );
+            },
+            tooltip: '评论动态',
+            child: const Icon(Icons.reply),
+          );
+          return !_articleCtr.showDynActionBar
+              ? Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: 14,
+                      bottom: MediaQuery.paddingOf(context).bottom + 14,
+                    ),
+                    child: button(),
+                  ),
+                )
+              : Obx(() {
+                  Widget textIconButton({
+                    required IconData icon,
+                    required String text,
+                    required DynamicStat? stat,
+                    required VoidCallback callback,
+                    IconData? activitedIcon,
+                  }) {
+                    final show = stat?.status == true;
+                    final color = show
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline;
+                    return TextButton.icon(
+                      onPressed: callback,
+                      icon: Icon(
+                        stat?.status == true ? activitedIcon : icon,
+                        size: 16,
+                        color: color,
+                        semanticLabel: text,
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        foregroundColor: theme.colorScheme.outline,
+                      ),
+                      label: Text(
+                        stat?.count != null
+                            ? NumUtil.numFormat(stat!.count)
+                            : text,
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Padding(
                         padding: EdgeInsets.only(
                           right: 14,
-                          bottom: MediaQuery.paddingOf(context).bottom + 14,
+                          bottom:
+                              14 +
+                              (_articleCtr.stats.value != null
+                                  ? 0
+                                  : MediaQuery.paddingOf(context).bottom),
                         ),
                         child: button(),
                       ),
-                    )
-                  : Obx(() {
-                      Widget textIconButton({
-                        required IconData icon,
-                        required String text,
-                        required DynamicStat? stat,
-                        required VoidCallback callback,
-                        IconData? activitedIcon,
-                      }) {
-                        final show = stat?.status == true;
-                        final color = show
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.outline;
-                        return TextButton.icon(
-                          onPressed: callback,
-                          icon: Icon(
-                            stat?.status == true ? activitedIcon : icon,
-                            size: 16,
-                            color: color,
-                            semanticLabel: text,
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            foregroundColor: theme.colorScheme.outline,
-                          ),
-                          label: Text(stat?.count != null
-                              ? NumUtil.numFormat(stat!.count)
-                              : text),
-                        );
-                      }
-
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                              right: 14,
-                              bottom: 14 +
-                                  (_articleCtr.stats.value != null
-                                      ? 0
-                                      : MediaQuery.paddingOf(context).bottom),
-                            ),
-                            child: button(),
-                          ),
-                          _articleCtr.stats.value != null
-                              ? Container(
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.surface,
-                                    border: Border(
-                                      top: BorderSide(
-                                        color: theme.colorScheme.outline
-                                            .withValues(alpha: 0.08),
-                                      ),
+                      _articleCtr.stats.value != null
+                          ? Container(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                border: Border(
+                                  top: BorderSide(
+                                    color: theme.colorScheme.outline.withValues(
+                                      alpha: 0.08,
                                     ),
                                   ),
-                                  padding: EdgeInsets.only(
-                                      bottom:
-                                          MediaQuery.paddingOf(context).bottom),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      Expanded(
-                                        child: Builder(
-                                          builder: (btnContext) =>
-                                              textIconButton(
-                                            text: '转发',
-                                            icon: FontAwesomeIcons
-                                                .shareFromSquare,
-                                            stat: _articleCtr
-                                                .stats.value?.forward,
-                                            callback: () {
-                                              if (_articleCtr.opusData ==
-                                                      null &&
-                                                  _articleCtr.articleData
-                                                          ?.dynIdStr ==
-                                                      null) {
-                                                SmartDialog.showToast(
-                                                    'err: ${_articleCtr.id}');
-                                                return;
-                                              }
-                                              showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                useSafeArea: true,
-                                                builder: (context) =>
-                                                    RepostPanel(
-                                                  item: _articleCtr.opusData,
-                                                  dynIdStr: _articleCtr
-                                                      .articleData?.dynIdStr,
-                                                  pic:
-                                                      _articleCtr.summary.cover,
-                                                  title:
-                                                      _articleCtr.summary.title,
-                                                  uname: _articleCtr
-                                                      .summary.author?.name,
-                                                  callback: () {
-                                                    int count = _articleCtr
-                                                            .stats
-                                                            .value
-                                                            ?.forward
-                                                            ?.count ??
-                                                        0;
+                                ),
+                              ),
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.paddingOf(context).bottom,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Expanded(
+                                    child: Builder(
+                                      builder: (btnContext) => textIconButton(
+                                        text: '转发',
+                                        icon: FontAwesomeIcons.shareFromSquare,
+                                        stat: _articleCtr.stats.value?.forward,
+                                        callback: () {
+                                          if (_articleCtr.opusData == null &&
+                                              _articleCtr
+                                                      .articleData
+                                                      ?.dynIdStr ==
+                                                  null) {
+                                            SmartDialog.showToast(
+                                              'err: ${_articleCtr.id}',
+                                            );
+                                            return;
+                                          }
+                                          showModalBottomSheet(
+                                            context: context,
+                                            isScrollControlled: true,
+                                            useSafeArea: true,
+                                            builder: (context) => RepostPanel(
+                                              item: _articleCtr.opusData,
+                                              dynIdStr: _articleCtr
+                                                  .articleData
+                                                  ?.dynIdStr,
+                                              pic: _articleCtr.summary.cover,
+                                              title: _articleCtr.summary.title,
+                                              uname: _articleCtr
+                                                  .summary
+                                                  .author
+                                                  ?.name,
+                                              callback: () {
+                                                int count =
                                                     _articleCtr
                                                         .stats
                                                         .value
                                                         ?.forward
-                                                        ?.count = count + 1;
-                                                    if (btnContext.mounted) {
-                                                      (btnContext as Element?)
-                                                          ?.markNeedsBuild();
-                                                    }
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
+                                                        ?.count ??
+                                                    0;
+                                                _articleCtr
+                                                        .stats
+                                                        .value
+                                                        ?.forward
+                                                        ?.count =
+                                                    count + 1;
+                                                if (btnContext.mounted) {
+                                                  (btnContext as Element?)
+                                                      ?.markNeedsBuild();
+                                                }
+                                              },
+                                            ),
+                                          );
+                                        },
                                       ),
-                                      Expanded(
-                                          child: textIconButton(
-                                        text: '分享',
-                                        icon: CustomIcon.share_node,
-                                        stat: null,
-                                        callback: () =>
-                                            Utils.shareText(_articleCtr.url),
-                                      )),
-                                      if (_articleCtr.stats.value != null)
-                                        Expanded(
-                                            child: textIconButton(
-                                          icon: FontAwesomeIcons.star,
-                                          activitedIcon:
-                                              FontAwesomeIcons.solidStar,
-                                          text: '收藏',
-                                          stat:
-                                              _articleCtr.stats.value!.favorite,
-                                          callback: _articleCtr.onFav,
-                                        )),
-                                      Expanded(
-                                        child: Builder(
-                                          builder: (context) => TextButton.icon(
-                                            onPressed: _articleCtr.onLike,
-                                            icon: Icon(
-                                              _articleCtr.stats.value?.like
-                                                          ?.status ==
-                                                      true
-                                                  ? FontAwesomeIcons
-                                                      .solidThumbsUp
-                                                  : FontAwesomeIcons.thumbsUp,
-                                              size: 16,
-                                              color: _articleCtr.stats.value
-                                                          ?.like?.status ==
-                                                      true
-                                                  ? theme.colorScheme.primary
-                                                  : theme.colorScheme.outline,
-                                              semanticLabel: _articleCtr
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: textIconButton(
+                                      text: '分享',
+                                      icon: CustomIcon.share_node,
+                                      stat: null,
+                                      callback: () =>
+                                          Utils.shareText(_articleCtr.url),
+                                    ),
+                                  ),
+                                  if (_articleCtr.stats.value != null)
+                                    Expanded(
+                                      child: textIconButton(
+                                        icon: FontAwesomeIcons.star,
+                                        activitedIcon:
+                                            FontAwesomeIcons.solidStar,
+                                        text: '收藏',
+                                        stat: _articleCtr.stats.value!.favorite,
+                                        callback: _articleCtr.onFav,
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: Builder(
+                                      builder: (context) => TextButton.icon(
+                                        onPressed: _articleCtr.onLike,
+                                        icon: Icon(
+                                          _articleCtr
+                                                      .stats
+                                                      .value
+                                                      ?.like
+                                                      ?.status ==
+                                                  true
+                                              ? FontAwesomeIcons.solidThumbsUp
+                                              : FontAwesomeIcons.thumbsUp,
+                                          size: 16,
+                                          color:
+                                              _articleCtr
+                                                      .stats
+                                                      .value
+                                                      ?.like
+                                                      ?.status ==
+                                                  true
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.outline,
+                                          semanticLabel:
+                                              _articleCtr
+                                                      .stats
+                                                      .value
+                                                      ?.like
+                                                      ?.status ==
+                                                  true
+                                              ? "已赞"
+                                              : "点赞",
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 15,
+                                          ),
+                                          foregroundColor:
+                                              theme.colorScheme.outline,
+                                        ),
+                                        label: AnimatedSwitcher(
+                                          duration: const Duration(
+                                            milliseconds: 400,
+                                          ),
+                                          transitionBuilder:
+                                              (
+                                                Widget child,
+                                                Animation<double> animation,
+                                              ) {
+                                                return ScaleTransition(
+                                                  scale: animation,
+                                                  child: child,
+                                                );
+                                              },
+                                          child: Text(
+                                            _articleCtr
+                                                        .stats
+                                                        .value
+                                                        ?.like
+                                                        ?.count !=
+                                                    null
+                                                ? NumUtil.numFormat(
+                                                    _articleCtr
+                                                        .stats
+                                                        .value!
+                                                        .like!
+                                                        .count,
+                                                  )
+                                                : '点赞',
+                                            style: TextStyle(
+                                              color:
+                                                  _articleCtr
                                                           .stats
                                                           .value
                                                           ?.like
                                                           ?.status ==
                                                       true
-                                                  ? "已赞"
-                                                  : "点赞",
-                                            ),
-                                            style: TextButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 15),
-                                              foregroundColor:
-                                                  theme.colorScheme.outline,
-                                            ),
-                                            label: AnimatedSwitcher(
-                                              duration: const Duration(
-                                                  milliseconds: 400),
-                                              transitionBuilder: (Widget child,
-                                                  Animation<double> animation) {
-                                                return ScaleTransition(
-                                                    scale: animation,
-                                                    child: child);
-                                              },
-                                              child: Text(
-                                                _articleCtr.stats.value?.like
-                                                            ?.count !=
-                                                        null
-                                                    ? NumUtil.numFormat(
-                                                        _articleCtr.stats.value!
-                                                            .like!.count)
-                                                    : '点赞',
-                                                style: TextStyle(
-                                                  color: _articleCtr.stats.value
-                                                              ?.like?.status ==
-                                                          true
-                                                      ? theme
-                                                          .colorScheme.primary
-                                                      : theme
-                                                          .colorScheme.outline,
-                                                ),
-                                              ),
+                                                  ? theme.colorScheme.primary
+                                                  : theme.colorScheme.outline,
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                )
-                              : const SizedBox.shrink(),
-                        ],
-                      );
-                    });
-            },
-          ),
-        ),
-      );
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
+                  );
+                });
+        },
+      ),
+    ),
+  );
 }

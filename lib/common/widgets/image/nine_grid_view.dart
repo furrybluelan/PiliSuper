@@ -133,7 +133,8 @@ class _NineGridViewState extends State<NineGridView> {
     if (widget.itemCount == 0) {
       return Rect.fromLTRB(0, 0, padding.horizontal, padding.vertical);
     }
-    double width = widget.width ??
+    double width =
+        widget.width ??
         (MediaQuery.sizeOf(context).width - widget.margin.horizontal);
     width = width - padding.horizontal;
     double space = widget.space;
@@ -158,18 +159,22 @@ class _NineGridViewState extends State<NineGridView> {
   /// build nine grid view.
   Widget _buildChild(BuildContext context, double itemW) {
     double space = widget.space;
-    int column =
-        (widget.itemCount == 4 && widget.type != NineGridType.normal) ? 2 : 3;
+    int column = (widget.itemCount == 4 && widget.type != NineGridType.normal)
+        ? 2
+        : 3;
     List<Widget> list = [];
     for (int i = 0; i < widget.itemCount; i++) {
-      list.add(Positioned(
+      list.add(
+        Positioned(
           top: (space + itemW) * (i ~/ column),
           left: (space + itemW) * (i % column),
           child: SizedBox(
             width: itemW,
             height: itemW,
             child: widget.itemBuilder(context, i),
-          )));
+          ),
+        ),
+      );
     }
     return Stack(
       clipBehavior: Clip.none,
@@ -191,11 +196,14 @@ class _NineGridViewState extends State<NineGridView> {
       if (!_isZero(bigImgWidth) && !_isZero(bigImgHeight)) {
         return _getOneChild(context, bigImgWidth!, bigImgHeight!);
       } else {
-        _ImageUtil().getImageSize(widget.bigImage)?.then((rect) {
-          ngvBigImageSizeMap[bigImageUrl] = rect;
-          if (!mounted) return;
-          setState(() {});
-        }).catchError((e) {});
+        _ImageUtil()
+            .getImageSize(widget.bigImage)
+            ?.then((rect) {
+              ngvBigImageSizeMap[bigImageUrl] = rect;
+              if (!mounted) return;
+              setState(() {});
+            })
+            .catchError((e) {});
       }
     }
     return null;
@@ -238,7 +246,8 @@ class _NineGridViewState extends State<NineGridView> {
     for (int i = 0; i < widget.itemCount; i++) {
       double left;
       if (first > 0 && i < first) {
-        left = (width - itemW * first - space * (first - 1)) / 2 +
+        left =
+            (width - itemW * first - space * (first - 1)) / 2 +
             (itemW + space) * i;
       } else {
         left = (space + itemW) * ((i - first) % column);
@@ -248,17 +257,21 @@ class _NineGridViewState extends State<NineGridView> {
           ? 0
           : (first > 0 ? (i + column - first) : i) ~/ column;
 
-      double top = (width - itemW * row - space * (row - 1)) / 2 +
+      double top =
+          (width - itemW * row - space * (row - 1)) / 2 +
           (space + itemW) * itemIndex;
 
-      list.add(Positioned(
+      list.add(
+        Positioned(
           top: top,
           left: left,
           child: SizedBox(
             width: itemW,
             height: itemW,
             child: widget.itemBuilder(context, i),
-          )));
+          ),
+        ),
+      );
     }
     return Stack(
       clipBehavior: Clip.none,
@@ -273,18 +286,22 @@ class _NineGridViewState extends State<NineGridView> {
     double itemW = (width - widget.space) / 2;
     List<Widget> children = [];
     for (int i = 0; i < itemCount; i++) {
-      children.add(Positioned(
+      children.add(
+        Positioned(
           top: (widget.space + itemW) * (i ~/ 2),
-          left: (widget.space + itemW) *
+          left:
+              (widget.space + itemW) *
               (((itemCount == 3 && i == 2) ? i + 1 : i) % 2),
           child: SizedBox(
             width: itemCount == 1 ? width : itemW,
             height:
                 (itemCount == 1 || itemCount == 2 || (itemCount == 3 && i == 0))
-                    ? width
-                    : itemW,
+                ? width
+                : itemW,
             child: widget.itemBuilder(context, i),
-          )));
+          ),
+        ),
+      );
     }
     return ClipOval(
       child: Stack(
@@ -300,11 +317,12 @@ class _NineGridViewState extends State<NineGridView> {
     int itemCount = math.min(5, widget.itemCount);
     if (itemCount == 1) {
       return ClipOval(
-          child: SizedBox(
-        width: width,
-        height: width,
-        child: widget.itemBuilder(context, 0),
-      ));
+        child: SizedBox(
+          width: width,
+          height: width,
+          child: widget.itemBuilder(context, 0),
+        ),
+      );
     }
 
     List<Widget> children = [];
@@ -323,7 +341,8 @@ class _NineGridViewState extends State<NineGridView> {
         startDegree = 210;
         r = width / (2 + 4 * math.sin(math.pi * (3 - 2) / (2 * 3)));
         r1 = r / math.cos(math.pi * (3 - 2) / (2 * 3));
-        double R = r *
+        double R =
+            r *
             (1 + math.sin(math.pi / itemCount)) /
             math.sin(math.pi / itemCount);
         double dy = 0.5 * (width - R - r * (1 + 1 / math.tan(math.pi / 3)));
@@ -338,7 +357,8 @@ class _NineGridViewState extends State<NineGridView> {
         startDegree = 126;
         r = width / (2 + 4 * math.sin(math.pi * (5 - 2) / (2 * 5)));
         r1 = r / math.cos(math.pi * (5 - 2) / (2 * 5));
-        double R = r *
+        double R =
+            r *
             (1 + math.sin(math.pi / itemCount)) /
             math.sin(math.pi / itemCount);
         double dy = 0.5 * (width - R - r * (1 + 1 / math.tan(math.pi / 5)));
@@ -388,7 +408,8 @@ class _NineGridViewState extends State<NineGridView> {
 
   /// get big image size.
   Rect _getBigImgSize(double originalWidth, double originalHeight) {
-    double width = widget.width ??
+    double width =
+        widget.width ??
         (MediaQuery.sizeOf(context).width - widget.margin.horizontal);
     width = width - widget.padding.horizontal;
     double itemW = (width - widget.space * 2) / 3;
@@ -475,8 +496,14 @@ class _ImageUtil {
       (ImageInfo info, bool synchronousCall) {
         imageStream.removeListener(listener);
         if (!completer.isCompleted) {
-          completer.complete(Rect.fromLTWH(
-              0, 0, info.image.width.toDouble(), info.image.height.toDouble()));
+          completer.complete(
+            Rect.fromLTWH(
+              0,
+              0,
+              info.image.width.toDouble(),
+              info.image.height.toDouble(),
+            ),
+          );
         }
       },
       onError: (dynamic exception, StackTrace? stackTrace) {
@@ -535,8 +562,10 @@ class QQClipper extends CustomClipper<Path> {
         points.add(Offset(x1, y1));
       }
 
-      double spaceB = math.atan(
-              r * math.sin(d2r(spaceA)) / (2 * r - r * math.cos(d2r(spaceA)))) /
+      double spaceB =
+          math.atan(
+            r * math.sin(d2r(spaceA)) / (2 * r - r * math.cos(d2r(spaceA))),
+          ) /
           math.pi *
           180;
       double r1 = (2 * r - r * math.cos(d2r(spaceA))) / math.cos(d2r(spaceB));

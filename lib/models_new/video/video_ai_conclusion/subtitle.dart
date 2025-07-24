@@ -8,10 +8,10 @@ class Subtitle {
   Subtitle({this.title, this.partSubtitle, this.timestamp});
 
   factory Subtitle.fromJson(Map<String, dynamic> json) => Subtitle(
-        title: json['title'] as String?,
-        partSubtitle: (json['part_subtitle'] as List<dynamic>?)
-            ?.map((e) => PartSubtitle.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        timestamp: json['timestamp'] as int?,
-      );
+    title: json['title'] as String?,
+    partSubtitle: (json['part_subtitle'] as List<dynamic>?)
+        ?.map((e) => PartSubtitle.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    timestamp: json['timestamp'] as int?,
+  );
 }

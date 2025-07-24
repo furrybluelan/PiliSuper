@@ -109,8 +109,9 @@ Widget liveRcmdPanel(
       const SizedBox(height: 6),
       if (liveRcmd.title != null)
         Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
+          padding: const EdgeInsets.symmetric(
+            horizontal: StyleString.safeSpace,
+          ),
           child: Text(
             liveRcmd.title!,
             maxLines: isDetail ? null : 1,

@@ -50,8 +50,9 @@ class _LiveAreaChildPageState extends State<LiveAreaChildPage>
               top: StyleString.safeSpace,
               bottom: MediaQuery.paddingOf(context).bottom + 80,
             ),
-            sliver:
-                Obx(() => _buildBody(theme, _controller.loadingState.value)),
+            sliver: Obx(
+              () => _buildBody(theme, _controller.loadingState.value),
+            ),
           ),
         ],
       ),
@@ -59,45 +60,49 @@ class _LiveAreaChildPageState extends State<LiveAreaChildPage>
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<CardLiveItem>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<CardLiveItem>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: SliverGridDelegateWithExtentAndRatio(
-            mainAxisSpacing: StyleString.cardSpace,
-            crossAxisSpacing: StyleString.cardSpace,
-            maxCrossAxisExtent: Grid.smallCardWidth,
-            childAspectRatio: StyleString.aspectRatio,
-            mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardVSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+          mainAxisSpacing: StyleString.cardSpace,
+          crossAxisSpacing: StyleString.cardSpace,
+          maxCrossAxisExtent: Grid.smallCardWidth,
+          childAspectRatio: StyleString.aspectRatio,
+          mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
         ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardVSkeleton();
+          },
+          childCount: 10,
+        ),
+      ),
       Success(:var response) => SliverMainAxisGroup(
-          slivers: [
-            if (_controller.newTags?.isNotEmpty == true)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: SelfSizedHorizontalList(
-                    gapSize: 12,
-                    childBuilder: (index) {
-                      late final item = _controller.newTags![index];
-                      return Obx(
-                        () => SearchText(
+        slivers: [
+          if (_controller.newTags?.isNotEmpty == true)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SelfSizedHorizontalList(
+                  gapSize: 12,
+                  childBuilder: (index) {
+                    late final item = _controller.newTags![index];
+                    return Obx(
+                      () {
+                        final isCurr = index == _controller.tagIndex.value;
+                        return SearchText(
                           fontSize: 14,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 3,
                           ),
                           text: '${item.name}',
-                          bgColor: index == _controller.tagIndex.value
+                          bgColor: isCurr
                               ? theme.colorScheme.secondaryContainer
                               : Colors.transparent,
-                          textColor: index == _controller.tagIndex.value
+                          textColor: isCurr
                               ? theme.colorScheme.onSecondaryContainer
                               : null,
                           onTap: (value) {
@@ -106,42 +111,42 @@ class _LiveAreaChildPageState extends State<LiveAreaChildPage>
                               item.sortType,
                             );
                           },
-                        ),
-                      );
-                    },
-                    itemCount: _controller.newTags!.length,
-                  ),
+                        );
+                      },
+                    );
+                  },
+                  itemCount: _controller.newTags!.length,
                 ),
               ),
-            response?.isNotEmpty == true
-                ? SliverGrid(
-                    gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                      mainAxisSpacing: StyleString.cardSpace,
-                      crossAxisSpacing: StyleString.cardSpace,
-                      maxCrossAxisExtent: Grid.smallCardWidth,
-                      childAspectRatio: StyleString.aspectRatio,
-                      mainAxisExtent:
-                          MediaQuery.textScalerOf(context).scale(90),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        if (index == response.length - 1) {
-                          _controller.onLoadMore();
-                        }
-                        return LiveCardVApp(item: response[index]);
-                      },
-                      childCount: response!.length,
-                    ),
-                  )
-                : HttpError(
-                    onReload: _controller.onReload,
+            ),
+          response?.isNotEmpty == true
+              ? SliverGrid(
+                  gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                    mainAxisSpacing: StyleString.cardSpace,
+                    crossAxisSpacing: StyleString.cardSpace,
+                    maxCrossAxisExtent: Grid.smallCardWidth,
+                    childAspectRatio: StyleString.aspectRatio,
+                    mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
                   ),
-          ],
-        ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index == response.length - 1) {
+                        _controller.onLoadMore();
+                      }
+                      return LiveCardVApp(item: response[index]);
+                    },
+                    childCount: response!.length,
+                  ),
+                )
+              : HttpError(
+                  onReload: _controller.onReload,
+                ),
+        ],
+      ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

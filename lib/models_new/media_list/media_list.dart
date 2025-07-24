@@ -83,8 +83,9 @@ class MediaListItemModel {
     attr = json['attr'] as int?;
     tid = json['tid'] as int?;
     copyRight = json['copy_right'] as int?;
-    cntInfo =
-        json['cnt_info'] == null ? null : CntInfo.fromJson(json['cnt_info']);
+    cntInfo = json['cnt_info'] == null
+        ? null
+        : CntInfo.fromJson(json['cnt_info']);
     cover = json['cover'] as String?;
     duration = json['duration'] as int?;
     pubtime = json['pubtime'] as int?;
@@ -101,8 +102,9 @@ class MediaListItemModel {
     rights = json['rights'] == null ? null : Rights.fromJson(json['rights']);
     elecInfo = json['elec_info'] as dynamic;
     coin = json['coin'] == null ? null : Coin.fromJson(json['coin']);
-    ogvInfo =
-        json['ogv_info'] == null ? null : OgvInfo.fromJson(json['ogv_info']);
+    ogvInfo = json['ogv_info'] == null
+        ? null
+        : OgvInfo.fromJson(json['ogv_info']);
     progressPercent = (json['progress_percent'] as num?)?.toDouble();
     badge = json['badge'] == null ? null : Badge.fromJson(json['badge']);
     forbidFav = json['forbid_fav'] as bool?;

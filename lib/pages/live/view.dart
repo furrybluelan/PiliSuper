@@ -54,10 +54,12 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
                 top: StyleString.cardSpace,
                 bottom: MediaQuery.paddingOf(context).bottom + 80,
               ),
-              sliver: SliverMainAxisGroup(slivers: [
-                Obx(() => _buildTop(theme, controller.topState.value)),
-                Obx(() => _buildBody(theme, controller.loadingState.value)),
-              ]),
+              sliver: SliverMainAxisGroup(
+                slivers: [
+                  Obx(() => _buildTop(theme, controller.topState.value)),
+                  Obx(() => _buildBody(theme, controller.loadingState.value)),
+                ],
+              ),
             ),
           ],
         ),
@@ -77,32 +79,41 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
                 Expanded(
                   child: SelfSizedHorizontalList(
                     gapSize: 12,
-                    padding:
-                        const EdgeInsets.only(top: 10, bottom: 10, right: 12),
+                    padding: const EdgeInsets.only(
+                      top: 10,
+                      bottom: 10,
+                      right: 12,
+                    ),
                     childBuilder: (index) {
                       late final item = data
-                          .second!.cardData!.areaEntranceV3!.list![index - 1];
+                          .second!
+                          .cardData!
+                          .areaEntranceV3!
+                          .list![index - 1];
                       return Obx(
-                        () => SearchText(
-                          fontSize: 14,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          text: index == 0 ? '推荐' : '${item.title}',
-                          bgColor: index == controller.areaIndex.value
-                              ? theme.colorScheme.secondaryContainer
-                              : Colors.transparent,
-                          textColor: index == controller.areaIndex.value
-                              ? theme.colorScheme.onSecondaryContainer
-                              : null,
-                          onTap: (value) {
-                            controller.onSelectArea(
-                              index,
-                              index == 0 ? null : item,
-                            );
-                          },
-                        ),
+                        () {
+                          final isCurr = index == controller.areaIndex.value;
+                          return SearchText(
+                            fontSize: 14,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            text: index == 0 ? '推荐' : '${item.title}',
+                            bgColor: isCurr
+                                ? theme.colorScheme.secondaryContainer
+                                : Colors.transparent,
+                            textColor: isCurr
+                                ? theme.colorScheme.onSecondaryContainer
+                                : null,
+                            onTap: (value) {
+                              controller.onSelectArea(
+                                index,
+                                index == 0 ? null : item,
+                              );
+                            },
+                          );
+                        },
                       );
                     },
                     itemCount:
@@ -129,41 +140,43 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
   Widget _buildBody(ThemeData theme, LoadingState<List?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: SliverGridDelegateWithExtentAndRatio(
-            mainAxisSpacing: StyleString.cardSpace,
-            crossAxisSpacing: StyleString.cardSpace,
-            maxCrossAxisExtent: Grid.smallCardWidth,
-            childAspectRatio: StyleString.aspectRatio,
-            mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardVSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+          mainAxisSpacing: StyleString.cardSpace,
+          crossAxisSpacing: StyleString.cardSpace,
+          maxCrossAxisExtent: Grid.smallCardWidth,
+          childAspectRatio: StyleString.aspectRatio,
+          mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
         ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardVSkeleton();
+          },
+          childCount: 10,
+        ),
+      ),
       Success(:var response) => SliverMainAxisGroup(
-          slivers: [
-            if (controller.newTags?.isNotEmpty == true)
-              SliverToBoxAdapter(
-                child: SelfSizedHorizontalList(
-                  gapSize: 12,
-                  padding: const EdgeInsets.only(bottom: 8),
-                  childBuilder: (index) {
-                    late final item = controller.newTags![index];
-                    return Obx(
-                      () => SearchText(
+        slivers: [
+          if (controller.newTags?.isNotEmpty == true)
+            SliverToBoxAdapter(
+              child: SelfSizedHorizontalList(
+                gapSize: 12,
+                padding: const EdgeInsets.only(bottom: 8),
+                childBuilder: (index) {
+                  late final item = controller.newTags![index];
+                  return Obx(
+                    () {
+                      final isCurr = index == controller.tagIndex.value;
+                      return SearchText(
                         fontSize: 13,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         text: '${item.name}',
-                        bgColor: index == controller.tagIndex.value
+                        bgColor: isCurr
                             ? theme.colorScheme.secondaryContainer
                             : Colors.transparent,
-                        textColor: index == controller.tagIndex.value
+                        textColor: isCurr
                             ? theme.colorScheme.onSecondaryContainer
                             : null,
                         onTap: (value) {
@@ -172,45 +185,45 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
                             item.sortType,
                           );
                         },
-                      ),
-                    );
-                  },
-                  itemCount: controller.newTags!.length,
-                ),
+                      );
+                    },
+                  );
+                },
+                itemCount: controller.newTags!.length,
               ),
-            response?.isNotEmpty == true
-                ? SliverGrid(
-                    gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                      mainAxisSpacing: StyleString.cardSpace,
-                      crossAxisSpacing: StyleString.cardSpace,
-                      maxCrossAxisExtent: Grid.smallCardWidth,
-                      childAspectRatio: StyleString.aspectRatio,
-                      mainAxisExtent:
-                          MediaQuery.textScalerOf(context).scale(90),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        if (index == response.length - 1) {
-                          controller.onLoadMore();
-                        }
-                        final item = response[index];
-                        if (item is LiveCardList) {
-                          return LiveCardVApp(
-                            item: item.cardData!.smallCardV1!,
-                          );
-                        }
-                        return LiveCardVApp(item: item);
-                      },
-                      childCount: response!.length,
-                    ),
-                  )
-                : HttpError(onReload: controller.onReload),
-          ],
-        ),
+            ),
+          response?.isNotEmpty == true
+              ? SliverGrid(
+                  gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                    mainAxisSpacing: StyleString.cardSpace,
+                    crossAxisSpacing: StyleString.cardSpace,
+                    maxCrossAxisExtent: Grid.smallCardWidth,
+                    childAspectRatio: StyleString.aspectRatio,
+                    mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index == response.length - 1) {
+                        controller.onLoadMore();
+                      }
+                      final item = response[index];
+                      if (item is LiveCardList) {
+                        return LiveCardVApp(
+                          item: item.cardData!.smallCardV1!,
+                        );
+                      }
+                      return LiveCardVApp(item: item);
+                    },
+                    childCount: response!.length,
+                  ),
+                )
+              : HttpError(onReload: controller.onReload),
+        ],
+      ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: controller.onReload,
+      ),
     };
   }
 

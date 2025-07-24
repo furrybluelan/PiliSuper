@@ -82,7 +82,7 @@ class SubItem extends StatelessWidget {
                           right: 6,
                           top: 6,
                           text: type,
-                        )
+                        ),
                       ],
                     );
                   },

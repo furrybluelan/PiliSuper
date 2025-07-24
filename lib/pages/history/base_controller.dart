@@ -11,7 +11,7 @@ class HistoryBaseController extends GetxController {
   RxBool enableMultiSelect = false.obs;
   RxInt checkedCount = 0.obs;
 
-// 清空观看历史
+  // 清空观看历史
   void onClearHistory(BuildContext context, VoidCallback onSuccess) {
     showDialog(
       context: context,
@@ -51,10 +51,10 @@ class HistoryBaseController extends GetxController {
     showDialog(
       context: context,
       builder: (context) {
+        final pauseStatus = !this.pauseStatus.value;
         return AlertDialog(
           title: const Text('提示'),
-          content:
-              Text(!pauseStatus.value ? '啊叻？你要暂停历史记录功能吗？' : '啊叻？要恢复历史记录功能吗？'),
+          content: Text(pauseStatus ? '啊叻？你要暂停历史记录功能吗？' : '啊叻？要恢复历史记录功能吗？'),
           actions: [
             TextButton(
               onPressed: Get.back,
@@ -66,18 +66,19 @@ class HistoryBaseController extends GetxController {
             TextButton(
               onPressed: () async {
                 SmartDialog.showLoading(msg: '请求中');
-                var res = await UserHttp.pauseHistory(!pauseStatus.value);
+                var res = await UserHttp.pauseHistory(pauseStatus);
                 SmartDialog.dismiss();
                 if (res.data['code'] == 0) {
-                  SmartDialog.showToast(
-                      !pauseStatus.value ? '暂停观看历史' : '恢复观看历史');
-                  pauseStatus.value = !pauseStatus.value;
-                  GStorage.localCache
-                      .put(LocalCacheKey.historyPause, pauseStatus.value);
+                  SmartDialog.showToast(pauseStatus ? '暂停观看历史' : '恢复观看历史');
+                  this.pauseStatus.value = pauseStatus;
+                  GStorage.localCache.put(
+                    LocalCacheKey.historyPause,
+                    pauseStatus,
+                  );
                 }
                 Get.back();
               },
-              child: Text(!pauseStatus.value ? '确认暂停' : '确认恢复'),
+              child: Text(pauseStatus ? '确认暂停' : '确认恢复'),
             ),
           ],
         );

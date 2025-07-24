@@ -80,7 +80,7 @@ class PgcRankItem extends StatelessWidget {
                           value: item.stat!.follow,
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),

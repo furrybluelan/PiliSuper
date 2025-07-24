@@ -30,13 +30,15 @@ class PgcCardVMemberPgc extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 0.75,
-              child: LayoutBuilder(builder: (context, boxConstraints) {
-                return NetworkImgLayer(
-                  src: item.cover,
-                  width: boxConstraints.maxWidth,
-                  height: boxConstraints.maxHeight,
-                );
-              }),
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  return NetworkImgLayer(
+                    src: item.cover,
+                    width: boxConstraints.maxWidth,
+                    height: boxConstraints.maxHeight,
+                  );
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 5, 0, 3),

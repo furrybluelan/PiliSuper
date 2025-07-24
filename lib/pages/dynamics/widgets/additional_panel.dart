@@ -12,8 +12,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
-Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
-    {floor = 1}) {
+Widget addWidget(
+  ThemeData theme,
+  DynamicItemModel item,
+  BuildContext context, {
+  floor = 1,
+}) {
   final type = item.modules.moduleDynamic?.additional?.type;
   late final Color bgColor = floor == 1
       ? theme.dividerColor.withValues(alpha: 0.08)
@@ -35,8 +39,10 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                   ? null
                   : () => PiliScheme.routePushFromUrl(ugc.jumpUrl!),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     NetworkImgLayer(
@@ -61,7 +67,7 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                               color: theme.colorScheme.outline,
                               fontSize: theme.textTheme.labelMedium!.fontSize,
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -77,163 +83,182 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
         late final borderRadius = floor == 1 ? null : StyleString.mdRadius;
         return reserve.state != -1
             ? reserve.title != null
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Material(
-                      color: bgColor,
-                      borderRadius: borderRadius,
-                      child: InkWell(
-                        onTap: () {},
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Material(
+                        color: bgColor,
                         borderRadius: borderRadius,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      reserve.title!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 1),
-                                    Text.rich(
-                                      TextSpan(
-                                        style: TextStyle(
-                                          color: theme.colorScheme.outline,
-                                          fontSize: 13,
-                                        ),
-                                        children: [
-                                          if (reserve.desc1?.text?.isNotEmpty ==
-                                              true)
-                                            TextSpan(text: reserve.desc1!.text),
-                                          if (reserve.desc2?.text?.isNotEmpty ==
-                                              true)
-                                            TextSpan(
+                        child: InkWell(
+                          onTap: () {},
+                          borderRadius: borderRadius,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        reserve.title!,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 1),
+                                      Text.rich(
+                                        TextSpan(
+                                          style: TextStyle(
+                                            color: theme.colorScheme.outline,
+                                            fontSize: 13,
+                                          ),
+                                          children: [
+                                            if (reserve
+                                                    .desc1
+                                                    ?.text
+                                                    ?.isNotEmpty ==
+                                                true)
+                                              TextSpan(
+                                                text: reserve.desc1!.text,
+                                              ),
+                                            if (reserve
+                                                    .desc2
+                                                    ?.text
+                                                    ?.isNotEmpty ==
+                                                true)
+                                              TextSpan(
                                                 text:
-                                                    '    ${reserve.desc2!.text}'),
-                                          if (reserve.desc3?.text?.isNotEmpty ==
-                                              true) ...[
-                                            const TextSpan(text: '\n'),
-                                            WidgetSpan(
-                                              alignment:
-                                                  PlaceholderAlignment.middle,
-                                              child: Icon(
-                                                size: 17,
-                                                Icons.card_giftcard,
-                                                color:
-                                                    theme.colorScheme.primary,
+                                                    '    ${reserve.desc2!.text}',
                                               ),
-                                            ),
-                                            TextSpan(
-                                              text: ' ${reserve.desc3!.text}',
-                                              style: TextStyle(
-                                                color:
-                                                    theme.colorScheme.primary,
+                                            if (reserve
+                                                    .desc3
+                                                    ?.text
+                                                    ?.isNotEmpty ==
+                                                true) ...[
+                                              const TextSpan(text: '\n'),
+                                              WidgetSpan(
+                                                alignment:
+                                                    PlaceholderAlignment.middle,
+                                                child: Icon(
+                                                  size: 17,
+                                                  Icons.card_giftcard,
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                ),
                                               ),
-                                              recognizer:
-                                                  reserve.desc3!.jumpUrl == null
-                                                      ? null
-                                                      : (TapGestureRecognizer()
+                                              TextSpan(
+                                                text: ' ${reserve.desc3!.text}',
+                                                style: TextStyle(
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                ),
+                                                recognizer:
+                                                    reserve.desc3!.jumpUrl ==
+                                                        null
+                                                    ? null
+                                                    : (TapGestureRecognizer()
                                                         ..onTap = () {
                                                           Get.toNamed(
                                                             '/webview',
                                                             parameters: {
                                                               'url': reserve
                                                                   .desc3!
-                                                                  .jumpUrl!
+                                                                  .jumpUrl!,
                                                             },
                                                           );
                                                         }),
-                                            ),
+                                              ),
+                                            ],
                                           ],
-                                        ],
+                                        ),
                                       ),
-                                    )
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              if (reserve.button != null) ...[
-                                const SizedBox(width: 10),
-                                Builder(
-                                  builder: (context) {
-                                    final btn = reserve.button!;
-                                    final isReserved = btn.status == btn.type;
-                                    final bool canJump = btn.jumpUrl != null;
-                                    return FilledButton.tonal(
-                                      style: FilledButton.styleFrom(
-                                        foregroundColor: canJump
-                                            ? null
-                                            : isReserved
-                                                ? theme.colorScheme.onSurface
-                                                    .withValues(alpha: 0.38)
-                                                : null,
-                                        backgroundColor: canJump
-                                            ? null
-                                            : isReserved
-                                                ? theme.colorScheme.onSurface
-                                                    .withValues(alpha: 0.12)
-                                                : null,
-                                        visualDensity: VisualDensity.compact,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16),
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      onPressed: canJump
-                                          ? () => PiliScheme.routePushFromUrl(
-                                              btn.jumpUrl!)
-                                          : btn.disable == 1
+                                if (reserve.button != null) ...[
+                                  const SizedBox(width: 10),
+                                  Builder(
+                                    builder: (context) {
+                                      final btn = reserve.button!;
+                                      final isReserved = btn.status == btn.type;
+                                      final bool canJump = btn.jumpUrl != null;
+                                      return FilledButton.tonal(
+                                        style: FilledButton.styleFrom(
+                                          foregroundColor: canJump
                                               ? null
-                                              : () async {
-                                                  var res = await DynamicsHttp
-                                                      .dynReserve(
-                                                    reserveId: reserve.rid,
-                                                    curBtnStatus: btn.status,
-                                                    dynamicIdStr: item.idStr,
-                                                    reserveTotal:
-                                                        reserve.reserveTotal,
-                                                  );
-                                                  if (res['status']) {
-                                                    DynReserveData data =
-                                                        res['data'];
-                                                    reserve
-                                                      ..desc2?.text =
-                                                          data.descUpdate
-                                                      ..reserveTotal =
-                                                          data.reserveUpdate
-                                                      ..button!.status =
-                                                          data.finalBtnStatus;
-                                                    if (context.mounted) {
-                                                      (context as Element?)
-                                                          ?.markNeedsBuild();
-                                                    }
-                                                  } else {
-                                                    SmartDialog.showToast(
-                                                        res['msg']);
+                                              : isReserved
+                                              ? theme.colorScheme.onSurface
+                                                    .withValues(alpha: 0.38)
+                                              : null,
+                                          backgroundColor: canJump
+                                              ? null
+                                              : isReserved
+                                              ? theme.colorScheme.onSurface
+                                                    .withValues(alpha: 0.12)
+                                              : null,
+                                          visualDensity: VisualDensity.compact,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                          ),
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                        onPressed: canJump
+                                            ? () => PiliScheme.routePushFromUrl(
+                                                btn.jumpUrl!,
+                                              )
+                                            : btn.disable == 1
+                                            ? null
+                                            : () async {
+                                                var res =
+                                                    await DynamicsHttp.dynReserve(
+                                                      reserveId: reserve.rid,
+                                                      curBtnStatus: btn.status,
+                                                      dynamicIdStr: item.idStr,
+                                                      reserveTotal:
+                                                          reserve.reserveTotal,
+                                                    );
+                                                if (res['status']) {
+                                                  DynReserveData data =
+                                                      res['data'];
+                                                  reserve
+                                                    ..desc2?.text =
+                                                        data.descUpdate
+                                                    ..reserveTotal =
+                                                        data.reserveUpdate
+                                                    ..button!.status =
+                                                        data.finalBtnStatus;
+                                                  if (context.mounted) {
+                                                    (context as Element?)
+                                                        ?.markNeedsBuild();
                                                   }
-                                                },
-                                      child: Text(
-                                        btn.jumpText != null
-                                            ? btn.jumpText!
-                                            : isReserved
-                                                ? btn.checkText!
-                                                : btn.uncheckText!,
-                                      ),
-                                    );
-                                  },
-                                ),
+                                                } else {
+                                                  SmartDialog.showToast(
+                                                    res['msg'],
+                                                  );
+                                                }
+                                              },
+                                        child: Text(
+                                          btn.jumpText != null
+                                              ? btn.jumpText!
+                                              : isReserved
+                                              ? btn.checkText!
+                                              : btn.uncheckText!,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  )
-                : const SizedBox.shrink()
+                    )
+                  : const SizedBox.shrink()
             : const SizedBox.shrink();
       case 'ADDITIONAL_TYPE_UPOWER_LOTTERY':
         final content = item.modules.moduleDynamic!.additional!.upowerLottery!;
@@ -249,8 +274,10 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                   ? null
                   : () => PiliScheme.routePushFromUrl(content.jumpUrl!),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -290,14 +317,14 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                                     recognizer: content.desc!.jumpUrl == null
                                         ? null
                                         : (TapGestureRecognizer()
-                                          ..onTap = () {
-                                            Get.toNamed(
-                                              '/webview',
-                                              parameters: {
-                                                'url': content.desc!.jumpUrl!
-                                              },
-                                            );
-                                          }),
+                                            ..onTap = () {
+                                              Get.toNamed(
+                                                '/webview',
+                                                parameters: {
+                                                  'url': content.desc!.jumpUrl!,
+                                                },
+                                              );
+                                            }),
                                   ),
                                 ],
                               ),
@@ -311,20 +338,24 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                         onPressed: content.button!.jumpUrl == null
                             ? null
                             : () => PiliScheme.routePushFromUrl(
-                                  content.button!.jumpUrl!,
-                                ),
+                                content.button!.jumpUrl!,
+                              ),
                         style: FilledButton.styleFrom(
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(Radius.circular(6)),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          visualDensity:
-                              const VisualDensity(horizontal: -2, vertical: -3),
+                          visualDensity: const VisualDensity(
+                            horizontal: -2,
+                            vertical: -3,
+                          ),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: Text(content.button!.jumpStyle?.text ??
-                            content.button!.check?.text ??
-                            ''),
+                        child: Text(
+                          content.button!.jumpStyle?.text ??
+                              content.button!.check?.text ??
+                              '',
+                        ),
                       ),
                     ],
                   ],
@@ -351,7 +382,9 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                     onTap: () => PiliScheme.routePushFromUrl(e.jumpUrl!),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
                           if (e.cover?.isNotEmpty == true) ...[
@@ -399,13 +432,17 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                                   PiliScheme.routePushFromUrl(e.jumpUrl!),
                               style: FilledButton.styleFrom(
                                 shape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(6)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(6),
+                                  ),
                                 ),
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
                                 visualDensity: const VisualDensity(
-                                    horizontal: -2, vertical: -3),
+                                  horizontal: -2,
+                                  vertical: -3,
+                                ),
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: Text(e.jumpDesc!),
@@ -437,12 +474,14 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                 item.idStr is int
                     ? item.idStr
                     : item.idStr is String
-                        ? int.parse(item.idStr)
-                        : null,
+                    ? int.parse(item.idStr)
+                    : null,
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -450,8 +489,9 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                         color: floor == 1
                             ? theme.colorScheme.surface
                             : theme.dividerColor.withValues(alpha: 0.08),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(8),
+                        ),
                       ),
                       width: 70,
                       height: 50,
@@ -475,7 +515,9 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                fontSize: 13, color: theme.colorScheme.outline),
+                              fontSize: 13,
+                              color: theme.colorScheme.outline,
+                            ),
                           ),
                         ],
                       ),
@@ -488,16 +530,18 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                         item.idStr is int
                             ? item.idStr
                             : item.idStr is String
-                                ? int.parse(item.idStr)
-                                : null,
+                            ? int.parse(item.idStr)
+                            : null,
                       ),
                       style: FilledButton.styleFrom(
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(6)),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        visualDensity:
-                            const VisualDensity(horizontal: -2, vertical: -3),
+                        visualDensity: const VisualDensity(
+                          horizontal: -2,
+                          vertical: -3,
+                        ),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: const Text('参与'),
@@ -522,8 +566,10 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                   ? null
                   : () => PiliScheme.routePushFromUrl(content.jumpUrl!),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     if (content.cover?.isNotEmpty == true) ...[
@@ -573,8 +619,10 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                             borderRadius: BorderRadius.all(Radius.circular(6)),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          visualDensity:
-                              const VisualDensity(horizontal: -2, vertical: -3),
+                          visualDensity: const VisualDensity(
+                            horizontal: -2,
+                            vertical: -3,
+                          ),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(content.button!.jumpStyle?.text ?? ''),
@@ -600,8 +648,10 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                   ? null
                   : () => PiliScheme.routePushFromUrl(content.jumpUrl!),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Column(
@@ -636,7 +686,7 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                           Text(
                             content.matchInfo!.leftTeam!.name!,
                             style: const TextStyle(fontSize: 13),
-                          )
+                          ),
                         ],
                       ),
                       const SizedBox(width: 16),
@@ -679,7 +729,7 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                           Text(
                             content.matchInfo!.rightTeam!.name!,
                             style: const TextStyle(fontSize: 13),
-                          )
+                          ),
                         ],
                       ),
                     ],
@@ -694,8 +744,10 @@ Widget addWidget(ThemeData theme, DynamicItemModel item, BuildContext context,
                             borderRadius: BorderRadius.all(Radius.circular(6)),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          visualDensity:
-                              const VisualDensity(horizontal: -2, vertical: -3),
+                          visualDensity: const VisualDensity(
+                            horizontal: -2,
+                            vertical: -3,
+                          ),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(content.button!.jumpStyle?.text ?? ''),

@@ -22,15 +22,15 @@ class Section {
   });
 
   factory Section.fromJson(Map<String, dynamic> json) => Section(
-        attr: json['attr'] as int?,
-        episodeId: json['episode_id'] as int?,
-        episodeIds: json['episode_ids'] as List<dynamic>?,
-        episodes: (json['episodes'] as List<dynamic>?)
-            ?.map((e) => EpisodeItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        id: json['id'] as int?,
-        title: json['title'] as String?,
-        type: json['type'] as int?,
-        type2: json['type2'] as int?,
-      );
+    attr: json['attr'] as int?,
+    episodeId: json['episode_id'] as int?,
+    episodeIds: json['episode_ids'] as List<dynamic>?,
+    episodes: (json['episodes'] as List<dynamic>?)
+        ?.map((e) => EpisodeItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    id: json['id'] as int?,
+    title: json['title'] as String?,
+    type: json['type'] as int?,
+    type2: json['type2'] as int?,
+  );
 }

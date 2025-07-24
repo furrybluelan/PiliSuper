@@ -64,10 +64,10 @@ class _NoteListPageState extends CommonSlidePageState<NoteListPage> {
               titleSpacing: 16,
               toolbarHeight: 45,
               backgroundColor: Colors.transparent,
-              title: Obx(
-                () => Text(
-                    '笔记${_controller.count.value == -1 ? '' : '(${_controller.count.value})'}'),
-              ),
+              title: Obx(() {
+                final count = _controller.count.value;
+                return Text('笔记${count == -1 ? '' : '($count)'}');
+              }),
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(1),
                 child: Divider(
@@ -87,7 +87,7 @@ class _NoteListPageState extends CommonSlidePageState<NoteListPage> {
               ],
             ),
           ),
-          Expanded(child: enableSlide ? slideList(theme) : buildList(theme))
+          Expanded(child: enableSlide ? slideList(theme) : buildList(theme)),
         ],
       ),
     );
@@ -107,7 +107,8 @@ class _NoteListPageState extends CommonSlidePageState<NoteListPage> {
                 SliverPadding(
                   padding: const EdgeInsets.only(bottom: 80),
                   sliver: Obx(
-                      () => _buildBody(theme, _controller.loadingState.value)),
+                    () => _buildBody(theme, _controller.loadingState.value),
+                  ),
                 ),
               ],
             ),
@@ -160,38 +161,41 @@ class _NoteListPageState extends CommonSlidePageState<NoteListPage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<VideoNoteItemModel>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<VideoNoteItemModel>?> loadingState,
+  ) {
     late final divider = Divider(
       height: 1,
       color: theme.colorScheme.outline.withValues(alpha: 0.1),
     );
     return switch (loadingState) {
       Loading() => SliverToBoxAdapter(
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return const VideoReplySkeleton();
-            },
-            itemCount: 8,
-          ),
+        child: ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return const VideoReplySkeleton();
+          },
+          itemCount: 8,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.separated(
-              itemBuilder: (context, index) {
-                if (index == response.length - 1) {
-                  _controller.onLoadMore();
-                }
-                return _itemWidget(theme, response[index]);
-              },
-              itemCount: response!.length,
-              separatorBuilder: (context, index) => divider,
-            )
-          : HttpError(onReload: _controller.onReload),
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.separated(
+                itemBuilder: (context, index) {
+                  if (index == response.length - 1) {
+                    _controller.onLoadMore();
+                  }
+                  return _itemWidget(theme, response[index]);
+                },
+                itemCount: response!.length,
+                separatorBuilder: (context, index) => divider,
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 
@@ -234,7 +238,8 @@ class _NoteListPageState extends CommonSlidePageState<NoteListPage> {
                           Text(
                             item.author!.name!,
                             style: TextStyle(
-                              color: item.author?.vipInfo?.status != null &&
+                              color:
+                                  item.author?.vipInfo?.status != null &&
                                       item.author!.vipInfo!.status > 0 &&
                                       item.author!.vipInfo!.type == 2
                                   ? context.vipColor

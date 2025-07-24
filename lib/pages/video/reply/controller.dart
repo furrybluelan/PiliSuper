@@ -18,16 +18,20 @@ class VideoReplyController extends ReplyController<MainListReply>
 
   bool _isFabVisible = true;
   late final AnimationController fabAnimationCtr = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 100))
-    ..forward();
+    vsync: this,
+    duration: const Duration(milliseconds: 100),
+  )..forward();
 
-  late final anim = Tween<Offset>(
-    begin: const Offset(0, 2),
-    end: Offset.zero,
-  ).animate(CurvedAnimation(
-    parent: fabAnimationCtr,
-    curve: Curves.easeInOut,
-  ));
+  late final anim =
+      Tween<Offset>(
+        begin: const Offset(0, 2),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: fabAnimationCtr,
+          curve: Curves.easeInOut,
+        ),
+      );
 
   void showFab() {
     if (!_isFabVisible) {
@@ -50,11 +54,11 @@ class VideoReplyController extends ReplyController<MainListReply>
 
   @override
   Future<LoadingState<MainListReply>> customGetData() => ReplyGrpc.mainList(
-        oid: aid,
-        mode: mode.value,
-        cursorNext: cursorNext,
-        offset: paginationReply?.nextOffset,
-      );
+    oid: aid,
+    mode: mode.value,
+    cursorNext: cursorNext,
+    offset: paginationReply?.nextOffset,
+  );
 
   @override
   void onClose() {

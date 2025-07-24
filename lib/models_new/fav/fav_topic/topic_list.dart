@@ -8,11 +8,11 @@ class TopicList {
   TopicList({this.topicItems, this.pageInfo});
 
   factory TopicList.fromJson(Map<String, dynamic> json) => TopicList(
-        topicItems: (json['topic_items'] as List<dynamic>?)
-            ?.map((e) => FavTopicItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        pageInfo: json['page_info'] == null
-            ? null
-            : PageInfo.fromJson(json['page_info'] as Map<String, dynamic>),
-      );
+    topicItems: (json['topic_items'] as List<dynamic>?)
+        ?.map((e) => FavTopicItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    pageInfo: json['page_info'] == null
+        ? null
+        : PageInfo.fromJson(json['page_info'] as Map<String, dynamic>),
+  );
 }

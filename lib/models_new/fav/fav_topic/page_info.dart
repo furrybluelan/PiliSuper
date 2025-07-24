@@ -5,7 +5,7 @@ class PageInfo {
   PageInfo({this.curPageNum, this.total});
 
   factory PageInfo.fromJson(Map<String, dynamic> json) => PageInfo(
-        curPageNum: json['cur_page_num'] as int?,
-        total: json['total'] as int?,
-      );
+    curPageNum: json['cur_page_num'] as int?,
+    total: json['total'] as int?,
+  );
 }

@@ -26,32 +26,31 @@ class _DynamicsPageState extends State<DynamicsPage>
   bool get wantKeepAlive => true;
 
   Widget _createDynamicBtn(ThemeData theme, [bool isRight = true]) => Center(
-        child: Container(
-          width: 34,
-          height: 34,
-          margin:
-              EdgeInsets.only(left: !isRight ? 16 : 0, right: isRight ? 16 : 0),
-          child: IconButton(
-            tooltip: '发布动态',
-            style: ButtonStyle(
-              padding: WidgetStateProperty.all(EdgeInsets.zero),
-              backgroundColor: WidgetStateProperty.resolveWith((states) {
-                return theme.colorScheme.secondaryContainer;
-              }),
-            ),
-            onPressed: () {
-              if (_dynamicsController.accountService.isLogin.value) {
-                CreateDynPanel.onCreateDyn(context);
-              }
-            },
-            icon: Icon(
-              Icons.add,
-              size: 18,
-              color: theme.colorScheme.onSecondaryContainer,
-            ),
-          ),
+    child: Container(
+      width: 34,
+      height: 34,
+      margin: EdgeInsets.only(left: !isRight ? 16 : 0, right: isRight ? 16 : 0),
+      child: IconButton(
+        tooltip: '发布动态',
+        style: ButtonStyle(
+          padding: WidgetStateProperty.all(EdgeInsets.zero),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            return theme.colorScheme.secondaryContainer;
+          }),
         ),
-      );
+        onPressed: () {
+          if (_dynamicsController.accountService.isLogin.value) {
+            CreateDynPanel.onCreateDyn(context);
+          }
+        },
+        icon: Icon(
+          Icons.add,
+          size: 18,
+          color: theme.colorScheme.onSecondaryContainer,
+        ),
+      ),
+    ),
+  );
 
   @override
   void initState() {
@@ -87,10 +86,10 @@ class _DynamicsPageState extends State<DynamicsPage>
         height: isTop ? 76 : null,
         child: Obx(
           () {
-            if (_dynamicsController.upData.value.upList == null &&
-                _dynamicsController.upData.value.liveUsers == null) {
+            final upData = _dynamicsController.upData.value;
+            if (upData.upList == null && upData.liveUsers == null) {
               return const SizedBox.shrink();
-            } else if (_dynamicsController.upData.value.errMsg != null) {
+            } else if (upData.errMsg != null) {
               return Center(
                 child: IconButton(
                   icon: const Icon(Icons.refresh),
@@ -132,9 +131,10 @@ class _DynamicsPageState extends State<DynamicsPage>
             unselectedLabelColor: theme.colorScheme.onSurface,
             labelStyle:
                 TabBarTheme.of(context).labelStyle?.copyWith(fontSize: 13) ??
-                    const TextStyle(fontSize: 13),
-            tabs:
-                DynamicsTabType.values.map((e) => Tab(text: e.label)).toList(),
+                const TextStyle(fontSize: 13),
+            tabs: DynamicsTabType.values
+                .map((e) => Tab(text: e.label))
+                .toList(),
             onTap: (index) {
               if (!_dynamicsController.tabController.indexIsChanging) {
                 _dynamicsController.animateToTop();

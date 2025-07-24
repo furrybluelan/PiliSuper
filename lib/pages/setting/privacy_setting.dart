@@ -17,8 +17,9 @@ class _PrivacySettingState extends State<PrivacySetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          widget.showAppBar == false ? null : AppBar(title: const Text('隐私设置')),
+      appBar: widget.showAppBar == false
+          ? null
+          : AppBar(title: const Text('隐私设置')),
       body: ListView(
         padding: EdgeInsets.only(
           bottom: MediaQuery.paddingOf(context).bottom + 80,

@@ -161,8 +161,9 @@ class RequestUtils {
                         context: context,
                         useSafeArea: true,
                         isScrollControlled: true,
-                        sheetAnimationStyle:
-                            const AnimationStyle(curve: Curves.ease),
+                        sheetAnimationStyle: const AnimationStyle(
+                          curve: Curves.ease,
+                        ),
                         constraints: BoxConstraints(
                           maxWidth: min(640, context.mediaQueryShortestSide),
                         ),
@@ -174,14 +175,17 @@ class RequestUtils {
                             snap: true,
                             expand: false,
                             snapSizes: const [0.7],
-                            builder: (BuildContext context,
-                                ScrollController scrollController) {
-                              return GroupPanel(
-                                mid: mid,
-                                tags: followStatus!['tag'],
-                                scrollController: scrollController,
-                              );
-                            },
+                            builder:
+                                (
+                                  BuildContext context,
+                                  ScrollController scrollController,
+                                ) {
+                                  return GroupPanel(
+                                    mid: mid,
+                                    tags: followStatus!['tag'],
+                                    scrollController: scrollController,
+                                  );
+                                },
                           );
                         },
                       );
@@ -205,7 +209,8 @@ class RequestUtils {
                         reSrc: 11,
                       );
                       SmartDialog.showToast(
-                          res['status'] ? "取消关注成功" : res['msg']);
+                        res['status'] ? "取消关注成功" : res['msg'],
+                      );
                       if (res['status']) {
                         callback?.call(0);
                       }
@@ -229,21 +234,20 @@ class RequestUtils {
     emote?.forEach((key, value) {
       value['size'] = value['meta']['size'];
     });
-    return ReplyInfo.create()
-      ..mergeFromProto3Json(
-        res
-          ..['content'].remove('members')
-          ..['id'] = res['rpid']
-          ..['member']['name'] = res['member']['uname']
-          ..['member']['face'] = res['member']['avatar']
-          ..['member']['level'] = res['member']['level_info']['current_level']
-          ..['member']['vipStatus'] = res['member']['vip']['vipStatus']
-          ..['member']['vipType'] = res['member']['vip']['vipType']
-          ..['member']['officialVerifyType'] =
-              res['member']['official_verify']['type']
-          ..['content']['emotes'] = emote,
-        ignoreUnknownFields: true,
-      );
+    return ReplyInfo.create()..mergeFromProto3Json(
+      res
+        ..['content'].remove('members')
+        ..['id'] = res['rpid']
+        ..['member']['name'] = res['member']['uname']
+        ..['member']['face'] = res['member']['avatar']
+        ..['member']['level'] = res['member']['level_info']['current_level']
+        ..['member']['vipStatus'] = res['member']['vip']['vipStatus']
+        ..['member']['vipType'] = res['member']['vip']['vipType']
+        ..['member']['officialVerifyType'] =
+            res['member']['official_verify']['type']
+        ..['content']['emotes'] = emote,
+      ignoreUnknownFields: true,
+    );
   }
 
   // static Future<dynamic> getWwebid(mid) async {
@@ -288,8 +292,11 @@ class RequestUtils {
     }
   }
 
-  static Future<void> checkCreatedDyn(
-      {dynamic id, String? dynText, bool isManual = false}) async {
+  static Future<void> checkCreatedDyn({
+    dynamic id,
+    String? dynText,
+    bool isManual = false,
+  }) async {
     if (isManual || Pref.enableCreateDynAntifraud) {
       try {
         if (id != null) {
@@ -302,7 +309,8 @@ class RequestUtils {
             AlertDialog(
               title: const Text('动态检查结果'),
               content: SelectableText(
-                  '${!isBan ? '无账号状态下找到了你的动态，动态正常！' : '你的动态被shadow ban（仅自己可见）！'}${dynText != null ? ' \n\n动态内容: $dynText' : ''}'),
+                '${!isBan ? '无账号状态下找到了你的动态，动态正常！' : '你的动态被shadow ban（仅自己可见）！'}${dynText != null ? ' \n\n动态内容: $dynText' : ''}',
+              ),
               actions: isBan
                   ? [
                       TextButton(
@@ -313,7 +321,7 @@ class RequestUtils {
                             '/webview',
                             parameters: {
                               'url':
-                                  'https://www.bilibili.com/h5/comment/appeal?native.theme=2&night=${Get.isDarkMode ? 1 : 0}'
+                                  'https://www.bilibili.com/h5/comment/appeal?native.theme=2&night=${Get.isDarkMode ? 1 : 0}',
                             },
                           );
                         },
@@ -332,7 +340,9 @@ class RequestUtils {
 
   // 动态点赞
   static Future<void> onLikeDynamic(
-      DynamicItemModel item, VoidCallback callback) async {
+    DynamicItemModel item,
+    VoidCallback callback,
+  ) async {
     feedBack();
     String dynamicId = item.idStr!;
     // 1 已点赞 2 不喜欢 0 未操作
@@ -403,8 +413,9 @@ class RequestUtils {
                   onPressed: Get.back,
                   child: Text(
                     '取消',
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.outline),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                   ),
                 ),
                 TextButton(
@@ -420,9 +431,11 @@ class RequestUtils {
                         srcMediaId: mediaId,
                         tarMediaId: checkedId,
                         resources: resources
-                            .map((item) => ctr is LaterController
-                                ? item.aid
-                                : '${item.id}:${item.type}')
+                            .map(
+                              (item) => ctr is LaterController
+                                  ? item.aid
+                                  : '${item.id}:${item.type}',
+                            )
                             .toList(),
                         mid: isCopy ? mid : null,
                       ).then((res) {
@@ -459,7 +472,9 @@ class RequestUtils {
   }
 
   static Future<void> validate(
-      String vVoucher, ValueChanged<String> onSuccess) async {
+    String vVoucher,
+    ValueChanged<String> onSuccess,
+  ) async {
     final res = await ValidateHttp.gaiaVgateRegister(vVoucher);
     if (!res['status']) {
       SmartDialog.showToast("${res['msg']}");

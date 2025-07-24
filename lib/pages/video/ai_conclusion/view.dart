@@ -116,7 +116,8 @@ class _AiDetailState extends CommonCollapseSlidePageState<AiConclusionPanel> {
                                 children: [
                                   TextSpan(
                                     text: DurationUtil.formatDuration(
-                                        item.timestamp),
+                                      item.timestamp,
+                                    ),
                                     style: TextStyle(
                                       color: theme.colorScheme.primary,
                                     ),
@@ -124,10 +125,10 @@ class _AiDetailState extends CommonCollapseSlidePageState<AiConclusionPanel> {
                                       ..onTap = () {
                                         try {
                                           Get.find<VideoDetailController>(
-                                                  tag: Get.arguments['heroTag'])
-                                              .plPlayerController
-                                              .seekTo(Duration(
-                                                  seconds: item.timestamp!));
+                                            tag: Get.arguments['heroTag'],
+                                          ).plPlayerController.seekTo(
+                                            Duration(seconds: item.timestamp!),
+                                          );
                                         } catch (_) {}
                                       },
                                   ),

@@ -6,12 +6,12 @@ class SpaceTab2 {
   const SpaceTab2({this.title, this.param, this.items});
 
   factory SpaceTab2.fromJson(Map<String, dynamic> json) => SpaceTab2(
-        title: json['title'] as String?,
-        param: json['param'] as String?,
-        items: (json['items'] as List<dynamic>?)
-            ?.map((e) => SpaceTab2Item.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    title: json['title'] as String?,
+    param: json['param'] as String?,
+    items: (json['items'] as List<dynamic>?)
+        ?.map((e) => SpaceTab2Item.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 class SpaceTab2Item {
@@ -32,17 +32,17 @@ class SpaceTab2Item {
   });
 
   factory SpaceTab2Item.fromJson(Map<String, dynamic> json) => SpaceTab2Item(
-        title: json["title"],
-        param: json["param"],
-        items: (json["items"] as List?)
-            ?.map((e) => SpaceTab2SubItem.fromJson(e))
-            .toList(),
-        filter: (json["filter"] as List?)
-            ?.map((e) => SpaceTabFilter.fromJson(e))
-            .toList(),
-        seasonId: json['season_id'],
-        seriesId: json['series_id'],
-      );
+    title: json["title"],
+    param: json["param"],
+    items: (json["items"] as List?)
+        ?.map((e) => SpaceTab2SubItem.fromJson(e))
+        .toList(),
+    filter: (json["filter"] as List?)
+        ?.map((e) => SpaceTabFilter.fromJson(e))
+        .toList(),
+    seasonId: json['season_id'],
+    seriesId: json['series_id'],
+  );
 }
 
 class SpaceTab2SubItem {
@@ -84,10 +84,10 @@ class SpaceTabFilter {
   });
 
   factory SpaceTabFilter.fromJson(Map<String, dynamic> json) => SpaceTabFilter(
-        text: json["text"],
-        meta: json["meta"] ?? 'all',
-        tabName: json["tab_name"],
-      );
+    text: json["text"],
+    meta: json["meta"] ?? 'all',
+    tabName: json["tab_name"],
+  );
 
   @override
   bool operator ==(Object other) {

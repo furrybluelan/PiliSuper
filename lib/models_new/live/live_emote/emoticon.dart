@@ -14,10 +14,10 @@ class Emoticon {
   });
 
   factory Emoticon.fromJson(Map<String, dynamic> json) => Emoticon(
-        emoji: json['emoji'] as String?,
-        url: json['url'] as String?,
-        width: json['width'] as int?,
-        height: json['height'] as int?,
-        emoticonUnique: json['emoticon_unique'] as String?,
-      );
+    emoji: json['emoji'] as String?,
+    url: json['url'] as String?,
+    width: json['width'] as int?,
+    height: json['height'] as int?,
+    emoticonUnique: json['emoticon_unique'] as String?,
+  );
 }

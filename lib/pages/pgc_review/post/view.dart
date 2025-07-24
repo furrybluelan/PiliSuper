@@ -117,23 +117,26 @@ class _PgcReviewPostPanelState
         SizedBox(
           width: double.infinity,
           child: Obx(
-            () => Text(
-              switch (_score.value) {
-                1 => '很差',
-                2 => '较差',
-                3 => '还行',
-                4 => '很好',
-                5 => '佳作',
-                _ => '轻触评分',
-              },
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: _score.value == 0
-                    ? theme.colorScheme.outline
-                    : const Color(0xFFFFAD35),
-              ),
-            ),
+            () {
+              final score = _score.value;
+              return Text(
+                switch (score) {
+                  1 => '很差',
+                  2 => '较差',
+                  3 => '还行',
+                  4 => '很好',
+                  5 => '佳作',
+                  _ => '轻触评分',
+                },
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: score == 0
+                      ? theme.colorScheme.outline
+                      : const Color(0xFFFFAD35),
+                ),
+              );
+            },
           ),
         ),
         Padding(
@@ -157,7 +160,8 @@ class _PgcReviewPostPanelState
               onTap: () => _shareFeed.value = !_shareFeed.value,
               child: Obx(
                 () {
-                  Color color = _shareFeed.value
+                  final shareFeed = _shareFeed.value;
+                  Color color = shareFeed
                       ? theme.colorScheme.primary
                       : theme.colorScheme.outline;
                   return Row(
@@ -165,7 +169,7 @@ class _PgcReviewPostPanelState
                     children: [
                       Icon(
                         size: 22,
-                        _shareFeed.value
+                        shareFeed
                             ? Icons.check_box_outlined
                             : Icons.check_box_outline_blank_outlined,
                         color: color,
@@ -185,7 +189,8 @@ class _PgcReviewPostPanelState
             left: 12,
             right: 12,
             top: 6,
-            bottom: MediaQuery.paddingOf(context).bottom +
+            bottom:
+                MediaQuery.paddingOf(context).bottom +
                 MediaQuery.viewInsetsOf(context).bottom +
                 6,
           ),

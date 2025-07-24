@@ -36,35 +36,34 @@ class RoomInfoH5Data {
   });
 
   factory RoomInfoH5Data.fromJson(Map<String, dynamic> json) => RoomInfoH5Data(
-        roomInfo: json['room_info'] == null
-            ? null
-            : RoomInfo.fromJson(json['room_info'] as Map<String, dynamic>),
-        anchorInfo: json['anchor_info'] == null
-            ? null
-            : AnchorInfo.fromJson(json['anchor_info'] as Map<String, dynamic>),
-        newSwitchInfo: json['new_switch_info'] == null
-            ? null
-            : NewSwitchInfo.fromJson(
-                json['new_switch_info'] as Map<String, dynamic>),
-        bannerInfo: json['banner_info'] as List<dynamic>?,
-        isRoomFeed: json['is_room_feed'] as int?,
-        tabInfo: json['tab_info'] as List<dynamic>?,
-        newsInfo: json['news_info'] == null
-            ? null
-            : NewsInfo.fromJson(json['news_info'] as Map<String, dynamic>),
-        watchedShow: json['watched_show'] == null
-            ? null
-            : WatchedShow.fromJson(
-                json['watched_show'] as Map<String, dynamic>),
-        likeInfoV3: json['like_info_v3'] == null
-            ? null
-            : LikeInfoV3.fromJson(json['like_info_v3'] as Map<String, dynamic>),
-        blockInfo: json['block_info'] == null
-            ? null
-            : BlockInfo.fromJson(json['block_info'] as Map<String, dynamic>),
-        areaMaskInfo: json['area_mask_info'] == null
-            ? null
-            : AreaMaskInfo.fromJson(
-                json['area_mask_info'] as Map<String, dynamic>),
-      );
+    roomInfo: json['room_info'] == null
+        ? null
+        : RoomInfo.fromJson(json['room_info'] as Map<String, dynamic>),
+    anchorInfo: json['anchor_info'] == null
+        ? null
+        : AnchorInfo.fromJson(json['anchor_info'] as Map<String, dynamic>),
+    newSwitchInfo: json['new_switch_info'] == null
+        ? null
+        : NewSwitchInfo.fromJson(
+            json['new_switch_info'] as Map<String, dynamic>,
+          ),
+    bannerInfo: json['banner_info'] as List<dynamic>?,
+    isRoomFeed: json['is_room_feed'] as int?,
+    tabInfo: json['tab_info'] as List<dynamic>?,
+    newsInfo: json['news_info'] == null
+        ? null
+        : NewsInfo.fromJson(json['news_info'] as Map<String, dynamic>),
+    watchedShow: json['watched_show'] == null
+        ? null
+        : WatchedShow.fromJson(json['watched_show'] as Map<String, dynamic>),
+    likeInfoV3: json['like_info_v3'] == null
+        ? null
+        : LikeInfoV3.fromJson(json['like_info_v3'] as Map<String, dynamic>),
+    blockInfo: json['block_info'] == null
+        ? null
+        : BlockInfo.fromJson(json['block_info'] as Map<String, dynamic>),
+    areaMaskInfo: json['area_mask_info'] == null
+        ? null
+        : AreaMaskInfo.fromJson(json['area_mask_info'] as Map<String, dynamic>),
+  );
 }

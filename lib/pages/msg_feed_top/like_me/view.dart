@@ -36,7 +36,8 @@ class _LikeMePageState extends State<LikeMePage> {
           IconButton(
             onPressed: () => Get.to(
               const WhisperSettingsPage(
-                  imSettingType: IMSettingType.SETTING_TYPE_OLD_RECEIVE_LIKE),
+                imSettingType: IMSettingType.SETTING_TYPE_OLD_RECEIVE_LIKE,
+              ),
             ),
             icon: Icon(
               size: 20,
@@ -54,9 +55,11 @@ class _LikeMePageState extends State<LikeMePage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.only(
-                  bottom: MediaQuery.paddingOf(context).bottom + 80),
-              sliver: Obx(() =>
-                  _buildBody(theme, _likeMeController.loadingState.value)),
+                bottom: MediaQuery.paddingOf(context).bottom + 80,
+              ),
+              sliver: Obx(
+                () => _buildBody(theme, _likeMeController.loadingState.value),
+              ),
             ),
           ],
         ),
@@ -73,67 +76,67 @@ class _LikeMePageState extends State<LikeMePage> {
     );
     return switch (loadingState) {
       Loading() => SliverList.builder(
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            return const MsgFeedTopSkeleton();
-          },
-        ),
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          return const MsgFeedTopSkeleton();
+        },
+      ),
       Success(:var response) => Builder(
-          builder: (context) {
-            Pair<List<MsgLikeItem>, List<MsgLikeItem>> pair = response;
-            List<MsgLikeItem> latest = pair.first;
-            List<MsgLikeItem> total = pair.second;
-            if (latest.isNotEmpty || total.isNotEmpty) {
-              return SliverMainAxisGroup(
-                slivers: [
-                  if (latest.isNotEmpty) ...[
-                    _buildHeader(theme, '最新'),
-                    SliverList.separated(
-                      itemBuilder: (context, index) {
-                        if (total.isEmpty && index == latest.length - 1) {
-                          _likeMeController.onLoadMore();
-                        }
-                        return _buildItem(
-                          theme,
-                          latest[index],
-                          (id) {
-                            _likeMeController.onRemove(id, index, true);
-                          },
-                        );
-                      },
-                      itemCount: latest.length,
-                      separatorBuilder: (context, index) => divider,
-                    ),
-                  ],
-                  if (total.isNotEmpty) ...[
-                    _buildHeader(theme, '累计'),
-                    SliverList.separated(
-                      itemBuilder: (context, index) {
-                        if (index == total.length - 1) {
-                          _likeMeController.onLoadMore();
-                        }
-                        return _buildItem(
-                          theme,
-                          total[index],
-                          (id) {
-                            _likeMeController.onRemove(id, index, false);
-                          },
-                        );
-                      },
-                      itemCount: total.length,
-                      separatorBuilder: (context, index) => divider,
-                    ),
-                  ],
+        builder: (context) {
+          Pair<List<MsgLikeItem>, List<MsgLikeItem>> pair = response;
+          List<MsgLikeItem> latest = pair.first;
+          List<MsgLikeItem> total = pair.second;
+          if (latest.isNotEmpty || total.isNotEmpty) {
+            return SliverMainAxisGroup(
+              slivers: [
+                if (latest.isNotEmpty) ...[
+                  _buildHeader(theme, '最新'),
+                  SliverList.separated(
+                    itemBuilder: (context, index) {
+                      if (total.isEmpty && index == latest.length - 1) {
+                        _likeMeController.onLoadMore();
+                      }
+                      return _buildItem(
+                        theme,
+                        latest[index],
+                        (id) {
+                          _likeMeController.onRemove(id, index, true);
+                        },
+                      );
+                    },
+                    itemCount: latest.length,
+                    separatorBuilder: (context, index) => divider,
+                  ),
                 ],
-              );
-            }
-            return HttpError(onReload: _likeMeController.onReload);
-          },
-        ),
+                if (total.isNotEmpty) ...[
+                  _buildHeader(theme, '累计'),
+                  SliverList.separated(
+                    itemBuilder: (context, index) {
+                      if (index == total.length - 1) {
+                        _likeMeController.onLoadMore();
+                      }
+                      return _buildItem(
+                        theme,
+                        total[index],
+                        (id) {
+                          _likeMeController.onRemove(id, index, false);
+                        },
+                      );
+                    },
+                    itemCount: total.length,
+                    separatorBuilder: (context, index) => divider,
+                  ),
+                ],
+              ],
+            );
+          }
+          return HttpError(onReload: _likeMeController.onReload);
+        },
+      ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _likeMeController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _likeMeController.onReload,
+      ),
     };
   }
 
@@ -241,19 +244,22 @@ class _LikeMePageState extends State<LikeMePage> {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                for (var j = 0;
-                    j < item.users!.length && j < 4;
-                    j++) ...<Widget>[
+                for (
+                  var j = 0;
+                  j < item.users!.length && j < 4;
+                  j++
+                ) ...<Widget>[
                   Positioned(
-                      left: 15 * (j % 2).toDouble(),
-                      top: 15 * (j ~/ 2).toDouble(),
-                      child: NetworkImgLayer(
-                        width: item.users!.length > 1 ? 30 : 45,
-                        height: item.users!.length > 1 ? 30 : 45,
-                        type: ImageType.avatar,
-                        src: item.users![j].avatar,
-                      )),
-                ]
+                    left: 15 * (j % 2).toDouble(),
+                    top: 15 * (j ~/ 2).toDouble(),
+                    child: NetworkImgLayer(
+                      width: item.users!.length > 1 ? 30 : 45,
+                      height: item.users!.length > 1 ? 30 : 45,
+                      type: ImageType.avatar,
+                      src: item.users![j].avatar,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -265,14 +271,18 @@ class _LikeMePageState extends State<LikeMePage> {
           children: [
             TextSpan(
               text: "${item.users![0].nickname}",
-              style: theme.textTheme.titleSmall!
-                  .copyWith(height: 1.5, color: theme.colorScheme.primary),
+              style: theme.textTheme.titleSmall!.copyWith(
+                height: 1.5,
+                color: theme.colorScheme.primary,
+              ),
             ),
             if (item.counts! > 1)
               TextSpan(
                 text: ' 等${item.counts}人',
-                style: theme.textTheme.titleSmall!
-                    .copyWith(fontSize: 12, height: 1.5),
+                style: theme.textTheme.titleSmall!.copyWith(
+                  fontSize: 12,
+                  height: 1.5,
+                ),
               ),
             TextSpan(
               text: " 赞了我的${item.item?.business}",
@@ -291,11 +301,15 @@ class _LikeMePageState extends State<LikeMePage> {
         children: [
           if (item.item?.title?.isNotEmpty == true) ...[
             const SizedBox(height: 4),
-            Text(item.item!.title!,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium!
-                    .copyWith(color: theme.colorScheme.outline, height: 1.5)),
+            Text(
+              item.item!.title!,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium!.copyWith(
+                color: theme.colorScheme.outline,
+                height: 1.5,
+              ),
+            ),
           ],
           const SizedBox(height: 4),
           Text(

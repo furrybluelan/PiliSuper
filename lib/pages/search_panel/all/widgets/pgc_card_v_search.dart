@@ -31,25 +31,27 @@ class PgcCardVSearch extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 0.75,
-              child: LayoutBuilder(builder: (context, boxConstraints) {
-                final double maxWidth = boxConstraints.maxWidth;
-                final double maxHeight = boxConstraints.maxHeight;
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    NetworkImgLayer(
-                      src: item.cover,
-                      width: maxWidth,
-                      height: maxHeight,
-                    ),
-                    PBadge(
-                      text: item.seasonTypeName,
-                      right: 6,
-                      top: 6,
-                    ),
-                  ],
-                );
-              }),
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  final double maxWidth = boxConstraints.maxWidth;
+                  final double maxHeight = boxConstraints.maxHeight;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      NetworkImgLayer(
+                        src: item.cover,
+                        width: maxWidth,
+                        height: maxHeight,
+                      ),
+                      PBadge(
+                        text: item.seasonTypeName,
+                        right: 6,
+                        top: 6,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 5, 0, 3),
@@ -62,7 +64,7 @@ class PgcCardVSearch extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-            )
+            ),
           ],
         ),
       ),

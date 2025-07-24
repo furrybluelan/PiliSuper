@@ -4,6 +4,6 @@ class Top {
   Top({this.result});
 
   factory Top.fromJson(Map<String, dynamic> json) => Top(
-        result: json['result'] as dynamic,
-      );
+    result: json['result'] as dynamic,
+  );
 }

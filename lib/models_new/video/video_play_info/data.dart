@@ -16,15 +16,15 @@ class PlayInfoData {
   });
 
   factory PlayInfoData.fromJson(Map<String, dynamic> json) => PlayInfoData(
-        lastPlayCid: json['last_play_cid'] as int?,
-        subtitle: json['subtitle'] == null
-            ? null
-            : SubtitleInfo.fromJson(json['subtitle'] as Map<String, dynamic>),
-        viewPoints: (json['view_points'] as List?)
-            ?.map((e) => ViewPoint.fromJson(e))
-            .toList(),
-        interaction: json["interaction"] == null
-            ? null
-            : Interaction.fromJson(json["interaction"]),
-      );
+    lastPlayCid: json['last_play_cid'] as int?,
+    subtitle: json['subtitle'] == null
+        ? null
+        : SubtitleInfo.fromJson(json['subtitle'] as Map<String, dynamic>),
+    viewPoints: (json['view_points'] as List?)
+        ?.map((e) => ViewPoint.fromJson(e))
+        .toList(),
+    interaction: json["interaction"] == null
+        ? null
+        : Interaction.fromJson(json["interaction"]),
+  );
 }

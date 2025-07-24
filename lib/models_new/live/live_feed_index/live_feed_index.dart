@@ -9,11 +9,11 @@ class LiveFeedIndex {
   LiveFeedIndex({this.code, this.message, this.ttl, this.data});
 
   factory LiveFeedIndex.fromJson(Map<String, dynamic> json) => LiveFeedIndex(
-        code: json['code'] as int?,
-        message: json['message'] as String?,
-        ttl: json['ttl'] as int?,
-        data: json['data'] == null
-            ? null
-            : LiveIndexData.fromJson(json['data'] as Map<String, dynamic>),
-      );
+    code: json['code'] as int?,
+    message: json['message'] as String?,
+    ttl: json['ttl'] as int?,
+    data: json['data'] == null
+        ? null
+        : LiveIndexData.fromJson(json['data'] as Map<String, dynamic>),
+  );
 }

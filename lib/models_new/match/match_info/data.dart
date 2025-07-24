@@ -6,8 +6,8 @@ class MatchInfoData {
   MatchInfoData({this.contest});
 
   factory MatchInfoData.fromJson(Map<String, dynamic> json) => MatchInfoData(
-        contest: json['contest'] == null
-            ? null
-            : MatchContest.fromJson(json['contest'] as Map<String, dynamic>),
-      );
+    contest: json['contest'] == null
+        ? null
+        : MatchContest.fromJson(json['contest'] as Map<String, dynamic>),
+  );
 }

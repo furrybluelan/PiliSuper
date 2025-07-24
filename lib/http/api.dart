@@ -102,11 +102,9 @@ class Api {
   // csrf	str	CSRF Token（位于cookie）	Cookie方式必要
   // https://api.bilibili.com/medialist/gateway/coll/resource/deal
   // https://api.bilibili.com/x/v3/fav/resource/deal
-  static const String favVideo = '/x/v3/fav/resource/deal';
+  static const String favVideo = '/x/v3/fav/resource/batch-deal';
 
-  // static const String favBangumi = '/x/v3/fav/resource/batch-deal';
-
-  static const String delFav = '/x/v3/fav/resource/batch-del';
+  static const String unfavAll = '/x/v3/fav/resource/unfav-all';
 
   static const String copyFav = '/x/v3/fav/resource/copy';
 

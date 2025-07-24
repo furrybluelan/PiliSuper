@@ -65,27 +65,28 @@ class _ReplySearchChildPageState extends State<ReplySearchChildPage>
   Widget _buildBody(LoadingState<List<SearchItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => _buildLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _controller.onLoadMore();
-                  }
-                  return ReplySearchItem(
-                    item: response[index],
-                    type: widget.searchType,
-                  );
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: _controller.onReload),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _controller.onLoadMore();
+                    }
+                    return ReplySearchItem(
+                      item: response[index],
+                      type: widget.searchType,
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

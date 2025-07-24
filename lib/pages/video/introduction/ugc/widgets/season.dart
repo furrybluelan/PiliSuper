@@ -40,19 +40,20 @@ class _SeasonPanelState extends State<SeasonPanel> {
   @override
   void initState() {
     super.initState();
-    _videoDetailController =
-        Get.find<VideoDetailController>(tag: widget.heroTag);
+    _videoDetailController = Get.find<VideoDetailController>(
+      tag: widget.heroTag,
+    );
 
     _videoDetailController.seasonCid =
         videoIntroController.lastPlayCid.value != 0
-            ? (videoDetail.pages?.isNotEmpty == true
-                ? videoDetail.isPageReversed
+        ? (videoDetail.pages?.isNotEmpty == true
+              ? videoDetail.isPageReversed
                     ? videoDetail.pages!.last.cid
                     : videoDetail.pages!.first.cid
-                : videoIntroController.lastPlayCid.value)
-            : videoDetail.isPageReversed
-                ? videoDetail.pages!.last.cid
-                : videoDetail.pages!.first.cid;
+              : videoIntroController.lastPlayCid.value)
+        : videoDetail.isPageReversed
+        ? videoDetail.pages!.last.cid
+        : videoDetail.pages!.first.cid;
 
     /// 根据 cid 找到对应集，找到对应 episodes
     /// 有多个episodes时，只显示其中一个
@@ -63,7 +64,8 @@ class _SeasonPanelState extends State<SeasonPanel> {
 
     /// 取对应 season_id 的 episodes
     currentIndex.value = episodes.indexWhere(
-        (EpisodeItem e) => e.cid == _videoDetailController.seasonCid);
+      (EpisodeItem e) => e.cid == _videoDetailController.seasonCid,
+    );
     _listener = _videoDetailController.cid.listen((int cid) {
       if (_videoDetailController.seasonCid != cid) {
         bool isPart =
@@ -74,7 +76,8 @@ class _SeasonPanelState extends State<SeasonPanel> {
       }
       _findEpisode();
       currentIndex.value = episodes.indexWhere(
-          (EpisodeItem e) => e.cid == _videoDetailController.seasonCid);
+        (EpisodeItem e) => e.cid == _videoDetailController.seasonCid,
+      );
     });
   }
 
@@ -104,13 +107,13 @@ class _SeasonPanelState extends State<SeasonPanel> {
           onTap: widget.onTap == false
               ? null
               : () => widget.showEpisodes(
-                    _videoDetailController.seasonIndex.value,
-                    videoDetail.ugcSeason,
-                    null,
-                    _videoDetailController.bvid,
-                    null,
-                    _videoDetailController.seasonCid,
-                  ),
+                  _videoDetailController.seasonIndex.value,
+                  videoDetail.ugcSeason,
+                  null,
+                  _videoDetailController.bvid,
+                  null,
+                  _videoDetailController.seasonCid,
+                ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
             child: Row(
@@ -143,7 +146,7 @@ class _SeasonPanelState extends State<SeasonPanel> {
                   Icons.arrow_forward_ios_outlined,
                   size: 13,
                   semanticLabel: '查看',
-                )
+                ),
               ],
             ),
           ),

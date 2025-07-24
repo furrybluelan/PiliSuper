@@ -5,7 +5,7 @@ class ContainerSize {
   ContainerSize({this.width, this.height});
 
   factory ContainerSize.fromJson(Map<String, dynamic> json) => ContainerSize(
-        width: (json['width'] as num?)?.toDouble(),
-        height: (json['height'] as num?)?.toDouble(),
-      );
+    width: (json['width'] as num?)?.toDouble(),
+    height: (json['height'] as num?)?.toDouble(),
+  );
 }

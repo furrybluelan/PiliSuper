@@ -17,7 +17,8 @@ class LiveFollowController
 
   @override
   void checkIsEnd(int length) {
-    if (count.value != null && length >= count.value!) {
+    final count = this.count.value;
+    if (count != null && length >= count) {
       isEnd = true;
     }
   }

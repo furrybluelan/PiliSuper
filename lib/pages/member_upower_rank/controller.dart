@@ -35,8 +35,8 @@ class UpowerRankController
 
   @override
   Future<LoadingState<UpowerRankData>> customGetData() => MemberHttp.upowerRank(
-        upMid: upMid,
-        page: page,
-        privilegeType: privilegeType,
-      );
+    upMid: upMid,
+    page: page,
+    privilegeType: privilegeType,
+  );
 }

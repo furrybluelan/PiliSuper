@@ -109,8 +109,9 @@ Widget livePanelSub(
       const SizedBox(height: 6),
       if (content.title != null)
         Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
+          padding: const EdgeInsets.symmetric(
+            horizontal: StyleString.safeSpace,
+          ),
           child: Text(
             content.title!,
             maxLines: isDetail ? null : 1,

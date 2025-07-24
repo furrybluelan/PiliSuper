@@ -43,55 +43,57 @@ class _FavPanelState extends State<FavPanel> {
   }
 
   Widget get _buildBody {
+    late final list = widget.ctr.favFolderData.value.list!;
     return switch (loadingState) {
       Loading() => loadingWidget,
       Success() => ListView.builder(
-          controller: widget.scrollController,
-          itemCount: widget.ctr.favFolderData.value.list!.length,
-          itemBuilder: (context, index) {
-            FavFolderInfo item = widget.ctr.favFolderData.value.list![index];
-            return Material(
-              type: MaterialType.transparency,
-              child: Builder(
-                builder: (context) {
-                  void onTap() {
-                    bool isChecked = item.favState == 1;
-                    item
-                      ..favState = isChecked ? 0 : 1
-                      ..mediaCount =
-                          isChecked ? item.mediaCount - 1 : item.mediaCount + 1;
-                    (context as Element).markNeedsBuild();
-                  }
+        controller: widget.scrollController,
+        itemCount: list.length,
+        itemBuilder: (context, index) {
+          FavFolderInfo item = list[index];
+          return Material(
+            type: MaterialType.transparency,
+            child: Builder(
+              builder: (context) {
+                void onTap() {
+                  bool isChecked = item.favState == 1;
+                  item
+                    ..favState = isChecked ? 0 : 1
+                    ..mediaCount = isChecked
+                        ? item.mediaCount - 1
+                        : item.mediaCount + 1;
+                  (context as Element).markNeedsBuild();
+                }
 
-                  return ListTile(
-                    onTap: onTap,
-                    dense: true,
-                    leading: FavUtil.isPublicFav(item.attr)
-                        ? const Icon(Icons.folder_outlined)
-                        : const Icon(Icons.lock_outline),
-                    minLeadingWidth: 0,
-                    title: Text(item.title),
-                    subtitle: Text(
-                      '${item.mediaCount}个内容 . ${FavUtil.isPublicFavText(item.attr)}',
+                return ListTile(
+                  onTap: onTap,
+                  dense: true,
+                  leading: FavUtil.isPublicFav(item.attr)
+                      ? const Icon(Icons.folder_outlined)
+                      : const Icon(Icons.lock_outline),
+                  minLeadingWidth: 0,
+                  title: Text(item.title),
+                  subtitle: Text(
+                    '${item.mediaCount}个内容 . ${FavUtil.isPublicFavText(item.attr)}',
+                  ),
+                  trailing: Transform.scale(
+                    scale: 0.9,
+                    child: Checkbox(
+                      value: item.favState == 1,
+                      onChanged: (bool? checkValue) => onTap(),
                     ),
-                    trailing: Transform.scale(
-                      scale: 0.9,
-                      child: Checkbox(
-                        value: item.favState == 1,
-                        onChanged: (bool? checkValue) => onTap(),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
-        ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
       Error(:var errMsg) => scrollErrorWidget(
-          controller: widget.scrollController,
-          errMsg: errMsg,
-          onReload: _query,
-        ),
+        controller: widget.scrollController,
+        errMsg: errMsg,
+        onReload: _query,
+      ),
     };
   }
 
@@ -123,8 +125,10 @@ class _FavPanelState extends State<FavPanel> {
               ),
               label: const Text('新建收藏夹'),
               style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
                 visualDensity: VisualDensity.compact,
               ),
             ),
@@ -149,8 +153,10 @@ class _FavPanelState extends State<FavPanel> {
               TextButton(
                 onPressed: Get.back,
                 style: TextButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   visualDensity: const VisualDensity(
                     horizontal: -1,
                     vertical: -2,
@@ -167,8 +173,10 @@ class _FavPanelState extends State<FavPanel> {
                   widget.ctr.actionFavVideo();
                 },
                 style: FilledButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   visualDensity: const VisualDensity(
                     horizontal: -1,
                     vertical: -2,

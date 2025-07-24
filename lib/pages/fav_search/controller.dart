@@ -1,5 +1,6 @@
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/models/common/fav_order_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/data.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/media.dart';
 import 'package:PiliPlus/pages/common/common_search_controller.dart';
@@ -14,6 +15,8 @@ class FavSearchController
   dynamic count = Get.arguments['count'];
   dynamic title = Get.arguments['title'];
 
+  final Rx<FavOrderType> order = FavOrderType.mtime.obs;
+
   @override
   Future<LoadingState<FavDetailData>> customGetData() =>
       FavHttp.userFavFolderDetail(
@@ -22,6 +25,7 @@ class FavSearchController
         mediaId: mediaId,
         keyword: editController.text,
         type: type,
+        order: order.value,
       );
 
   @override
@@ -34,10 +38,9 @@ class FavSearchController
 
   Future<void> onCancelFav(int index, int id, int? type) async {
     var result = await FavHttp.favVideo(
-      aid: id,
+      resources: '$id:$type',
       addIds: '',
       delIds: mediaId.toString(),
-      type: type,
     );
     if (result['status']) {
       loadingState

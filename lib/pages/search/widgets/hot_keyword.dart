@@ -65,7 +65,7 @@ class HotKeyword extends StatelessWidget {
                               width: 48,
                               height: 15,
                             ),
-                          )
+                          ),
                       ],
                     ),
                   ),

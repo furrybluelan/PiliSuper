@@ -87,10 +87,12 @@ class SearchVideoController
 
   // sort
   late final List<Map> filterList = ArchiveFilterType.values
-      .map((type) => {
-            'label': type.desc,
-            'type': type,
-          })
+      .map(
+        (type) => {
+          'label': type.desc,
+          'type': type,
+        },
+      )
       .toList();
   late final Rx<ArchiveFilterType> selectedType =
       ArchiveFilterType.values.first.obs;
@@ -152,8 +154,9 @@ class SearchVideoController
           final theme = Theme.of(context);
           Widget dateWidget([bool isFirst = true]) {
             return SearchText(
-              text: DateUtil.longFormat
-                  .format(isFirst ? pubBeginDate : pubEndDate),
+              text: DateUtil.longFormat.format(
+                isFirst ? pubBeginDate : pubEndDate,
+              ),
               textAlign: TextAlign.center,
               onTap: (text) {
                 showDatePicker(
@@ -172,7 +175,8 @@ class SearchVideoController
                     }
                     currentPubTimeFilter = -1;
                     SmartDialog.dismiss();
-                    pubBegin = DateTime(
+                    pubBegin =
+                        DateTime(
                           pubBeginDate.year,
                           pubBeginDate.month,
                           pubBeginDate.day,
@@ -181,7 +185,8 @@ class SearchVideoController
                           0,
                         ).millisecondsSinceEpoch ~/
                         1000;
-                    pubEnd = DateTime(
+                    pubEnd =
+                        DateTime(
                           pubEndDate.year,
                           pubEndDate.month,
                           pubEndDate.day,
@@ -197,11 +202,13 @@ class SearchVideoController
                   }
                 });
               },
-              bgColor: currentPubTimeFilter == -1 &&
+              bgColor:
+                  currentPubTimeFilter == -1 &&
                       (isFirst ? customPubBeginDate : customPubEndDate)
                   ? theme.colorScheme.secondaryContainer
                   : theme.colorScheme.outline.withValues(alpha: 0.1),
-              textColor: currentPubTimeFilter == -1 &&
+              textColor:
+                  currentPubTimeFilter == -1 &&
                       (isFirst ? customPubBeginDate : customPubEndDate)
                   ? theme.colorScheme.onSecondaryContainer
                   : theme.colorScheme.outline.withValues(alpha: 0.8),
@@ -241,21 +248,23 @@ class SearchVideoController
                                 pubBegin = null;
                                 pubEnd = null;
                               } else {
-                                pubBegin = DateTime(
+                                pubBegin =
+                                    DateTime(
                                       now.year,
                                       now.month,
                                       now.day -
                                           (item['value'] == 0
                                               ? 0
                                               : item['value'] == 1
-                                                  ? 6
-                                                  : 179),
+                                              ? 6
+                                              : 179),
                                       0,
                                       0,
                                       0,
                                     ).millisecondsSinceEpoch ~/
                                     1000;
-                                pubEnd = DateTime(
+                                pubEnd =
+                                    DateTime(
                                       now.year,
                                       now.month,
                                       now.day,

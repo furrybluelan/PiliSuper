@@ -9,7 +9,6 @@ import 'package:PiliPlus/utils/image_util.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,8 +28,13 @@ import 'package:media_kit_video/media_kit_video.dart';
 /// source is hit after zooming in to disable or enable the swiping gesture of
 /// the [PageView].
 ///
-typedef IndexedFocusedWidgetBuilder = Widget Function(
-    BuildContext context, int index, bool isFocus, bool enablePageView);
+typedef IndexedFocusedWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      int index,
+      bool isFocus,
+      bool enablePageView,
+    );
 
 typedef IndexedTagStringBuilder = String Function(int index);
 
@@ -131,8 +135,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
         SystemUiMode.immersiveSticky,
       );
     }
-    if (Platform.isAndroid &&
-        (await DeviceInfoPlugin().androidInfo).version.sdkInt < 29) {
+    if (Platform.isAndroid && (await Utils.sdkInt < 29)) {
       mode = SystemUiMode.manual;
     }
   }
@@ -235,12 +238,13 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
     if (_transformationController!.value != Matrix4.identity()) {
       // animate the reset for the transformation of the interactive viewer
 
-      _animation = Matrix4Tween(
-        begin: _transformationController!.value,
-        end: Matrix4.identity(),
-      ).animate(
-        CurveTween(curve: Curves.easeOut).animate(_animationController),
-      );
+      _animation =
+          Matrix4Tween(
+            begin: _transformationController!.value,
+            end: Matrix4.identity(),
+          ).animate(
+            CurveTween(curve: Curves.easeOut).animate(_animationController),
+          );
 
       _animationController.forward(from: 0);
     }
@@ -289,20 +293,27 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
           child: PageView.builder(
             onPageChanged: _onPageChanged,
             controller: _pageController,
-            physics:
-                _enablePageView ? null : const NeverScrollableScrollPhysics(),
+            physics: _enablePageView
+                ? null
+                : const NeverScrollableScrollPhysics(),
             itemCount: widget.sources.length,
             itemBuilder: (BuildContext context, int index) {
               final item = widget.sources[index];
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => EasyThrottle.throttle(
-                    'preview', const Duration(milliseconds: 555), onClose),
+                  'preview',
+                  const Duration(milliseconds: 555),
+                  onClose,
+                ),
                 onDoubleTapDown: (TapDownDetails details) {
                   _doubleTapLocalPosition = details.localPosition;
                 },
                 onDoubleTap: () => EasyThrottle.throttle(
-                    'preview', const Duration(milliseconds: 555), onDoubleTap),
+                  'preview',
+                  const Duration(milliseconds: 555),
+                  onDoubleTap,
+                ),
                 onLongPress: item.sourceType == SourceType.fileImage
                     ? null
                     : () => onLongPress(item),
@@ -323,7 +334,8 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
           left: 0,
           right: 0,
           child: Container(
-            padding: MediaQuery.paddingOf(context) +
+            padding:
+                MediaQuery.paddingOf(context) +
                 const EdgeInsets.fromLTRB(12, 8, 20, 8),
             decoration: _enablePageView
                 ? BoxDecoration(
@@ -332,7 +344,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withValues(alpha: 0.3)
+                        Colors.black.withValues(alpha: 0.3),
                       ],
                     ),
                   )
@@ -421,30 +433,32 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
         tag: item.url,
         child: switch (item.sourceType) {
           SourceType.fileImage => Image(
-              filterQuality: FilterQuality.low,
-              image: FileImage(File(item.url)),
-            ),
+            filterQuality: FilterQuality.low,
+            image: FileImage(File(item.url)),
+          ),
           SourceType.networkImage => CachedNetworkImage(
-              fadeInDuration: Duration.zero,
-              fadeOutDuration: Duration.zero,
-              imageUrl: _getActualUrl(item.url),
-              placeholderFadeInDuration: Duration.zero,
-              placeholder: (context, url) {
-                return CachedNetworkImage(
-                  fadeInDuration: Duration.zero,
-                  fadeOutDuration: Duration.zero,
-                  imageUrl: ImageUtil.thumbnailUrl(item.url, widget.quality),
-                );
-              },
-            ),
-          SourceType.livePhoto => Obx(() => currentIndex.value == index
-              ? IgnorePointer(
-                  child: Video(
-                    controller: _videoController!,
-                    fill: Colors.transparent,
-                  ),
-                )
-              : const SizedBox.shrink()),
+            fadeInDuration: Duration.zero,
+            fadeOutDuration: Duration.zero,
+            imageUrl: _getActualUrl(item.url),
+            placeholderFadeInDuration: Duration.zero,
+            placeholder: (context, url) {
+              return CachedNetworkImage(
+                fadeInDuration: Duration.zero,
+                fadeOutDuration: Duration.zero,
+                imageUrl: ImageUtil.thumbnailUrl(item.url, widget.quality),
+              );
+            },
+          ),
+          SourceType.livePhoto => Obx(
+            () => currentIndex.value == index
+                ? IgnorePointer(
+                    child: Video(
+                      controller: _videoController!,
+                      fill: Colors.transparent,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         },
       ),
     );
@@ -483,15 +497,16 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
       offSetX,
       offSetY,
       matrix.row2.w,
-      matrix.row3.w
+      matrix.row3.w,
     ]);
 
-    _animation = Matrix4Tween(
-      begin: _transformationController!.value,
-      end: matrix,
-    ).animate(
-      CurveTween(curve: Curves.easeOut).animate(_animationController),
-    );
+    _animation =
+        Matrix4Tween(
+          begin: _transformationController!.value,
+          end: matrix,
+        ).animate(
+          CurveTween(curve: Curves.easeOut).animate(_animationController),
+        );
     _animationController
         .forward(from: 0)
         .whenComplete(() => _onScaleChanged(targetScale));

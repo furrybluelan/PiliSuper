@@ -20,13 +20,13 @@ class History {
   });
 
   factory History.fromJson(Map<String, dynamic> json) => History(
-        oid: json['oid'],
-        epid: json['epid'],
-        bvid: json['bvid'],
-        page: json['page'],
-        cid: json['cid'] == 0 ? null : json['cid'],
-        part: json['part'],
-        business: json['business'],
-        dt: json['dt'],
-      );
+    oid: json['oid'],
+    epid: json['epid'],
+    bvid: json['bvid'],
+    page: json['page'],
+    cid: json['cid'] == 0 ? null : json['cid'],
+    part: json['part'],
+    business: json['business'],
+    dt: json['dt'],
+  );
 }

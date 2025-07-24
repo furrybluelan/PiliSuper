@@ -52,8 +52,9 @@ class _VideoReplyReplyPanelState
   late final itemPositionsListener = ItemPositionsListener.create();
   late final _key = GlobalKey<ScaffoldState>();
   late final _listKey = GlobalKey();
-  late final _tag =
-      Utils.makeHeroTag('${widget.rpid}${widget.dialog}${widget.isDialogue}');
+  late final _tag = Utils.makeHeroTag(
+    '${widget.rpid}${widget.dialog}${widget.isDialogue}',
+  );
 
   ReplyInfo? get firstFloor => widget.firstFloor ?? _controller.firstFloor;
 
@@ -96,11 +97,14 @@ class _VideoReplyReplyPanelState
             if (positions.isNotEmpty) {
               min = positions
                   .where(
-                      (ItemPosition position) => position.itemTrailingEdge > 0)
-                  .reduce((ItemPosition min, ItemPosition position) =>
-                      position.itemTrailingEdge < min.itemTrailingEdge
-                          ? position
-                          : min)
+                    (ItemPosition position) => position.itemTrailingEdge > 0,
+                  )
+                  .reduce(
+                    (ItemPosition min, ItemPosition position) =>
+                        position.itemTrailingEdge < min.itemTrailingEdge
+                        ? position
+                        : min,
+                  )
                   .index;
             }
             return min >= 2 ? _sortWidget(theme) : const SizedBox.shrink();
@@ -168,15 +172,21 @@ class _VideoReplyReplyPanelState
                 itemBuilder: (context, index) {
                   if (widget.isDialogue) {
                     return _buildBody(
-                        theme, _controller.loadingState.value, index);
+                      theme,
+                      _controller.loadingState.value,
+                      index,
+                    );
                   } else if (firstFloor != null) {
                     if (index == 0) {
                       return ReplyItemGrpc(
                         replyItem: firstFloor!,
                         replyLevel: 2,
                         needDivider: false,
-                        onReply: (replyItem) => _controller.onReply(context,
-                            replyItem: replyItem, index: -1),
+                        onReply: (replyItem) => _controller.onReply(
+                          context,
+                          replyItem: replyItem,
+                          index: -1,
+                        ),
                         upMid: _controller.upMid,
                         onViewImage: widget.onViewImage,
                         onDismissed: widget.onDismissed,
@@ -223,53 +233,54 @@ class _VideoReplyReplyPanelState
   }
 
   Widget _sortWidget(ThemeData theme) => Container(
-        height: 40,
-        padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
-        decoration: BoxDecoration(
+    height: 40,
+    padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
+    decoration: BoxDecoration(
+      color: theme.colorScheme.surface,
+      boxShadow: [
+        BoxShadow(
           color: theme.colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.surface,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          offset: const Offset(0, -2),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Obx(
-              () => _controller.count.value != -1
-                  ? Text(
-                      '相关回复共${NumUtil.numFormat(_controller.count.value)}条',
-                      style: const TextStyle(fontSize: 13),
-                    )
-                  : const SizedBox.shrink(),
+      ],
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Obx(
+          () {
+            final count = _controller.count.value;
+            return count != -1
+                ? Text(
+                    '相关回复共${NumUtil.numFormat(count)}条',
+                    style: const TextStyle(fontSize: 13),
+                  )
+                : const SizedBox.shrink();
+          },
+        ),
+        SizedBox(
+          height: 35,
+          child: TextButton.icon(
+            onPressed: () => _controller.queryBySort(),
+            icon: Icon(
+              Icons.sort,
+              size: 16,
+              color: theme.colorScheme.secondary,
             ),
-            SizedBox(
-              height: 35,
-              child: TextButton.icon(
-                onPressed: () => _controller.queryBySort(),
-                icon: Icon(
-                  Icons.sort,
-                  size: 16,
+            label: Obx(
+              () => Text(
+                _controller.mode.value == Mode.MAIN_LIST_HOT ? '按热度' : '按时间',
+                style: TextStyle(
+                  fontSize: 13,
                   color: theme.colorScheme.secondary,
                 ),
-                label: Obx(
-                  () => Text(
-                    _controller.mode.value == Mode.MAIN_LIST_HOT
-                        ? '按热度'
-                        : '按时间',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: theme.colorScheme.secondary,
-                    ),
-                  ),
-                ),
               ),
-            )
-          ],
+            ),
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   Function(List<String>, int)? get _getImageCallback => _horizontalPreview
       ? (imgList, index) {
@@ -302,60 +313,65 @@ class _VideoReplyReplyPanelState
       : null;
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<ReplyInfo>?> loadingState, int index) {
+    ThemeData theme,
+    LoadingState<List<ReplyInfo>?> loadingState,
+    int index,
+  ) {
     return switch (loadingState) {
       Loading() => IgnorePointer(
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return const VideoReplySkeleton();
-            },
-            itemCount: 8,
-          ),
-        ),
-      Success(:var response) => Builder(
-          builder: (context) {
-            if (index == response!.length) {
-              _controller.onLoadMore();
-              return Container(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(
-                    bottom: MediaQuery.paddingOf(context).bottom),
-                height: 125,
-                child: Text(
-                  _controller.isEnd ? '没有更多了' : '加载中...',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-              );
-            } else {
-              if (_controller.index != null && _controller.index == index) {
-                colorAnimation ??= ColorTween(
-                  begin: theme.colorScheme.onInverseSurface,
-                  end: theme.colorScheme.surface,
-                ).animate(_controller.controller!);
-                return AnimatedBuilder(
-                  animation: colorAnimation!,
-                  builder: (context, child) {
-                    return ColoredBox(
-                      color: colorAnimation!.value ??
-                          theme.colorScheme.onInverseSurface,
-                      child: _replyItem(response[index], index),
-                    );
-                  },
-                );
-              }
-              return _replyItem(response[index], index);
-            }
+        child: ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return const VideoReplySkeleton();
           },
+          itemCount: 8,
         ),
+      ),
+      Success(:var response) => Builder(
+        builder: (context) {
+          if (index == response!.length) {
+            _controller.onLoadMore();
+            return Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.paddingOf(context).bottom,
+              ),
+              height: 125,
+              child: Text(
+                _controller.isEnd ? '没有更多了' : '加载中...',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            );
+          } else {
+            if (_controller.index != null && _controller.index == index) {
+              colorAnimation ??= ColorTween(
+                begin: theme.colorScheme.onInverseSurface,
+                end: theme.colorScheme.surface,
+              ).animate(_controller.controller!);
+              return AnimatedBuilder(
+                animation: colorAnimation!,
+                builder: (context, child) {
+                  return ColoredBox(
+                    color:
+                        colorAnimation!.value ??
+                        theme.colorScheme.onInverseSurface,
+                    child: _replyItem(response[index], index),
+                  );
+                },
+              );
+            }
+            return _replyItem(response[index], index);
+          }
+        },
+      ),
       Error(:var errMsg) => errorWidget(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

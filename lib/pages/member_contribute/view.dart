@@ -58,16 +58,19 @@ class _MemberContributeState extends State<MemberContribute>
                   controller: _controller.tabController,
                   dividerHeight: 0,
                   indicatorWeight: 0,
-                  indicatorPadding:
-                      const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+                  indicatorPadding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 8,
+                  ),
                   indicator: BoxDecoration(
                     color: theme.colorScheme.secondaryContainer,
                     borderRadius: const BorderRadius.all(Radius.circular(20)),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  labelStyle: TabBarTheme.of(context)
-                          .labelStyle
-                          ?.copyWith(fontSize: 14) ??
+                  labelStyle:
+                      TabBarTheme.of(
+                        context,
+                      ).labelStyle?.copyWith(fontSize: 14) ??
                       const TextStyle(fontSize: 14),
                   labelColor: theme.colorScheme.onSecondaryContainer,
                   unselectedLabelColor: theme.colorScheme.outline,
@@ -83,61 +86,61 @@ class _MemberContributeState extends State<MemberContribute>
             ],
           )
         : _controller.items?.isNotEmpty == true
-            ? _getPageFromType(_controller.items!.first)
-            : const SizedBox.shrink();
+        ? _getPageFromType(_controller.items!.first)
+        : const SizedBox.shrink();
   }
 
   Widget _getPageFromType(SpaceTab2Item item) {
     return switch (item.param) {
       'video' => MemberVideo(
-          type: ContributeType.video,
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-          title: item.title,
-          isSingle: _controller.tabs == null,
-        ),
+        type: ContributeType.video,
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+        title: item.title,
+        isSingle: _controller.tabs == null,
+      ),
       'charging_video' => MemberVideo(
-          type: ContributeType.charging,
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-          title: item.title,
-        ),
+        type: ContributeType.charging,
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+        title: item.title,
+      ),
       'article' => MemberArticle(
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-        ),
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+      ),
       'opus' => MemberOpus(
-          isSingle: _controller.tabs == null,
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-        ),
+        isSingle: _controller.tabs == null,
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+      ),
       'audio' => MemberAudio(
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-        ),
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+      ),
       'comic' => MemberComic(
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-        ),
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+      ),
       'season_video' => MemberVideo(
-          type: ContributeType.season,
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-          seasonId: item.seasonId,
-          title: item.title,
-        ),
+        type: ContributeType.season,
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+        seasonId: item.seasonId,
+        title: item.title,
+      ),
       'series' => MemberVideo(
-          type: ContributeType.series,
-          heroTag: widget.heroTag,
-          mid: widget.mid,
-          seriesId: item.seriesId,
-          title: item.title,
-        ),
+        type: ContributeType.series,
+        heroTag: widget.heroTag,
+        mid: widget.mid,
+        seriesId: item.seriesId,
+        title: item.title,
+      ),
       'ugcSeason' => SeasonSeriesPage(
-          mid: widget.mid,
-          heroTag: widget.heroTag,
-        ),
-      _ => Center(child: Text(item.title!))
+        mid: widget.mid,
+        heroTag: widget.heroTag,
+      ),
+      _ => Center(child: Text(item.title!)),
     };
   }
 }

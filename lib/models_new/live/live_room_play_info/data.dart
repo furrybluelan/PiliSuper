@@ -66,7 +66,8 @@ class RoomPlayInfoData {
         playurlInfo: json['playurl_info'] == null
             ? null
             : PlayurlInfo.fromJson(
-                json['playurl_info'] as Map<String, dynamic>),
+                json['playurl_info'] as Map<String, dynamic>,
+              ),
         officialType: json['official_type'] as int?,
         officialRoomId: json['official_room_id'] as int?,
         riskWithDelay: json['risk_with_delay'] as int?,

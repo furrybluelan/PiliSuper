@@ -5,7 +5,7 @@ class GlobalData {
 
   num? coins;
 
-  void afterCoin(int coin) {
+  void afterCoin(num coin) {
     if (coins != null) {
       coins = coins! - coin;
     }

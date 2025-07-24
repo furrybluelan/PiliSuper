@@ -18,12 +18,12 @@ class Section {
   });
 
   factory Section.fromJson(Map<String, dynamic> json) => Section(
-        sectionId: json['section_id'] as int?,
-        seasonId: json['season_id'] as int?,
-        limitGroup: json['limit_group'] as int?,
-        watchPlatform: json['watch_platform'] as int?,
-        copyright: json['copyright'] as String?,
-        banAreaShow: json['ban_area_show'] as int?,
-        episodeIds: (json['episode_ids'] as List?)?.cast(),
-      );
+    sectionId: json['section_id'] as int?,
+    seasonId: json['season_id'] as int?,
+    limitGroup: json['limit_group'] as int?,
+    watchPlatform: json['watch_platform'] as int?,
+    copyright: json['copyright'] as String?,
+    banAreaShow: json['ban_area_show'] as int?,
+    episodeIds: (json['episode_ids'] as List?)?.cast(),
+  );
 }

@@ -10,8 +10,8 @@ class Ogv {
   });
 
   factory Ogv.fromJson(Map<String, dynamic> json) => Ogv(
-        typeName: json['type_name'],
-        typeId: json['type_id'],
-        seasonId: json['season_id'],
-      );
+    typeName: json['type_name'],
+    typeId: json['type_id'],
+    seasonId: json['season_id'],
+  );
 }

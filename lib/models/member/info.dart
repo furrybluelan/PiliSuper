@@ -43,8 +43,9 @@ class MemberInfoModel {
         ? null
         : BaseOfficialVerify.fromJson(json['official']);
     vip = Vip.fromJson(json['vip']);
-    liveRoom =
-        json['live_room'] != null ? LiveRoom.fromJson(json['live_room']) : null;
+    liveRoom = json['live_room'] != null
+        ? LiveRoom.fromJson(json['live_room'])
+        : null;
     isSeniorMember = json['is_senior_member'];
   }
 }

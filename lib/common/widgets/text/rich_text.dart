@@ -114,26 +114,29 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textHeightBehavior,
     this.selectionRegistrar,
     this.selectionColor,
-  })  : assert(maxLines == null || maxLines > 0),
-        assert(selectionRegistrar == null || selectionColor != null),
-        assert(
-          textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling),
-          'Use textScaler instead.',
-        ),
-        textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
-        super(
-          children: WidgetSpan.extractFromInlineSpan(
-            text,
-            _effectiveTextScalerFrom(textScaler, textScaleFactor),
-          ),
-        );
+  }) : assert(maxLines == null || maxLines > 0),
+       assert(selectionRegistrar == null || selectionColor != null),
+       assert(
+         textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling),
+         'Use textScaler instead.',
+       ),
+       textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
+       super(
+         children: WidgetSpan.extractFromInlineSpan(
+           text,
+           _effectiveTextScalerFrom(textScaler, textScaleFactor),
+         ),
+       );
 
   static TextScaler _effectiveTextScalerFrom(
-      TextScaler textScaler, double textScaleFactor) {
+    TextScaler textScaler,
+    double textScaleFactor,
+  ) {
     return switch ((textScaler, textScaleFactor)) {
       (final TextScaler scaler, 1.0) => scaler,
-      (TextScaler.noScaling, final double textScaleFactor) =>
-        TextScaler.linear(textScaleFactor),
+      (TextScaler.noScaling, final double textScaleFactor) => TextScaler.linear(
+        textScaleFactor,
+      ),
       (final TextScaler scaler, _) => scaler,
     };
   }
@@ -269,10 +272,20 @@ class RichText extends MultiChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<TextAlign>('textAlign', textAlign,
-        defaultValue: TextAlign.start));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
+    properties.add(
+      EnumProperty<TextAlign>(
+        'textAlign',
+        textAlign,
+        defaultValue: TextAlign.start,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
     properties.add(
       FlagProperty(
         'softWrap',
@@ -283,12 +296,18 @@ class RichText extends MultiChildRenderObjectWidget {
       ),
     );
     properties.add(
-      EnumProperty<TextOverflow>('overflow', overflow,
-          defaultValue: TextOverflow.clip),
+      EnumProperty<TextOverflow>(
+        'overflow',
+        overflow,
+        defaultValue: TextOverflow.clip,
+      ),
     );
     properties.add(
-      DiagnosticsProperty<TextScaler>('textScaler', textScaler,
-          defaultValue: TextScaler.noScaling),
+      DiagnosticsProperty<TextScaler>(
+        'textScaler',
+        textScaler,
+        defaultValue: TextScaler.noScaling,
+      ),
     );
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(
@@ -299,10 +318,16 @@ class RichText extends MultiChildRenderObjectWidget {
       ),
     );
     properties.add(StringProperty('text', text.toPlainText()));
-    properties
-        .add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(DiagnosticsProperty<StrutStyle>('strutStyle', strutStyle,
-        defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<Locale>('locale', locale, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<StrutStyle>(
+        'strutStyle',
+        strutStyle,
+        defaultValue: null,
+      ),
+    );
     properties.add(
       DiagnosticsProperty<TextHeightBehavior>(
         'textHeightBehavior',

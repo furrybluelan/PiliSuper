@@ -18,15 +18,17 @@ class MemberOpusController
   final int mid;
 
   String offset = '';
-  Rx<SpaceTabFilter> type =
-      const SpaceTabFilter(text: "全部图文", meta: "all", tabName: "图文").obs;
+  Rx<SpaceTabFilter> type = const SpaceTabFilter(
+    text: "全部图文",
+    meta: "all",
+    tabName: "图文",
+  ).obs;
   List<SpaceTabFilter>? filter;
 
   @override
   void onInit() {
     super.onInit();
-    filter = Get.find<MemberController>(tag: heroTag)
-        .tab2
+    filter = Get.find<MemberController>(tag: heroTag).tab2
         ?.firstWhereOrNull((e) => e.param == 'contribute')
         ?.items
         ?.firstWhereOrNull((e) => e.param == 'opus')
@@ -51,9 +53,9 @@ class MemberOpusController
 
   @override
   Future<LoadingState<SpaceOpusData>> customGetData() => MemberHttp.spaceOpus(
-        hostMid: mid,
-        page: page,
-        offset: offset,
-        type: type.value.meta,
-      );
+    hostMid: mid,
+    page: page,
+    offset: offset,
+    type: type.value.meta,
+  );
 }

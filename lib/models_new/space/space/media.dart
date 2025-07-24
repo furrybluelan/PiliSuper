@@ -20,13 +20,13 @@ class Media {
   });
 
   factory Media.fromJson(Map<String, dynamic> json) => Media(
-        score: json['score'] as int?,
-        mediaId: json['media_id'] as int?,
-        title: json['title'] as String?,
-        cover: json['cover'] as String?,
-        area: json['area'] as String?,
-        typeId: json['type_id'] as int?,
-        typeName: json['type_name'] as String?,
-        spoiler: json['spoiler'] as int?,
-      );
+    score: json['score'] as int?,
+    mediaId: json['media_id'] as int?,
+    title: json['title'] as String?,
+    cover: json['cover'] as String?,
+    area: json['area'] as String?,
+    typeId: json['type_id'] as int?,
+    typeName: json['type_name'] as String?,
+    spoiler: json['spoiler'] as int?,
+  );
 }

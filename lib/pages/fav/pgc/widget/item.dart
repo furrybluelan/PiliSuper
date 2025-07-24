@@ -55,8 +55,7 @@ class FavPgcItem extends StatelessWidget {
                   AspectRatio(
                     aspectRatio: 3 / 4,
                     child: LayoutBuilder(
-                      builder: (BuildContext context,
-                          BoxConstraints boxConstraints) {
+                      builder: (BuildContext context, BoxConstraints boxConstraints) {
                         return Stack(
                           clipBehavior: Clip.none,
                           children: [
@@ -82,52 +81,66 @@ class FavPgcItem extends StatelessWidget {
                                 child: LayoutBuilder(
                                   builder: (context, constraints) =>
                                       AnimatedOpacity(
-                                    opacity: item.checked == true ? 1 : 0,
-                                    duration: const Duration(milliseconds: 200),
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      height: constraints.maxHeight,
-                                      width: constraints.maxHeight *
-                                          StyleString.aspectRatio,
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(4)),
-                                        color:
-                                            Colors.black.withValues(alpha: 0.6),
-                                      ),
-                                      child: SizedBox(
-                                        width: 34,
-                                        height: 34,
-                                        child: AnimatedScale(
-                                          scale: item.checked == true ? 1 : 0,
-                                          duration:
-                                              const Duration(milliseconds: 250),
-                                          curve: Curves.easeInOut,
-                                          child: IconButton(
-                                            tooltip: '取消选择',
-                                            style: ButtonStyle(
-                                              padding: WidgetStateProperty.all(
-                                                  EdgeInsets.zero),
-                                              backgroundColor:
-                                                  WidgetStateProperty
-                                                      .resolveWith(
-                                                (states) {
-                                                  return theme
-                                                      .colorScheme.surface
-                                                      .withValues(alpha: 0.8);
-                                                },
-                                              ),
+                                        opacity: item.checked == true ? 1 : 0,
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          height: constraints.maxHeight,
+                                          width:
+                                              constraints.maxHeight *
+                                              StyleString.aspectRatio,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                  Radius.circular(4),
+                                                ),
+                                            color: Colors.black.withValues(
+                                              alpha: 0.6,
                                             ),
-                                            onPressed: null,
-                                            icon: Icon(
-                                              Icons.done_all_outlined,
-                                              color: theme.colorScheme.primary,
+                                          ),
+                                          child: SizedBox(
+                                            width: 34,
+                                            height: 34,
+                                            child: AnimatedScale(
+                                              scale: item.checked == true
+                                                  ? 1
+                                                  : 0,
+                                              duration: const Duration(
+                                                milliseconds: 250,
+                                              ),
+                                              curve: Curves.easeInOut,
+                                              child: IconButton(
+                                                tooltip: '取消选择',
+                                                style: ButtonStyle(
+                                                  padding:
+                                                      WidgetStateProperty.all(
+                                                        EdgeInsets.zero,
+                                                      ),
+                                                  backgroundColor:
+                                                      WidgetStateProperty.resolveWith(
+                                                        (states) {
+                                                          return theme
+                                                              .colorScheme
+                                                              .surface
+                                                              .withValues(
+                                                                alpha: 0.8,
+                                                              );
+                                                        },
+                                                      ),
+                                                ),
+                                                onPressed: null,
+                                                icon: Icon(
+                                                  Icons.done_all_outlined,
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
                                 ),
                               ),
                             ),
@@ -155,7 +168,8 @@ class FavPgcItem extends StatelessWidget {
                         ],
                         if (item.progress != null) ...[
                           SizedBox(
-                              height: item.newEp?.indexShow != null ? 2 : 6),
+                            height: item.newEp?.indexShow != null ? 2 : 6,
+                          ),
                           Text(
                             item.progress!,
                             style: TextStyle(

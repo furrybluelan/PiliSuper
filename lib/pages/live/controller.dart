@@ -79,7 +79,9 @@ class LiveController extends CommonListController {
       );
     }
     return LiveHttp.liveFeedIndex(
-        pn: page, isLogin: accountService.isLogin.value);
+      pn: page,
+      isLogin: accountService.isLogin.value,
+    );
   }
 
   @override
@@ -105,10 +107,10 @@ class LiveController extends CommonListController {
         first: data.followItem,
         second: data.areaItem,
       );
-      areaIndex.value = (data.areaItem?.cardData?.areaEntranceV3?.list
-                  ?.indexWhere((e) =>
-                      e.areaV2Id == areaId &&
-                      e.areaV2ParentId == parentAreaId) ??
+      areaIndex.value =
+          (data.areaItem?.cardData?.areaEntranceV3?.list?.indexWhere(
+                (e) => e.areaV2Id == areaId && e.areaV2ParentId == parentAreaId,
+              ) ??
               -2) +
           1;
     }

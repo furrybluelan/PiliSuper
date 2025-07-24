@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage>
                 child: TabBar(
                   controller: _homeController.tabController,
                   tabs: [
-                    for (var i in _homeController.tabs) Tab(text: i.label)
+                    for (var i in _homeController.tabs) Tab(text: i.label),
                   ],
                   isScrollable: true,
                   dividerColor: Colors.transparent,
@@ -115,23 +115,27 @@ class _HomePageState extends State<HomePage>
                       Positioned(
                         right: -6,
                         bottom: -6,
-                        child: Obx(() => MineController.anonymity.value
-                            ? IgnorePointer(
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.secondaryContainer,
-                                    shape: BoxShape.circle,
+                        child: Obx(
+                          () => MineController.anonymity.value
+                              ? IgnorePointer(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          theme.colorScheme.secondaryContainer,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      size: 16,
+                                      MdiIcons.incognito,
+                                      color: theme
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                    ),
                                   ),
-                                  child: Icon(
-                                    size: 16,
-                                    MdiIcons.incognito,
-                                    color:
-                                        theme.colorScheme.onSecondaryContainer,
-                                  ),
-                                ),
-                              )
-                            : const SizedBox.shrink()),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
                       ),
                     ],
                   )
@@ -150,10 +154,10 @@ class _HomePageState extends State<HomePage>
     return StreamBuilder(
       stream: _homeController.hideSearchBar
           ? _mainController.navSearchStreamDebounce
-              ? _homeController.searchBarStream?.stream
-                  .distinct()
-                  .throttle(const Duration(milliseconds: 500))
-              : _homeController.searchBarStream?.stream.distinct()
+                ? _homeController.searchBarStream?.stream.distinct().throttle(
+                    const Duration(milliseconds: 500),
+                  )
+                : _homeController.searchBarStream?.stream.distinct()
           : null,
       initialData: true,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -181,8 +185,9 @@ class _HomePageState extends State<HomePage>
           color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.05),
           child: InkWell(
             borderRadius: const BorderRadius.all(Radius.circular(25)),
-            splashColor:
-                theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            splashColor: theme.colorScheme.primaryContainer.withValues(
+              alpha: 0.3,
+            ),
             onTap: () => Get.toNamed(
               '/search',
               parameters: {
@@ -253,17 +258,20 @@ Widget msgBadge(MainController mainController) {
     Get.toNamed('/whisper');
   }
 
+  final msgUnReadCount = mainController.msgUnReadCount.value;
   return GestureDetector(
     onTap: toWhisper,
     child: Badge(
-      isLabelVisible: mainController.msgBadgeMode != DynamicBadgeMode.hidden &&
-          mainController.msgUnReadCount.value.isNotEmpty,
+      isLabelVisible:
+          mainController.msgBadgeMode != DynamicBadgeMode.hidden &&
+          msgUnReadCount.isNotEmpty,
       alignment: mainController.msgBadgeMode == DynamicBadgeMode.number
           ? const Alignment(0, -0.5)
           : const Alignment(0.5, -0.5),
-      label: mainController.msgBadgeMode == DynamicBadgeMode.number &&
-              mainController.msgUnReadCount.value.isNotEmpty
-          ? Text(mainController.msgUnReadCount.value.toString())
+      label:
+          mainController.msgBadgeMode == DynamicBadgeMode.number &&
+              msgUnReadCount.isNotEmpty
+          ? Text(msgUnReadCount)
           : null,
       child: IconButton(
         tooltip: '消息',

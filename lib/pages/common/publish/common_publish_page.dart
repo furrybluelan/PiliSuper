@@ -29,7 +29,8 @@ abstract class CommonPublishPage<T> extends StatefulWidget {
 }
 
 abstract class CommonPublishPageState<T extends CommonPublishPage>
-    extends State<T> with WidgetsBindingObserver {
+    extends State<T>
+    with WidgetsBindingObserver {
   late final focusNode = FocusNode();
   late final controller = ChatBottomPanelContainerController<PanelType>();
   TextEditingController get editController;
@@ -218,23 +219,24 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
       final cancelToken = CancelToken();
       try {
         pictures = await Future.wait<Map<String, dynamic>>(
-            pathList.map((path) async {
-              Map result = await MsgHttp.uploadBfs(
-                path: path,
-                category: 'daily',
-                biz: 'new_dyn',
-                cancelToken: cancelToken,
-              );
-              if (!result['status']) throw HttpException(result['msg']);
-              UploadBfsResData data = result['data'];
-              return {
-                'img_width': data.imageWidth,
-                'img_height': data.imageHeight,
-                'img_size': data.imgSize,
-                'img_src': data.imageUrl,
-              };
-            }).toList(),
-            eagerError: true);
+          pathList.map((path) async {
+            Map result = await MsgHttp.uploadBfs(
+              path: path,
+              category: 'daily',
+              biz: 'new_dyn',
+              cancelToken: cancelToken,
+            );
+            if (!result['status']) throw HttpException(result['msg']);
+            UploadBfsResData data = result['data'];
+            return {
+              'img_width': data.imageWidth,
+              'img_height': data.imageHeight,
+              'img_size': data.imgSize,
+              'img_src': data.imageUrl,
+            };
+          }).toList(),
+          eagerError: true,
+        );
         SmartDialog.dismiss();
       } on HttpException catch (e) {
         cancelToken.cancel();

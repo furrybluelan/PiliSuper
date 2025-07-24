@@ -19,9 +19,12 @@ class RuleFilter {
     dmFilterString = rules[0].map((e) => e.filter).toList();
 
     dmRegExp = rules[1]
-        .map((e) => RegExp(
+        .map(
+          (e) => RegExp(
             _regExp.matchAsPrefix(e.filter)?.group(1) ?? e.filter,
-            caseSensitive: false))
+            caseSensitive: false,
+          ),
+        )
         .toList();
 
     dmUid = rules[2].map((e) => e.filter).toSet();

@@ -40,13 +40,15 @@ class VideoCardHLater extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onLongPress: onLongPress ??
+        onLongPress:
+            onLongPress ??
             () => imageSaveDialog(
-                  title: videoItem.title,
-                  cover: videoItem.pic,
-                  bvid: videoItem.bvid,
-                ),
-        onTap: onTap ??
+              title: videoItem.title,
+              cover: videoItem.pic,
+              bvid: videoItem.bvid,
+            ),
+        onTap:
+            onTap ??
             () async {
               if (type == 'ketang') {
                 SmartDialog.showToast('课堂视频暂不支持播放');
@@ -61,9 +63,12 @@ class VideoCardHLater extends StatelessWidget {
                 return;
               }
               try {
-                final int? cid = videoItem.cid ??
+                final int? cid =
+                    videoItem.cid ??
                     await SearchHttp.ab2c(
-                        aid: videoItem.aid, bvid: videoItem.bvid);
+                      aid: videoItem.aid,
+                      bvid: videoItem.bvid,
+                    );
                 if (cid != null) {
                   onViewLater!(cid);
                 }
@@ -131,11 +136,12 @@ class VideoCardHLater extends StatelessWidget {
                                   ? 1
                                   : progress / videoItem.duration!,
                             ),
-                          )
+                          ),
                         ] else if (videoItem.duration! > 0)
                           PBadge(
-                            text:
-                                DurationUtil.formatDuration(videoItem.duration),
+                            text: DurationUtil.formatDuration(
+                              videoItem.duration,
+                            ),
                             right: 6.0,
                             bottom: 6.0,
                             type: PBadgeType.gray,
@@ -231,7 +237,7 @@ class VideoCardHLater extends StatelessWidget {
                 ),
               ],
             ),
-          ]
+          ],
         ],
       ),
     );

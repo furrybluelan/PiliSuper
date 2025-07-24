@@ -19,8 +19,13 @@ class SearchLivePanel extends CommonSearchPanel {
   State<SearchLivePanel> createState() => _SearchLivePanelState();
 }
 
-class _SearchLivePanelState extends CommonSearchPanelState<SearchLivePanel,
-    SearchLiveData, SearchLiveItemModel> {
+class _SearchLivePanelState
+    extends
+        CommonSearchPanelState<
+          SearchLivePanel,
+          SearchLiveData,
+          SearchLiveItemModel
+        > {
   @override
   late final controller = Get.put(
     SearchPanelController<SearchLiveData, SearchLiveItemModel>(

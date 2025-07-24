@@ -35,8 +35,10 @@ class _MemberDynamicsPageState extends State<MemberDynamicsPage>
     super.initState();
     mid = widget.mid ?? int.parse(Get.parameters['mid']!);
     final String heroTag = Utils.makeHeroTag(mid);
-    _memberDynamicController =
-        Get.put(MemberDynamicsController(mid), tag: heroTag);
+    _memberDynamicController = Get.put(
+      MemberDynamicsController(mid),
+      tag: heroTag,
+    );
   }
 
   @override
@@ -51,74 +53,80 @@ class _MemberDynamicsPageState extends State<MemberDynamicsPage>
   }
 
   Widget get _buildBody => refreshIndicator(
-        onRefresh: _memberDynamicController.onRefresh,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.paddingOf(context).bottom + 80,
-              ),
-              sliver: Obx(() =>
-                  _buildContent(_memberDynamicController.loadingState.value)),
-            ),
-          ],
+    onRefresh: _memberDynamicController.onRefresh,
+    child: CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.paddingOf(context).bottom + 80,
+          ),
+          sliver: Obx(
+            () => _buildContent(_memberDynamicController.loadingState.value),
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   Widget _buildContent(LoadingState<List<DynamicItemModel>?> loadingState) {
     return switch (loadingState) {
-      Loading() =>
-        DynamicsTabPage.dynSkeleton(GlobalData().dynamicsWaterfallFlow),
-      Success(:var response) => response?.isNotEmpty == true
-          ? GlobalData().dynamicsWaterfallFlow
-              ? SliverWaterfallFlow.extent(
-                  maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                  crossAxisSpacing: StyleString.safeSpace,
-                  lastChildLayoutTypeBuilder: (index) {
-                    if (index == response.length - 1) {
-                      _memberDynamicController.onLoadMore();
-                    }
-                    return index == response.length
-                        ? LastChildLayoutType.foot
-                        : LastChildLayoutType.none;
-                  },
-                  children: response!
-                      .map((item) => DynamicPanel(
-                          item: item,
-                          onRemove: _memberDynamicController.onRemove,
-                          onSetTop: _memberDynamicController.onSetTop))
-                      .toList(),
-                )
-              : SliverCrossAxisGroup(
-                  slivers: [
-                    const SliverFillRemaining(),
-                    SliverConstrainedCrossAxis(
-                      maxExtent: Grid.smallCardWidth * 2,
-                      sliver: SliverList.builder(
-                        itemBuilder: (context, index) {
-                          if (index == response.length - 1) {
-                            _memberDynamicController.onLoadMore();
-                          }
-                          return DynamicPanel(
-                            item: response[index],
-                            onRemove: _memberDynamicController.onRemove,
-                            onSetTop: _memberDynamicController.onSetTop,
-                          );
-                        },
-                        itemCount: response!.length,
-                      ),
-                    ),
-                    const SliverFillRemaining(),
-                  ],
-                )
-          : HttpError(
-              onReload: _memberDynamicController.onReload,
-            ),
+      Loading() => DynamicsTabPage.dynSkeleton(
+        GlobalData().dynamicsWaterfallFlow,
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? GlobalData().dynamicsWaterfallFlow
+                  ? SliverWaterfallFlow.extent(
+                      maxCrossAxisExtent: Grid.smallCardWidth * 2,
+                      crossAxisSpacing: StyleString.safeSpace,
+                      lastChildLayoutTypeBuilder: (index) {
+                        if (index == response.length - 1) {
+                          _memberDynamicController.onLoadMore();
+                        }
+                        return index == response.length
+                            ? LastChildLayoutType.foot
+                            : LastChildLayoutType.none;
+                      },
+                      children: response!
+                          .map(
+                            (item) => DynamicPanel(
+                              item: item,
+                              onRemove: _memberDynamicController.onRemove,
+                              onSetTop: _memberDynamicController.onSetTop,
+                            ),
+                          )
+                          .toList(),
+                    )
+                  : SliverCrossAxisGroup(
+                      slivers: [
+                        const SliverFillRemaining(),
+                        SliverConstrainedCrossAxis(
+                          maxExtent: Grid.smallCardWidth * 2,
+                          sliver: SliverList.builder(
+                            itemBuilder: (context, index) {
+                              if (index == response.length - 1) {
+                                _memberDynamicController.onLoadMore();
+                              }
+                              return DynamicPanel(
+                                item: response[index],
+                                onRemove: _memberDynamicController.onRemove,
+                                onSetTop: _memberDynamicController.onSetTop,
+                              );
+                            },
+                            itemCount: response!.length,
+                          ),
+                        ),
+                        const SliverFillRemaining(),
+                      ],
+                    )
+            : HttpError(
+                onReload: _memberDynamicController.onReload,
+              ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _memberDynamicController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _memberDynamicController.onReload,
+      ),
     };
   }
 }

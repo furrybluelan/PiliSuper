@@ -22,8 +22,10 @@ class FavNoteChildPage extends StatefulWidget {
 
 class _FavNoteChildPageState extends State<FavNoteChildPage>
     with AutomaticKeepAliveClientMixin {
-  late final FavNoteController _favNoteController =
-      Get.put(FavNoteController(widget.isPublish), tag: '${widget.isPublish}');
+  late final FavNoteController _favNoteController = Get.put(
+    FavNoteController(widget.isPublish),
+    tag: '${widget.isPublish}',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -41,9 +43,11 @@ class _FavNoteChildPageState extends State<FavNoteChildPage>
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.only(
-                      bottom: MediaQuery.paddingOf(context).bottom + 80),
+                    bottom: MediaQuery.paddingOf(context).bottom + 80,
+                  ),
                   sliver: Obx(
-                      () => _buildBody(_favNoteController.loadingState.value)),
+                    () => _buildBody(_favNoteController.loadingState.value),
+                  ),
                 ),
               ],
             ),
@@ -86,14 +90,16 @@ class _FavNoteChildPageState extends State<FavNoteChildPage>
                           value: _favNoteController.allSelected.value,
                           onChanged: (value) {
                             _favNoteController.handleSelect(
-                                !_favNoteController.allSelected.value);
+                              !_favNoteController.allSelected.value,
+                            );
                           },
                         ),
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () => _favNoteController.handleSelect(
-                            !_favNoteController.allSelected.value),
+                          !_favNoteController.allSelected.value,
+                        ),
                         child: const Padding(
                           padding: EdgeInsets.only(
                             top: 14,
@@ -135,37 +141,38 @@ class _FavNoteChildPageState extends State<FavNoteChildPage>
   Widget _buildBody(LoadingState<List<FavNoteItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: Grid.videoCardHDelegate(context),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardHSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: Grid.videoCardHDelegate(context),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardHSkeleton();
+          },
+          childCount: 10,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _favNoteController.onLoadMore();
-                  }
-                  final item = response[index];
-                  return FavNoteItem(
-                    item: item,
-                    ctr: _favNoteController,
-                    onSelect: () => _favNoteController.onSelect(item),
-                  );
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: _favNoteController.onReload),
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _favNoteController.onLoadMore();
+                    }
+                    final item = response[index];
+                    return FavNoteItem(
+                      item: item,
+                      ctr: _favNoteController,
+                      onSelect: () => _favNoteController.onSelect(item),
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: _favNoteController.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _favNoteController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _favNoteController.onReload,
+      ),
     };
   }
 

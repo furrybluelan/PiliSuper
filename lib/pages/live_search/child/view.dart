@@ -55,50 +55,52 @@ class _LiveSearchChildPageState extends State<LiveSearchChildPage>
   Widget get _buildLoading {
     return switch (widget.searchType) {
       LiveSearchType.room => SliverGrid(
-          gridDelegate: SliverGridDelegateWithExtentAndRatio(
-            mainAxisSpacing: StyleString.cardSpace,
-            crossAxisSpacing: StyleString.cardSpace,
-            maxCrossAxisExtent: Grid.smallCardWidth,
-            childAspectRatio: StyleString.aspectRatio,
-            mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardVSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: SliverGridDelegateWithExtentAndRatio(
+          mainAxisSpacing: StyleString.cardSpace,
+          crossAxisSpacing: StyleString.cardSpace,
+          maxCrossAxisExtent: Grid.smallCardWidth,
+          childAspectRatio: StyleString.aspectRatio,
+          mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
         ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardVSkeleton();
+          },
+          childCount: 10,
+        ),
+      ),
       LiveSearchType.user => SliverGrid(
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: Grid.smallCardWidth * 2,
-            mainAxisExtent: 60,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return const MsgFeedTopSkeleton();
-            },
-            childCount: 12,
-          ),
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: Grid.smallCardWidth * 2,
+          mainAxisExtent: 60,
         ),
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return const MsgFeedTopSkeleton();
+          },
+          childCount: 12,
+        ),
+      ),
     };
   }
 
   Widget _buildBody(LoadingState<List?> loadingState) {
     return switch (loadingState) {
       Loading() => _buildLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? Builder(
-              builder: (context) {
-                return switch (widget.searchType) {
-                  LiveSearchType.room => SliverGrid(
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? Builder(
+                builder: (context) {
+                  return switch (widget.searchType) {
+                    LiveSearchType.room => SliverGrid(
                       gridDelegate: SliverGridDelegateWithExtentAndRatio(
                         mainAxisSpacing: StyleString.cardSpace,
                         crossAxisSpacing: StyleString.cardSpace,
                         maxCrossAxisExtent: Grid.smallCardWidth,
                         childAspectRatio: StyleString.aspectRatio,
-                        mainAxisExtent:
-                            MediaQuery.textScalerOf(context).scale(60),
+                        mainAxisExtent: MediaQuery.textScalerOf(
+                          context,
+                        ).scale(60),
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -112,7 +114,7 @@ class _LiveSearchChildPageState extends State<LiveSearchChildPage>
                         childCount: response!.length,
                       ),
                     ),
-                  LiveSearchType.user => SliverGrid(
+                    LiveSearchType.user => SliverGrid(
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: Grid.smallCardWidth * 2,
                         mainAxisExtent: 60,
@@ -129,16 +131,16 @@ class _LiveSearchChildPageState extends State<LiveSearchChildPage>
                         childCount: response!.length,
                       ),
                     ),
-                };
-              },
-            )
-          : HttpError(
-              onReload: _controller.onReload,
-            ),
+                  };
+                },
+              )
+            : HttpError(
+                onReload: _controller.onReload,
+              ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

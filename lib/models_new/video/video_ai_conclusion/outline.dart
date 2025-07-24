@@ -8,10 +8,10 @@ class Outline {
   Outline({this.title, this.partOutline, this.timestamp});
 
   factory Outline.fromJson(Map<String, dynamic> json) => Outline(
-        title: json['title'] as String?,
-        partOutline: (json['part_outline'] as List<dynamic>?)
-            ?.map((e) => PartOutline.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        timestamp: json['timestamp'] as int?,
-      );
+    title: json['title'] as String?,
+    partOutline: (json['part_outline'] as List<dynamic>?)
+        ?.map((e) => PartOutline.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    timestamp: json['timestamp'] as int?,
+  );
 }

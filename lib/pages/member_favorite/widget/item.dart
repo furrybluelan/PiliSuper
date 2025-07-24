@@ -112,10 +112,10 @@ class MemberFavItem extends StatelessWidget {
                       item.type == 0
                           ? '${item.mediaCount}个内容 · ${FavUtil.isPublicFavText(item.attr)}'
                           : item.type == 11
-                              ? '${item.mediaCount}个内容 · ${item.upper?.name}'
-                              : item.type == 21
-                                  ? '创建者: ${item.upper?.name}\n${item.mediaCount}个视频 · ${NumUtil.numFormat(item.viewCount)}播放'
-                                  : '${item.mediaCount}个内容',
+                          ? '${item.mediaCount}个内容 · ${item.upper?.name}'
+                          : item.type == 21
+                          ? '创建者: ${item.upper?.name}\n${item.mediaCount}个视频 · ${NumUtil.numFormat(item.viewCount)}播放'
+                          : '${item.mediaCount}个内容',
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.outline,

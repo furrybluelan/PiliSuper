@@ -85,9 +85,9 @@ class _MemberOpusState extends State<MemberOpus>
                                   ..onReload();
                               },
                               tileColor: e == _controller.type.value
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .onInverseSurface
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.onInverseSurface
                                   : null,
                               dense: true,
                               title: Text(
@@ -103,8 +103,10 @@ class _MemberOpusState extends State<MemberOpus>
               ),
               icon: const Icon(size: 20, Icons.sort),
               label: Obx(
-                () => Text(_controller.type.value.text ??
-                    _controller.type.value.tabName!),
+                () {
+                  final type = _controller.type.value;
+                  return Text(type.text ?? type.tabName!);
+                },
               ),
             ),
           ),
@@ -115,34 +117,36 @@ class _MemberOpusState extends State<MemberOpus>
   Widget _buildBody(LoadingState<List<SpaceOpusItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverWaterfallFlow.extent(
-          maxCrossAxisExtent: Grid.smallCardWidth,
-          mainAxisSpacing: StyleString.safeSpace,
-          crossAxisSpacing: StyleString.safeSpace,
-          children: List.generate(10, (_) => const SpaceOpusSkeleton()),
-        ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverWaterfallFlow.extent(
-              maxCrossAxisExtent: Grid.smallCardWidth,
-              mainAxisSpacing: StyleString.safeSpace,
-              crossAxisSpacing: StyleString.safeSpace,
-              lastChildLayoutTypeBuilder: (index) {
-                if (index == response.length - 1) {
-                  _controller.onLoadMore();
-                }
-                return index == response.length
-                    ? LastChildLayoutType.foot
-                    : LastChildLayoutType.none;
-              },
-              children:
-                  response!.map((item) => SpaceOpusItem(item: item)).toList(),
-            )
-          : HttpError(
-              onReload: _controller.onReload,
-            ),
+        maxCrossAxisExtent: Grid.smallCardWidth,
+        mainAxisSpacing: StyleString.safeSpace,
+        crossAxisSpacing: StyleString.safeSpace,
+        children: List.generate(10, (_) => const SpaceOpusSkeleton()),
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverWaterfallFlow.extent(
+                maxCrossAxisExtent: Grid.smallCardWidth,
+                mainAxisSpacing: StyleString.safeSpace,
+                crossAxisSpacing: StyleString.safeSpace,
+                lastChildLayoutTypeBuilder: (index) {
+                  if (index == response.length - 1) {
+                    _controller.onLoadMore();
+                  }
+                  return index == response.length
+                      ? LastChildLayoutType.foot
+                      : LastChildLayoutType.none;
+                },
+                children: response!
+                    .map((item) => SpaceOpusItem(item: item))
+                    .toList(),
+              )
+            : HttpError(
+                onReload: _controller.onReload,
+              ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

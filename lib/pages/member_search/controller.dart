@@ -18,11 +18,13 @@ class MemberSearchController extends GetxController
   final RxList<int> counts = <int>[-1, -1].obs;
 
   late final arcCtr = Get.put(
-      MemberSearchChildController(this, MemberSearchType.archive),
-      tag: Utils.generateRandomString(8));
+    MemberSearchChildController(this, MemberSearchType.archive),
+    tag: Utils.generateRandomString(8),
+  );
   late final dynCtr = Get.put(
-      MemberSearchChildController(this, MemberSearchType.dynamic),
-      tag: Utils.generateRandomString(8));
+    MemberSearchChildController(this, MemberSearchType.dynamic),
+    tag: Utils.generateRandomString(8),
+  );
 
   void onClear() {
     if (editingController.value.text.isNotEmpty) {

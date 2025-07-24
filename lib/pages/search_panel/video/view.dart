@@ -21,8 +21,13 @@ class SearchVideoPanel extends CommonSearchPanel {
   State<SearchVideoPanel> createState() => _SearchVideoPanelState();
 }
 
-class _SearchVideoPanelState extends CommonSearchPanelState<SearchVideoPanel,
-    SearchVideoData, SearchVideoItemModel> {
+class _SearchVideoPanelState
+    extends
+        CommonSearchPanelState<
+          SearchVideoPanel,
+          SearchVideoData,
+          SearchVideoItemModel
+        > {
   @override
   late final SearchVideoController controller = Get.put(
     SearchVideoController(
@@ -59,19 +64,21 @@ class _SearchVideoPanelState extends CommonSearchPanelState<SearchVideoPanel,
                             bgColor: Colors.transparent,
                             textColor:
                                 controller.selectedType.value == i['type']
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.outline,
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outline,
                             onTap: (value) async {
                               controller.selectedType.value = i['type'];
-                              controller.order.value =
-                                  i['type'].toString().split('.').last;
+                              controller.order.value = i['type']
+                                  .toString()
+                                  .split('.')
+                                  .last;
                               SmartDialog.showLoading(msg: 'loading');
                               await controller.onReload();
                               SmartDialog.dismiss();
                             },
                           ),
                         ),
-                      ]
+                      ],
                     ],
                   ),
                 ),

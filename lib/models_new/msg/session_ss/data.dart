@@ -12,9 +12,9 @@ class SessionSsData {
   });
 
   factory SessionSsData.fromJson(Map<String, dynamic> json) => SessionSsData(
-        followStatus: json['follow_status'] as int?,
-        special: json['special'] as int?,
-        pushSetting: json['push_setting'] as int?,
-        showPushSetting: json['show_push_setting'] as int?,
-      );
+    followStatus: json['follow_status'] as int?,
+    special: json['special'] as int?,
+    pushSetting: json['push_setting'] as int?,
+    showPushSetting: json['show_push_setting'] as int?,
+  );
 }

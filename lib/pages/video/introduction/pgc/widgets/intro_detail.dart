@@ -55,7 +55,10 @@ class _IntroDetailState extends CommonCollapseSlidePageState<PgcIntroPanel> {
               isScrollable: true,
               tabAlignment: TabAlignment.start,
               dividerColor: Colors.transparent,
-              tabs: const [Tab(text: '详情'), Tab(text: '点评')],
+              tabs: const [
+                Tab(text: '详情'),
+                Tab(text: '点评'),
+              ],
               onTap: (index) {
                 if (!_tabController.indexIsChanging) {
                   if (index == 0) {
@@ -176,7 +179,7 @@ class _IntroDetailState extends CommonCollapseSlidePageState<PgcIntroPanel> {
                   ),
                 )
                 .toList(),
-          )
+          ),
         ],
       ],
     );

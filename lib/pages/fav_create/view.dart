@@ -99,20 +99,20 @@ class _CreateFavPageState extends State<CreateFavPage> {
       ),
       body: _mediaId != null
           ? _titleController.text.isNotEmpty
-              ? _buildBody(theme)
-              : _errMsg?.isNotEmpty == true
-                  ? Center(
-                      child: CustomScrollView(
-                        shrinkWrap: true,
-                        slivers: [
-                          HttpError(
-                            errMsg: _errMsg,
-                            onReload: _getFolderInfo,
-                          ),
-                        ],
-                      ),
-                    )
-                  : const Center(child: CircularProgressIndicator())
+                ? _buildBody(theme)
+                : _errMsg?.isNotEmpty == true
+                ? Center(
+                    child: CustomScrollView(
+                      shrinkWrap: true,
+                      slivers: [
+                        HttpError(
+                          errMsg: _errMsg,
+                          onReload: _getFolderInfo,
+                        ),
+                      ],
+                    ),
+                  )
+                : const Center(child: CircularProgressIndicator())
           : _buildBody(theme),
     );
   }
@@ -174,233 +174,241 @@ class _CreateFavPageState extends State<CreateFavPage> {
   final leadingStyle = const TextStyle(fontSize: 14);
 
   Widget _buildBody(ThemeData theme) => SingleChildScrollView(
-        child: Column(
-          children: [
-            if (_attr == null || !FavUtil.isDefaultFav(_attr!)) ...[
-              Builder(
-                builder: (context) {
-                  return ListTile(
-                    tileColor: theme.colorScheme.onInverseSurface,
-                    onTap: () {
-                      EasyThrottle.throttle(
-                          'imagePicker', const Duration(milliseconds: 500), () {
-                        if (_cover?.isNotEmpty == true) {
-                          showDialog(
-                            context: context,
-                            builder: (_) {
-                              return AlertDialog(
-                                clipBehavior: Clip.hardEdge,
-                                contentPadding:
-                                    const EdgeInsets.fromLTRB(0, 12, 0, 12),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ListTile(
-                                      dense: true,
-                                      onTap: () {
-                                        Get.back();
-                                        _pickImg(context, theme);
-                                      },
-                                      title: const Text(
-                                        '替换封面',
-                                        style: TextStyle(fontSize: 14),
-                                      ),
+    child: Column(
+      children: [
+        if (_attr == null || !FavUtil.isDefaultFav(_attr!)) ...[
+          Builder(
+            builder: (context) {
+              return ListTile(
+                tileColor: theme.colorScheme.onInverseSurface,
+                onTap: () {
+                  EasyThrottle.throttle(
+                    'imagePicker',
+                    const Duration(milliseconds: 500),
+                    () {
+                      if (_cover?.isNotEmpty == true) {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              clipBehavior: Clip.hardEdge,
+                              contentPadding: const EdgeInsets.fromLTRB(
+                                0,
+                                12,
+                                0,
+                                12,
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    dense: true,
+                                    onTap: () {
+                                      Get.back();
+                                      _pickImg(context, theme);
+                                    },
+                                    title: const Text(
+                                      '替换封面',
+                                      style: TextStyle(fontSize: 14),
                                     ),
-                                    ListTile(
-                                      dense: true,
-                                      onTap: () {
-                                        Get.back();
-                                        _cover = null;
-                                        (context as Element).markNeedsBuild();
-                                      },
-                                      title: const Text(
-                                        '移除封面',
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                        } else {
-                          _pickImg(context, theme);
-                        }
-                      });
-                    },
-                    leading: Text(
-                      '封面',
-                      style: leadingStyle,
-                    ),
-                    trailing: Row(
-                      spacing: 10,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_cover?.isNotEmpty == true)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(6)),
-                                  child: CachedNetworkImage(
-                                    imageUrl: ImageUtil.thumbnailUrl(_cover!),
-                                    height: constraints.maxHeight,
-                                    width: constraints.maxHeight * 16 / 9,
-                                    fit: BoxFit.cover,
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ],
-                    ),
+                                  ListTile(
+                                    dense: true,
+                                    onTap: () {
+                                      Get.back();
+                                      _cover = null;
+                                      (context as Element).markNeedsBuild();
+                                    },
+                                    title: const Text(
+                                      '移除封面',
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        _pickImg(context, theme);
+                      }
+                    },
                   );
                 },
-              ),
-              const SizedBox(height: 16),
-            ],
-            ListTile(
-              tileColor: theme.colorScheme.onInverseSurface,
-              leading: Text.rich(
-                style: const TextStyle(
-                  height: 1,
-                  fontSize: 14,
+                leading: Text(
+                  '封面',
+                  style: leadingStyle,
                 ),
-                TextSpan(
+                trailing: Row(
+                  spacing: 10,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextSpan(
-                      text: '*',
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1,
-                        color: theme.colorScheme.error,
-                      ),
-                    ),
-                    const TextSpan(
-                      text: '名称',
-                      style: TextStyle(
-                        height: 1,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              title: TextField(
-                autofocus: true,
-                readOnly: _attr != null && FavUtil.isDefaultFav(_attr!),
-                controller: _titleController,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: _attr != null && FavUtil.isDefaultFav(_attr!)
-                      ? theme.colorScheme.outline
-                      : null,
-                ),
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(20),
-                ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  hintText: '名称',
-                  hintStyle: TextStyle(
-                    fontSize: 14,
-                    color: theme.colorScheme.outline,
-                  ),
-                  border: const OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    gapPadding: 0,
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (_attr == null || !FavUtil.isDefaultFav(_attr!)) ...[
-              ListTile(
-                tileColor: theme.colorScheme.onInverseSurface,
-                title: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '简介',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const TextSpan(
-                            text: '*',
-                            style: TextStyle(color: Colors.transparent),
-                          )
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        minLines: 6,
-                        maxLines: 6,
-                        controller: _introController,
-                        style: const TextStyle(fontSize: 14),
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(200),
-                        ],
-                        decoration: InputDecoration(
-                          isDense: true,
-                          hintText: '可填写简介',
-                          hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: theme.colorScheme.outline,
-                          ),
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            gapPadding: 0,
-                          ),
-                          contentPadding: EdgeInsets.zero,
+                    if (_cover?.isNotEmpty == true)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return ClipRRect(
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(6),
+                              ),
+                              child: CachedNetworkImage(
+                                imageUrl: ImageUtil.thumbnailUrl(_cover!),
+                                height: constraints.maxHeight,
+                                width: constraints.maxHeight * 16 / 9,
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          },
                         ),
                       ),
+                    Icon(
+                      Icons.keyboard_arrow_right,
+                      color: theme.colorScheme.outline,
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            Builder(
-              builder: (context) {
-                void onTap() {
-                  _isPublic = !_isPublic;
-                  (context as Element).markNeedsBuild();
-                }
-
-                return ListTile(
-                  onTap: onTap,
-                  tileColor: theme.colorScheme.onInverseSurface,
-                  leading: Text(
-                    '公开',
-                    style: leadingStyle,
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+        ListTile(
+          tileColor: theme.colorScheme.onInverseSurface,
+          leading: Text.rich(
+            style: const TextStyle(
+              height: 1,
+              fontSize: 14,
+            ),
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '*',
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1,
+                    color: theme.colorScheme.error,
                   ),
-                  trailing: Transform.scale(
-                    alignment: Alignment.centerRight,
-                    scale: 0.8,
-                    child: Switch(
-                      value: _isPublic,
-                      onChanged: (value) => onTap(),
+                ),
+                const TextSpan(
+                  text: '名称',
+                  style: TextStyle(
+                    height: 1,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          title: TextField(
+            autofocus: true,
+            readOnly: _attr != null && FavUtil.isDefaultFav(_attr!),
+            controller: _titleController,
+            style: TextStyle(
+              fontSize: 14,
+              color: _attr != null && FavUtil.isDefaultFav(_attr!)
+                  ? theme.colorScheme.outline
+                  : null,
+            ),
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(20),
+            ],
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: '名称',
+              hintStyle: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.outline,
+              ),
+              border: const OutlineInputBorder(
+                borderSide: BorderSide.none,
+                gapPadding: 0,
+              ),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (_attr == null || !FavUtil.isDefaultFav(_attr!)) ...[
+          ListTile(
+            tileColor: theme.colorScheme.onInverseSurface,
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '简介',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: '*',
+                        style: TextStyle(color: Colors.transparent),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    minLines: 6,
+                    maxLines: 6,
+                    controller: _introController,
+                    style: const TextStyle(fontSize: 14),
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(200),
+                    ],
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hintText: '可填写简介',
+                      hintStyle: TextStyle(
+                        fontSize: 14,
+                        color: theme.colorScheme.outline,
+                      ),
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        gapPadding: 0,
+                      ),
+                      contentPadding: EdgeInsets.zero,
                     ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
+          const SizedBox(height: 16),
+        ],
+        Builder(
+          builder: (context) {
+            void onTap() {
+              _isPublic = !_isPublic;
+              (context as Element).markNeedsBuild();
+            }
+
+            return ListTile(
+              onTap: onTap,
+              tileColor: theme.colorScheme.onInverseSurface,
+              leading: Text(
+                '公开',
+                style: leadingStyle,
+              ),
+              trailing: Transform.scale(
+                alignment: Alignment.centerRight,
+                scale: 0.8,
+                child: Switch(
+                  value: _isPublic,
+                  onChanged: (value) => onTap(),
+                ),
+              ),
+            );
+          },
         ),
-      );
+        const SizedBox(height: 16),
+      ],
+    ),
+  );
 }

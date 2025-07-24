@@ -15,8 +15,13 @@ class HistorySearchPage extends CommonSearchPage {
   State<HistorySearchPage> createState() => _HistorySearchPageState();
 }
 
-class _HistorySearchPageState extends CommonSearchPageState<HistorySearchPage,
-    HistoryData, HistoryItemModel> {
+class _HistorySearchPageState
+    extends
+        CommonSearchPageState<
+          HistorySearchPage,
+          HistoryData,
+          HistoryItemModel
+        > {
   @override
   final HistorySearchController controller = Get.put(
     HistorySearchController(),

@@ -6,8 +6,8 @@ class LiveEmoteData {
   LiveEmoteData({this.data});
 
   factory LiveEmoteData.fromJson(Map<String, dynamic> json) => LiveEmoteData(
-        data: (json['data'] as List<dynamic>?)
-            ?.map((e) => LiveEmoteDatum.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    data: (json['data'] as List<dynamic>?)
+        ?.map((e) => LiveEmoteDatum.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

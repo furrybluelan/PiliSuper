@@ -12,10 +12,13 @@ class ThemeUtils {
     bool isDark = false,
     required FlexSchemeVariant variant,
   }) {
-    final appFontWeight =
-        Pref.appFontWeight.clamp(-1, FontWeight.values.length - 1);
-    final fontWeight =
-        appFontWeight == -1 ? null : FontWeight.values[appFontWeight];
+    final appFontWeight = Pref.appFontWeight.clamp(
+      -1,
+      FontWeight.values.length - 1,
+    );
+    final fontWeight = appFontWeight == -1
+        ? null
+        : FontWeight.values[appFontWeight];
     late final textStyle = TextStyle(fontWeight: fontWeight);
     ThemeData themeData = ThemeData(
       colorScheme: colorScheme,
@@ -39,8 +42,9 @@ class ThemeUtils {
               labelMedium: textStyle,
               labelSmall: textStyle,
             ),
-      tabBarTheme:
-          fontWeight == null ? null : TabBarThemeData(labelStyle: textStyle),
+      tabBarTheme: fontWeight == null
+          ? null
+          : TabBarThemeData(labelStyle: textStyle),
       appBarTheme: AppBarTheme(
         elevation: 0,
         titleSpacing: 0,
@@ -72,8 +76,8 @@ class ThemeUtils {
         surfaceTintColor: isDynamic
             ? colorScheme.onSurfaceVariant
             : isDark
-                ? colorScheme.onSurfaceVariant
-                : null,
+            ? colorScheme.onSurfaceVariant
+            : null,
         shadowColor: Colors.transparent,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -132,27 +136,34 @@ class ThemeUtils {
       dialogTheme: themeData.dialogTheme.copyWith(
         backgroundColor: color,
       ),
-      bottomSheetTheme:
-          themeData.bottomSheetTheme.copyWith(backgroundColor: color),
-      bottomNavigationBarTheme:
-          themeData.bottomNavigationBarTheme.copyWith(backgroundColor: color),
-      navigationBarTheme:
-          themeData.navigationBarTheme.copyWith(backgroundColor: color),
-      navigationRailTheme:
-          themeData.navigationRailTheme.copyWith(backgroundColor: Colors.black),
+      bottomSheetTheme: themeData.bottomSheetTheme.copyWith(
+        backgroundColor: color,
+      ),
+      bottomNavigationBarTheme: themeData.bottomNavigationBarTheme.copyWith(
+        backgroundColor: color,
+      ),
+      navigationBarTheme: themeData.navigationBarTheme.copyWith(
+        backgroundColor: color,
+      ),
+      navigationRailTheme: themeData.navigationRailTheme.copyWith(
+        backgroundColor: Colors.black,
+      ),
       colorScheme: themeData.colorScheme.copyWith(
         primary: themeData.colorScheme.primary.darken(0.1),
         onPrimary: themeData.colorScheme.onPrimary.darken(0.1),
         primaryContainer: themeData.colorScheme.primaryContainer.darken(0.1),
-        onPrimaryContainer:
-            themeData.colorScheme.onPrimaryContainer.darken(0.1),
+        onPrimaryContainer: themeData.colorScheme.onPrimaryContainer.darken(
+          0.1,
+        ),
         inversePrimary: themeData.colorScheme.inversePrimary.darken(0.1),
         secondary: themeData.colorScheme.secondary.darken(0.1),
         onSecondary: themeData.colorScheme.onSecondary.darken(0.1),
-        secondaryContainer:
-            themeData.colorScheme.secondaryContainer.darken(0.1),
-        onSecondaryContainer:
-            themeData.colorScheme.onSecondaryContainer.darken(0.1),
+        secondaryContainer: themeData.colorScheme.secondaryContainer.darken(
+          0.1,
+        ),
+        onSecondaryContainer: themeData.colorScheme.onSecondaryContainer.darken(
+          0.1,
+        ),
         error: themeData.colorScheme.error.darken(0.1),
         surface: Colors.black,
         onSurface: themeData.colorScheme.onSurface.darken(0.15),
@@ -160,10 +171,10 @@ class ThemeUtils {
         inverseSurface: themeData.colorScheme.inverseSurface.darken(),
         onInverseSurface: themeData.colorScheme.onInverseSurface.darken(),
         surfaceContainer: themeData.colorScheme.surfaceContainer.darken(),
-        surfaceContainerHigh:
-            themeData.colorScheme.surfaceContainerHigh.darken(),
-        surfaceContainerHighest:
-            themeData.colorScheme.surfaceContainerHighest.darken(0.4),
+        surfaceContainerHigh: themeData.colorScheme.surfaceContainerHigh
+            .darken(),
+        surfaceContainerHighest: themeData.colorScheme.surfaceContainerHighest
+            .darken(0.4),
       ),
     );
   }

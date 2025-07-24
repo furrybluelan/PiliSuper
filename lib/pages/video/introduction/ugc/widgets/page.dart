@@ -44,8 +44,9 @@ class _PagesPanelState extends State<PagesPanel> {
   @override
   void initState() {
     super.initState();
-    _videoDetailController =
-        Get.find<VideoDetailController>(tag: widget.heroTag);
+    _videoDetailController = Get.find<VideoDetailController>(
+      tag: widget.heroTag,
+    );
     if (widget.list == null) {
       cid = widget.videoIntroController.lastPlayCid.value;
       pageIndex = pages.indexWhere((Part e) => e.cid == cid);
@@ -68,8 +69,9 @@ class _PagesPanelState extends State<PagesPanel> {
     }
     const double itemWidth = 150;
     final double targetOffset = (pageIndex * itemWidth - itemWidth / 2).clamp(
-        _scrollController.position.minScrollExtent,
-        _scrollController.position.maxScrollExtent);
+      _scrollController.position.minScrollExtent,
+      _scrollController.position.maxScrollExtent,
+    );
     _scrollController.animateTo(
       targetOffset,
       duration: const Duration(milliseconds: 300),
@@ -162,7 +164,10 @@ class _PagesPanelState extends State<PagesPanel> {
                         widget.cover,
                       );
                       if (widget.list != null &&
-                          widget.videoIntroController.videoDetail.value
+                          widget
+                                  .videoIntroController
+                                  .videoDetail
+                                  .value
                                   .ugcSeason !=
                               null) {
                         _videoDetailController.seasonCid = pages.first.cid;
@@ -179,7 +184,7 @@ class _PagesPanelState extends State<PagesPanel> {
                               height: 12,
                               semanticLabel: "正在播放：",
                             ),
-                            const SizedBox(width: 6)
+                            const SizedBox(width: 6),
                           ],
                           Expanded(
                             child: Text(
@@ -202,7 +207,7 @@ class _PagesPanelState extends State<PagesPanel> {
               );
             },
           ),
-        )
+        ),
       ],
     );
   }

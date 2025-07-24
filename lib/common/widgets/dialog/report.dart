@@ -8,7 +8,7 @@ void autoWrapReportDialog(
   BuildContext context,
   Map<String, Map<int, String>> options,
   Future<Map> Function(int reasonType, String? reasonDesc, bool banUid)
-      onSuccess,
+  onSuccess,
 ) {
   int? reasonType;
   String? reasonDesc;
@@ -22,8 +22,11 @@ void autoWrapReportDialog(
           title: const Text('举报'),
           titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
           contentPadding: const EdgeInsets.symmetric(vertical: 5),
-          actionsPadding:
-              const EdgeInsets.only(left: 16, right: 16, bottom: 10),
+          actionsPadding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: 10,
+          ),
           content: Form(
             key: key,
             child: Column(
@@ -56,7 +59,8 @@ void autoWrapReportDialog(
                           ),
                           if (reasonType == 0)
                             ReasonField(
-                                onChanged: (value) => reasonDesc = value),
+                              onChanged: (value) => reasonDesc = value,
+                            ),
                         ],
                       ),
                     ),
@@ -65,7 +69,9 @@ void autoWrapReportDialog(
                 Padding(
                   padding: const EdgeInsets.only(left: 14, top: 6),
                   child: CheckBoxText(
-                      text: '拉黑该用户', onChanged: (value) => banUid = value),
+                    text: '拉黑该用户',
+                    onChanged: (value) => banUid = value,
+                  ),
                 ),
               ],
             ),
@@ -211,33 +217,33 @@ class _CheckBoxTextState extends State<CheckBoxText> {
 class ReportOptions {
   // from https://s1.hdslb.com/bfs/seed/jinkela/comment-h5/static/js/605.chunks.js
   static Map<String, Map<int, String>> get commentReport => const {
-        '违反法律法规': {9: '违法违规', 2: '色情', 10: '低俗', 12: '赌博诈骗', 23: '违法信息外链'},
-        '谣言类不实信息': {19: '涉政谣言', 22: '虚假不实信息', 20: '涉社会事件谣言'},
-        '侵犯个人权益': {7: '人身攻击', 15: '侵犯隐私'},
-        '有害社区环境': {
-          1: '垃圾广告',
-          4: '引战',
-          5: '剧透',
-          3: '刷屏',
-          8: '视频不相关',
-          18: '违规抽奖',
-          17: '青少年不良信息',
-        },
-        '其他': {0: '其他'},
-      };
+    '违反法律法规': {9: '违法违规', 2: '色情', 10: '低俗', 12: '赌博诈骗', 23: '违法信息外链'},
+    '谣言类不实信息': {19: '涉政谣言', 22: '虚假不实信息', 20: '涉社会事件谣言'},
+    '侵犯个人权益': {7: '人身攻击', 15: '侵犯隐私'},
+    '有害社区环境': {
+      1: '垃圾广告',
+      4: '引战',
+      5: '剧透',
+      3: '刷屏',
+      8: '视频不相关',
+      18: '违规抽奖',
+      17: '青少年不良信息',
+    },
+    '其他': {0: '其他'},
+  };
 
   static Map<String, Map<int, String>> get dynamicReport => const {
-        '': {
-          4: '垃圾广告',
-          8: '引战',
-          1: '色情',
-          5: '人身攻击',
-          3: '违法信息',
-          9: '涉政谣言',
-          10: '涉社会事件谣言',
-          12: '虚假不实信息',
-          13: '违法信息外链',
-          0: '其他',
-        },
-      };
+    '': {
+      4: '垃圾广告',
+      8: '引战',
+      1: '色情',
+      5: '人身攻击',
+      3: '违法信息',
+      9: '涉政谣言',
+      10: '涉社会事件谣言',
+      12: '虚假不实信息',
+      13: '违法信息外链',
+      0: '其他',
+    },
+  };
 }

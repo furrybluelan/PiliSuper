@@ -76,7 +76,7 @@ class VoteInfo extends SimpleVoteInfo {
     myVotes = (json['my_votes'] as List?)?.cast(); // doVote
     options =
         (json['options'] as List?)?.map((v) => Option.fromJson(v)).toList() ??
-            <Option>[];
+        <Option>[];
     optionsCnt = json['options_cnt'];
     voterLevel = json['voter_level'];
     face = json['face'];
@@ -91,16 +91,16 @@ class VoteInfo extends SimpleVoteInfo {
   }
 
   Map<String, dynamic> toJson() => {
-        'title': title,
-        'desc': desc,
-        'type': type,
-        'choice_cnt': choiceCnt,
-        'duration': duration,
-        'options': options.map((e) => e.toJson()).toList(),
-        'only_fans_level': onlyFansLevel,
-        'vote_publisher': votePublisher,
-        if (voteId != null) 'vote_id': voteId,
-      };
+    'title': title,
+    'desc': desc,
+    'type': type,
+    'choice_cnt': choiceCnt,
+    'duration': duration,
+    'options': options.map((e) => e.toJson()).toList(),
+    'only_fans_level': onlyFansLevel,
+    'vote_publisher': votePublisher,
+    if (voteId != null) 'vote_id': voteId,
+  };
 }
 
 class Option {
@@ -122,7 +122,7 @@ class Option {
   }
 
   Map<String, dynamic> toJson() => {
-        'opt_desc': optDesc,
-        'img_url': imgUrl,
-      };
+    'opt_desc': optDesc,
+    'img_url': imgUrl,
+  };
 }

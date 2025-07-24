@@ -43,27 +43,27 @@ class PgcIndexItem {
   });
 
   factory PgcIndexItem.fromJson(Map<String, dynamic> json) => PgcIndexItem(
-        badge: json['badge'] as String?,
-        badgeInfo: json['badge_info'] == null
-            ? null
-            : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
-        badgeType: json['badge_type'] as int?,
-        cover: json['cover'] as String?,
-        firstEp: json['first_ep'] == null
-            ? null
-            : FirstEp.fromJson(json['first_ep'] as Map<String, dynamic>),
-        indexShow: json['index_show'] as String?,
-        isFinish: json['is_finish'] as int?,
-        link: json['link'] as String?,
-        mediaId: json['media_id'] as int?,
-        order: json['order'] as String?,
-        orderType: json['order_type'] as String?,
-        score: json['score'] as String?,
-        seasonId: json['season_id'] as int?,
-        seasonStatus: json['season_status'] as int?,
-        seasonType: json['season_type'] as int?,
-        subTitle: json['subTitle'] as String?,
-        title: json['title'] as String?,
-        titleIcon: json['title_icon'] as String?,
-      );
+    badge: json['badge'] as String?,
+    badgeInfo: json['badge_info'] == null
+        ? null
+        : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
+    badgeType: json['badge_type'] as int?,
+    cover: json['cover'] as String?,
+    firstEp: json['first_ep'] == null
+        ? null
+        : FirstEp.fromJson(json['first_ep'] as Map<String, dynamic>),
+    indexShow: json['index_show'] as String?,
+    isFinish: json['is_finish'] as int?,
+    link: json['link'] as String?,
+    mediaId: json['media_id'] as int?,
+    order: json['order'] as String?,
+    orderType: json['order_type'] as String?,
+    score: json['score'] as String?,
+    seasonId: json['season_id'] as int?,
+    seasonStatus: json['season_status'] as int?,
+    seasonType: json['season_type'] as int?,
+    subTitle: json['subTitle'] as String?,
+    title: json['title'] as String?,
+    titleIcon: json['title_icon'] as String?,
+  );
 }

@@ -65,8 +65,9 @@ class SystemContextMenu extends StatefulWidget {
   }) {
     final (
       startGlyphHeight: double startGlyphHeight,
-      endGlyphHeight: double endGlyphHeight
-    ) = editableTextState.getGlyphHeights();
+      endGlyphHeight: double endGlyphHeight,
+    ) = editableTextState
+        .getGlyphHeights();
 
     return SystemContextMenu._(
       key: key,
@@ -123,7 +124,8 @@ class SystemContextMenu extends StatefulWidget {
   ///  * [EditableTextState.contextMenuButtonItems], which provides the default
   ///    [ContextMenuButtonItem]s for the Flutter-rendered context menu.
   static List<IOSSystemContextMenuItem> getDefaultItems(
-      EditableTextState editableTextState) {
+    EditableTextState editableTextState,
+  ) {
     return <IOSSystemContextMenuItem>[
       if (editableTextState.copyEnabled) const IOSSystemContextMenuItemCopy(),
       if (editableTextState.cutEnabled) const IOSSystemContextMenuItemCut(),
@@ -147,8 +149,9 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void initState() {
     super.initState();
-    _systemContextMenuController =
-        SystemContextMenuController(onSystemHide: widget.onSystemHide);
+    _systemContextMenuController = SystemContextMenuController(
+      onSystemHide: widget.onSystemHide,
+    );
   }
 
   @override
@@ -162,8 +165,9 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     assert(SystemContextMenu.isSupported(context));
 
     if (widget.items.isNotEmpty) {
-      final WidgetsLocalizations localizations =
-          WidgetsLocalizations.of(context);
+      final WidgetsLocalizations localizations = WidgetsLocalizations.of(
+        context,
+      );
       final List<IOSSystemContextMenuItemData> itemDatas = widget.items
           .map((IOSSystemContextMenuItem item) => item.getData(localizations))
           .toList();
@@ -279,7 +283,8 @@ final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
 
   @override
   IOSSystemContextMenuItemDataPaste getData(
-      WidgetsLocalizations localizations) {
+    WidgetsLocalizations localizations,
+  ) {
     return const IOSSystemContextMenuItemDataPaste();
   }
 }
@@ -303,7 +308,8 @@ final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
 
   @override
   IOSSystemContextMenuItemDataSelectAll getData(
-      WidgetsLocalizations localizations) {
+    WidgetsLocalizations localizations,
+  ) {
     return const IOSSystemContextMenuItemDataSelectAll();
   }
 }
@@ -334,9 +340,11 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
 
   @override
   IOSSystemContextMenuItemDataLookUp getData(
-      WidgetsLocalizations localizations) {
+    WidgetsLocalizations localizations,
+  ) {
     return IOSSystemContextMenuItemDataLookUp(
-        title: title ?? localizations.lookUpButtonLabel);
+      title: title ?? localizations.lookUpButtonLabel,
+    );
   }
 
   @override
@@ -371,7 +379,8 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
 
   @override
   IOSSystemContextMenuItemDataSearchWeb getData(
-      WidgetsLocalizations localizations) {
+    WidgetsLocalizations localizations,
+  ) {
     return IOSSystemContextMenuItemDataSearchWeb(
       title: title ?? localizations.searchWebButtonLabel,
     );
@@ -409,9 +418,11 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
 
   @override
   IOSSystemContextMenuItemDataShare getData(
-      WidgetsLocalizations localizations) {
+    WidgetsLocalizations localizations,
+  ) {
     return IOSSystemContextMenuItemDataShare(
-        title: title ?? localizations.shareButtonLabel);
+      title: title ?? localizations.shareButtonLabel,
+    );
   }
 
   @override

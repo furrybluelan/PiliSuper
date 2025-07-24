@@ -26,8 +26,10 @@ class MemberAudio extends StatefulWidget {
 
 class _MemberAudioState extends State<MemberAudio>
     with AutomaticKeepAliveClientMixin {
-  late final _controller =
-      Get.put(MemberAudioController(widget.mid), tag: widget.heroTag);
+  late final _controller = Get.put(
+    MemberAudioController(widget.mid),
+    tag: widget.heroTag,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -54,31 +56,32 @@ class _MemberAudioState extends State<MemberAudio>
   Widget _buildBody(LoadingState<List<SpaceAudioItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => linearLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                mainAxisSpacing: 2,
-                maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                childAspectRatio: StyleString.aspectRatio * 2.6,
-                minHeight: MediaQuery.textScalerOf(context).scale(90),
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _controller.onLoadMore();
-                  }
-                  return MemberAudioItem(
-                    item: response[index],
-                  );
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: _controller.onReload),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                  mainAxisSpacing: 2,
+                  maxCrossAxisExtent: Grid.smallCardWidth * 2,
+                  childAspectRatio: StyleString.aspectRatio * 2.6,
+                  minHeight: MediaQuery.textScalerOf(context).scale(90),
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _controller.onLoadMore();
+                    }
+                    return MemberAudioItem(
+                      item: response[index],
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

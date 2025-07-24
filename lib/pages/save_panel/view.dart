@@ -46,8 +46,10 @@ class SavePanel extends StatefulWidget {
       },
       transitionDuration: const Duration(milliseconds: 255),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
-        var tween = Tween<double>(begin: 0, end: 1)
-            .chain(CurveTween(curve: Curves.easeInOut));
+        var tween = Tween<double>(
+          begin: 0,
+          end: 1,
+        ).chain(CurveTween(curve: Curves.easeInOut));
         return FadeTransition(
           opacity: animation.drive(tween),
           child: child,
@@ -88,10 +90,11 @@ class _SavePanelState extends State<SavePanel> {
         try {
           final heroTag = Get.arguments?['heroTag'];
           late final ctr = Get.find<VideoIntroController>(tag: heroTag);
-          cover = ctr.videoDetail.value.pic;
-          title = ctr.videoDetail.value.title;
-          pubdate = ctr.videoDetail.value.pubdate;
-          uname = ctr.videoDetail.value.owner?.name;
+          final videoDetail = ctr.videoDetail.value;
+          cover = videoDetail.pic;
+          title = videoDetail.title;
+          pubdate = videoDetail.pubdate;
+          uname = videoDetail.owner?.name;
         } catch (_) {}
         uri =
             'bilibili://video/${_item.oid}?comment_root_id=${hasRoot ? _item.root : _item.id}${hasRoot ? '&comment_secondary_id=${_item.id}' : ''}';
@@ -118,9 +121,7 @@ class _SavePanelState extends State<SavePanel> {
           viewType = '查看';
           itemType = '评论';
           uri = switch (type) {
-            1 ||
-            11 ||
-            12 =>
+            1 || 11 || 12 =>
               'bilibili://comment/detail/$type/${dynItem.basic!.ridStr}/$rootId/?${anchor}enterUri=$enterUri',
             _ =>
               'bilibili://comment/detail/$type/$oid/$rootId/?${anchor}enterUri=$enterUri',
@@ -134,9 +135,7 @@ class _SavePanelState extends State<SavePanel> {
           late final anchor = hasRoot ? 'anchor=${_item.id}&' : '';
           late final enterUri = 'bilibili://following/detail/$oid';
           uri = switch (type) {
-            1 ||
-            11 ||
-            12 =>
+            1 || 11 || 12 =>
               'bilibili://comment/detail/$type/$oid/$rootId/?${anchor}enterUri=${Get.arguments['enterUri']}',
             _ =>
               'bilibili://comment/detail/$type/$oid/$rootId/?${anchor}enterUri=$enterUri',
@@ -233,8 +232,9 @@ class _SavePanelState extends State<SavePanel> {
     }
     SmartDialog.showLoading();
     try {
-      RenderRepaintBoundary boundary = boundaryKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary;
+      RenderRepaintBoundary boundary =
+          boundaryKey.currentContext!.findRenderObject()
+              as RenderRepaintBoundary;
       var image = await boundary.toImage(pixelRatio: 3);
       ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
@@ -249,7 +249,7 @@ class _SavePanelState extends State<SavePanel> {
               pngBytes,
               name: picName,
               mimeType: 'image/png',
-            )
+            ),
           ],
           sharePositionOrigin: await Utils.isIpad()
               ? Rect.fromLTWH(0, 0, Get.width, Get.height / 2)
@@ -300,8 +300,9 @@ class _SavePanelState extends State<SavePanel> {
                       clipBehavior: Clip.hardEdge,
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surface,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(12)),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(12),
+                        ),
                       ),
                       child: AnimatedSize(
                         curve: Curves.easeInOut,
@@ -333,23 +334,28 @@ class _SavePanelState extends State<SavePanel> {
                               Container(
                                 height: 81,
                                 clipBehavior: Clip.hardEdge,
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 12),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: theme.colorScheme.onInverseSurface,
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(8)),
+                                    Radius.circular(8),
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
                                     NetworkImgLayer(
                                       radius: 6,
                                       src: cover!,
-                                      height: MediaQuery.textScalerOf(context)
-                                          .scale(65),
-                                      width: MediaQuery.textScalerOf(context)
-                                              .scale(65) *
+                                      height: MediaQuery.textScalerOf(
+                                        context,
+                                      ).scale(65),
+                                      width:
+                                          MediaQuery.textScalerOf(
+                                            context,
+                                          ).scale(65) *
                                           16 /
                                           9,
                                       quality: 100,
@@ -368,9 +374,10 @@ class _SavePanelState extends State<SavePanel> {
                                           if (pubdate != null) ...[
                                             const Spacer(),
                                             Text(
-                                              DateUtil.format(pubdate,
-                                                  format:
-                                                      DateUtil.longFormatDs),
+                                              DateUtil.format(
+                                                pubdate,
+                                                format: DateUtil.longFormatDs,
+                                              ),
                                               style: TextStyle(
                                                 color:
                                                     theme.colorScheme.outline,
@@ -418,7 +425,8 @@ class _SavePanelState extends State<SavePanel> {
                                                       '识别二维码，$viewType$itemType',
                                                       textAlign: TextAlign.end,
                                                       style: TextStyle(
-                                                        color: theme.colorScheme
+                                                        color: theme
+                                                            .colorScheme
                                                             .onSurfaceVariant,
                                                       ),
                                                     ),
@@ -426,11 +434,13 @@ class _SavePanelState extends State<SavePanel> {
                                                     Text(
                                                       DateUtil.longFormatDs
                                                           .format(
-                                                              DateTime.now()),
+                                                            DateTime.now(),
+                                                          ),
                                                       textAlign: TextAlign.end,
                                                       style: TextStyle(
                                                         fontSize: 13,
-                                                        color: theme.colorScheme
+                                                        color: theme
+                                                            .colorScheme
                                                             .outline,
                                                       ),
                                                     ),
@@ -440,25 +450,29 @@ class _SavePanelState extends State<SavePanel> {
                                               Container(
                                                 width: 100,
                                                 height: 100,
-                                                padding:
-                                                    const EdgeInsets.all(12),
+                                                padding: const EdgeInsets.all(
+                                                  12,
+                                                ),
                                                 child: Container(
                                                   color: Get.isDarkMode
                                                       ? Colors.white
                                                       : theme
-                                                          .colorScheme.surface,
-                                                  padding:
-                                                      const EdgeInsets.all(3),
+                                                            .colorScheme
+                                                            .surface,
+                                                  padding: const EdgeInsets.all(
+                                                    3,
+                                                  ),
                                                   child: PrettyQrView.data(
                                                     data: uri,
                                                     decoration:
                                                         const PrettyQrDecoration(
-                                                      shape:
-                                                          PrettyQrRoundedSymbol(
-                                                        borderRadius:
-                                                            BorderRadius.zero,
-                                                      ),
-                                                    ),
+                                                          shape:
+                                                              PrettyQrRoundedSymbol(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .zero,
+                                                              ),
+                                                        ),
                                                   ),
                                                 ),
                                               ),
@@ -471,7 +485,8 @@ class _SavePanelState extends State<SavePanel> {
                                           'assets/images/logo/logo_2.png',
                                           width: 100,
                                           color: theme
-                                              .colorScheme.onSurfaceVariant,
+                                              .colorScheme
+                                              .onSurfaceVariant,
                                         ),
                                       ),
                                     ],
@@ -518,15 +533,16 @@ class _SavePanelState extends State<SavePanel> {
                     ),
                     const SizedBox(width: 40),
                     iconButton(
-                        size: 42,
-                        tooltip: showBottom ? '隐藏' : '显示',
-                        context: context,
-                        icon: showBottom
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        onPressed: () => setState(() {
-                              showBottom = !showBottom;
-                            })),
+                      size: 42,
+                      tooltip: showBottom ? '隐藏' : '显示',
+                      context: context,
+                      icon: showBottom
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      onPressed: () => setState(() {
+                        showBottom = !showBottom;
+                      }),
+                    ),
                     const SizedBox(width: 40),
                     iconButton(
                       size: 42,

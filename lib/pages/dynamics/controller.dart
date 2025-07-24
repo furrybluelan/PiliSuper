@@ -40,7 +40,8 @@ class DynamicsController extends GetxController
   DynamicsTabController? get controller {
     try {
       return Get.find<DynamicsTabController>(
-          tag: DynamicsTabType.values[tabController.index].name);
+        tag: DynamicsTabType.values[tabController.index].name,
+      );
     } catch (_) {
       return null;
     }
@@ -148,7 +149,7 @@ class DynamicsController extends GetxController
       var res = await DynamicsHttp.followUp();
       if (res.isSuccess) {
         upData.value = res.data;
-        if (upData.value.upList!.isEmpty) {
+        if (upData.value.upList.isNullOrEmpty) {
           mid.value = -1;
         }
       } else {
@@ -196,7 +197,10 @@ class DynamicsController extends GetxController
           scrollController.animToTop();
         }
         EasyThrottle.throttle(
-            'topOrRefresh', const Duration(milliseconds: 500), onRefresh);
+          'topOrRefresh',
+          const Duration(milliseconds: 500),
+          onRefresh,
+        );
       } else {
         animateToTop();
       }

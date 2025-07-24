@@ -60,7 +60,8 @@ class HomeController extends GetxController
 
   void setTabConfig() {
     List<int>? localTabs = GStorage.setting.get(SettingBoxKey.tabBarSort);
-    tabs = localTabs?.map((i) => HomeTabType.values[i]).toList() ??
+    tabs =
+        localTabs?.map((i) => HomeTabType.values[i]).toList() ??
         HomeTabType.values;
 
     tabController = TabController(

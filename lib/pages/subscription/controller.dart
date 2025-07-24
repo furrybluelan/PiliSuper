@@ -45,7 +45,9 @@ class SubController extends CommonListController<SubData, SubItemModel> {
           TextButton(
             onPressed: () async {
               var res = await FavHttp.cancelSub(
-                  id: subFolderItem.id!, type: subFolderItem.type!);
+                id: subFolderItem.id!,
+                type: subFolderItem.type!,
+              );
               if (res['status']) {
                 loadingState
                   ..value.data!.remove(subFolderItem)
@@ -73,8 +75,8 @@ class SubController extends CommonListController<SubData, SubItemModel> {
 
   @override
   Future<LoadingState<SubData>> customGetData() => UserHttp.userSubFolder(
-        pn: page,
-        ps: 20,
-        mid: accountService.mid,
-      );
+    pn: page,
+    ps: 20,
+    mid: accountService.mid,
+  );
 }

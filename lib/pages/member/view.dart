@@ -68,7 +68,8 @@ class _MemberPageState extends State<MemberPage> {
         forceMaterialTransparency: true,
         title: IgnorePointer(
           child: Obx(
-            () => _userController.showUname.value &&
+            () =>
+                _userController.showUname.value &&
                     _userController.username != null
                 ? Text(_userController.username!)
                 : const SizedBox.shrink(),
@@ -78,7 +79,8 @@ class _MemberPageState extends State<MemberPage> {
           IconButton(
             tooltip: '搜索',
             onPressed: () => Get.toNamed(
-                '/memberSearch?mid=$_mid&uname=${_userController.username}'),
+              '/memberSearch?mid=$_mid&uname=${_userController.username}',
+            ),
             icon: const Icon(Icons.search_outlined),
           ),
           PopupMenuButton(
@@ -93,9 +95,11 @@ class _MemberPageState extends State<MemberPage> {
                     children: [
                       const Icon(Icons.block, size: 19),
                       const SizedBox(width: 10),
-                      Text(_userController.relation.value != 128
-                          ? '加入黑名单'
-                          : '移除黑名单'),
+                      Text(
+                        _userController.relation.value != 128
+                            ? '加入黑名单'
+                            : '移除黑名单',
+                      ),
                     ],
                   ),
                 ),
@@ -119,9 +123,11 @@ class _MemberPageState extends State<MemberPage> {
                   children: [
                     const Icon(Icons.share_outlined, size: 19),
                     const SizedBox(width: 10),
-                    Text(_userController.accountService.mid != _mid
-                        ? '分享UP主'
-                        : '分享我的主页'),
+                    Text(
+                      _userController.accountService.mid != _mid
+                          ? '分享UP主'
+                          : '分享我的主页',
+                    ),
                   ],
                 ),
               ),
@@ -144,7 +150,12 @@ class _MemberPageState extends State<MemberPage> {
               if (_userController.accountService.isLogin.value)
                 if (_userController.mid ==
                     _userController.accountService.mid) ...[
-                  if ((_userController.loadingState.value.dataOrNull?.card?.vip
+                  if ((_userController
+                              .loadingState
+                              .value
+                              .dataOrNull
+                              ?.card
+                              ?.vip
                               ?.status ??
                           0) >
                       0)
@@ -285,39 +296,39 @@ class _MemberPageState extends State<MemberPage> {
   }
 
   Widget _buildTab(ThemeData theme) => Material(
-        color: theme.colorScheme.surface,
-        child: TabBar(
-          controller: _userController.tabController,
-          tabs: _userController.tabs,
-          onTap: _userController.onTapTab,
-        ),
-      );
+    color: theme.colorScheme.surface,
+    child: TabBar(
+      controller: _userController.tabController,
+      tabs: _userController.tabs,
+      onTap: _userController.onTapTab,
+    ),
+  );
 
   Widget get _buildBody => tabBarView(
-        controller: _userController.tabController,
-        children: _userController.tab2!.map((item) {
-          return switch (item.param!) {
-            'home' => MemberHome(heroTag: _heroTag),
-            'dynamic' => MemberDynamicsPage(mid: _mid),
-            'contribute' => Obx(
-                () => MemberContribute(
-                  heroTag: _heroTag,
-                  initialIndex: _userController.contributeInitialIndex.value,
-                  mid: _mid,
-                ),
-              ),
-            'bangumi' => MemberBangumi(
-                heroTag: _heroTag,
-                mid: _mid,
-              ),
-            'favorite' => MemberFavorite(
-                heroTag: _heroTag,
-                mid: _mid,
-              ),
-            _ => Center(child: Text(item.title ?? '')),
-          };
-        }).toList(),
-      );
+    controller: _userController.tabController,
+    children: _userController.tab2!.map((item) {
+      return switch (item.param!) {
+        'home' => MemberHome(heroTag: _heroTag),
+        'dynamic' => MemberDynamicsPage(mid: _mid),
+        'contribute' => Obx(
+          () => MemberContribute(
+            heroTag: _heroTag,
+            initialIndex: _userController.contributeInitialIndex.value,
+            mid: _mid,
+          ),
+        ),
+        'bangumi' => MemberBangumi(
+          heroTag: _heroTag,
+          mid: _mid,
+        ),
+        'favorite' => MemberFavorite(
+          heroTag: _heroTag,
+          mid: _mid,
+        ),
+        _ => Center(child: Text(item.title ?? '')),
+      };
+    }).toList(),
+  );
 
   Widget _buildAppBar({bool isV = true}) {
     return DynamicSliverAppBar(
@@ -337,29 +348,30 @@ class _MemberPageState extends State<MemberPage> {
   Widget _buildUserInfo(LoadingState<SpaceData?> userState, [bool isV = true]) {
     return switch (userState) {
       Loading() => const CircularProgressIndicator(),
-      Success(:var response) => response != null
-          ? Obx(
-              () => UserInfoCard(
-                isV: isV,
-                isOwner:
-                    _userController.mid == _userController.accountService.mid,
-                relation: _userController.relation.value,
-                card: response.card!,
-                images: response.images!,
-                onFollow: () => _userController.onFollow(context),
-                live: _userController.live,
-                silence: _userController.silence,
+      Success(:var response) =>
+        response != null
+            ? Obx(
+                () => UserInfoCard(
+                  isV: isV,
+                  isOwner:
+                      _userController.mid == _userController.accountService.mid,
+                  relation: _userController.relation.value,
+                  card: response.card!,
+                  images: response.images!,
+                  onFollow: () => _userController.onFollow(context),
+                  live: _userController.live,
+                  silence: _userController.silence,
+                ),
+              )
+            : GestureDetector(
+                onTap: _userController.onReload,
+                behavior: HitTestBehavior.opaque,
+                child: const SizedBox(height: 56, width: double.infinity),
               ),
-            )
-          : GestureDetector(
-              onTap: _userController.onReload,
-              behavior: HitTestBehavior.opaque,
-              child: const SizedBox(height: 56, width: double.infinity),
-            ),
       Error(:var errMsg) => scrollErrorWidget(
-          errMsg: errMsg,
-          onReload: _userController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _userController.onReload,
+      ),
     };
   }
 }

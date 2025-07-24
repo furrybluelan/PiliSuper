@@ -25,7 +25,8 @@ class VideoUtils {
           : item.backupUrl ?? "";
     }
     if (item is CodecItem) {
-      backupUrl = (item.urlInfo?.first.host)! +
+      backupUrl =
+          (item.urlInfo?.first.host)! +
           item.baseUrl! +
           item.urlInfo!.first.extra!;
     } else {
@@ -49,9 +50,9 @@ class VideoUtils {
       videoUrl = uri.replace(host: hostname, port: 443).toString();
     } else if (videoUrl.contains(".mcdn.bilivideo") ||
         videoUrl.contains("/upgcxcode/")) {
-      videoUrl = Uri.parse(videoUrl)
-          .replace(host: defaultCDNHost, port: 443)
-          .toString();
+      videoUrl = Uri.parse(
+        videoUrl,
+      ).replace(host: defaultCDNHost, port: 443).toString();
       // videoUrl =
       //     'https://proxy-tf-all-ws.bilivideo.com/?url=${Uri.encodeComponent(videoUrl)}';
     }

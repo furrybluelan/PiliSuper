@@ -9,7 +9,7 @@ class DanmakuFilterHttp {
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'data': DanmakuBlockDataModel.fromJson(res.data['data'])
+        'data': DanmakuBlockDataModel.fromJson(res.data['data']),
       };
     } else {
       return {
@@ -37,8 +37,10 @@ class DanmakuFilterHttp {
     }
   }
 
-  static Future danmakuFilterAdd(
-      {required String filter, required int type}) async {
+  static Future danmakuFilterAdd({
+    required String filter,
+    required int type,
+  }) async {
     var res = await Request().post(
       Api.danmakuFilterAdd,
       queryParameters: {

@@ -8,8 +8,13 @@ class SpaceOpusItemModel {
   Stat? stat;
   Cover? cover;
 
-  SpaceOpusItemModel(
-      {this.content, this.jumpUrl, this.opusId, this.stat, this.cover});
+  SpaceOpusItemModel({
+    this.content,
+    this.jumpUrl,
+    this.opusId,
+    this.stat,
+    this.cover,
+  });
 
   factory SpaceOpusItemModel.fromJson(Map<String, dynamic> json) =>
       SpaceOpusItemModel(

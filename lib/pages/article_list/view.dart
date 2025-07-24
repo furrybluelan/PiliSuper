@@ -25,8 +25,10 @@ class ArticleListPage extends StatefulWidget {
 }
 
 class _ArticleListPageState extends State<ArticleListPage> {
-  final _controller =
-      Get.put(ArticleListController(), tag: Utils.generateRandomString(8));
+  final _controller = Get.put(
+    ArticleListController(),
+    tag: Utils.generateRandomString(8),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +45,11 @@ class _ArticleListPageState extends State<ArticleListPage> {
               Obx(() => _buildHeader(theme, _controller.list.value)),
               SliverPadding(
                 padding: EdgeInsets.only(
-                    bottom: MediaQuery.paddingOf(context).bottom + 80),
+                  bottom: MediaQuery.paddingOf(context).bottom + 80,
+                ),
                 sliver: Obx(
-                    () => _buildBody(theme, _controller.loadingState.value)),
+                  () => _buildBody(theme, _controller.loadingState.value),
+                ),
               ),
             ],
           ),
@@ -55,38 +59,42 @@ class _ArticleListPageState extends State<ArticleListPage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<ArticleListItemModel>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<ArticleListItemModel>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => SliverPadding(
-          padding: EdgeInsets.only(
-              top: MediaQuery.paddingOf(context).top + kToolbarHeight + 120),
-          sliver: SliverGrid(
-            gridDelegate: Grid.videoCardHDelegate(context),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return const VideoCardHSkeleton();
-              },
-              childCount: 10,
-            ),
+        padding: EdgeInsets.only(
+          top: MediaQuery.paddingOf(context).top + kToolbarHeight + 120,
+        ),
+        sliver: SliverGrid(
+          gridDelegate: Grid.videoCardHDelegate(context),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              return const VideoCardHSkeleton();
+            },
+            childCount: 10,
           ),
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return ArticleListItem(
-                    item: response[index],
-                  );
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: _controller.onReload),
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return ArticleListItem(
+                      item: response[index],
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 
@@ -160,8 +168,8 @@ class _ArticleListPageState extends State<ArticleListPage> {
                     TextSpan(
                       children: [
                         TextSpan(
-                            text:
-                                '${NumUtil.numFormat(item.articlesCount)}篇专栏'),
+                          text: '${NumUtil.numFormat(item.articlesCount)}篇专栏',
+                        ),
                         divider,
                         TextSpan(text: '${NumUtil.numFormat(item.words)}个字'),
                         divider,
@@ -174,7 +182,8 @@ class _ArticleListPageState extends State<ArticleListPage> {
                     TextSpan(
                       children: [
                         TextSpan(
-                            text: '${DateUtil.dateFormat(item.updateTime)}更新'),
+                          text: '${DateUtil.dateFormat(item.updateTime)}更新',
+                        ),
                         divider,
                         TextSpan(text: '文集号: ${item.id}'),
                       ],
@@ -191,7 +200,8 @@ class _ArticleListPageState extends State<ArticleListPage> {
         IconButton(
           tooltip: '浏览器打开',
           onPressed: () => PageUtils.inAppWebview(
-              '${HttpString.baseUrl}/read/mobile-readlist/rl${_controller.id}'),
+            '${HttpString.baseUrl}/read/mobile-readlist/rl${_controller.id}',
+          ),
           icon: const Icon(Icons.open_in_browser_outlined, size: 19),
         ),
         const SizedBox(width: 10),

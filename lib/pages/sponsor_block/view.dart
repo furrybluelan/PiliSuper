@@ -53,323 +53,337 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
 
   void _checkServerStatus() {
     Request().get('$_blockServer/api/status/uptime').then((res) {
-      _serverStatus.value = res.statusCode == 200 &&
+      _serverStatus.value =
+          res.statusCode == 200 &&
           res.data is String &&
           Utils.isStringNumeric(res.data);
     });
   }
 
   Widget _blockLimitItem(
-          ThemeData theme, TextStyle titleStyle, TextStyle subTitleStyle) =>
-      Builder(
-        builder: (context) {
-          return ListTile(
-            dense: true,
-            onTap: () {
-              _textController.text = _blockLimit.toString();
-              showDialog(
-                context: context,
-                builder: (_) {
-                  return AlertDialog(
-                    title: Text('最短片段时长', style: titleStyle),
-                    content: TextFormField(
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      controller: _textController,
-                      autofocus: true,
-                      decoration: const InputDecoration(suffixText: 's'),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: Get.back,
-                        child: Text(
-                          '取消',
-                          style: TextStyle(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
+    ThemeData theme,
+    TextStyle titleStyle,
+    TextStyle subTitleStyle,
+  ) => Builder(
+    builder: (context) {
+      return ListTile(
+        dense: true,
+        onTap: () {
+          _textController.text = _blockLimit.toString();
+          showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text('最短片段时长', style: titleStyle),
+                content: TextFormField(
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  controller: _textController,
+                  autofocus: true,
+                  decoration: const InputDecoration(suffixText: 's'),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: Get.back,
+                    child: Text(
+                      '取消',
+                      style: TextStyle(
+                        color: theme.colorScheme.outline,
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Get.back();
-                          _blockLimit = max(0.0,
-                              double.tryParse(_textController.text) ?? 0.0);
-                          setting.put(SettingBoxKey.blockLimit, _blockLimit);
-                          (context as Element).markNeedsBuild();
-                        },
-                        child: const Text('确定'),
-                      )
-                    ],
-                  );
-                },
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Get.back();
+                      _blockLimit = max(
+                        0.0,
+                        double.tryParse(_textController.text) ?? 0.0,
+                      );
+                      setting.put(SettingBoxKey.blockLimit, _blockLimit);
+                      (context as Element).markNeedsBuild();
+                    },
+                    child: const Text('确定'),
+                  ),
+                ],
               );
             },
-            title: Text('最短片段时长', style: titleStyle),
-            subtitle: Text(
-              '忽略短于此时长的片段',
-              style: subTitleStyle,
-            ),
-            trailing: Text(
-              '${_blockLimit}s',
-              style: const TextStyle(fontSize: 13),
-            ),
           );
         },
+        title: Text('最短片段时长', style: titleStyle),
+        subtitle: Text(
+          '忽略短于此时长的片段',
+          style: subTitleStyle,
+        ),
+        trailing: Text(
+          '${_blockLimit}s',
+          style: const TextStyle(fontSize: 13),
+        ),
       );
+    },
+  );
 
   Widget _aboudItem(TextStyle titleStyle, TextStyle subTitleStyle) => ListTile(
-        dense: true,
-        title: Text('关于空降助手', style: titleStyle),
-        subtitle: Text(_url, style: subTitleStyle),
-        onTap: () => PageUtils.launchURL(_url),
-      );
+    dense: true,
+    title: Text('关于空降助手', style: titleStyle),
+    subtitle: Text(_url, style: subTitleStyle),
+    onTap: () => PageUtils.launchURL(_url),
+  );
 
   Widget _userIdItem(
-          ThemeData theme, TextStyle titleStyle, TextStyle subTitleStyle) =>
-      Builder(
-        builder: (context) {
-          return ListTile(
-            dense: true,
-            title: Text('用户ID', style: titleStyle),
-            subtitle: Text(_userId, style: subTitleStyle),
-            onTap: () {
-              final key = GlobalKey<FormState>();
-              _textController.text = _userId;
-              showDialog(
-                context: context,
-                builder: (_) {
-                  return AlertDialog(
-                    title: Text('用户ID', style: titleStyle),
-                    content: Form(
-                      key: key,
-                      child: TextFormField(
-                        minLines: 1,
-                        maxLines: 4,
-                        autofocus: true,
-                        controller: _textController,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'[a-zA-Z\d]+')),
-                        ],
-                        validator: (value) {
-                          if ((value?.length ?? -1) < 30) {
-                            return '用户ID要求至少为30个字符长度的纯字符串';
-                          }
-                          return null;
-                        },
+    ThemeData theme,
+    TextStyle titleStyle,
+    TextStyle subTitleStyle,
+  ) => Builder(
+    builder: (context) {
+      return ListTile(
+        dense: true,
+        title: Text('用户ID', style: titleStyle),
+        subtitle: Text(_userId, style: subTitleStyle),
+        onTap: () {
+          final key = GlobalKey<FormState>();
+          _textController.text = _userId;
+          showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text('用户ID', style: titleStyle),
+                content: Form(
+                  key: key,
+                  child: TextFormField(
+                    minLines: 1,
+                    maxLines: 4,
+                    autofocus: true,
+                    controller: _textController,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\d]+')),
+                    ],
+                    validator: (value) {
+                      if ((value?.length ?? -1) < 30) {
+                        return '用户ID要求至少为30个字符长度的纯字符串';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Get.back();
+                      _userId = const Uuid().v4().replaceAll('-', '');
+                      setting.put(SettingBoxKey.blockUserID, _userId);
+                      (context as Element).markNeedsBuild();
+                    },
+                    child: const Text('随机'),
+                  ),
+                  TextButton(
+                    onPressed: Get.back,
+                    child: Text(
+                      '取消',
+                      style: TextStyle(
+                        color: theme.colorScheme.outline,
                       ),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Get.back();
-                          _userId = const Uuid().v4().replaceAll('-', '');
-                          setting.put(SettingBoxKey.blockUserID, _userId);
-                          (context as Element).markNeedsBuild();
-                        },
-                        child: const Text('随机'),
-                      ),
-                      TextButton(
-                        onPressed: Get.back,
-                        child: Text(
-                          '取消',
-                          style: TextStyle(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          if (key.currentState?.validate() == true) {
-                            Get.back();
-                            _userId = _textController.text;
-                            setting.put(SettingBoxKey.blockUserID, _userId);
-                            (context as Element).markNeedsBuild();
-                          }
-                        },
-                        child: const Text('确定'),
-                      )
-                    ],
-                  );
-                },
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (key.currentState?.validate() == true) {
+                        Get.back();
+                        _userId = _textController.text;
+                        setting.put(SettingBoxKey.blockUserID, _userId);
+                        (context as Element).markNeedsBuild();
+                      }
+                    },
+                    child: const Text('确定'),
+                  ),
+                ],
               );
             },
           );
         },
       );
+    },
+  );
 
   Widget _blockToastItem(TextStyle titleStyle) => Builder(
-        builder: (context) {
-          void update() {
-            _blockToast = !_blockToast;
-            setting.put(SettingBoxKey.blockToast, _blockToast);
-            (context as Element).markNeedsBuild();
-          }
+    builder: (context) {
+      void update() {
+        _blockToast = !_blockToast;
+        setting.put(SettingBoxKey.blockToast, _blockToast);
+        (context as Element).markNeedsBuild();
+      }
 
-          return ListTile(
-            dense: true,
-            onTap: update,
-            title: Text(
-              '显示跳过Toast',
-              style: titleStyle,
-            ),
-            trailing: Transform.scale(
-              alignment: Alignment.centerRight,
-              scale: 0.8,
-              child: Switch(
-                thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
-                  if (states.isNotEmpty &&
-                      states.first == WidgetState.selected) {
-                    return const Icon(Icons.done);
-                  }
-                  return null;
-                }),
-                value: _blockToast,
-                onChanged: (val) => update(),
-              ),
-            ),
-          );
-        },
+      return ListTile(
+        dense: true,
+        onTap: update,
+        title: Text(
+          '显示跳过Toast',
+          style: titleStyle,
+        ),
+        trailing: Transform.scale(
+          alignment: Alignment.centerRight,
+          scale: 0.8,
+          child: Switch(
+            thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
+              if (states.isNotEmpty && states.first == WidgetState.selected) {
+                return const Icon(Icons.done);
+              }
+              return null;
+            }),
+            value: _blockToast,
+            onChanged: (val) => update(),
+          ),
+        ),
       );
+    },
+  );
 
-  Widget _blockTrackItem(TextStyle titleStyle, TextStyle subTitleStyle) =>
-      Builder(
-        builder: (context) {
-          void update() {
-            _blockTrack = !_blockTrack;
-            setting.put(SettingBoxKey.blockTrack, _blockTrack);
-            (context as Element).markNeedsBuild();
-          }
+  Widget _blockTrackItem(
+    TextStyle titleStyle,
+    TextStyle subTitleStyle,
+  ) => Builder(
+    builder: (context) {
+      void update() {
+        _blockTrack = !_blockTrack;
+        setting.put(SettingBoxKey.blockTrack, _blockTrack);
+        (context as Element).markNeedsBuild();
+      }
 
-          return ListTile(
-              dense: true,
-              onTap: update,
-              title: Text(
-                '跳过次数统计跟踪',
-                style: titleStyle,
-              ),
-              subtitle: Text(
-                // from origin extension
-                '此功能追踪您跳过了哪些片段，让用户知道他们提交的片段帮助了多少人。同时点赞会作为依据，确保垃圾信息不会污染数据库。在您每次跳过片段时，我们都会向服务器发送一条消息。希望大家开启此项设置，以便得到更准确的统计数据。:)',
-                style: subTitleStyle,
-              ),
-              trailing: Transform.scale(
-                alignment: Alignment.centerRight,
-                scale: 0.8,
-                child: Switch(
-                  thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
-                    if (states.isNotEmpty &&
-                        states.first == WidgetState.selected) {
-                      return const Icon(Icons.done);
-                    }
-                    return null;
-                  }),
-                  value: _blockTrack,
-                  onChanged: (val) => update(),
-                ),
-              ));
-        },
+      return ListTile(
+        dense: true,
+        onTap: update,
+        title: Text(
+          '跳过次数统计跟踪',
+          style: titleStyle,
+        ),
+        subtitle: Text(
+          // from origin extension
+          '此功能追踪您跳过了哪些片段，让用户知道他们提交的片段帮助了多少人。同时点赞会作为依据，确保垃圾信息不会污染数据库。在您每次跳过片段时，我们都会向服务器发送一条消息。希望大家开启此项设置，以便得到更准确的统计数据。:)',
+          style: subTitleStyle,
+        ),
+        trailing: Transform.scale(
+          alignment: Alignment.centerRight,
+          scale: 0.8,
+          child: Switch(
+            thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
+              if (states.isNotEmpty && states.first == WidgetState.selected) {
+                return const Icon(Icons.done);
+              }
+              return null;
+            }),
+            value: _blockTrack,
+            onChanged: (val) => update(),
+          ),
+        ),
       );
+    },
+  );
 
   Widget _blockServerItem(
-          ThemeData theme, TextStyle titleStyle, TextStyle subTitleStyle) =>
-      Builder(
-        builder: (context) {
-          return ListTile(
-            dense: true,
-            onTap: () {
-              _textController.text = _blockServer;
-              showDialog(
-                context: context,
-                builder: (_) {
-                  return AlertDialog(
-                    title: Text('服务器地址', style: titleStyle),
-                    content: TextFormField(
-                      keyboardType: TextInputType.url,
-                      controller: _textController,
-                      autofocus: true,
+    ThemeData theme,
+    TextStyle titleStyle,
+    TextStyle subTitleStyle,
+  ) => Builder(
+    builder: (context) {
+      return ListTile(
+        dense: true,
+        onTap: () {
+          _textController.text = _blockServer;
+          showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text('服务器地址', style: titleStyle),
+                content: TextFormField(
+                  keyboardType: TextInputType.url,
+                  controller: _textController,
+                  autofocus: true,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Get.back();
+                      _blockServer = HttpString.sponsorBlockBaseUrl;
+                      setting.put(SettingBoxKey.blockServer, _blockServer);
+                      Request.accountManager.blockServer = _blockServer;
+                      (context as Element).markNeedsBuild();
+                    },
+                    child: const Text('重置'),
+                  ),
+                  TextButton(
+                    onPressed: Get.back,
+                    child: Text(
+                      '取消',
+                      style: TextStyle(
+                        color: theme.colorScheme.outline,
+                      ),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Get.back();
-                          _blockServer = HttpString.sponsorBlockBaseUrl;
-                          setting.put(SettingBoxKey.blockServer, _blockServer);
-                          Request.accountManager.blockServer = _blockServer;
-                          (context as Element).markNeedsBuild();
-                        },
-                        child: const Text('重置'),
-                      ),
-                      TextButton(
-                        onPressed: Get.back,
-                        child: Text(
-                          '取消',
-                          style: TextStyle(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Get.back();
-                          _blockServer = _textController.text;
-                          setting.put(SettingBoxKey.blockServer, _blockServer);
-                          Request.accountManager.blockServer = _blockServer;
-                          (context as Element).markNeedsBuild();
-                        },
-                        child: const Text('确定'),
-                      )
-                    ],
-                  );
-                },
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Get.back();
+                      _blockServer = _textController.text;
+                      setting.put(SettingBoxKey.blockServer, _blockServer);
+                      Request.accountManager.blockServer = _blockServer;
+                      (context as Element).markNeedsBuild();
+                    },
+                    child: const Text('确定'),
+                  ),
+                ],
               );
             },
-            title: Text(
-              '服务器地址',
-              style: titleStyle,
-            ),
-            subtitle: Text(
-              _blockServer,
-              style: subTitleStyle,
-            ),
           );
         },
+        title: Text(
+          '服务器地址',
+          style: titleStyle,
+        ),
+        subtitle: Text(
+          _blockServer,
+          style: subTitleStyle,
+        ),
       );
+    },
+  );
 
   Widget _serverStatusItem(ThemeData theme, TextStyle titleStyle) => Obx(
-        () {
-          String status;
-          Color? color;
-          switch (_serverStatus.value) {
-            case null:
-              status = '——';
-            case true:
-              status = '正常';
-              color = theme.colorScheme.primary;
-            case false:
-              status = '错误';
-              color = theme.colorScheme.error;
-          }
-          return ListTile(
-            dense: true,
-            onTap: () {
-              _serverStatus.value = null;
-              _checkServerStatus();
-            },
-            title: Text('服务器状态', style: titleStyle),
-            trailing: Text(
-              status,
-              style: TextStyle(fontSize: 13, color: color),
-            ),
-          );
+    () {
+      String status;
+      Color? color;
+      switch (_serverStatus.value) {
+        case null:
+          status = '——';
+        case true:
+          status = '正常';
+          color = theme.colorScheme.primary;
+        case false:
+          status = '错误';
+          color = theme.colorScheme.error;
+      }
+      return ListTile(
+        dense: true,
+        onTap: () {
+          _serverStatus.value = null;
+          _checkServerStatus();
         },
+        title: Text('服务器状态', style: titleStyle),
+        trailing: Text(
+          status,
+          style: TextStyle(fontSize: 13, color: color),
+        ),
       );
+    },
+  );
 
-  void onSelectColor(BuildContext context, int index, Color color,
-      Pair<SegmentType, SkipType> item) {
+  void onSelectColor(
+    BuildContext context,
+    int index,
+    Color color,
+    Pair<SegmentType, SkipType> item,
+  ) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -406,10 +420,11 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
           callback: (Color? color) {
             _blockColor[index] = color ?? item.first.color;
             setting.put(
-                SettingBoxKey.blockColor,
-                _blockColor
-                    .map((item) => item.value.toRadixString(16).substring(2))
-                    .toList());
+              SettingBoxKey.blockColor,
+              _blockColor
+                  .map((item) => item.value.toRadixString(16).substring(2))
+                  .toList(),
+            );
             (context as Element).markNeedsBuild();
           },
         ),
@@ -450,7 +465,8 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
           SliverToBoxAdapter(child: _serverStatusItem(theme, titleStyle)),
           dividerL,
           SliverToBoxAdapter(
-              child: _blockLimitItem(theme, titleStyle, subTitleStyle)),
+            child: _blockLimitItem(theme, titleStyle, subTitleStyle),
+          ),
           sliverDivider,
           SliverToBoxAdapter(child: _blockToastItem(titleStyle)),
           sliverDivider,
@@ -464,27 +480,34 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
           ),
           dividerL,
           SliverToBoxAdapter(
-              child: _userIdItem(theme, titleStyle, subTitleStyle)),
+            child: _userIdItem(theme, titleStyle, subTitleStyle),
+          ),
           sliverDivider,
           SliverToBoxAdapter(
-              child: _blockServerItem(theme, titleStyle, subTitleStyle)),
+            child: _blockServerItem(theme, titleStyle, subTitleStyle),
+          ),
           dividerL,
           SliverToBoxAdapter(child: _aboudItem(titleStyle, subTitleStyle)),
           dividerL,
           SliverToBoxAdapter(
-              child: SizedBox(
-            height: 55 + MediaQuery.paddingOf(context).bottom,
-          )),
+            child: SizedBox(
+              height: 55 + MediaQuery.paddingOf(context).bottom,
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildItem(
-      ThemeData theme, int index, Pair<SegmentType, SkipType> item) {
+    ThemeData theme,
+    int index,
+    Pair<SegmentType, SkipType> item,
+  ) {
     return Builder(
       builder: (context) {
         Color color = _blockColor[index];
+        final isDisable = item.second == SkipType.disable;
         return ListTile(
           dense: true,
           enabled: item.second != SkipType.disable,
@@ -515,20 +538,29 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
                 ),
               ),
               Builder(
-                builder: (context) {
-                  return PopupMenuButton(
+                builder: (btnContext) {
+                  return PopupMenuButton<SkipType>(
                     initialValue: item.second,
                     onSelected: (e) {
+                      final updateItem = isDisable || e == SkipType.disable;
                       item.second = e;
-                      setting.put(SettingBoxKey.blockSettings,
-                          _blockSettings.map((e) => e.second.index).toList());
-                      (context as Element).markNeedsBuild();
+                      setting.put(
+                        SettingBoxKey.blockSettings,
+                        _blockSettings.map((e) => e.second.index).toList(),
+                      );
+                      if (updateItem) {
+                        (context as Element).markNeedsBuild();
+                      } else {
+                        (btnContext as Element).markNeedsBuild();
+                      }
                     },
                     itemBuilder: (context) => SkipType.values
-                        .map((item) => PopupMenuItem<SkipType>(
-                              value: item,
-                              child: Text(item.title),
-                            ))
+                        .map(
+                          (item) => PopupMenuItem<SkipType>(
+                            value: item,
+                            child: Text(item.title),
+                          ),
+                        )
                         .toList(),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -540,9 +572,10 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
                             style: TextStyle(
                               height: 1,
                               fontSize: 14,
-                              color: item.second == SkipType.disable
-                                  ? theme.colorScheme.outline
-                                      .withValues(alpha: 0.7)
+                              color: isDisable
+                                  ? theme.colorScheme.outline.withValues(
+                                      alpha: 0.7,
+                                    )
                                   : theme.colorScheme.secondary,
                             ),
                             strutStyle: const StrutStyle(height: 1, leading: 0),
@@ -550,9 +583,10 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
                           Icon(
                             MdiIcons.unfoldMoreHorizontal,
                             size: MediaQuery.textScalerOf(context).scale(14),
-                            color: item.second == SkipType.disable
-                                ? theme.colorScheme.outline
-                                    .withValues(alpha: 0.7)
+                            color: isDisable
+                                ? theme.colorScheme.outline.withValues(
+                                    alpha: 0.7,
+                                  )
                                 : theme.colorScheme.secondary,
                           ),
                         ],
@@ -567,9 +601,7 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
             item.first.description,
             style: TextStyle(
               fontSize: 12,
-              color: item.second == SkipType.disable
-                  ? null
-                  : theme.colorScheme.outline,
+              color: isDisable ? null : theme.colorScheme.outline,
             ),
           ),
         );

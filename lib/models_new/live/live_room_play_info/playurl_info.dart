@@ -15,14 +15,15 @@ class PlayurlInfo {
   });
 
   factory PlayurlInfo.fromJson(Map<String, dynamic> json) => PlayurlInfo(
-        confJson: json['conf_json'] as String?,
-        playurl: json['playurl'] == null
-            ? null
-            : Playurl.fromJson(json['playurl'] as Map<String, dynamic>),
-        expectedQuality: json['expected_quality'] == null
-            ? null
-            : ExpectedQuality.fromJson(
-                json['expected_quality'] as Map<String, dynamic>),
-        qnDescMoreAb: json['qn_desc_more_ab'] as int?,
-      );
+    confJson: json['conf_json'] as String?,
+    playurl: json['playurl'] == null
+        ? null
+        : Playurl.fromJson(json['playurl'] as Map<String, dynamic>),
+    expectedQuality: json['expected_quality'] == null
+        ? null
+        : ExpectedQuality.fromJson(
+            json['expected_quality'] as Map<String, dynamic>,
+          ),
+    qnDescMoreAb: json['qn_desc_more_ab'] as int?,
+  );
 }

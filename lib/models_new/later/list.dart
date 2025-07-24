@@ -103,65 +103,67 @@ class LaterItemModel with MultiSelectData {
   });
 
   factory LaterItemModel.fromJson(Map<String, dynamic> json) => LaterItemModel(
-        aid: json['aid'] as int?,
-        videos: json['videos'] as int?,
-        tid: json['tid'] as int?,
-        tname: json['tname'] as String?,
-        copyright: json['copyright'] as int?,
-        pic: json['pic'] as String?,
-        title: json['title'] as String?,
-        pubdate: json['pubdate'] as int?,
-        ctime: json['ctime'] as int?,
-        desc: json['desc'] as String?,
-        state: json['state'] as int?,
-        duration: json['duration'] as int?,
-        redirectUrl: json['redirect_url'] as String?,
-        rights: json['rights'] == null
-            ? null
-            : Rights.fromJson(json['rights'] as Map<String, dynamic>),
-        owner: json['owner'] == null
-            ? null
-            : Owner.fromJson(json['owner'] as Map<String, dynamic>),
-        stat: json['stat'] == null
-            ? null
-            : Stat.fromJson(json['stat'] as Map<String, dynamic>),
-        dynam1c: json['dynamic'] as String?,
-        dimension: json['dimension'] == null
-            ? null
-            : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
-        shortLinkV2: json['short_link_v2'] as String?,
-        upFromV2: json['up_from_v2'] as int?,
-        pubLocation: json['pub_location'] as String?,
-        cover43: json['cover43'] as String?,
-        tidv2: json['tidv2'] as int?,
-        tnamev2: json['tnamev2'] as String?,
-        pidV2: json['pid_v2'] as int?,
-        pidNameV2: json['pid_name_v2'] as String?,
-        pages: (json['pages'] as List<dynamic>?)
-            ?.map((e) => Page.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        bangumi: json['bangumi'] == null
-            ? null
-            : Bangumi.fromJson(json['bangumi'] as Map<String, dynamic>),
-        subtitle: json['bangumi'] == null
-            ? null
-            : (json['title'] as String)
-                .replaceFirst('${json['bangumi']['season']['title']} ', ''),
-        cid: json['cid'] as int?,
-        progress: json['progress'] as int?,
-        addAt: json['add_at'] as int?,
-        bvid: json['bvid'] as String?,
-        uri: json['uri'] as String?,
-        viewed: json['viewed'] as bool?,
-        seq: json['seq'] as int?,
-        enableVt: json['enable_vt'] as int?,
-        viewText1: json['view_text_1'] as String?,
-        isPgc: json['is_pgc'] as bool?,
-        pgcLabel: json['pgc_label'] == '' ? null : json['pgc_label'],
-        isPugv: json['is_pugv'] as bool?,
-        missionId: json['mission_id'] as int?,
-        firstFrame: json['first_frame'] as String?,
-        seasonId: json['season_id'] as int?,
-        isCharging: json['charging_pay']?['level'] != null,
-      );
+    aid: json['aid'] as int?,
+    videos: json['videos'] as int?,
+    tid: json['tid'] as int?,
+    tname: json['tname'] as String?,
+    copyright: json['copyright'] as int?,
+    pic: json['pic'] as String?,
+    title: json['title'] as String?,
+    pubdate: json['pubdate'] as int?,
+    ctime: json['ctime'] as int?,
+    desc: json['desc'] as String?,
+    state: json['state'] as int?,
+    duration: json['duration'] as int?,
+    redirectUrl: json['redirect_url'] as String?,
+    rights: json['rights'] == null
+        ? null
+        : Rights.fromJson(json['rights'] as Map<String, dynamic>),
+    owner: json['owner'] == null
+        ? null
+        : Owner.fromJson(json['owner'] as Map<String, dynamic>),
+    stat: json['stat'] == null
+        ? null
+        : Stat.fromJson(json['stat'] as Map<String, dynamic>),
+    dynam1c: json['dynamic'] as String?,
+    dimension: json['dimension'] == null
+        ? null
+        : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
+    shortLinkV2: json['short_link_v2'] as String?,
+    upFromV2: json['up_from_v2'] as int?,
+    pubLocation: json['pub_location'] as String?,
+    cover43: json['cover43'] as String?,
+    tidv2: json['tidv2'] as int?,
+    tnamev2: json['tnamev2'] as String?,
+    pidV2: json['pid_v2'] as int?,
+    pidNameV2: json['pid_name_v2'] as String?,
+    pages: (json['pages'] as List<dynamic>?)
+        ?.map((e) => Page.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    bangumi: json['bangumi'] == null
+        ? null
+        : Bangumi.fromJson(json['bangumi'] as Map<String, dynamic>),
+    subtitle: json['bangumi'] == null
+        ? null
+        : (json['title'] as String).replaceFirst(
+            '${json['bangumi']['season']['title']} ',
+            '',
+          ),
+    cid: json['cid'] as int?,
+    progress: json['progress'] as int?,
+    addAt: json['add_at'] as int?,
+    bvid: json['bvid'] as String?,
+    uri: json['uri'] as String?,
+    viewed: json['viewed'] as bool?,
+    seq: json['seq'] as int?,
+    enableVt: json['enable_vt'] as int?,
+    viewText1: json['view_text_1'] as String?,
+    isPgc: json['is_pgc'] as bool?,
+    pgcLabel: json['pgc_label'] == '' ? null : json['pgc_label'],
+    isPugv: json['is_pugv'] as bool?,
+    missionId: json['mission_id'] as int?,
+    firstFrame: json['first_frame'] as String?,
+    seasonId: json['season_id'] as int?,
+    isCharging: json['charging_pay']?['level'] != null,
+  );
 }

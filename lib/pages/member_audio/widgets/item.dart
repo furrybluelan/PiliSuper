@@ -36,13 +36,13 @@ class MemberAudioItem extends StatelessWidget {
                 child: LayoutBuilder(
                   builder:
                       (BuildContext context, BoxConstraints boxConstraints) {
-                    return NetworkImgLayer(
-                      radius: 4,
-                      src: item.cover,
-                      width: boxConstraints.maxWidth,
-                      height: boxConstraints.maxHeight,
-                    );
-                  },
+                        return NetworkImgLayer(
+                          radius: 4,
+                          src: item.cover,
+                          width: boxConstraints.maxWidth,
+                          height: boxConstraints.maxHeight,
+                        );
+                      },
                 ),
               ),
               const SizedBox(width: 10),
@@ -76,7 +76,7 @@ class MemberAudioItem extends StatelessWidget {
                           value: item.statistic?.comment,
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),

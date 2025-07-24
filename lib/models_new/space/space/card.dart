@@ -105,83 +105,87 @@ class SpaceCard {
   });
 
   factory SpaceCard.fromJson(Map<String, dynamic> json) => SpaceCard(
-        mid: json['mid'] as String?,
-        name: json['name'] as String?,
-        approve: json['approve'] as bool?,
-        rank: json['rank'] as String?,
-        face: json['face'] as String?,
-        displayRank: json['DisplayRank'] as String?,
-        regtime: json['regtime'] as int?,
-        spacesta: json['spacesta'] as int?,
-        birthday: json['birthday'] as String?,
-        place: json['place'] as String?,
-        description: json['description'] as String?,
-        article: json['article'] as int?,
-        attentions: json['attentions'] as dynamic,
-        fans: json['fans'] as int?,
-        friend: json['friend'] as int?,
-        attention: json['attention'] as int?,
-        sign: json['sign'] as String?,
-        levelInfo: json['level_info'] == null
-            ? null
-            : LevelInfo.fromJson(json['level_info'] as Map<String, dynamic>),
-        pendant: json['pendant'] == null
-            ? null
-            : Pendant.fromJson(json['pendant'] as Map<String, dynamic>),
-        nameplate: json['nameplate'] == null
-            ? null
-            : Nameplate.fromJson(json['nameplate'] as Map<String, dynamic>),
-        officialVerify: json['official_verify'] == null
-            ? null
-            : OfficialVerify.fromJson(
-                json['official_verify'] as Map<String, dynamic>),
-        professionVerify: json['profession_verify'] == null
-            ? null
-            : ProfessionVerify.fromJson(
-                json['profession_verify'] as Map<String, dynamic>),
-        vip: json['vip'] == null
-            ? null
-            : Vip.fromJson(json['vip'] as Map<String, dynamic>),
-        silence: json['silence'] as int?,
-        endTime: json['end_time'] as int?,
-        silenceUrl: json['silence_url'] as String?,
-        likes: json['likes'] == null
-            ? null
-            : Likes.fromJson(json['likes'] as Map<String, dynamic>),
-        achieve: json['achieve'] == null
-            ? null
-            : Achieve.fromJson(json['achieve'] as Map<String, dynamic>),
-        relation: json['relation'] == null
-            ? null
-            : SpaceRelation.fromJson(json['relation'] as Map<String, dynamic>),
-        isDeleted: json['is_deleted'] as int?,
-        honours: json['honours'] == null
-            ? null
-            : Honours.fromJson(json['honours'] as Map<String, dynamic>),
-        liveFansWearing: json['live_fans_wearing'] == null
-            ? null
-            : LiveFansWearing.fromJson(
-                json['live_fans_wearing'] as Map<String, dynamic>),
-        spaceTag: (json['space_tag'] as List<dynamic>?)
-            ?.where((e) => (e?['title'] as String?)?.startsWith('IP') == true)
-            .map((e) => SpaceTag.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        faceNftNew: json['face_nft_new'] as int?,
-        hasFaceNft: json['has_face_nft'] as bool?,
-        nftCertificate: json['nft_certificate'] == null
-            ? null
-            : NftCertificate.fromJson(
-                json['nft_certificate'] as Map<String, dynamic>),
-        entrance: json['entrance'] == null
-            ? null
-            : Entrance.fromJson(json['entrance'] as Map<String, dynamic>),
-        nftId: json['nft_id'] as String?,
-        nftFaceIcon: json['nft_face_icon'] as dynamic,
-        digitalId: json['digital_id'] as String?,
-        digitalType: json['digital_type'] as int?,
-        hasDigitalAsset: json['has_digital_asset'] as bool?,
-        prInfo: json['pr_info'] == null
-            ? null
-            : SpacePrInfo.fromJson(json['pr_info'] as Map<String, dynamic>),
-      );
+    mid: json['mid'] as String?,
+    name: json['name'] as String?,
+    approve: json['approve'] as bool?,
+    rank: json['rank'] as String?,
+    face: json['face'] as String?,
+    displayRank: json['DisplayRank'] as String?,
+    regtime: json['regtime'] as int?,
+    spacesta: json['spacesta'] as int?,
+    birthday: json['birthday'] as String?,
+    place: json['place'] as String?,
+    description: json['description'] as String?,
+    article: json['article'] as int?,
+    attentions: json['attentions'] as dynamic,
+    fans: json['fans'] as int?,
+    friend: json['friend'] as int?,
+    attention: json['attention'] as int?,
+    sign: json['sign'] as String?,
+    levelInfo: json['level_info'] == null
+        ? null
+        : LevelInfo.fromJson(json['level_info'] as Map<String, dynamic>),
+    pendant: json['pendant'] == null
+        ? null
+        : Pendant.fromJson(json['pendant'] as Map<String, dynamic>),
+    nameplate: json['nameplate'] == null
+        ? null
+        : Nameplate.fromJson(json['nameplate'] as Map<String, dynamic>),
+    officialVerify: json['official_verify'] == null
+        ? null
+        : OfficialVerify.fromJson(
+            json['official_verify'] as Map<String, dynamic>,
+          ),
+    professionVerify: json['profession_verify'] == null
+        ? null
+        : ProfessionVerify.fromJson(
+            json['profession_verify'] as Map<String, dynamic>,
+          ),
+    vip: json['vip'] == null
+        ? null
+        : Vip.fromJson(json['vip'] as Map<String, dynamic>),
+    silence: json['silence'] as int?,
+    endTime: json['end_time'] as int?,
+    silenceUrl: json['silence_url'] as String?,
+    likes: json['likes'] == null
+        ? null
+        : Likes.fromJson(json['likes'] as Map<String, dynamic>),
+    achieve: json['achieve'] == null
+        ? null
+        : Achieve.fromJson(json['achieve'] as Map<String, dynamic>),
+    relation: json['relation'] == null
+        ? null
+        : SpaceRelation.fromJson(json['relation'] as Map<String, dynamic>),
+    isDeleted: json['is_deleted'] as int?,
+    honours: json['honours'] == null
+        ? null
+        : Honours.fromJson(json['honours'] as Map<String, dynamic>),
+    liveFansWearing: json['live_fans_wearing'] == null
+        ? null
+        : LiveFansWearing.fromJson(
+            json['live_fans_wearing'] as Map<String, dynamic>,
+          ),
+    spaceTag: (json['space_tag'] as List<dynamic>?)
+        ?.where((e) => (e?['title'] as String?)?.startsWith('IP') == true)
+        .map((e) => SpaceTag.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    faceNftNew: json['face_nft_new'] as int?,
+    hasFaceNft: json['has_face_nft'] as bool?,
+    nftCertificate: json['nft_certificate'] == null
+        ? null
+        : NftCertificate.fromJson(
+            json['nft_certificate'] as Map<String, dynamic>,
+          ),
+    entrance: json['entrance'] == null
+        ? null
+        : Entrance.fromJson(json['entrance'] as Map<String, dynamic>),
+    nftId: json['nft_id'] as String?,
+    nftFaceIcon: json['nft_face_icon'] as dynamic,
+    digitalId: json['digital_id'] as String?,
+    digitalType: json['digital_type'] as int?,
+    hasDigitalAsset: json['has_digital_asset'] as bool?,
+    prInfo: json['pr_info'] == null
+        ? null
+        : SpacePrInfo.fromJson(json['pr_info'] as Map<String, dynamic>),
+  );
 }

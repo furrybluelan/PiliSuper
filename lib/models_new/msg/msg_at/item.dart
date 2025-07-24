@@ -10,13 +10,13 @@ class MsgAtItem {
   MsgAtItem({this.id, this.user, this.item, this.atTime});
 
   factory MsgAtItem.fromJson(Map<String, dynamic> json) => MsgAtItem(
-        id: json['id'] as int?,
-        user: json['user'] == null
-            ? null
-            : User.fromJson(json['user'] as Map<String, dynamic>),
-        item: json['item'] == null
-            ? null
-            : MsgAtContent.fromJson(json['item'] as Map<String, dynamic>),
-        atTime: json['at_time'] as int?,
-      );
+    id: json['id'] as int?,
+    user: json['user'] == null
+        ? null
+        : User.fromJson(json['user'] as Map<String, dynamic>),
+    item: json['item'] == null
+        ? null
+        : MsgAtContent.fromJson(json['item'] as Map<String, dynamic>),
+    atTime: json['at_time'] as int?,
+  );
 }

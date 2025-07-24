@@ -7,9 +7,9 @@ class Audios {
   Audios({this.count, this.item});
 
   factory Audios.fromJson(Map<String, dynamic> json) => Audios(
-        count: json['count'] as int?,
-        item: (json['item'] as List<dynamic>?)
-            ?.map((e) => SpaceAudioItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    count: json['count'] as int?,
+    item: (json['item'] as List<dynamic>?)
+        ?.map((e) => SpaceAudioItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

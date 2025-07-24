@@ -35,7 +35,8 @@ class _ReplyMePageState extends State<ReplyMePage> {
           IconButton(
             onPressed: () => Get.to(
               const WhisperSettingsPage(
-                  imSettingType: IMSettingType.SETTING_TYPE_OLD_REPLY_ME),
+                imSettingType: IMSettingType.SETTING_TYPE_OLD_REPLY_ME,
+              ),
             ),
             icon: Icon(
               size: 20,
@@ -53,9 +54,11 @@ class _ReplyMePageState extends State<ReplyMePage> {
           slivers: [
             SliverPadding(
               padding: EdgeInsets.only(
-                  bottom: MediaQuery.paddingOf(context).bottom + 80),
-              sliver: Obx(() =>
-                  _buildBody(theme, _replyMeController.loadingState.value)),
+                bottom: MediaQuery.paddingOf(context).bottom + 80,
+              ),
+              sliver: Obx(
+                () => _buildBody(theme, _replyMeController.loadingState.value),
+              ),
             ),
           ],
         ),
@@ -64,7 +67,9 @@ class _ReplyMePageState extends State<ReplyMePage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<MsgReplyItem>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<MsgReplyItem>?> loadingState,
+  ) {
     late final divider = Divider(
       indent: 72,
       endIndent: 20,
@@ -73,111 +78,125 @@ class _ReplyMePageState extends State<ReplyMePage> {
     );
     return switch (loadingState) {
       Loading() => SliverList.builder(
-          itemCount: 12,
-          itemBuilder: (context, index) {
-            return const MsgFeedTopSkeleton();
-          },
-        ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.separated(
-              itemCount: response!.length,
-              itemBuilder: (context, int index) {
-                if (index == response.length - 1) {
-                  _replyMeController.onLoadMore();
-                }
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          return const MsgFeedTopSkeleton();
+        },
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.separated(
+                itemCount: response!.length,
+                itemBuilder: (context, int index) {
+                  if (index == response.length - 1) {
+                    _replyMeController.onLoadMore();
+                  }
 
-                MsgReplyItem item = response[index];
-                return ListTile(
-                  onTap: () {
-                    String? nativeUri = item.item?.nativeUri;
-                    if (nativeUri == null ||
-                        nativeUri.isEmpty ||
-                        nativeUri.startsWith('?')) {
-                      return;
-                    }
-                    PiliScheme.routePushFromUrl(
-                      nativeUri,
-                      businessId: item.item?.businessId,
-                      oid: item.item?.subjectId,
-                    );
-                  },
-                  onLongPress: () => showConfirmDialog(
-                    context: context,
-                    title: '确定删除该通知?',
-                    onConfirm: () =>
-                        _replyMeController.onRemove(item.id, index),
-                  ),
-                  leading: GestureDetector(
-                    onTap: () => Get.toNamed('/member?mid=${item.user?.mid}'),
-                    child: NetworkImgLayer(
-                      width: 45,
-                      height: 45,
-                      type: ImageType.avatar,
-                      src: item.user?.avatar,
+                  MsgReplyItem item = response[index];
+                  return ListTile(
+                    onTap: () {
+                      String? nativeUri = item.item?.nativeUri;
+                      if (nativeUri == null ||
+                          nativeUri.isEmpty ||
+                          nativeUri.startsWith('?')) {
+                        return;
+                      }
+                      PiliScheme.routePushFromUrl(
+                        nativeUri,
+                        businessId: item.item?.businessId,
+                        oid: item.item?.subjectId,
+                      );
+                    },
+                    onLongPress: () => showConfirmDialog(
+                      context: context,
+                      title: '确定删除该通知?',
+                      onConfirm: () =>
+                          _replyMeController.onRemove(item.id, index),
                     ),
-                  ),
-                  title: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "${item.user?.nickname}",
-                          style: theme.textTheme.titleSmall!
-                              .copyWith(color: theme.colorScheme.primary),
-                        ),
-                        if (item.isMulti == 1)
+                    leading: GestureDetector(
+                      onTap: () => Get.toNamed('/member?mid=${item.user?.mid}'),
+                      child: NetworkImgLayer(
+                        width: 45,
+                        height: 45,
+                        type: ImageType.avatar,
+                        src: item.user?.avatar,
+                      ),
+                    ),
+                    title: Text.rich(
+                      TextSpan(
+                        children: [
                           TextSpan(
-                            text: " 等人",
-                            style: theme.textTheme.titleSmall!
-                                .copyWith(fontSize: 12),
+                            text: "${item.user?.nickname}",
+                            style: theme.textTheme.titleSmall!.copyWith(
+                              color: theme.colorScheme.primary,
+                            ),
                           ),
-                        TextSpan(
-                          text:
-                              " 对我的${item.item?.business}发布了${item.counts}条评论",
-                          style: theme.textTheme.titleSmall!.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant),
+                          if (item.isMulti == 1)
+                            TextSpan(
+                              text: " 等人",
+                              style: theme.textTheme.titleSmall!.copyWith(
+                                fontSize: 12,
+                              ),
+                            ),
+                          TextSpan(
+                            text:
+                                " 对我的${item.item?.business}发布了${item.counts}条评论",
+                            style: theme.textTheme.titleSmall!.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text(
+                          item.item?.sourceContent ?? "",
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        if (item.item?.targetReplyContent != null &&
+                            item.item?.targetReplyContent != "")
+                          Text(
+                            "| ${item.item?.targetReplyContent}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium!.copyWith(
+                              color: theme.colorScheme.outline,
+                              height: 1.5,
+                            ),
+                          ),
+                        if (item.item?.rootReplyContent != null &&
+                            item.item?.rootReplyContent != "")
+                          Text(
+                            " | ${item.item?.rootReplyContent}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium!.copyWith(
+                              color: theme.colorScheme.outline,
+                              height: 1.5,
+                            ),
+                          ),
+                        Text(
+                          DateUtil.dateFormat(item.replyTime),
+                          style: theme.textTheme.bodyMedium!.copyWith(
+                            fontSize: 13,
+                            color: theme.colorScheme.outline,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Text(item.item?.sourceContent ?? "",
-                          style: theme.textTheme.bodyMedium),
-                      const SizedBox(height: 4),
-                      if (item.item?.targetReplyContent != null &&
-                          item.item?.targetReplyContent != "")
-                        Text("| ${item.item?.targetReplyContent}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelMedium!.copyWith(
-                                color: theme.colorScheme.outline, height: 1.5)),
-                      if (item.item?.rootReplyContent != null &&
-                          item.item?.rootReplyContent != "")
-                        Text(" | ${item.item?.rootReplyContent}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelMedium!.copyWith(
-                                color: theme.colorScheme.outline, height: 1.5)),
-                      Text(
-                        DateUtil.dateFormat(item.replyTime),
-                        style: theme.textTheme.bodyMedium!.copyWith(
-                          fontSize: 13,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              separatorBuilder: (context, index) => divider,
-            )
-          : HttpError(onReload: _replyMeController.onReload),
+                  );
+                },
+                separatorBuilder: (context, index) => divider,
+              )
+            : HttpError(onReload: _replyMeController.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _replyMeController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _replyMeController.onReload,
+      ),
     };
   }
 }

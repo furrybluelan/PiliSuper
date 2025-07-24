@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -48,9 +49,11 @@ class LoginAccount implements Account {
 
   @override
   late final Map<String, String> headers = {
+    ...Constants.baseHeaders,
     'x-bili-mid': _midStr,
     'x-bili-aurora-eid': IdUtils.genAuroraEid(mid),
   };
+
   @override
   late String csrf =
       cookieJar.domainCookies['bilibili.com']!['/']!['bili_jct']!.cookie.value;
@@ -63,20 +66,25 @@ class LoginAccount implements Account {
 
   @override
   Map<String, dynamic>? toJson() => {
-        'cookies': cookieJar.toJson(),
-        'accessKey': accessKey,
-        'refresh': refresh,
-        'type': type.map((i) => i.index).toList()
-      };
+    'cookies': cookieJar.toJson(),
+    'accessKey': accessKey,
+    'refresh': refresh,
+    'type': type.map((i) => i.index).toList(),
+  };
 
   late final String _midStr = cookieJar
-      .domainCookies['bilibili.com']!['/']!['DedeUserID']!.cookie.value;
+      .domainCookies['bilibili.com']!['/']!['DedeUserID']!
+      .cookie
+      .value;
 
   late final Box<LoginAccount> _box = Accounts.account;
 
-  LoginAccount(this.cookieJar, this.accessKey, this.refresh,
-      [Set<AccountType>? type])
-      : type = type ?? {} {
+  LoginAccount(
+    this.cookieJar,
+    this.accessKey,
+    this.refresh, [
+    Set<AccountType>? type,
+  ]) : type = type ?? {} {
     cookieJar.setBuvid3();
   }
 
@@ -84,7 +92,8 @@ class LoginAccount implements Account {
     cookieJar = BiliCookieJar.fromJson(json['cookies'])..setBuvid3();
     accessKey = json['accessKey'];
     refresh = json['refresh'];
-    type = (json['type'] as Iterable?)
+    type =
+        (json['type'] as Iterable?)
             ?.map((i) => AccountType.values[i])
             .toSet() ??
         {};
@@ -114,7 +123,7 @@ class AnonymousAccount implements Account {
   @override
   String csrf = '';
   @override
-  final Map<String, String> headers = const {};
+  final Map<String, String> headers = Constants.baseHeaders;
 
   @override
   bool activited = false;
@@ -164,8 +173,7 @@ extension BiliCookieJar on DefaultCookieJar {
   }
 
   List<Cookie> toList() =>
-      domainCookies['bilibili.com']?['/']
-          ?.entries
+      domainCookies['bilibili.com']?['/']?.entries
           .map((i) => i.value.cookie)
           .toList() ??
       [];
@@ -173,7 +181,8 @@ extension BiliCookieJar on DefaultCookieJar {
   void setBuvid3() {
     domainCookies['bilibili.com'] ??= {'/': {}};
     domainCookies['bilibili.com']!['/']!['buvid3'] ??= SerializableCookie(
-        Cookie('buvid3', IdUtils.genBuvid3())..setBiliDomain());
+      Cookie('buvid3', IdUtils.genBuvid3())..setBiliDomain(),
+    );
   }
 
   static DefaultCookieJar fromJson(Map json) =>
@@ -181,7 +190,9 @@ extension BiliCookieJar on DefaultCookieJar {
         ..domainCookies['bilibili.com'] = {
           '/': {
             for (var i in json.entries)
-              i.key: SerializableCookie(Cookie(i.key, i.value)..setBiliDomain())
+              i.key: SerializableCookie(
+                Cookie(i.key, i.value)..setBiliDomain(),
+              ),
           },
         };
 
@@ -191,7 +202,58 @@ extension BiliCookieJar on DefaultCookieJar {
           '/': {
             for (var i in cookies)
               i['name']!: SerializableCookie(
-                  Cookie(i['name']!, i['value']!)..setBiliDomain()),
+                Cookie(i['name']!, i['value']!)..setBiliDomain(),
+              ),
           },
         };
+}
+
+class NoAccount implements Account {
+  @override
+  String? accessKey;
+
+  @override
+  bool activited = false;
+
+  @override
+  DefaultCookieJar cookieJar = DefaultCookieJar();
+
+  @override
+  String csrf = '';
+
+  @override
+  String? refresh;
+
+  @override
+  Set<AccountType> type = const {};
+
+  @override
+  Future<void> delete() {
+    return Future.value();
+  }
+
+  @override
+  final Map<String, String> headers = const {};
+
+  @override
+  bool isLogin = false;
+
+  @override
+  int mid = 0;
+
+  @override
+  Future<void> onChange() {
+    return Future.value();
+  }
+
+  @override
+  Map<String, dynamic>? toJson() {
+    return null;
+  }
+
+  NoAccount._();
+
+  static final _instance = NoAccount._();
+
+  factory NoAccount() => _instance;
 }

@@ -6,8 +6,8 @@ class Author {
   Author({this.name, this.face, this.mid});
 
   factory Author.fromJson(Map<String, dynamic> json) => Author(
-        name: json['name'] as String?,
-        face: json['face'] as String?,
-        mid: json['mid'] as String?,
-      );
+    name: json['name'] as String?,
+    face: json['face'] as String?,
+    mid: json['mid'] as String?,
+  );
 }

@@ -143,12 +143,13 @@ class TextSelectionGestureDetectorBuilder {
   ]) {
     assert(renderEditable.selection?.baseOffset != null);
 
-    final TextPosition tappedPosition =
-        renderEditable.getPositionForPoint(offset);
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(
+      offset,
+    );
     final TextSelection selection = fromSelection ?? renderEditable.selection!;
     final bool baseIsCloser =
         (tappedPosition.offset - selection.baseOffset).abs() <
-            (tappedPosition.offset - selection.extentOffset).abs();
+        (tappedPosition.offset - selection.extentOffset).abs();
     final TextSelection nextSelection = selection.copyWith(
       baseOffset: baseIsCloser ? selection.extentOffset : selection.baseOffset,
       extentOffset: tappedPosition.offset,
@@ -171,11 +172,13 @@ class TextSelectionGestureDetectorBuilder {
   void _extendSelection(Offset offset, SelectionChangedCause cause) {
     assert(renderEditable.selection?.baseOffset != null);
 
-    final TextPosition tappedPosition =
-        renderEditable.getPositionForPoint(offset);
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(
+      offset,
+    );
     final TextSelection selection = renderEditable.selection!;
-    final TextSelection nextSelection =
-        selection.copyWith(extentOffset: tappedPosition.offset);
+    final TextSelection nextSelection = selection.copyWith(
+      extentOffset: tappedPosition.offset,
+    );
 
     editableText.userUpdateTextEditingValue(
       editableText.textEditingValue.copyWith(selection: nextSelection),
@@ -215,16 +218,16 @@ class TextSelectionGestureDetectorBuilder {
   double get _scrollPosition {
     final ScrollableState? scrollableState =
         delegate.editableTextKey.currentContext == null
-            ? null
-            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
+        ? null
+        : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
     return scrollableState == null ? 0.0 : scrollableState.position.pixels;
   }
 
   AxisDirection? get _scrollDirection {
     final ScrollableState? scrollableState =
         delegate.editableTextKey.currentContext == null
-            ? null
-            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
+        ? null
+        : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
     return scrollableState?.axisDirection;
   }
 
@@ -249,11 +252,12 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onTapTrackStart() {
-    _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
-        .intersection(<LogicalKeyboardKey>{
-      LogicalKeyboardKey.shiftLeft,
-      LogicalKeyboardKey.shiftRight,
-    }).isNotEmpty;
+    _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed.intersection(
+      <LogicalKeyboardKey>{
+        LogicalKeyboardKey.shiftLeft,
+        LogicalKeyboardKey.shiftRight,
+      },
+    ).isNotEmpty;
   }
 
   /// Handler for [TextSelectionGestureDetector.onTapTrackReset].
@@ -287,8 +291,9 @@ class TextSelectionGestureDetectorBuilder {
     // vs [TapGestureRecognizer.onSecondaryTapUp] instead of having to track state in
     // renderEditable. When this migration is complete we should remove this hack.
     // See https://github.com/flutter/flutter/issues/115130.
-    renderEditable
-        .handleTapDown(TapDownDetails(globalPosition: details.globalPosition));
+    renderEditable.handleTapDown(
+      TapDownDetails(globalPosition: details.globalPosition),
+    );
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
@@ -297,7 +302,8 @@ class TextSelectionGestureDetectorBuilder {
     // TODO(justinmc): Should a desktop platform show its selection toolbar when
     // receiving a tap event?  Say a Windows device with a touchscreen.
     // https://github.com/flutter/flutter/issues/106586
-    _shouldShowSelectionToolbar = kind == null ||
+    _shouldShowSelectionToolbar =
+        kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
 
@@ -309,8 +315,7 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.android:
         if (editableText.widget.stylusHandwritingEnabled) {
           final bool stylusEnabled = switch (kind) {
-            PointerDeviceKind.stylus ||
-            PointerDeviceKind.invertedStylus =>
+            PointerDeviceKind.stylus || PointerDeviceKind.invertedStylus =>
               editableText.widget.stylusHandwritingEnabled,
             _ => false,
           };
@@ -318,7 +323,8 @@ class TextSelectionGestureDetectorBuilder {
             Scribe.isFeatureAvailable().then((bool isAvailable) {
               if (isAvailable) {
                 renderEditable.selectPosition(
-                    cause: SelectionChangedCause.stylusHandwriting);
+                  cause: SelectionChangedCause.stylusHandwriting,
+                );
                 Scribe.startStylusHandwriting();
               }
             });
@@ -337,7 +343,10 @@ class TextSelectionGestureDetectorBuilder {
               ? null
               : const TextSelection.collapsed(offset: 0);
           _expandSelection(
-              details.globalPosition, SelectionChangedCause.tap, fromSelection);
+            details.globalPosition,
+            SelectionChangedCause.tap,
+            fromSelection,
+          );
           return;
         }
         // On macOS, a tap/click places the selection in a precise position.
@@ -474,7 +483,10 @@ class TextSelectionGestureDetectorBuilder {
               ? null
               : const TextSelection.collapsed(offset: 0);
           _expandSelection(
-              details.globalPosition, SelectionChangedCause.tap, fromSelection);
+            details.globalPosition,
+            SelectionChangedCause.tap,
+            fromSelection,
+          );
           return;
         }
         switch (details.kind) {
@@ -505,16 +517,19 @@ class TextSelectionGestureDetectorBuilder {
             // Selects the word edge closest to the tap when the editable is not focused, or if the tap was neither exclusively
             // or inclusively on `previousSelection`. If the selection remains the same after selecting the word edge, then we
             // toggle the toolbar, if the editable field is not read only. If the selection changes then we hide the toolbar.
-            final TextSelection previousSelection = renderEditable.selection ??
+            final TextSelection previousSelection =
+                renderEditable.selection ??
                 editableText.textEditingValue.selection;
-            final TextPosition textPosition =
-                renderEditable.getPositionForPoint(
-              details.globalPosition,
-            );
+            final TextPosition textPosition = renderEditable
+                .getPositionForPoint(
+                  details.globalPosition,
+                );
             final bool isAffinityTheSame =
                 textPosition.affinity == previousSelection.affinity;
-            final bool wordAtCursorIndexIsMisspelled = editableText
-                    .findSuggestionSpanAtCursorIndex(textPosition.offset) !=
+            final bool wordAtCursorIndexIsMisspelled =
+                editableText.findSuggestionSpanAtCursorIndex(
+                  textPosition.offset,
+                ) !=
                 null;
 
             if (wordAtCursorIndexIsMisspelled) {
@@ -651,7 +666,8 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.macOS:
         if (_longPressStartedWithoutFocus || renderEditable.readOnly) {
           renderEditable.selectWordsInRange(
-            from: details.globalPosition -
+            from:
+                details.globalPosition -
                 details.offsetFromOrigin -
                 editableOffset -
                 scrollableOffset,
@@ -675,7 +691,8 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         renderEditable.selectWordsInRange(
-          from: details.globalPosition -
+          from:
+              details.globalPosition -
               details.offsetFromOrigin -
               editableOffset -
               scrollableOffset,
@@ -760,7 +777,8 @@ class TextSelectionGestureDetectorBuilder {
     // renderEditable. When this migration is complete we should remove this hack.
     // See https://github.com/flutter/flutter/issues/115130.
     renderEditable.handleSecondaryTapDown(
-        TapDownDetails(globalPosition: details.globalPosition));
+      TapDownDetails(globalPosition: details.globalPosition),
+    );
     _shouldShowSelectionToolbar = true;
   }
 
@@ -785,37 +803,56 @@ class TextSelectionGestureDetectorBuilder {
 
   // Selects the set of paragraphs in a document that intersect a given range of
   // global positions.
-  void _selectParagraphsInRange(
-      {required Offset from, Offset? to, SelectionChangedCause? cause}) {
-    final TextBoundary paragraphBoundary =
-        ParagraphBoundary(editableText.textEditingValue.text);
+  void _selectParagraphsInRange({
+    required Offset from,
+    Offset? to,
+    SelectionChangedCause? cause,
+  }) {
+    final TextBoundary paragraphBoundary = ParagraphBoundary(
+      editableText.textEditingValue.text,
+    );
     _selectTextBoundariesInRange(
-        boundary: paragraphBoundary, from: from, to: to, cause: cause);
+      boundary: paragraphBoundary,
+      from: from,
+      to: to,
+      cause: cause,
+    );
   }
 
   // Selects the set of lines in a document that intersect a given range of
   // global positions.
-  void _selectLinesInRange(
-      {required Offset from, Offset? to, SelectionChangedCause? cause}) {
+  void _selectLinesInRange({
+    required Offset from,
+    Offset? to,
+    SelectionChangedCause? cause,
+  }) {
     final TextBoundary lineBoundary = LineBoundary(renderEditable);
     _selectTextBoundariesInRange(
-        boundary: lineBoundary, from: from, to: to, cause: cause);
+      boundary: lineBoundary,
+      from: from,
+      to: to,
+      cause: cause,
+    );
   }
 
   // Returns the location of a text boundary at `extent`. When `extent` is at
   // the end of the text, returns the previous text boundary's location.
   TextRange _moveToTextBoundary(
-      TextPosition extent, TextBoundary textBoundary) {
+    TextPosition extent,
+    TextBoundary textBoundary,
+  ) {
     assert(extent.offset >= 0);
     // Use extent.offset - 1 when `extent` is at the end of the text to retrieve
     // the previous text boundary's location.
-    final int start = textBoundary.getLeadingTextBoundaryAt(
+    final int start =
+        textBoundary.getLeadingTextBoundaryAt(
           extent.offset == editableText.textEditingValue.text.length
               ? extent.offset - 1
               : extent.offset,
         ) ??
         0;
-    final int end = textBoundary.getTrailingTextBoundaryAt(extent.offset) ??
+    final int end =
+        textBoundary.getTrailingTextBoundaryAt(extent.offset) ??
         editableText.textEditingValue.text.length;
     return TextRange(start: start, end: end);
   }
@@ -836,8 +873,9 @@ class TextSelectionGestureDetectorBuilder {
   }) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
     final TextRange fromRange = _moveToTextBoundary(fromPosition, boundary);
-    final TextPosition toPosition =
-        to == null ? fromPosition : renderEditable.getPositionForPoint(to);
+    final TextPosition toPosition = to == null
+        ? fromPosition
+        : renderEditable.getPositionForPoint(to);
     final TextRange toRange = toPosition == fromPosition
         ? fromRange
         : _moveToTextBoundary(toPosition, boundary);
@@ -878,10 +916,14 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           _selectParagraphsInRange(
-              from: details.globalPosition, cause: SelectionChangedCause.tap);
+            from: details.globalPosition,
+            cause: SelectionChangedCause.tap,
+          );
         case TargetPlatform.linux:
           _selectLinesInRange(
-              from: details.globalPosition, cause: SelectionChangedCause.tap);
+            from: details.globalPosition,
+            cause: SelectionChangedCause.tap,
+          );
       }
     }
     if (shouldShowSelectionToolbar) {
@@ -903,7 +945,8 @@ class TextSelectionGestureDetectorBuilder {
       return;
     }
     final PointerDeviceKind? kind = details.kind;
-    _shouldShowSelectionToolbar = kind == null ||
+    _shouldShowSelectionToolbar =
+        kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
 
@@ -1003,12 +1046,16 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(
-              0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+              0.0,
+              renderEditable.offset.pixels - _dragStartViewportOffset,
+            );
       final Offset scrollableOffset = switch (axisDirectionToAxis(
         _scrollDirection ?? AxisDirection.left,
       )) {
-        Axis.horizontal =>
-          Offset(_scrollPosition - _dragStartScrollOffset, 0.0),
+        Axis.horizontal => Offset(
+          _scrollPosition - _dragStartScrollOffset,
+          0.0,
+        ),
         Axis.vertical => Offset(0.0, _scrollPosition - _dragStartScrollOffset),
       };
       final Offset dragStartGlobalPosition =
@@ -1051,7 +1098,8 @@ class TextSelectionGestureDetectorBuilder {
               case PointerDeviceKind.mouse:
               case PointerDeviceKind.trackpad:
                 return _selectParagraphsInRange(
-                  from: dragStartGlobalPosition -
+                  from:
+                      dragStartGlobalPosition -
                       editableOffset -
                       scrollableOffset,
                   to: details.globalPosition,
@@ -1130,7 +1178,8 @@ class TextSelectionGestureDetectorBuilder {
                   cause: SelectionChangedCause.drag,
                 );
                 return _showMagnifierIfSupportedByPlatform(
-                    details.globalPosition);
+                  details.globalPosition,
+                );
               }
             case null:
               break;
@@ -1151,14 +1200,17 @@ class TextSelectionGestureDetectorBuilder {
         (defaultTargetPlatform != TargetPlatform.iOS &&
             defaultTargetPlatform != TargetPlatform.macOS)) {
       return _extendSelection(
-          details.globalPosition, SelectionChangedCause.drag);
+        details.globalPosition,
+        SelectionChangedCause.drag,
+      );
     }
 
     // If the drag inverts the selection, Mac and iOS revert to the initial
     // selection.
     final TextSelection selection = editableText.textEditingValue.selection;
-    final TextPosition nextExtent =
-        renderEditable.getPositionForPoint(details.globalPosition);
+    final TextPosition nextExtent = renderEditable.getPositionForPoint(
+      details.globalPosition,
+    );
     final bool isShiftTapDragSelectionForward =
         _dragStartSelection!.baseOffset < _dragStartSelection!.extentOffset;
     final bool isInverted = isShiftTapDragSelectionForward
@@ -1223,8 +1275,11 @@ class TextSelectionGestureDetectorBuilder {
   /// The [child] or its subtree should contain an [EditableText] whose key is
   /// the [GlobalKey] provided by the [delegate]'s
   /// [TextSelectionGestureDetectorBuilderDelegate.editableTextKey].
-  Widget buildGestureDetector(
-      {Key? key, HitTestBehavior? behavior, required Widget child}) {
+  Widget buildGestureDetector({
+    Key? key,
+    HitTestBehavior? behavior,
+    required Widget child,
+  }) {
     return TextSelectionGestureDetector(
       key: key,
       onTapTrackStart: onTapTrackStart,
@@ -1375,30 +1430,30 @@ class _TextSelectionGestureDetectorState
 
     gestures[TapGestureRecognizer] =
         GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-      () => TapGestureRecognizer(debugOwner: this),
-      (TapGestureRecognizer instance) {
-        instance
-          ..onSecondaryTap = widget.onSecondaryTap
-          ..onSecondaryTapDown = widget.onSecondaryTapDown;
-      },
-    );
+          () => TapGestureRecognizer(debugOwner: this),
+          (TapGestureRecognizer instance) {
+            instance
+              ..onSecondaryTap = widget.onSecondaryTap
+              ..onSecondaryTapDown = widget.onSecondaryTapDown;
+          },
+        );
 
     if (widget.onSingleLongTapStart != null ||
         widget.onSingleLongTapMoveUpdate != null ||
         widget.onSingleLongTapEnd != null) {
       gestures[LongPressGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(
-          debugOwner: this,
-          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
-        ),
-        (LongPressGestureRecognizer instance) {
-          instance
-            ..onLongPressStart = _handleLongPressStart
-            ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
-            ..onLongPressEnd = _handleLongPressEnd;
-        },
-      );
+            () => LongPressGestureRecognizer(
+              debugOwner: this,
+              supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+            ),
+            (LongPressGestureRecognizer instance) {
+              instance
+                ..onLongPressStart = _handleLongPressStart
+                ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+                ..onLongPressEnd = _handleLongPressEnd;
+            },
+          );
     }
 
     if (widget.onDragSelectionStart != null ||
@@ -1410,60 +1465,64 @@ class _TextSelectionGestureDetectorState
         case TargetPlatform.iOS:
           gestures[TapAndHorizontalDragGestureRecognizer] =
               GestureRecognizerFactoryWithHandlers<
-                  TapAndHorizontalDragGestureRecognizer>(
-            () => TapAndHorizontalDragGestureRecognizer(debugOwner: this),
-            (TapAndHorizontalDragGestureRecognizer instance) {
-              instance
-                // Text selection should start from the position of the first pointer
-                // down event.
-                ..dragStartBehavior = DragStartBehavior.down
-                ..eagerVictoryOnDrag =
-                    defaultTargetPlatform != TargetPlatform.iOS
-                ..onTapTrackStart = _handleTapTrackStart
-                ..onTapTrackReset = _handleTapTrackReset
-                ..onTapDown = _handleTapDown
-                ..onDragStart = _handleDragStart
-                ..onDragUpdate = _handleDragUpdate
-                ..onDragEnd = _handleDragEnd
-                ..onTapUp = _handleTapUp
-                ..onCancel = _handleTapCancel;
-            },
-          );
+                TapAndHorizontalDragGestureRecognizer
+              >(
+                () => TapAndHorizontalDragGestureRecognizer(debugOwner: this),
+                (TapAndHorizontalDragGestureRecognizer instance) {
+                  instance
+                    // Text selection should start from the position of the first pointer
+                    // down event.
+                    ..dragStartBehavior = DragStartBehavior.down
+                    ..eagerVictoryOnDrag =
+                        defaultTargetPlatform != TargetPlatform.iOS
+                    ..onTapTrackStart = _handleTapTrackStart
+                    ..onTapTrackReset = _handleTapTrackReset
+                    ..onTapDown = _handleTapDown
+                    ..onDragStart = _handleDragStart
+                    ..onDragUpdate = _handleDragUpdate
+                    ..onDragEnd = _handleDragEnd
+                    ..onTapUp = _handleTapUp
+                    ..onCancel = _handleTapCancel;
+                },
+              );
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           gestures[TapAndPanGestureRecognizer] =
               GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-            () => TapAndPanGestureRecognizer(debugOwner: this),
-            (TapAndPanGestureRecognizer instance) {
-              instance
-                // Text selection should start from the position of the first pointer
-                // down event.
-                ..dragStartBehavior = DragStartBehavior.down
-                ..onTapTrackStart = _handleTapTrackStart
-                ..onTapTrackReset = _handleTapTrackReset
-                ..onTapDown = _handleTapDown
-                ..onDragStart = _handleDragStart
-                ..onDragUpdate = _handleDragUpdate
-                ..onDragEnd = _handleDragEnd
-                ..onTapUp = _handleTapUp
-                ..onCancel = _handleTapCancel;
-            },
-          );
+                () => TapAndPanGestureRecognizer(debugOwner: this),
+                (TapAndPanGestureRecognizer instance) {
+                  instance
+                    // Text selection should start from the position of the first pointer
+                    // down event.
+                    ..dragStartBehavior = DragStartBehavior.down
+                    ..onTapTrackStart = _handleTapTrackStart
+                    ..onTapTrackReset = _handleTapTrackReset
+                    ..onTapDown = _handleTapDown
+                    ..onDragStart = _handleDragStart
+                    ..onDragUpdate = _handleDragUpdate
+                    ..onDragEnd = _handleDragEnd
+                    ..onTapUp = _handleTapUp
+                    ..onCancel = _handleTapCancel;
+                },
+              );
       }
     }
 
     if (widget.onForcePressStart != null || widget.onForcePressEnd != null) {
       gestures[ForcePressGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-        () => ForcePressGestureRecognizer(debugOwner: this),
-        (ForcePressGestureRecognizer instance) {
-          instance
-            ..onStart =
-                widget.onForcePressStart != null ? _forcePressStarted : null
-            ..onEnd = widget.onForcePressEnd != null ? _forcePressEnded : null;
-        },
-      );
+            () => ForcePressGestureRecognizer(debugOwner: this),
+            (ForcePressGestureRecognizer instance) {
+              instance
+                ..onStart = widget.onForcePressStart != null
+                    ? _forcePressStarted
+                    : null
+                ..onEnd = widget.onForcePressEnd != null
+                    ? _forcePressEnded
+                    : null;
+            },
+          );
     }
 
     return RawGestureDetector(
@@ -1502,13 +1561,15 @@ class TextSelectionOverlay {
     this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
     required this.controller,
-  })  : _handlesVisible = handlesVisible,
-        _value = value {
+  }) : _handlesVisible = handlesVisible,
+       _value = value {
     assert(debugMaybeDispatchCreated('widgets', 'TextSelectionOverlay', this));
-    renderObject.selectionStartInViewport
-        .addListener(_updateTextSelectionOverlayVisibilities);
-    renderObject.selectionEndInViewport
-        .addListener(_updateTextSelectionOverlayVisibilities);
+    renderObject.selectionStartInViewport.addListener(
+      _updateTextSelectionOverlayVisibilities,
+    );
+    renderObject.selectionEndInViewport.addListener(
+      _updateTextSelectionOverlayVisibilities,
+    );
     _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
       magnifierConfiguration: magnifierConfiguration,
@@ -1579,10 +1640,12 @@ class TextSelectionOverlay {
 
   final ValueNotifier<bool> _effectiveStartHandleVisibility =
       ValueNotifier<bool>(false);
-  final ValueNotifier<bool> _effectiveEndHandleVisibility =
-      ValueNotifier<bool>(false);
-  final ValueNotifier<bool> _effectiveToolbarVisibility =
-      ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(
+    false,
+  );
+  final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(
+    false,
+  );
 
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value =
@@ -1591,7 +1654,7 @@ class TextSelectionOverlay {
         _handlesVisible && renderObject.selectionEndInViewport.value;
     _effectiveToolbarVisibility.value =
         renderObject.selectionStartInViewport.value ||
-            renderObject.selectionEndInViewport.value;
+        renderObject.selectionEndInViewport.value;
   }
 
   /// Whether selection handles are visible.
@@ -1635,14 +1698,17 @@ class TextSelectionOverlay {
 
     assert(context.mounted);
     _selectionOverlay.showToolbar(
-        context: context, contextMenuBuilder: contextMenuBuilder);
+      context: context,
+      contextMenuBuilder: contextMenuBuilder,
+    );
     return;
   }
 
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
   void showSpellCheckSuggestionsToolbar(
-      WidgetBuilder spellCheckSuggestionsToolbarBuilder) {
+    WidgetBuilder spellCheckSuggestionsToolbarBuilder,
+  ) {
     _updateSelectionOverlay();
     assert(context.mounted);
     _selectionOverlay.showSpellCheckSuggestionsToolbar(
@@ -1654,8 +1720,9 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
   void showMagnifier(Offset positionToShow) {
-    final TextPosition position =
-        renderObject.getPositionForPoint(positionToShow);
+    final TextPosition position = renderObject.getPositionForPoint(
+      positionToShow,
+    );
     _updateSelectionOverlay();
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -1668,8 +1735,9 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.updateMagnifier}
   void updateMagnifier(Offset positionToShow) {
-    final TextPosition position =
-        renderObject.getPositionForPoint(positionToShow);
+    final TextPosition position = renderObject.getPositionForPoint(
+      positionToShow,
+    );
     _updateSelectionOverlay();
     _selectionOverlay.updateMagnifier(
       _buildMagnifier(
@@ -1772,10 +1840,12 @@ class TextSelectionOverlay {
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
     _selectionOverlay.dispose();
-    renderObject.selectionStartInViewport
-        .removeListener(_updateTextSelectionOverlayVisibilities);
-    renderObject.selectionEndInViewport
-        .removeListener(_updateTextSelectionOverlayVisibilities);
+    renderObject.selectionStartInViewport.removeListener(
+      _updateTextSelectionOverlayVisibilities,
+    );
+    renderObject.selectionEndInViewport.removeListener(
+      _updateTextSelectionOverlayVisibilities,
+    );
     _effectiveToolbarVisibility.dispose();
     _effectiveStartHandleVisibility.dispose();
     _effectiveEndHandleVisibility.dispose();
@@ -1800,8 +1870,9 @@ class TextSelectionOverlay {
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       startHandleRect = renderObject.getRectForComposingRange(
         TextRange(
-            start: _selection.start,
-            end: _selection.start + firstSelectedGraphemeExtent),
+          start: _selection.start,
+          end: _selection.start + firstSelectedGraphemeExtent,
+        ),
       );
     }
     return startHandleRect?.height ?? renderObject.preferredLineHeight;
@@ -1819,8 +1890,9 @@ class TextSelectionOverlay {
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       endHandleRect = renderObject.getRectForComposingRange(
         TextRange(
-            start: _selection.end - lastSelectedGraphemeExtent,
-            end: _selection.end),
+          start: _selection.end - lastSelectedGraphemeExtent,
+          end: _selection.end,
+        ),
       );
     }
     return endHandleRect?.height ?? renderObject.preferredLineHeight;
@@ -1831,41 +1903,48 @@ class TextSelectionOverlay {
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
   }) {
-    final TextSelection lineAtOffset =
-        renderEditable.getLineAtOffset(currentTextPosition);
+    final TextSelection lineAtOffset = renderEditable.getLineAtOffset(
+      currentTextPosition,
+    );
     final TextPosition positionAtEndOfLine = TextPosition(
       offset: lineAtOffset.extentOffset,
       affinity: TextAffinity.upstream,
     );
 
     // Default affinity is downstream.
-    final TextPosition positionAtBeginningOfLine =
-        TextPosition(offset: lineAtOffset.baseOffset);
+    final TextPosition positionAtBeginningOfLine = TextPosition(
+      offset: lineAtOffset.baseOffset,
+    );
 
     final Rect localLineBoundaries = Rect.fromPoints(
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
-    final RenderBox? overlay = Overlay.of(context, rootOverlay: true)
-        .context
-        .findRenderObject() as RenderBox?;
+    final RenderBox? overlay =
+        Overlay.of(context, rootOverlay: true).context.findRenderObject()
+            as RenderBox?;
     final Matrix4 transformToOverlay = renderEditable.getTransformTo(overlay);
     final Rect overlayLineBoundaries = MatrixUtils.transformRect(
       transformToOverlay,
       localLineBoundaries,
     );
 
-    final Rect localCaretRect =
-        renderEditable.getLocalRectForCaret(currentTextPosition);
-    final Rect overlayCaretRect =
-        MatrixUtils.transformRect(transformToOverlay, localCaretRect);
+    final Rect localCaretRect = renderEditable.getLocalRectForCaret(
+      currentTextPosition,
+    );
+    final Rect overlayCaretRect = MatrixUtils.transformRect(
+      transformToOverlay,
+      localCaretRect,
+    );
 
     final Offset overlayGesturePosition =
         overlay?.globalToLocal(globalGesturePosition) ?? globalGesturePosition;
 
     return MagnifierInfo(
       fieldBounds: MatrixUtils.transformRect(
-          transformToOverlay, renderEditable.paintBounds),
+        transformToOverlay,
+        renderEditable.paintBounds,
+      ),
       globalGesturePosition: overlayGesturePosition,
       caretRect: overlayCaretRect,
       currentLineBoundaries: overlayLineBoundaries,
@@ -1894,9 +1973,10 @@ class TextSelectionOverlay {
     // scale transformation, the line height will also be scaled.
     final double centerOfLineLocal =
         _selectionOverlay.selectionEndpoints.last.point.dy -
-            renderObject.preferredLineHeight / 2;
-    final double centerOfLineGlobal =
-        renderObject.localToGlobal(Offset(0.0, centerOfLineLocal)).dy;
+        renderObject.preferredLineHeight / 2;
+    final double centerOfLineGlobal = renderObject
+        .localToGlobal(Offset(0.0, centerOfLineLocal))
+        .dy;
     _endHandleDragTarget = centerOfLineGlobal - details.globalPosition.dy;
     // Instead of finding the TextPosition at the handle's location directly,
     // use the vertical center of the line that it points to. This is because
@@ -1936,7 +2016,8 @@ class TextSelectionOverlay {
   double _getHandleDy(double dragDy, double handleDy) {
     final double distanceDragged = dragDy - handleDy;
     final int dragDirection = distanceDragged < 0.0 ? -1 : 1;
-    final int linesDragged = dragDirection *
+    final int linesDragged =
+        dragDirection *
         (distanceDragged.abs() / renderObject.preferredLineHeight).floor();
     return handleDy + linesDragged * renderObject.preferredLineHeight;
   }
@@ -1949,8 +2030,9 @@ class TextSelectionOverlay {
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
-    final Offset localPosition =
-        renderObject.globalToLocal(details.globalPosition);
+    final Offset localPosition = renderObject.globalToLocal(
+      details.globalPosition,
+    );
 
     final double nextEndHandleDragPositionLocal = _getHandleDy(
       localPosition.dy,
@@ -1965,8 +2047,9 @@ class TextSelectionOverlay {
       _endHandleDragPosition + _endHandleDragTarget,
     );
 
-    TextPosition position =
-        renderObject.getPositionForPoint(handleTargetGlobal);
+    TextPosition position = renderObject.getPositionForPoint(
+      handleTargetGlobal,
+    );
 
     // bggRGjQaUbCoE right drag
     position = controller.dragOffset(position);
@@ -1980,8 +2063,9 @@ class TextSelectionOverlay {
         ),
       );
 
-      final TextSelection currentSelection =
-          TextSelection.fromPosition(position);
+      final TextSelection currentSelection = TextSelection.fromPosition(
+        position,
+      );
       _handleSelectionHandleChanged(currentSelection);
       return;
     }
@@ -1995,7 +2079,7 @@ class TextSelectionOverlay {
         // always returns true for a TextSelection.
         final bool dragStartSelectionNormalized =
             _dragStartSelection!.extentOffset >=
-                _dragStartSelection!.baseOffset;
+            _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
           baseOffset: dragStartSelectionNormalized
               ? _dragStartSelection!.baseOffset
@@ -2045,9 +2129,10 @@ class TextSelectionOverlay {
     // scale transformation, the line height will also be scaled.
     final double centerOfLineLocal =
         _selectionOverlay.selectionEndpoints.first.point.dy -
-            renderObject.preferredLineHeight / 2;
-    final double centerOfLineGlobal =
-        renderObject.localToGlobal(Offset(0.0, centerOfLineLocal)).dy;
+        renderObject.preferredLineHeight / 2;
+    final double centerOfLineGlobal = renderObject
+        .localToGlobal(Offset(0.0, centerOfLineLocal))
+        .dy;
     _startHandleDragTarget = centerOfLineGlobal - details.globalPosition.dy;
     // Instead of finding the TextPosition at the handle's location directly,
     // use the vertical center of the line that it points to. This is because
@@ -2075,8 +2160,9 @@ class TextSelectionOverlay {
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
-    final Offset localPosition =
-        renderObject.globalToLocal(details.globalPosition);
+    final Offset localPosition = renderObject.globalToLocal(
+      details.globalPosition,
+    );
     final double nextStartHandleDragPositionLocal = _getHandleDy(
       localPosition.dy,
       renderObject.globalToLocal(Offset(0.0, _startHandleDragPosition)).dy,
@@ -2088,8 +2174,9 @@ class TextSelectionOverlay {
       details.globalPosition.dx,
       _startHandleDragPosition + _startHandleDragTarget,
     );
-    TextPosition position =
-        renderObject.getPositionForPoint(handleTargetGlobal);
+    TextPosition position = renderObject.getPositionForPoint(
+      handleTargetGlobal,
+    );
 
     // bggRGjQaUbCoE single drag, left drag
     position = controller.dragOffset(position);
@@ -2103,8 +2190,9 @@ class TextSelectionOverlay {
         ),
       );
 
-      final TextSelection currentSelection =
-          TextSelection.fromPosition(position);
+      final TextSelection currentSelection = TextSelection.fromPosition(
+        position,
+      );
       _handleSelectionHandleChanged(currentSelection);
       return;
     }
@@ -2118,7 +2206,7 @@ class TextSelectionOverlay {
         // always returns true for a TextSelection.
         final bool dragStartSelectionNormalized =
             _dragStartSelection!.extentOffset >=
-                _dragStartSelection!.baseOffset;
+            _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
           baseOffset: dragStartSelectionNormalized
               ? _dragStartSelection!.extentOffset
@@ -2142,8 +2230,8 @@ class TextSelectionOverlay {
       _buildMagnifier(
         currentTextPosition:
             newSelection.extent.offset < newSelection.base.offset
-                ? newSelection.extent
-                : newSelection.base,
+            ? newSelection.extent
+            : newSelection.base,
         globalGesturePosition: details.globalPosition,
         renderEditable: renderObject,
       ),
@@ -2167,7 +2255,9 @@ class TextSelectionOverlay {
     _selectionOverlay.hideMagnifier();
     if (!_selection.isCollapsed) {
       _selectionOverlay.showToolbar(
-          context: context, contextMenuBuilder: contextMenuBuilder);
+        context: context,
+        contextMenuBuilder: contextMenuBuilder,
+      );
     }
   }
 
@@ -2237,13 +2327,13 @@ class SelectionOverlay {
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-  })  : _startHandleType = startHandleType,
-        _lineHeightAtStart = lineHeightAtStart,
-        _endHandleType = endHandleType,
-        _lineHeightAtEnd = lineHeightAtEnd,
-        _selectionEndpoints = selectionEndpoints,
-        _toolbarLocation = toolbarLocation,
-        assert(debugCheckHasOverlay(context)) {
+  }) : _startHandleType = startHandleType,
+       _lineHeightAtStart = lineHeightAtStart,
+       _endHandleType = endHandleType,
+       _lineHeightAtEnd = lineHeightAtEnd,
+       _selectionEndpoints = selectionEndpoints,
+       _toolbarLocation = toolbarLocation,
+       assert(debugCheckHasOverlay(context)) {
     assert(debugMaybeDispatchCreated('widgets', 'SelectionOverlay', this));
   }
 
@@ -2252,8 +2342,8 @@ class SelectionOverlay {
 
   final ValueNotifier<MagnifierInfo> _magnifierInfo =
       ValueNotifier<MagnifierInfo>(
-    MagnifierInfo.empty,
-  );
+        MagnifierInfo.empty,
+      );
 
   // [MagnifierController.show] and [MagnifierController.hide] should not be
   // called directly, except from inside [showMagnifier] and [hideMagnifier]. If
@@ -2719,8 +2809,10 @@ class SelectionOverlay {
 
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
-  void showSpellCheckSuggestionsToolbar(
-      {BuildContext? context, required WidgetBuilder builder}) {
+  void showSpellCheckSuggestionsToolbar({
+    BuildContext? context,
+    required WidgetBuilder builder,
+  }) {
     if (context == null) {
       return;
     }
@@ -2890,15 +2982,15 @@ class SelectionOverlay {
 
     final bool isMultiline =
         selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
-            lineHeightAtEnd / 2;
+        lineHeightAtEnd / 2;
 
     // If the selected text spans more than 1 line, horizontally center the toolbar.
     // Derived from both iOS and Android.
     final double midX = isMultiline
         ? editingRegion.width / 2
         : (selectionEndpoints.first.point.dx +
-                selectionEndpoints.last.point.dx) /
-            2;
+                  selectionEndpoints.last.point.dx) /
+              2;
 
     final Offset midpoint = Offset(
       midX,
@@ -2980,7 +3072,9 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
     super.initState();
 
     _controller = AnimationController(
-        duration: SelectionOverlay.fadeDuration, vsync: this);
+      duration: SelectionOverlay.fadeDuration,
+      vsync: this,
+    );
 
     _toolbarVisibilityChanged();
     widget.visibility?.addListener(_toolbarVisibilityChanged);
@@ -3073,7 +3167,9 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     super.initState();
 
     _controller = AnimationController(
-        duration: SelectionOverlay.fadeDuration, vsync: this);
+      duration: SelectionOverlay.fadeDuration,
+      vsync: this,
+    );
 
     _handleVisibilityChanged();
     widget.visibility?.addListener(_handleVisibilityChanged);
@@ -3094,9 +3190,12 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
   /// interactive area should be at least [kMinInteractiveDimension] square,
   /// which this method does not consider.
   Rect _getHandleRect(
-      TextSelectionHandleType type, double preferredLineHeight) {
-    final Size handleSize =
-        widget.selectionControls.getHandleSize(preferredLineHeight);
+    TextSelectionHandleType type,
+    double preferredLineHeight,
+  ) {
+    final Size handleSize = widget.selectionControls.getHandleSize(
+      preferredLineHeight,
+    );
     return Rect.fromLTWH(0.0, 0.0, handleSize.width, handleSize.height);
   }
 
@@ -3117,13 +3216,17 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final Rect handleRect =
-        _getHandleRect(widget.type, widget.preferredLineHeight);
+    final Rect handleRect = _getHandleRect(
+      widget.type,
+      widget.preferredLineHeight,
+    );
 
     // Make sure the GestureDetector is big enough to be easily interactive.
     final Rect interactiveRect = handleRect.expandToInclude(
       Rect.fromCircle(
-          center: handleRect.center, radius: kMinInteractiveDimension / 2),
+        center: handleRect.center,
+        radius: kMinInteractiveDimension / 2,
+      ),
     );
     final RelativeRect padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
@@ -3142,7 +3245,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     // other drag gestures.
     final bool eagerlyAcceptDragWhenCollapsed =
         widget.type == TextSelectionHandleType.collapsed &&
-            defaultTargetPlatform == TargetPlatform.iOS;
+        defaultTargetPlatform == TargetPlatform.iOS;
 
     return CompositedTransformFollower(
       link: widget.handleLayerLink,
@@ -3161,26 +3264,26 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
               gestures: <Type, GestureRecognizerFactory>{
                 PanGestureRecognizer:
                     GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                  () => PanGestureRecognizer(
-                    debugOwner: this,
-                    // Mouse events select the text and do not drag the cursor.
-                    supportedDevices: <PointerDeviceKind>{
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.stylus,
-                      PointerDeviceKind.unknown,
-                    },
-                  ),
-                  (PanGestureRecognizer instance) {
-                    instance
-                      ..dragStartBehavior = widget.dragStartBehavior
-                      ..gestureSettings = eagerlyAcceptDragWhenCollapsed
-                          ? const DeviceGestureSettings(touchSlop: 1.0)
-                          : null
-                      ..onStart = widget.onSelectionHandleDragStart
-                      ..onUpdate = widget.onSelectionHandleDragUpdate
-                      ..onEnd = widget.onSelectionHandleDragEnd;
-                  },
-                ),
+                      () => PanGestureRecognizer(
+                        debugOwner: this,
+                        // Mouse events select the text and do not drag the cursor.
+                        supportedDevices: <PointerDeviceKind>{
+                          PointerDeviceKind.touch,
+                          PointerDeviceKind.stylus,
+                          PointerDeviceKind.unknown,
+                        },
+                      ),
+                      (PanGestureRecognizer instance) {
+                        instance
+                          ..dragStartBehavior = widget.dragStartBehavior
+                          ..gestureSettings = eagerlyAcceptDragWhenCollapsed
+                              ? const DeviceGestureSettings(touchSlop: 1.0)
+                              : null
+                          ..onStart = widget.onSelectionHandleDragStart
+                          ..onUpdate = widget.onSelectionHandleDragUpdate
+                          ..onEnd = widget.onSelectionHandleDragEnd;
+                      },
+                    ),
               },
               child: Padding(
                 padding: EdgeInsets.only(

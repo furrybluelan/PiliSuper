@@ -16,11 +16,11 @@ class FirstEpInfo {
   });
 
   factory FirstEpInfo.fromJson(Map<String, dynamic> json) => FirstEpInfo(
-        id: json['id'] as int?,
-        cover: json['cover'] as String?,
-        title: json['title'] as String?,
-        longTitle: json['long_title'] as String?,
-        pubTime: json['pub_time'] as String?,
-        duration: json['duration'] as int?,
-      );
+    id: json['id'] as int?,
+    cover: json['cover'] as String?,
+    title: json['title'] as String?,
+    longTitle: json['long_title'] as String?,
+    pubTime: json['pub_time'] as String?,
+    duration: json['duration'] as int?,
+  );
 }

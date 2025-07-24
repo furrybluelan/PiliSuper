@@ -12,9 +12,9 @@ class PgcLCF {
   });
 
   factory PgcLCF.fromJson(Map<String, dynamic> json) => PgcLCF(
-        coinNumber: json["coin_number"],
-        favorite: json["favorite"],
-        isOriginal: json["is_original"],
-        like: json["like"],
-      );
+    coinNumber: json["coin_number"],
+    favorite: json["favorite"],
+    isOriginal: json["is_original"],
+    like: json["like"],
+  );
 }

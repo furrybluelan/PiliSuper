@@ -38,8 +38,12 @@ class _SlideDialogState extends State<SlideDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title),
-      contentPadding:
-          const EdgeInsets.only(top: 20, left: 8, right: 8, bottom: 8),
+      contentPadding: const EdgeInsets.only(
+        top: 20,
+        left: 8,
+        right: 8,
+        bottom: 8,
+      ),
       content: SizedBox(
         height: 40,
         child: Slider(
@@ -67,7 +71,7 @@ class _SlideDialogState extends State<SlideDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context, _tempValue),
           child: const Text('确定'),
-        )
+        ),
       ],
     );
   }

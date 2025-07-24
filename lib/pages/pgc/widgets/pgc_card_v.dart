@@ -32,37 +32,39 @@ class PgcCardV extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 0.75,
-              child: LayoutBuilder(builder: (context, boxConstraints) {
-                final double maxWidth = boxConstraints.maxWidth;
-                final double maxHeight = boxConstraints.maxHeight;
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    NetworkImgLayer(
-                      src: item.cover,
-                      width: maxWidth,
-                      height: maxHeight,
-                    ),
-                    PBadge(
-                      text: item.badge,
-                      top: 6,
-                      right: 6,
-                      bottom: null,
-                      left: null,
-                    ),
-                    if (item.isFinish == 0 &&
-                        item.renewalTime?.isNotEmpty == true)
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  final double maxWidth = boxConstraints.maxWidth;
+                  final double maxHeight = boxConstraints.maxHeight;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      NetworkImgLayer(
+                        src: item.cover,
+                        width: maxWidth,
+                        height: maxHeight,
+                      ),
                       PBadge(
-                        text: item.renewalTime,
-                        bottom: 6,
-                        left: 6,
-                        type: PBadgeType.gray,
-                      )
-                  ],
-                );
-              }),
+                        text: item.badge,
+                        top: 6,
+                        right: 6,
+                        bottom: null,
+                        left: null,
+                      ),
+                      if (item.isFinish == 0 &&
+                          item.renewalTime?.isNotEmpty == true)
+                        PBadge(
+                          text: item.renewalTime,
+                          bottom: 6,
+                          left: 6,
+                          type: PBadgeType.gray,
+                        ),
+                    ],
+                  );
+                },
+              ),
             ),
-            content(context)
+            content(context),
           ],
         ),
       ),

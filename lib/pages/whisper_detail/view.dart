@@ -82,22 +82,37 @@ class _WhisperDetailPageState
                 src: _whisperDetailController.face,
               ),
               const SizedBox(width: 6),
-              Expanded(
+              Flexible(
                 child: Text(
                   _whisperDetailController.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium,
+                  style: const TextStyle(height: 1, fontSize: 16),
+                  strutStyle: const StrutStyle(
+                    leading: 0,
+                    height: 1,
+                    fontSize: 16,
+                  ),
                 ),
               ),
+              if (_whisperDetailController.isLive) ...[
+                const SizedBox(width: 10),
+                Image.asset(
+                  'assets/images/live/live.gif',
+                  height: 16,
+                  filterQuality: FilterQuality.low,
+                ),
+              ],
             ],
           ),
         ),
         actions: [
           IconButton(
-            onPressed: () => Get.to(WhisperLinkSettingPage(
-              talkerUid: _whisperDetailController.talkerId,
-            )),
+            onPressed: () => Get.to(
+              WhisperLinkSettingPage(
+                talkerUid: _whisperDetailController.talkerId,
+              ),
+            ),
             icon: Icon(
               size: 20,
               Icons.settings,
@@ -120,8 +135,10 @@ class _WhisperDetailPageState
                 behavior: HitTestBehavior.opaque,
                 child: refreshIndicator(
                   onRefresh: _whisperDetailController.onRefresh,
-                  child: Obx(() =>
-                      _buildBody(_whisperDetailController.loadingState.value)),
+                  child: Obx(
+                    () =>
+                        _buildBody(_whisperDetailController.loadingState.value),
+                  ),
                 ),
               ),
             ),
@@ -139,39 +156,42 @@ class _WhisperDetailPageState
   Widget _buildBody(LoadingState<List<Msg>?> loadingState) {
     return switch (loadingState) {
       Loading() => loadingWidget,
-      Success(:var response) => response?.isNotEmpty == true
-          ? ListView.separated(
-              shrinkWrap: true,
-              reverse: true,
-              itemCount: response!.length,
-              padding: const EdgeInsets.all(14),
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: ClampingScrollPhysics(),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? ListView.separated(
+                shrinkWrap: true,
+                reverse: true,
+                itemCount: response!.length,
+                padding: const EdgeInsets.all(14),
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
+                controller: _whisperDetailController.scrollController,
+                itemBuilder: (context, int index) {
+                  if (index == response.length - 1) {
+                    _whisperDetailController.onLoadMore();
+                  }
+                  final item = response[index];
+                  return ChatItem(
+                    item: item,
+                    eInfos: _whisperDetailController.eInfos,
+                    onLongPress:
+                        item.senderUid.toInt() ==
+                            _whisperDetailController.accountService.mid
+                        ? () => onLongPress(index, item)
+                        : null,
+                  );
+                },
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+              )
+            : scrollErrorWidget(
+                onReload: _whisperDetailController.onReload,
               ),
-              controller: _whisperDetailController.scrollController,
-              itemBuilder: (context, int index) {
-                if (index == response.length - 1) {
-                  _whisperDetailController.onLoadMore();
-                }
-                final item = response[index];
-                return ChatItem(
-                  item: item,
-                  eInfos: _whisperDetailController.eInfos,
-                  onLongPress: item.senderUid.toInt() ==
-                          _whisperDetailController.accountService.mid
-                      ? () => onLongPress(index, item)
-                      : null,
-                );
-              },
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-            )
-          : scrollErrorWidget(
-              onReload: _whisperDetailController.onReload,
-            ),
       Error(:var errMsg) => scrollErrorWidget(
-          errMsg: errMsg,
-          onReload: _whisperDetailController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _whisperDetailController.onReload,
+      ),
     };
   }
 
@@ -266,9 +286,10 @@ class _WhisperDetailPageState
           ),
           Obx(
             () {
+              final enablePublish = this.enablePublish.value;
               return IconButton(
                 onPressed: () async {
-                  if (enablePublish.value) {
+                  if (enablePublish) {
                     _whisperDetailController.sendMsg(
                       message: editController.rawText,
                       onClearText: editController.clear,
@@ -286,9 +307,10 @@ class _WhisperDetailPageState
                           biz: 'im',
                         );
                         if (result['status']) {
-                          String mimeType = lookupMimeType(pickedFile.path)
-                                  ?.split('/')
-                                  .getOrNull(1) ??
+                          String mimeType =
+                              lookupMimeType(
+                                pickedFile.path,
+                              )?.split('/').getOrNull(1) ??
                               'jpg';
                           UploadBfsResData data = result['data'];
                           Map picMsg = {
@@ -315,10 +337,12 @@ class _WhisperDetailPageState
                     }
                   }
                 },
-                icon: Icon(enablePublish.value
-                    ? Icons.send
-                    : Icons.add_photo_alternate_outlined),
-                tooltip: enablePublish.value ? '发送' : '图片',
+                icon: Icon(
+                  enablePublish
+                      ? Icons.send
+                      : Icons.add_photo_alternate_outlined,
+                ),
+                tooltip: enablePublish ? '发送' : '图片',
               );
             },
           ),

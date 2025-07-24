@@ -8,12 +8,13 @@ class RuleFilterAdapter extends TypeAdapter<RuleFilter> {
   @override
   RuleFilter read(BinaryReader reader) {
     return RuleFilter(
-        reader.readStringList(),
-        reader
-            .readStringList()
-            .map((i) => RegExp(i, caseSensitive: false))
-            .toList(),
-        reader.readStringList().toSet());
+      reader.readStringList(),
+      reader
+          .readStringList()
+          .map((i) => RegExp(i, caseSensitive: false))
+          .toList(),
+      reader.readStringList().toSet(),
+    );
   }
 
   @override

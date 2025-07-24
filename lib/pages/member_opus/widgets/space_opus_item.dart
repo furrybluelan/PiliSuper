@@ -68,8 +68,10 @@ class SpaceOpusItem extends StatelessWidget {
               ),
             if (item.content?.isNotEmpty == true)
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 10,
+                ),
                 child: Text(
                   item.content!,
                   maxLines: hasPic ? 4 : 6,

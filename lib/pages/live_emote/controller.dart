@@ -20,10 +20,14 @@ class LiveEmotePanelController
 
   @override
   bool customHandleResponse(
-      bool isRefresh, Success<List<LiveEmoteDatum>?> response) {
+    bool isRefresh,
+    Success<List<LiveEmoteDatum>?> response,
+  ) {
     if (response.response?.isNotEmpty == true) {
-      tabController =
-          TabController(length: response.response!.length, vsync: this);
+      tabController = TabController(
+        length: response.response!.length,
+        vsync: this,
+      );
     }
     loadingState.value = response;
     return true;

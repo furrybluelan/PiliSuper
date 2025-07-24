@@ -39,15 +39,17 @@ class GrpcReq {
     } else {
       headers.remove('authorization');
     }
-    headers['x-bili-metadata-bin'] = base64Encode(Metadata(
-      accessKey: _accessKey ?? '',
-      mobiApp: _mobiApp,
-      device: _device,
-      build: _build,
-      channel: _biliChannel,
-      buvid: _buvid,
-      platform: _device,
-    ).writeToBuffer());
+    headers['x-bili-metadata-bin'] = base64Encode(
+      Metadata(
+        accessKey: _accessKey ?? '',
+        mobiApp: _mobiApp,
+        device: _device,
+        build: _build,
+        channel: _biliChannel,
+        buvid: _buvid,
+        platform: _device,
+      ).writeToBuffer(),
+    );
     options = Options(headers: headers, responseType: ResponseType.bytes);
   }
 
@@ -63,45 +65,57 @@ class GrpcReq {
     'buvid': _buvid,
     'bili-http-engine': 'cronet',
     'te': 'trailers',
-    'x-bili-fawkes-req-bin': base64Encode(FawkesReq(
-      appkey: _mobiApp,
-      env: 'prod',
-      sessionId: _sessionId,
-    ).writeToBuffer()),
-    'x-bili-metadata-bin': base64Encode(Metadata(
-      accessKey: _accessKey ?? '',
-      mobiApp: _mobiApp,
-      device: _device,
-      build: _build,
-      channel: _biliChannel,
-      buvid: _buvid,
-      platform: _device,
-    ).writeToBuffer()),
-    'x-bili-device-bin': base64Encode(Device(
-      appId: 5,
-      build: _build,
-      buvid: _buvid,
-      mobiApp: _mobiApp,
-      platform: _device,
-      channel: _biliChannel,
-      brand: _device,
-      model: _device,
-      osver: '15',
-      versionName: _versionName,
-    ).writeToBuffer()),
-    'x-bili-network-bin': base64Encode(network.Network(
-      type: network.NetworkType.WIFI,
-    ).writeToBuffer()),
-    'x-bili-locale-bin': base64Encode(Locale(
-      cLocale: LocaleIds(language: 'zh', region: 'CN', script: 'Hans'),
-      sLocale: LocaleIds(language: 'zh', region: 'CN', script: 'Hans'),
-      timezone: 'Asia/Shanghai',
-    ).writeToBuffer()),
+    'x-bili-fawkes-req-bin': base64Encode(
+      FawkesReq(
+        appkey: _mobiApp,
+        env: 'prod',
+        sessionId: _sessionId,
+      ).writeToBuffer(),
+    ),
+    'x-bili-metadata-bin': base64Encode(
+      Metadata(
+        accessKey: _accessKey ?? '',
+        mobiApp: _mobiApp,
+        device: _device,
+        build: _build,
+        channel: _biliChannel,
+        buvid: _buvid,
+        platform: _device,
+      ).writeToBuffer(),
+    ),
+    'x-bili-device-bin': base64Encode(
+      Device(
+        appId: 5,
+        build: _build,
+        buvid: _buvid,
+        mobiApp: _mobiApp,
+        platform: _device,
+        channel: _biliChannel,
+        brand: _device,
+        model: _device,
+        osver: '15',
+        versionName: _versionName,
+      ).writeToBuffer(),
+    ),
+    'x-bili-network-bin': base64Encode(
+      network.Network(
+        type: network.NetworkType.WIFI,
+      ).writeToBuffer(),
+    ),
+    'x-bili-locale-bin': base64Encode(
+      Locale(
+        cLocale: LocaleIds(language: 'zh', region: 'CN', script: 'Hans'),
+        sLocale: LocaleIds(language: 'zh', region: 'CN', script: 'Hans'),
+        timezone: 'Asia/Shanghai',
+      ).writeToBuffer(),
+    ),
     'x-bili-exps-bin': '',
   };
 
-  static Options options =
-      Options(headers: headers, responseType: ResponseType.bytes);
+  static Options options = Options(
+    headers: headers,
+    responseType: ResponseType.bytes,
+  );
 
   static Uint8List compressProtobuf(Uint8List proto) {
     proto = const GZipEncoder().encodeBytes(proto);
@@ -122,10 +136,16 @@ class GrpcReq {
     }
   }
 
-  static Future<LoadingState<T>> request<T>(String url,
-      GeneratedMessage request, T Function(Uint8List) grpcParser) async {
-    final response = await Request().post(HttpString.appBaseUrl + url,
-        data: compressProtobuf(request.writeToBuffer()), options: options);
+  static Future<LoadingState<T>> request<T>(
+    String url,
+    GeneratedMessage request,
+    T Function(Uint8List) grpcParser,
+  ) async {
+    final response = await Request().post(
+      HttpString.appBaseUrl + url,
+      data: compressProtobuf(request.writeToBuffer()),
+      options: options,
+    );
 
     if (response.data is Map) {
       return Error(response.data['message']);
@@ -151,8 +171,9 @@ class GrpcReq {
           try {
             final grpcMsg = Status.fromBuffer(msgBytes);
             // UNKNOWN : -400 : msg
-            final errMsg =
-                grpcMsg.details.map((e) => e.status.message).join('\n');
+            final errMsg = grpcMsg.details
+                .map((e) => e.status.message)
+                .join('\n');
             msg = kDebugMode
                 ? 'CODE: ${grpcMsg.code}(${grpcMsg.message})\nMSG: $errMsg'
                 : errMsg;

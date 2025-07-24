@@ -42,8 +42,10 @@ class LiveAreaChildController
   List<CardLiveItem>? getDataList(LiveSecondData response) {
     count = response.count;
     newTags = response.newTags;
-    tagIndex.value =
-        max(0, newTags?.indexWhere((e) => e.sortType == sortType) ?? 0);
+    tagIndex.value = max(
+      0,
+      newTags?.indexWhere((e) => e.sortType == sortType) ?? 0,
+    );
     return response.cardList;
   }
 

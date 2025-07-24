@@ -17,7 +17,10 @@ mixin ScrollOrRefreshMixin {
     if (scrollController.hasClients) {
       if (scrollController.position.pixels == 0) {
         EasyThrottle.throttle(
-            'topOrRefresh', const Duration(milliseconds: 500), onRefresh);
+          'topOrRefresh',
+          const Duration(milliseconds: 500),
+          onRefresh,
+        );
       } else {
         animateToTop();
       }

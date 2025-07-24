@@ -4,6 +4,6 @@ class PlayStrategy {
   PlayStrategy({this.strategies});
 
   factory PlayStrategy.fromJson(Map<String, dynamic> json) => PlayStrategy(
-        strategies: json['strategies'],
-      );
+    strategies: json['strategies'],
+  );
 }

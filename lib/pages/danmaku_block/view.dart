@@ -48,18 +48,26 @@ class _DanmakuBlockPageState extends State<DanmakuBlockPage> {
         bottom: TabBar(
           controller: _controller.tabController,
           tabs: DmBlockType.values
-              .map((e) => Obx(() => Tab(
-                  text: '${e.label}(${_controller.rules[e.index].length})')))
+              .map(
+                (e) => Obx(
+                  () => Tab(
+                    text: '${e.label}(${_controller.rules[e.index].length})',
+                  ),
+                ),
+              )
               .toList(),
         ),
       ),
       body: tabBarView(
         controller: _controller.tabController,
         children: DmBlockType.values
-            .map((e) => KeepAliveWrapper(
-                  builder: (context) => Obx(() =>
-                      tabViewBuilder(e.index, _controller.rules[e.index])),
-                ))
+            .map(
+              (e) => KeepAliveWrapper(
+                builder: (context) => Obx(
+                  () => tabViewBuilder(e.index, _controller.rules[e.index]),
+                ),
+              ),
+            )
             .toList(),
       ),
       floatingActionButton: FloatingActionButton(
@@ -76,8 +84,9 @@ class _DanmakuBlockPageState extends State<DanmakuBlockPage> {
     }
     return ListView.builder(
       itemCount: list.length,
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 80),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.paddingOf(context).bottom + 80,
+      ),
       itemBuilder: (context, itemIndex) {
         final SimpleRule item = list[itemIndex];
         return ListTile(
@@ -125,9 +134,10 @@ class _DanmakuBlockPageState extends State<DanmakuBlockPage> {
                 initialValue: filter,
                 onChanged: (value) => filter = value,
                 keyboardType: isUid ? TextInputType.number : null,
-                inputFormatters:
-                    isUid ? [FilteringTextInputFormatter.digitsOnly] : null,
-              )
+                inputFormatters: isUid
+                    ? [FilteringTextInputFormatter.digitsOnly]
+                    : null,
+              ),
             ],
           ),
           actions: [
@@ -144,7 +154,9 @@ class _DanmakuBlockPageState extends State<DanmakuBlockPage> {
                 if (filter.isNotEmpty) {
                   Get.back();
                   _controller.danmakuFilterAdd(
-                      filter: filter, type: type.index);
+                    filter: filter,
+                    type: type.index,
+                  );
                 } else {
                   SmartDialog.showToast('输入内容不能为空');
                 }

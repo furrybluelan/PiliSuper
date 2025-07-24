@@ -24,7 +24,9 @@ class WhisperSettingsController
 
   @override
   bool customHandleResponse(
-      bool isRefresh, Success<GetImSettingsReply> response) {
+    bool isRefresh,
+    Success<GetImSettingsReply> response,
+  ) {
     title.value = response.response.pageTitle;
     loadingState.value = Success(response.response.settings);
     return true;

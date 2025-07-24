@@ -13,10 +13,10 @@ class SpaceSsModel {
   });
 
   factory SpaceSsModel.fromJson(Map<String, dynamic> json) => SpaceSsModel(
-        archives: (json["archives"] as List?)
-            ?.map((e) => SpaceSsArchive.fromJson(e))
-            .toList(),
-        meta: json["meta"] == null ? null : SpaceSsMeta.fromJson(json["meta"]),
-        recentAids: (json["recent_aids"] as List?)?.cast(),
-      );
+    archives: (json["archives"] as List?)
+        ?.map((e) => SpaceSsArchive.fromJson(e))
+        .toList(),
+    meta: json["meta"] == null ? null : SpaceSsMeta.fromJson(json["meta"]),
+    recentAids: (json["recent_aids"] as List?)?.cast(),
+  );
 }

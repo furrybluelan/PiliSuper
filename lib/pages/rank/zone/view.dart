@@ -69,30 +69,31 @@ class _ZonePageState extends CommonPageState<ZonePage, ZoneController>
   Widget _buildBody(LoadingState<List<dynamic>?> loadingState) {
     return switch (loadingState) {
       Loading() => _buildSkeleton(),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final item = response[index];
-                  if (item is HotVideoItemModel) {
-                    return VideoCardH(
-                      videoItem: item,
-                      onRemove: () => controller.loadingState
-                        ..value.data!.removeAt(index)
-                        ..refresh(),
-                    );
-                  }
-                  return PgcRankItem(item: item);
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: controller.onReload),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final item = response[index];
+                    if (item is HotVideoItemModel) {
+                      return VideoCardH(
+                        videoItem: item,
+                        onRemove: () => controller.loadingState
+                          ..value.data!.removeAt(index)
+                          ..refresh(),
+                      );
+                    }
+                    return PgcRankItem(item: item);
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: controller.onReload,
+      ),
     };
   }
 }

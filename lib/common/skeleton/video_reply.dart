@@ -26,14 +26,18 @@ class VideoReplySkeleton extends StatelessWidget {
                   width: 80,
                   height: 13,
                   color: bgColor,
-                )
+                ),
               ],
             ),
           ),
           Container(
             width: double.infinity,
-            margin:
-                const EdgeInsets.only(top: 4, left: 57, right: 6, bottom: 6),
+            margin: const EdgeInsets.only(
+              top: 4,
+              left: 57,
+              right: 6,
+              bottom: 6,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -71,9 +75,9 @@ class VideoReplySkeleton extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 4),
                       color: bgColor,
                     ),
-                    const SizedBox(width: 8)
+                    const SizedBox(width: 8),
                   ],
-                )
+                ),
               ],
             ),
           ),

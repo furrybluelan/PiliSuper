@@ -40,17 +40,17 @@ class SearchAllController
 
   @override
   Future<LoadingState<SearchAllData>> customGetData() => SearchHttp.searchAll(
-        keyword: keyword,
-        page: page,
-        order: order.value,
-        duration: searchType == SearchType.video ? duration.value : null,
-        tids: tids,
-        orderSort: orderSort,
-        userType: userType,
-        categoryId: categoryId,
-        pubBegin: pubBegin,
-        pubEnd: pubEnd,
-      );
+    keyword: keyword,
+    page: page,
+    order: order.value,
+    duration: searchType == SearchType.video ? duration.value : null,
+    tids: tids,
+    orderSort: orderSort,
+    userType: userType,
+    categoryId: categoryId,
+    pubBegin: pubBegin,
+    pubEnd: pubEnd,
+  );
 
   void onPushDetail(dynamic resultList) {
     try {

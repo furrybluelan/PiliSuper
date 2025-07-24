@@ -27,16 +27,16 @@ class PendantAvatar extends StatelessWidget {
     this.garbPendantImage,
     this.roomId,
     this.onTap,
-  })  : _badgeType = officialType == null || officialType < 0
-            ? isVip == true
-                ? BadgeType.vip
-                : BadgeType.none
-            : officialType == 0
-                ? BadgeType.person
-                : officialType == 1
-                    ? BadgeType.institution
-                    : BadgeType.none,
-        badgeSize = badgeSize ?? size / 3;
+  }) : _badgeType = officialType == null || officialType < 0
+           ? isVip == true
+                 ? BadgeType.vip
+                 : BadgeType.none
+           : officialType == 0
+           ? BadgeType.person
+           : officialType == 1
+           ? BadgeType.institution
+           : BadgeType.none,
+       badgeSize = badgeSize ?? size / 3;
 
   static bool showDynDecorate = Pref.showDynDecorate;
 
@@ -56,7 +56,8 @@ class PendantAvatar extends StatelessWidget {
               ),
         if (showDynDecorate && !garbPendantImage.isNullOrEmpty)
           Positioned(
-            top: -0.375 *
+            top:
+                -0.375 *
                 (size == 80 ? size - 4 : size), // -(size * 1.75 - size) / 2
             child: IgnorePointer(
               child: CachedNetworkImage(
@@ -133,27 +134,29 @@ class PendantAvatar extends StatelessWidget {
   Widget _buildBadge(ColorScheme colorScheme) {
     final child = switch (_badgeType) {
       BadgeType.vip => Image.asset(
-          'assets/images/big-vip.png',
-          height: badgeSize,
-          semanticLabel: _badgeType.desc,
-        ),
+        'assets/images/big-vip.png',
+        height: badgeSize,
+        semanticLabel: _badgeType.desc,
+      ),
       _ => Icon(
-          Icons.offline_bolt,
-          color: _badgeType.color,
-          size: badgeSize,
-          semanticLabel: _badgeType.desc,
-        ),
+        Icons.offline_bolt,
+        color: _badgeType.color,
+        size: badgeSize,
+        semanticLabel: _badgeType.desc,
+      ),
     };
     return Positioned(
-        right: 0,
-        bottom: 0,
-        child: IgnorePointer(
-          child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.surface,
-              ),
-              child: child),
-        ));
+      right: 0,
+      bottom: 0,
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colorScheme.surface,
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 }

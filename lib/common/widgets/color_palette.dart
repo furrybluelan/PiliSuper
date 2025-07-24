@@ -21,11 +21,11 @@ class ColorPalette extends StatelessWidget {
     final primaryContainer = Color(Hct.from(hct.hue, 30.0, 50.0).toInt());
     final checkbox = Color(Hct.from(hct.hue, 30.0, 40.0).toInt());
     Widget coloredBox(Color color) => Expanded(
-          child: ColoredBox(
-            color: color,
-            child: const SizedBox.expand(),
-          ),
-        );
+      child: ColoredBox(
+        color: color,
+        child: const SizedBox.expand(),
+      ),
+    );
     Widget child = ClipOval(
       child: Column(
         children: [

@@ -54,8 +54,8 @@ Widget imageView(
     imageWidth = ratioWH > 1.5
         ? maxWidth
         : (ratioWH >= 1 || (height > width && ratioHW < 1.5))
-            ? 2 * imageWidth
-            : 1.5 * imageWidth;
+        ? 2 * imageWidth
+        : 1.5 * imageWidth;
     imageHeight = imageWidth * min(ratioHW, _maxRatio);
   } else if (picArr.length == 2) {
     imageWidth = imageHeight = 2 * imageWidth;
@@ -66,19 +66,23 @@ Widget imageView(
       return StyleString.mdRadius;
     }
     return BorderRadius.only(
-      topLeft: index - row >= 0 ||
+      topLeft:
+          index - row >= 0 ||
               ((index - 1) >= 0 && (index - 1) % row < index % row)
           ? Radius.zero
           : StyleString.imgRadius,
-      topRight: index - row >= 0 ||
+      topRight:
+          index - row >= 0 ||
               ((index + 1) < picArr.length && (index + 1) % row > index % row)
           ? Radius.zero
           : StyleString.imgRadius,
-      bottomLeft: index + row < picArr.length ||
+      bottomLeft:
+          index + row < picArr.length ||
               ((index - 1) >= 0 && (index - 1) % row < index % row)
           ? Radius.zero
           : StyleString.imgRadius,
-      bottomRight: index + row < picArr.length ||
+      bottomRight:
+          index + row < picArr.length ||
               ((index + 1) < picArr.length && (index + 1) % row > index % row)
           ? Radius.zero
           : StyleString.imgRadius,
@@ -105,8 +109,9 @@ Widget imageView(
           (item) {
             bool isLive = item.isLivePhoto;
             return SourceModel(
-              sourceType:
-                  isLive ? SourceType.livePhoto : SourceType.networkImage,
+              sourceType: isLive
+                  ? SourceType.livePhoto
+                  : SourceType.networkImage,
               url: item.url,
               liveUrl: isLive ? item.liveUrl : null,
               width: isLive ? parseSize(item.width) : null,
@@ -152,10 +157,9 @@ Widget imageView(
                       width: imageWidth,
                       height: imageHeight,
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onInverseSurface
-                            .withValues(alpha: 0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onInverseSurface.withValues(alpha: 0.4),
                         borderRadius: borderRadius(index),
                       ),
                       child: Center(

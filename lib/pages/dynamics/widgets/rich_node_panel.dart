@@ -77,12 +77,14 @@ TextSpan? richNode(
                 style: style,
                 recognizer: TapGestureRecognizer()
                   ..onTap = () => Get.toNamed(
-                        '/searchResult',
-                        parameters: {
-                          'keyword':
-                              i.origText!.substring(1, i.origText!.length - 1),
-                        },
+                    '/searchResult',
+                    parameters: {
+                      'keyword': i.origText!.substring(
+                        1,
+                        i.origText!.length - 1,
                       ),
+                    },
+                  ),
               ),
             );
             break;
@@ -106,8 +108,8 @@ TextSpan? richNode(
                   recognizer: i.origText == null
                       ? null
                       : (TapGestureRecognizer()
-                        ..onTap =
-                            () => PiliScheme.routePushFromUrl(i.origText!)),
+                          ..onTap = () =>
+                              PiliScheme.routePushFromUrl(i.origText!)),
                 ),
               );
             break;
@@ -131,8 +133,9 @@ TextSpan? richNode(
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       final dynIdStr = item.basic?.commentIdStr;
-                      final dynId =
-                          dynIdStr != null ? int.tryParse(dynIdStr) : null;
+                      final dynId = dynIdStr != null
+                          ? int.tryParse(dynIdStr)
+                          : null;
                       showVoteDialog(context, int.parse(i.rid!), dynId);
                     },
                 ),
@@ -171,12 +174,12 @@ TextSpan? richNode(
                   style: style,
                   recognizer: TapGestureRecognizer()
                     ..onTap = () => Get.toNamed(
-                          '/webview',
-                          parameters: {
-                            'url':
-                                'https://www.bilibili.com/h5/lottery/result?business_id=${item.idStr}'
-                          },
-                        ),
+                      '/webview',
+                      parameters: {
+                        'url':
+                            'https://www.bilibili.com/h5/lottery/result?business_id=${item.idStr}',
+                      },
+                    ),
                 ),
               );
             break;
@@ -200,8 +203,8 @@ TextSpan? richNode(
                   recognizer: i.jumpUrl == null
                       ? null
                       : (TapGestureRecognizer()
-                        ..onTap =
-                            () => PiliScheme.routePushFromUrl(i.jumpUrl!)),
+                          ..onTap = () =>
+                              PiliScheme.routePushFromUrl(i.jumpUrl!)),
                 ),
               );
             break;
@@ -252,11 +255,13 @@ TextSpan? richNode(
                         return imageView(
                           constraints.maxWidth,
                           i.pics!
-                              .map((item) => ImageModel(
-                                    url: item.src ?? '',
-                                    width: item.width,
-                                    height: item.height,
-                                  ))
+                              .map(
+                                (item) => ImageModel(
+                                  url: item.src ?? '',
+                                  width: item.width,
+                                  height: item.height,
+                                ),
+                              )
                               .toList(),
                         );
                       },
@@ -272,9 +277,10 @@ TextSpan? richNode(
                     ..onTap = () {
                       void onView(List<OpusPicModel> list) {
                         Get.context!.imageView(
-                            imgList: list
-                                .map((e) => SourceModel(url: e.src!))
-                                .toList());
+                          imgList: list
+                              .map((e) => SourceModel(url: e.src!))
+                              .toList(),
+                        );
                       }
 
                       if (i.pics?.isNotEmpty == true) {

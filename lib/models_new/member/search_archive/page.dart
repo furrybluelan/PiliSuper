@@ -6,8 +6,8 @@ class Page {
   Page({this.pn, this.ps, this.count});
 
   factory Page.fromJson(Map<String, dynamic> json) => Page(
-        pn: json['pn'] as int?,
-        ps: json['ps'] as int?,
-        count: json['count'] as int?,
-      );
+    pn: json['pn'] as int?,
+    ps: json['ps'] as int?,
+    count: json['count'] as int?,
+  );
 }

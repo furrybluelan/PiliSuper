@@ -48,8 +48,9 @@ class PlayUrlModel {
     timeLength = json['timelength'];
     acceptFormat = json['accept_format'];
     acceptDesc = json['accept_description'];
-    acceptQuality =
-        (json['accept_quality'] as List?)?.map<int>((e) => e as int).toList();
+    acceptQuality = (json['accept_quality'] as List?)
+        ?.map<int>((e) => e as int)
+        .toList();
     videoCodecid = json['video_codecid'];
     seekParam = json['seek_param'];
     seekType = json['seek_type'];
@@ -172,8 +173,10 @@ abstract class BaseItem {
     baseUrl = json['baseUrl'];
     final backupUrls = (json['backupUrl'] as List?)?.cast<String>() ?? [];
     backupUrl = backupUrls.isNotEmpty
-        ? backupUrls.firstWhere((i) => !_isMCDNorPCDN(i),
-            orElse: () => backupUrls.first)
+        ? backupUrls.firstWhere(
+            (i) => !_isMCDNorPCDN(i),
+            orElse: () => backupUrls.first,
+          )
         : null;
     bandWidth = json['bandWidth'];
     mimeType = json['mime_type'];

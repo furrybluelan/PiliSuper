@@ -44,8 +44,9 @@ class HistoryController
   void onSelect(HistoryItemModel item, [bool disableSelect = true]) {
     List<HistoryItemModel> list = loadingState.value.data!;
     item.checked = !(item.checked ?? false);
-    baseCtr.checkedCount.value =
-        list.where((item) => item.checked == true).length;
+    baseCtr.checkedCount.value = list
+        .where((item) => item.checked == true)
+        .length;
     loadingState.refresh();
     if (baseCtr.checkedCount.value == 0) {
       baseCtr.enableMultiSelect.value = false;
@@ -113,8 +114,9 @@ class HistoryController
   // 删除已看历史记录
   void onDelHistory() {
     if (loadingState.value.isSuccess) {
-      List<HistoryItemModel> list =
-          loadingState.value.data!.where((e) => e.progress == -1).toList();
+      List<HistoryItemModel> list = loadingState.value.data!
+          .where((e) => e.progress == -1)
+          .toList();
       if (list.isNotEmpty) {
         _onDelete(list);
       } else {
@@ -130,8 +132,10 @@ class HistoryController
     }).toList();
     var response = await UserHttp.delHistory(kidList);
     if (response['status']) {
-      List<HistoryItemModel> remainList =
-          loadingState.value.data!.toSet().difference(result.toSet()).toList();
+      List<HistoryItemModel> remainList = loadingState.value.data!
+          .toSet()
+          .difference(result.toSet())
+          .toList();
       if (remainList.isNotEmpty) {
         loadingState.value = Success(remainList);
       } else {
@@ -168,13 +172,15 @@ class HistoryController
               onPressed: () {
                 Get.back();
                 if (loadingState.value.isSuccess) {
-                  _onDelete(loadingState.value.data!
-                      .where((e) => e.checked == true)
-                      .toList());
+                  _onDelete(
+                    loadingState.value.data!
+                        .where((e) => e.checked == true)
+                        .toList(),
+                  );
                 }
               },
               child: const Text('确认'),
-            )
+            ),
           ],
         );
       },

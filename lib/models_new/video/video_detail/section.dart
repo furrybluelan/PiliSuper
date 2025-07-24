@@ -11,12 +11,12 @@ class SectionItem {
   SectionItem({this.seasonId, this.id, this.title, this.type, this.episodes});
 
   factory SectionItem.fromJson(Map<String, dynamic> json) => SectionItem(
-        seasonId: json['season_id'] as int?,
-        id: json['id'] as int?,
-        title: json['title'] as String?,
-        type: json['type'] as int?,
-        episodes: (json['episodes'] as List<dynamic>?)
-            ?.map((e) => EpisodeItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    seasonId: json['season_id'] as int?,
+    id: json['id'] as int?,
+    title: json['title'] as String?,
+    type: json['type'] as int?,
+    episodes: (json['episodes'] as List<dynamic>?)
+        ?.map((e) => EpisodeItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

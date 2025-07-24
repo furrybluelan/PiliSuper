@@ -29,7 +29,8 @@ class _VotePanelState extends State<VotePanel> {
   late VoteInfo _voteInfo;
   late final RxSet<int> groupValue = (_voteInfo.myVotes?.toSet() ?? {}).obs;
   late var _percentage = _cnt2Percentage(_voteInfo.options);
-  late bool _enabled = groupValue.isEmpty &&
+  late bool _enabled =
+      groupValue.isEmpty &&
       _voteInfo.endTime! * 1000 > DateTime.now().millisecondsSinceEpoch;
   late bool _showPercentage = !_enabled;
   late final _maxCnt = _voteInfo.choiceCnt ?? _voteInfo.options.length;
@@ -81,10 +82,10 @@ class _VotePanelState extends State<VotePanel> {
               _enabled
                   ? '投票选项'
                   : groupValue.isEmpty
-                      ? '已结束'
-                      : '已完成',
+                  ? '已结束'
+                  : '已完成',
             ),
-            if (_enabled) Obx(() => Text('${groupValue.length} / $_maxCnt'))
+            if (_enabled) Obx(() => Text('${groupValue.length} / $_maxCnt')),
           ],
         ),
         Flexible(fit: FlexFit.loose, child: _buildContext()),
@@ -122,23 +123,23 @@ class _VotePanelState extends State<VotePanel> {
   }
 
   List<Widget> get _checkBoxs => [
-        CheckBoxText(
-          text: '显示比例',
-          selected: _showPercentage,
-          onChanged: (value) {
-            setState(() {
-              _showPercentage = value;
-            });
-          },
-        ),
-        CheckBoxText(
-          text: '匿名',
-          selected: anonymity,
-          onChanged: (val) {
-            anonymity = val;
-          },
-        ),
-      ];
+    CheckBoxText(
+      text: '显示比例',
+      selected: _showPercentage,
+      onChanged: (value) {
+        setState(() {
+          _showPercentage = value;
+        });
+      },
+    ),
+    CheckBoxText(
+      text: '匿名',
+      selected: anonymity,
+      onChanged: (val) {
+        anonymity = val;
+      },
+    ),
+  ];
 
   Widget _buildOptions(int index) {
     return Padding(
@@ -185,7 +186,7 @@ class _VotePanelState extends State<VotePanel> {
           itemCount: _voteInfo.options.length,
           itemBuilder: (context, index) => _buildOptions(index),
         ),
-        if (_enabled) SliverList.list(children: _checkBoxs)
+        if (_enabled) SliverList.list(children: _checkBoxs),
       ],
     );
   }
@@ -277,27 +278,31 @@ class PercentageChip extends StatelessWidget {
   }
 }
 
-Future showVoteDialog(BuildContext context, int voteId,
-    [int? dynamicId]) async {
+Future showVoteDialog(
+  BuildContext context,
+  int voteId, [
+  int? dynamicId,
+]) async {
   final voteInfo = await DynamicsHttp.voteInfo(voteId);
   if (context.mounted) {
     if (voteInfo.isSuccess) {
       showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                content: SizedBox(
-                  width: 160,
-                  child: VotePanel(
-                    voteInfo: voteInfo.data,
-                    callback: (votes, anonymity) => DynamicsHttp.doVote(
-                      voteId: voteId,
-                      votes: votes.toList(),
-                      anonymity: anonymity,
-                      dynamicId: dynamicId,
-                    ),
-                  ),
-                ),
-              ));
+        context: context,
+        builder: (context) => AlertDialog(
+          content: SizedBox(
+            width: 160,
+            child: VotePanel(
+              voteInfo: voteInfo.data,
+              callback: (votes, anonymity) => DynamicsHttp.doVote(
+                voteId: voteId,
+                votes: votes.toList(),
+                anonymity: anonymity,
+                dynamicId: dynamicId,
+              ),
+            ),
+          ),
+        ),
+      );
     } else {
       voteInfo.toast();
     }

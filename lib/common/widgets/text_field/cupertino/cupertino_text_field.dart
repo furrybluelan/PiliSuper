@@ -77,9 +77,9 @@ const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
 // Note it may not be consistent with https://developer.apple.com/design/resources/.
 const CupertinoDynamicColor _kClearButtonColor =
     CupertinoDynamicColor.withBrightness(
-  color: Color(0x33000000),
-  darkColor: Color(0x33FFFFFF),
-);
+      color: Color(0x33000000),
+      darkColor: Color(0x33FFFFFF),
+    );
 
 // An eyeballed value that moves the cursor slightly left of where it is
 // rendered for text on Android so it's positioning more accurately matches the
@@ -115,10 +115,10 @@ enum OverlayVisibilityMode {
 
 class _CupertinoTextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
-  _CupertinoTextFieldSelectionGestureDetectorBuilder(
-      {required _CupertinoRichTextFieldState state})
-      : _state = state,
-        super(delegate: state);
+  _CupertinoTextFieldSelectionGestureDetectorBuilder({
+    required _CupertinoRichTextFieldState state,
+  }) : _state = state,
+       super(delegate: state);
 
   final _CupertinoRichTextFieldState _state;
 
@@ -129,10 +129,12 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext!
-          .findRenderObject()! as RenderBox;
-      final Offset localOffset =
-          renderBox.globalToLocal(details.globalPosition);
+      final RenderBox renderBox =
+          _state._clearGlobalKey.currentContext!.findRenderObject()!
+              as RenderBox;
+      final Offset localOffset = renderBox.globalToLocal(
+        details.globalPosition,
+      );
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
       }
@@ -324,35 +326,40 @@ class CupertinoRichTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-  })  : assert(obscuringCharacter.length == 1),
-        smartDashesType = smartDashesType ??
-            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ??
-            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        assert(maxLines == null || maxLines > 0),
-        assert(minLines == null || minLines > 0),
-        assert(
-          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          "minLines can't be greater than maxLines",
-        ),
-        assert(
-          !expands || (maxLines == null && minLines == null),
-          'minLines and maxLines must be null when expands is true.',
-        ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
-        assert(maxLength == null || maxLength > 0),
-        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-        assert(
-          !identical(textInputAction, TextInputAction.newline) ||
-              maxLines == 1 ||
-              !identical(keyboardType, TextInputType.text),
-          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
-        ),
-        keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText);
+  }) : assert(obscuringCharacter.length == 1),
+       smartDashesType =
+           smartDashesType ??
+           (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType =
+           smartQuotesType ??
+           (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         "minLines can't be greater than maxLines",
+       ),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
+       assert(
+         !obscureText || maxLines == 1,
+         'Obscured fields cannot be multiline.',
+       ),
+       assert(maxLength == null || maxLength > 0),
+       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+       assert(
+         !identical(textInputAction, TextInputAction.newline) ||
+             maxLines == 1 ||
+             !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+       ),
+       keyboardType =
+           keyboardType ??
+           (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       enableInteractiveSelection =
+           enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -464,35 +471,40 @@ class CupertinoRichTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-  })  : assert(obscuringCharacter.length == 1),
-        smartDashesType = smartDashesType ??
-            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ??
-            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        assert(maxLines == null || maxLines > 0),
-        assert(minLines == null || minLines > 0),
-        assert(
-          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          "minLines can't be greater than maxLines",
-        ),
-        assert(
-          !expands || (maxLines == null && minLines == null),
-          'minLines and maxLines must be null when expands is true.',
-        ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
-        assert(maxLength == null || maxLength > 0),
-        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-        assert(
-          !identical(textInputAction, TextInputAction.newline) ||
-              maxLines == 1 ||
-              !identical(keyboardType, TextInputType.text),
-          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
-        ),
-        keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText);
+  }) : assert(obscuringCharacter.length == 1),
+       smartDashesType =
+           smartDashesType ??
+           (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType =
+           smartQuotesType ??
+           (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         "minLines can't be greater than maxLines",
+       ),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
+       assert(
+         !obscureText || maxLines == 1,
+         'Obscured fields cannot be multiline.',
+       ),
+       assert(maxLength == null || maxLength > 0),
+       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+       assert(
+         !identical(textInputAction, TextInputAction.newline) ||
+             maxLines == 1 ||
+             !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+       ),
+       keyboardType =
+           keyboardType ??
+           (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       enableInteractiveSelection =
+           enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// {@macro flutter.widgets.editableText.groupId}
   final Object groupId;
@@ -832,10 +844,12 @@ class CupertinoRichTextField extends StatefulWidget {
     if (defaultTargetPlatform == TargetPlatform.iOS &&
         SystemContextMenu.isSupported(context)) {
       return SystemContextMenu.editableText(
-          editableTextState: editableTextState);
+        editableTextState: editableTextState,
+      );
     }
     return CupertinoAdaptiveTextSelectionToolbar.editableText(
-        editableTextState: editableTextState);
+      editableTextState: editableTextState,
+    );
   }
 
   /// Configuration for the text field magnifier.
@@ -895,7 +909,8 @@ class CupertinoRichTextField extends StatefulWidget {
     EditableTextState editableTextState,
   ) {
     return CupertinoSpellCheckSuggestionsToolbar.editableText(
-        editableTextState: editableTextState);
+      editableTextState: editableTextState,
+    );
   }
 
   /// {@macro flutter.widgets.undoHistory.controller}
@@ -908,11 +923,19 @@ class CupertinoRichTextField extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<RichTextEditingController>('controller', controller,
-          defaultValue: null),
+      DiagnosticsProperty<RichTextEditingController>(
+        'controller',
+        controller,
+        defaultValue: null,
+      ),
     );
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-        defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<FocusNode>(
+        'focusNode',
+        focusNode,
+        defaultValue: null,
+      ),
+    );
     properties.add(
       DiagnosticsProperty<UndoHistoryController>(
         'undoController',
@@ -920,25 +943,37 @@ class CupertinoRichTextField extends StatefulWidget {
         defaultValue: null,
       ),
     );
-    properties
-        .add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
+    properties.add(
+      DiagnosticsProperty<BoxDecoration>('decoration', decoration),
+    );
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
     properties.add(
-        DiagnosticsProperty<TextStyle>('placeholderStyle', placeholderStyle));
-    properties.add(
-      DiagnosticsProperty<OverlayVisibilityMode>(
-          'prefix', prefix == null ? null : prefixMode),
+      DiagnosticsProperty<TextStyle>('placeholderStyle', placeholderStyle),
     );
     properties.add(
       DiagnosticsProperty<OverlayVisibilityMode>(
-          'suffix', suffix == null ? null : suffixMode),
+        'prefix',
+        prefix == null ? null : prefixMode,
+      ),
     );
-    properties.add(DiagnosticsProperty<OverlayVisibilityMode>(
-        'clearButtonMode', clearButtonMode));
+    properties.add(
+      DiagnosticsProperty<OverlayVisibilityMode>(
+        'suffix',
+        suffix == null ? null : suffixMode,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<OverlayVisibilityMode>(
+        'clearButtonMode',
+        clearButtonMode,
+      ),
+    );
     properties.add(
       DiagnosticsProperty<String>(
-          'clearButtonSemanticLabel', clearButtonSemanticLabel),
+        'clearButtonSemanticLabel',
+        clearButtonSemanticLabel,
+      ),
     );
     properties.add(
       DiagnosticsProperty<TextInputType>(
@@ -948,41 +983,58 @@ class CupertinoRichTextField extends StatefulWidget {
       ),
     );
     properties.add(
-        DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(
-      DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter,
-          defaultValue: '•'),
+      DiagnosticsProperty<TextStyle>('style', style, defaultValue: null),
     );
-    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText,
-        defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect,
-        defaultValue: true));
+    properties.add(
+      DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false),
+    );
+    properties.add(
+      DiagnosticsProperty<String>(
+        'obscuringCharacter',
+        obscuringCharacter,
+        defaultValue: '•',
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'obscureText',
+        obscureText,
+        defaultValue: false,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true),
+    );
     properties.add(
       EnumProperty<SmartDashesType>(
         'smartDashesType',
         smartDashesType,
-        defaultValue:
-            obscureText ? SmartDashesType.disabled : SmartDashesType.enabled,
+        defaultValue: obscureText
+            ? SmartDashesType.disabled
+            : SmartDashesType.enabled,
       ),
     );
     properties.add(
       EnumProperty<SmartQuotesType>(
         'smartQuotesType',
         smartQuotesType,
-        defaultValue:
-            obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled,
+        defaultValue: obscureText
+            ? SmartQuotesType.disabled
+            : SmartQuotesType.enabled,
       ),
     );
     properties.add(
-      DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions,
-          defaultValue: true),
+      DiagnosticsProperty<bool>(
+        'enableSuggestions',
+        enableSuggestions,
+        defaultValue: true,
+      ),
     );
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(
-        DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
+      DiagnosticsProperty<bool>('expands', expands, defaultValue: false),
+    );
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(
       EnumProperty<MaxLengthEnforcement>(
@@ -991,18 +1043,33 @@ class CupertinoRichTextField extends StatefulWidget {
         defaultValue: null,
       ),
     );
-    properties
-        .add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-    properties
-        .add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
-    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius,
-        defaultValue: null));
     properties.add(
-      DiagnosticsProperty<bool>('cursorOpacityAnimates', cursorOpacityAnimates,
-          defaultValue: true),
+      DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0),
     );
-    properties.add(createCupertinoColorProperty('cursorColor', cursorColor,
-        defaultValue: null));
+    properties.add(
+      DoubleProperty('cursorHeight', cursorHeight, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<Radius>(
+        'cursorRadius',
+        cursorRadius,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'cursorOpacityAnimates',
+        cursorOpacityAnimates,
+        defaultValue: true,
+      ),
+    );
+    properties.add(
+      createCupertinoColorProperty(
+        'cursorColor',
+        cursorColor,
+        defaultValue: null,
+      ),
+    );
     properties.add(
       FlagProperty(
         'selectionEnabled',
@@ -1026,11 +1093,19 @@ class CupertinoRichTextField extends StatefulWidget {
       ),
     );
     properties.add(
-      DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics,
-          defaultValue: null),
+      DiagnosticsProperty<ScrollPhysics>(
+        'scrollPhysics',
+        scrollPhysics,
+        defaultValue: null,
+      ),
     );
-    properties.add(EnumProperty<TextAlign>('textAlign', textAlign,
-        defaultValue: TextAlign.start));
+    properties.add(
+      EnumProperty<TextAlign>(
+        'textAlign',
+        textAlign,
+        defaultValue: TextAlign.start,
+      ),
+    );
     properties.add(
       DiagnosticsProperty<TextAlignVertical>(
         'textAlignVertical',
@@ -1038,15 +1113,26 @@ class CupertinoRichTextField extends StatefulWidget {
         defaultValue: null,
       ),
     );
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
     properties.add(
-      DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
-          defaultValue: Clip.hardEdge),
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
     );
     properties.add(
-      DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled,
-          defaultValue: true),
+      DiagnosticsProperty<Clip>(
+        'clipBehavior',
+        clipBehavior,
+        defaultValue: Clip.hardEdge,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'scribbleEnabled',
+        scribbleEnabled,
+        defaultValue: true,
+      ),
     );
     properties.add(
       DiagnosticsProperty<bool>(
@@ -1082,24 +1168,27 @@ class CupertinoRichTextField extends StatefulWidget {
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration =
       TextMagnifierConfiguration(
-    magnifierBuilder: (
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
-    ) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.iOS:
-          return CupertinoTextMagnifier(
-              controller: controller, magnifierInfo: magnifierInfo);
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          return null;
-      }
-    },
-  );
+        magnifierBuilder:
+            (
+              BuildContext context,
+              MagnifierController controller,
+              ValueNotifier<MagnifierInfo> magnifierInfo,
+            ) {
+              switch (defaultTargetPlatform) {
+                case TargetPlatform.android:
+                case TargetPlatform.iOS:
+                  return CupertinoTextMagnifier(
+                    controller: controller,
+                    magnifierInfo: magnifierInfo,
+                  );
+                case TargetPlatform.fuchsia:
+                case TargetPlatform.linux:
+                case TargetPlatform.macOS:
+                case TargetPlatform.windows:
+                  return null;
+              }
+            },
+      );
 
   /// Returns a new [SpellCheckConfiguration] where the given configuration has
   /// had any missing values replaced with their defaults for the iOS platform.
@@ -1112,13 +1201,15 @@ class CupertinoRichTextField extends StatefulWidget {
     }
 
     return configuration.copyWith(
-      misspelledTextStyle: configuration.misspelledTextStyle ??
+      misspelledTextStyle:
+          configuration.misspelledTextStyle ??
           CupertinoRichTextField.cupertinoMisspelledTextStyle,
-      misspelledSelectionColor: configuration.misspelledSelectionColor ??
+      misspelledSelectionColor:
+          configuration.misspelledSelectionColor ??
           CupertinoRichTextField.kMisspelledSelectionColor,
       spellCheckSuggestionsToolbarBuilder:
           configuration.spellCheckSuggestionsToolbarBuilder ??
-              CupertinoRichTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+          CupertinoRichTextField.defaultSpellCheckSuggestionsToolbarBuilder,
     );
   }
 }
@@ -1143,7 +1234,7 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
   bool _showSelectionHandles = false;
 
   late _CupertinoTextFieldSelectionGestureDetectorBuilder
-      _selectionGestureDetectorBuilder;
+  _selectionGestureDetectorBuilder;
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
@@ -1162,8 +1253,8 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
     super.initState();
     _selectionGestureDetectorBuilder =
         _CupertinoTextFieldSelectionGestureDetectorBuilder(
-      state: this,
-    );
+          state: this,
+        );
     // if (widget.controller == null) {
     //   _createLocalController();
     // }
@@ -1264,7 +1355,9 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
   }
 
   void _handleSelectionChanged(
-      TextSelection selection, SelectionChangedCause? cause) {
+    TextSelection selection,
+    SelectionChangedCause? cause,
+  ) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -1343,7 +1436,8 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
   }
 
   Widget _buildClearButton() {
-    final String clearLabel = widget.clearButtonSemanticLabel ??
+    final String clearLabel =
+        widget.clearButtonSemanticLabel ??
         CupertinoLocalizations.of(context).clearButtonLabel;
 
     return Semantics(
@@ -1410,8 +1504,11 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
                 ),
               );
 
-        final Widget? prefixWidget = _shouldShowAttachment(
-                attachment: widget.prefixMode, hasText: hasText)
+        final Widget? prefixWidget =
+            _shouldShowAttachment(
+              attachment: widget.prefixMode,
+              hasText: hasText,
+            )
             ? widget.prefix
             : null;
 
@@ -1424,8 +1521,10 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
           attachment: widget.clearButtonMode,
           hasText: hasText,
         );
-        final Widget? suffixWidget =
-            switch ((showUserSuffix, showClearButton)) {
+        final Widget? suffixWidget = switch ((
+          showUserSuffix,
+          showClearButton,
+        )) {
           (false, false) => null,
           (true, false) => widget.suffix,
           (true, true) => widget.suffix ?? _buildClearButton(),
@@ -1436,7 +1535,7 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
           children: <Widget>[
             // Insert a prefix at the front if the prefix visibility mode matches
             // the current text state.
-            if (prefixWidget != null) prefixWidget,
+            ?prefixWidget,
             // In the middle part, stack the placeholder on top of the main EditableText
             // if needed.
             Expanded(
@@ -1447,13 +1546,10 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
                 // See also https://github.com/flutter/flutter/issues/13715.
                 alignment: AlignmentDirectional.center,
                 textDirection: widget.textDirection,
-                children: <Widget>[
-                  if (placeholder != null) placeholder,
-                  editableText
-                ],
+                children: <Widget>[?placeholder, editableText],
               ),
             ),
-            if (suffixWidget != null) suffixWidget,
+            ?suffixWidget,
           ],
         );
       },
@@ -1470,8 +1566,9 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
 
   @override
   TextInputConfiguration get textInputConfiguration {
-    final List<String>? autofillHints =
-        widget.autofillHints?.toList(growable: false);
+    final List<String>? autofillHints = widget.autofillHints?.toList(
+      growable: false,
+    );
     final AutofillConfiguration autofillConfiguration = autofillHints != null
         ? AutofillConfiguration(
             uniqueIdentifier: autofillId,
@@ -1535,35 +1632,44 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
     final TextStyle? resolvedStyle = widget.style?.copyWith(
       color: CupertinoDynamicColor.maybeResolve(widget.style?.color, context),
       backgroundColor: CupertinoDynamicColor.maybeResolve(
-          widget.style?.backgroundColor, context),
-    );
-
-    final TextStyle textStyle =
-        themeData.textTheme.textStyle.merge(resolvedStyle);
-
-    final TextStyle? resolvedPlaceholderStyle =
-        widget.placeholderStyle?.copyWith(
-      color: CupertinoDynamicColor.maybeResolve(
-          widget.placeholderStyle?.color, context),
-      backgroundColor: CupertinoDynamicColor.maybeResolve(
-        widget.placeholderStyle?.backgroundColor,
+        widget.style?.backgroundColor,
         context,
       ),
     );
 
-    final TextStyle placeholderStyle =
-        textStyle.merge(resolvedPlaceholderStyle);
+    final TextStyle textStyle = themeData.textTheme.textStyle.merge(
+      resolvedStyle,
+    );
+
+    final TextStyle? resolvedPlaceholderStyle = widget.placeholderStyle
+        ?.copyWith(
+          color: CupertinoDynamicColor.maybeResolve(
+            widget.placeholderStyle?.color,
+            context,
+          ),
+          backgroundColor: CupertinoDynamicColor.maybeResolve(
+            widget.placeholderStyle?.backgroundColor,
+            context,
+          ),
+        );
+
+    final TextStyle placeholderStyle = textStyle.merge(
+      resolvedPlaceholderStyle,
+    );
 
     final Brightness keyboardAppearance =
         widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
-    final Color cursorColor = CupertinoDynamicColor.maybeResolve(
+    final Color cursorColor =
+        CupertinoDynamicColor.maybeResolve(
           widget.cursorColor ?? DefaultSelectionStyle.of(context).cursorColor,
           context,
         ) ??
         themeData.primaryColor;
 
-    final Color disabledColor =
-        CupertinoDynamicColor.resolve(_kDisabledBackground, context);
+    final Color disabledColor = CupertinoDynamicColor.resolve(
+      _kDisabledBackground,
+      context,
+    );
 
     final Color? decorationColor = CupertinoDynamicColor.maybeResolve(
       widget.decoration?.color,
@@ -1577,7 +1683,8 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
         return side == BorderSide.none
             ? side
             : side.copyWith(
-                color: CupertinoDynamicColor.resolve(side.color, context));
+                color: CupertinoDynamicColor.resolve(side.color, context),
+              );
       }
 
       resolvedBorder = border.runtimeType != Border
@@ -1596,11 +1703,12 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
       color: enabled
           ? decorationColor
           : (widget.decoration == _kDefaultRoundedBorderDecoration
-              ? disabledColor
-              : widget.decoration?.color),
+                ? disabledColor
+                : widget.decoration?.color),
     );
 
-    final Color selectionColor = CupertinoDynamicColor.maybeResolve(
+    final Color selectionColor =
+        CupertinoDynamicColor.maybeResolve(
           DefaultSelectionStyle.of(context).selectionColor,
           context,
         ) ??
@@ -1611,7 +1719,8 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
     // unless a custom style is specified.
     final SpellCheckConfiguration spellCheckConfiguration =
         CupertinoRichTextField.inferIOSSpellCheckConfiguration(
-            widget.spellCheckConfiguration);
+          widget.spellCheckConfiguration,
+        );
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -1644,13 +1753,16 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
             maxLines: widget.maxLines,
             minLines: widget.minLines,
             expands: widget.expands,
-            magnifierConfiguration: widget.magnifierConfiguration ??
+            magnifierConfiguration:
+                widget.magnifierConfiguration ??
                 CupertinoRichTextField._iosMagnifierConfiguration,
             // Only show the selection highlight when the text field is focused.
-            selectionColor:
-                _effectiveFocusNode.hasFocus ? selectionColor : null,
-            selectionControls:
-                widget.selectionEnabled ? textSelectionControls : null,
+            selectionColor: _effectiveFocusNode.hasFocus
+                ? selectionColor
+                : null,
+            selectionControls: widget.selectionEnabled
+                ? textSelectionControls
+                : null,
             groupId: widget.groupId,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
@@ -1699,8 +1811,9 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
           ? null
           : () {
               if (!controller.selection.isValid) {
-                controller.selection =
-                    TextSelection.collapsed(offset: controller.text.length);
+                controller.selection = TextSelection.collapsed(
+                  offset: controller.text.length,
+                );
               }
               _requestKeyboard();
             },
@@ -1741,8 +1854,9 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
           ignoring: !enabled,
           child: Container(
             decoration: effectiveDecoration,
-            color:
-                !enabled && effectiveDecoration == null ? disabledColor : null,
+            color: !enabled && effectiveDecoration == null
+                ? disabledColor
+                : null,
             child: _selectionGestureDetectorBuilder.buildGestureDetector(
               behavior: HitTestBehavior.translucent,
               child: Align(
@@ -1750,7 +1864,10 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
                 widthFactor: 1.0,
                 heightFactor: 1.0,
                 child: _addTextDependentAttachments(
-                    paddedEditable, textStyle, placeholderStyle),
+                  paddedEditable,
+                  textStyle,
+                  placeholderStyle,
+                ),
               ),
             ),
           ),

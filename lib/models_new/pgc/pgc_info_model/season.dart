@@ -37,27 +37,27 @@ class Season {
   });
 
   factory Season.fromJson(Map<String, dynamic> json) => Season(
-        badge: json['badge'] as String?,
-        badgeInfo: json['badge_info'] == null
-            ? null
-            : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
-        badgeType: json['badge_type'] as int?,
-        cover: json['cover'] as String?,
-        enableVt: json['enable_vt'] as bool?,
-        horizontalCover1610: json['horizontal_cover_1610'] as String?,
-        horizontalCover169: json['horizontal_cover_169'] as String?,
-        iconFont: json['icon_font'] == null
-            ? null
-            : IconFont.fromJson(json['icon_font'] as Map<String, dynamic>),
-        mediaId: json['media_id'] as int?,
-        newEp: json['new_ep'] == null
-            ? null
-            : NewEp.fromJson(json['new_ep'] as Map<String, dynamic>),
-        seasonId: json['season_id'] as int?,
-        seasonTitle: json['season_title'] as String?,
-        seasonType: json['season_type'] as int?,
-        stat: json['stat'] == null
-            ? null
-            : Stat.fromJson(json['stat'] as Map<String, dynamic>),
-      );
+    badge: json['badge'] as String?,
+    badgeInfo: json['badge_info'] == null
+        ? null
+        : BadgeInfo.fromJson(json['badge_info'] as Map<String, dynamic>),
+    badgeType: json['badge_type'] as int?,
+    cover: json['cover'] as String?,
+    enableVt: json['enable_vt'] as bool?,
+    horizontalCover1610: json['horizontal_cover_1610'] as String?,
+    horizontalCover169: json['horizontal_cover_169'] as String?,
+    iconFont: json['icon_font'] == null
+        ? null
+        : IconFont.fromJson(json['icon_font'] as Map<String, dynamic>),
+    mediaId: json['media_id'] as int?,
+    newEp: json['new_ep'] == null
+        ? null
+        : NewEp.fromJson(json['new_ep'] as Map<String, dynamic>),
+    seasonId: json['season_id'] as int?,
+    seasonTitle: json['season_title'] as String?,
+    seasonType: json['season_type'] as int?,
+    stat: json['stat'] == null
+        ? null
+        : Stat.fromJson(json['stat'] as Map<String, dynamic>),
+  );
 }

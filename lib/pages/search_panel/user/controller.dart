@@ -81,8 +81,8 @@ class SearchUserController
                               : null,
                           textColor:
                               item['value'] == currentOrderFilterval.value
-                                  ? theme.colorScheme.onSecondaryContainer
-                                  : null,
+                              ? theme.colorScheme.onSecondaryContainer
+                              : null,
                         ),
                       )
                       .toList(),
@@ -109,12 +109,12 @@ class SearchUserController
                           },
                           bgColor:
                               item['value'] == currentUserTypeFilterval.value
-                                  ? theme.colorScheme.secondaryContainer
-                                  : null,
+                              ? theme.colorScheme.secondaryContainer
+                              : null,
                           textColor:
                               item['value'] == currentUserTypeFilterval.value
-                                  ? theme.colorScheme.onSecondaryContainer
-                                  : null,
+                              ? theme.colorScheme.onSecondaryContainer
+                              : null,
                         ),
                       )
                       .toList(),

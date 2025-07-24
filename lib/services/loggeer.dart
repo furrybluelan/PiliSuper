@@ -16,8 +16,13 @@ class PiliLogger extends Logger {
   PiliLogger() : super();
 
   @override
-  Future<void> log(Level level, dynamic message,
-      {Object? error, StackTrace? stackTrace, DateTime? time}) async {
+  Future<void> log(
+    Level level,
+    dynamic message, {
+    Object? error,
+    StackTrace? stackTrace,
+    DateTime? time,
+  }) async {
     if (level == Level.error || level == Level.fatal) {
       // 添加至文件末尾
       File logFile = await getLogsPath();

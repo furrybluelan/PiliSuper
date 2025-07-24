@@ -43,7 +43,8 @@ class SegmentProgressBar extends CustomPainter {
         if (item.title != null) {
           double fontSize = 10;
 
-          _defHeight ??= (TextPainter(
+          _defHeight ??=
+              (TextPainter(
                 text: TextSpan(
                   text: item.title,
                   style: TextStyle(
@@ -51,23 +52,21 @@ class SegmentProgressBar extends CustomPainter {
                   ),
                 ),
                 textDirection: TextDirection.ltr,
-              )..layout())
-                  .height +
+              )..layout()).height +
               2;
 
           TextPainter getTextPainter() => TextPainter(
-                text: TextSpan(
-                  text: item.title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: fontSize,
-                    height: 1,
-                  ),
-                ),
-                strutStyle:
-                    StrutStyle(leading: 0, height: 1, fontSize: fontSize),
-                textDirection: TextDirection.ltr,
-              )..layout();
+            text: TextSpan(
+              text: item.title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: fontSize,
+                height: 1,
+              ),
+            ),
+            strutStyle: StrutStyle(leading: 0, height: 1, fontSize: fontSize),
+            textDirection: TextDirection.ltr,
+          )..layout();
 
           TextPainter textPainter = getTextPainter();
 
@@ -107,8 +106,8 @@ class SegmentProgressBar extends CustomPainter {
           double textX = i == 0
               ? (segmentStart - textPainter.width) / 2
               : (segmentStart - prevStart - textPainter.width) / 2 +
-                  prevStart +
-                  1;
+                    prevStart +
+                    1;
           double textY = (-_defHeight! - textPainter.height) / 2;
           textPainter.paint(canvas, Offset(textX, textY));
         } else {

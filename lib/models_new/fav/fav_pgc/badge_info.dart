@@ -16,12 +16,12 @@ class BadgeInfo {
   });
 
   factory BadgeInfo.fromJson(Map<String, dynamic> json) => BadgeInfo(
-        text: json['text'] as String?,
-        bgColor: json['bg_color'] as String?,
-        bgColorNight: json['bg_color_night'] as String?,
-        img: json['img'] as String?,
-        multiImg: json['multi_img'] == null
-            ? null
-            : MultiImg.fromJson(json['multi_img'] as Map<String, dynamic>),
-      );
+    text: json['text'] as String?,
+    bgColor: json['bg_color'] as String?,
+    bgColorNight: json['bg_color_night'] as String?,
+    img: json['img'] as String?,
+    multiImg: json['multi_img'] == null
+        ? null
+        : MultiImg.fromJson(json['multi_img'] as Map<String, dynamic>),
+  );
 }

@@ -8,11 +8,12 @@ class Room {
   Room({this.list, this.totalRoom, this.totalPage});
 
   factory Room.fromJson(Map<String, dynamic> json) => Room(
-        list: (json['list'] as List<dynamic>?)
-            ?.map((e) =>
-                LiveSearchRoomItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        totalRoom: json['total_room'] as int?,
-        totalPage: json['total_page'] as int?,
-      );
+    list: (json['list'] as List<dynamic>?)
+        ?.map(
+          (e) => LiveSearchRoomItemModel.fromJson(e as Map<String, dynamic>),
+        )
+        .toList(),
+    totalRoom: json['total_room'] as int?,
+    totalPage: json['total_page'] as int?,
+  );
 }

@@ -20,8 +20,10 @@ class FollowPage extends StatefulWidget {
 
 class _FollowPageState extends State<FollowPage> {
   final _tag = Utils.generateRandomString(8);
-  late final FollowController _followController =
-      Get.put(FollowController(), tag: _tag);
+  late final FollowController _followController = Get.put(
+    FollowController(),
+    tag: _tag,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +62,7 @@ class _FollowPageState extends State<FollowPage> {
                           Text('黑名单管理'),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(width: 6),
@@ -74,11 +76,11 @@ class _FollowPageState extends State<FollowPage> {
   }
 
   Widget _childPage([MemberTagItemModel? item]) => FollowChildPage(
-        tag: _tag,
-        controller: _followController,
-        mid: _followController.mid,
-        tagid: item?.tagid,
-      );
+    tag: _tag,
+    controller: _followController,
+    mid: _followController.mid,
+    tagid: item?.tagid,
+  );
 
   bool _isCustomTag(int? tagid) {
     return tagid != null && tagid != 0 && tagid != -10 && tagid != -2;
@@ -88,64 +90,66 @@ class _FollowPageState extends State<FollowPage> {
     return switch (loadingState) {
       Loading() => loadingWidget,
       Success() => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SafeArea(
-              top: false,
-              bottom: false,
-              child: TabBar(
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                controller: _followController.tabController,
-                tabs: List.generate(_followController.tabs.length, (index) {
-                  return Obx(() {
-                    final item = _followController.tabs[index];
-                    int? count = item.count;
-                    if (_isCustomTag(item.tagid)) {
-                      return GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onLongPress: () {
-                          Feedback.forLongPress(context);
-                          _onHandleTag(index, item);
-                        },
-                        child: Tab(
-                          child: Row(
-                            children: [
-                              Text(
-                                '${item.name}${count != null ? '($count)' : ''} ',
-                              ),
-                              const Icon(Icons.menu, size: 18),
-                            ],
-                          ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SafeArea(
+            top: false,
+            bottom: false,
+            child: TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              controller: _followController.tabController,
+              tabs: List.generate(_followController.tabs.length, (index) {
+                return Obx(() {
+                  final item = _followController.tabs[index];
+                  int? count = item.count;
+                  if (_isCustomTag(item.tagid)) {
+                    return GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onLongPress: () {
+                        Feedback.forLongPress(context);
+                        _onHandleTag(index, item);
+                      },
+                      child: Tab(
+                        child: Row(
+                          children: [
+                            Text(
+                              '${item.name}${count != null ? '($count)' : ''} ',
+                            ),
+                            const Icon(Icons.menu, size: 18),
+                          ],
                         ),
-                      );
-                    }
-                    return Tab(
-                        text: '${item.name}${count != null ? '($count)' : ''}');
-                  });
-                }),
-                onTap: (value) {
-                  if (!_followController.tabController!.indexIsChanging) {
-                    final item = _followController.tabs[value];
-                    // if (_isCustomTag(item.tagid)) {
-                    //   _onHandleTag(value, item);
-                    // }
-                    try {
-                      Get.find<FollowChildController>(tag: '$_tag${item.tagid}')
-                          .animateToTop();
-                    } catch (_) {}
+                      ),
+                    );
                   }
-                },
-              ),
+                  return Tab(
+                    text: '${item.name}${count != null ? '($count)' : ''}',
+                  );
+                });
+              }),
+              onTap: (value) {
+                if (!_followController.tabController!.indexIsChanging) {
+                  final item = _followController.tabs[value];
+                  // if (_isCustomTag(item.tagid)) {
+                  //   _onHandleTag(value, item);
+                  // }
+                  try {
+                    Get.find<FollowChildController>(
+                      tag: '$_tag${item.tagid}',
+                    ).animateToTop();
+                  } catch (_) {}
+                }
+              },
             ),
-            Expanded(
-              child: tabBarView(
-                controller: _followController.tabController,
-                children: _followController.tabs.map(_childPage).toList(),
-              ),
+          ),
+          Expanded(
+            child: tabBarView(
+              controller: _followController.tabController,
+              children: _followController.tabs.map(_childPage).toList(),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
       Error() => _childPage(),
     };
   }
@@ -174,8 +178,9 @@ class _FollowPageState extends State<FollowPage> {
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(16),
                       ],
-                      decoration:
-                          const InputDecoration(border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                     onConfirm: () {
                       if (tagName.isNotEmpty) {

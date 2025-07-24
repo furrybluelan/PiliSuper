@@ -20,20 +20,20 @@ class ReplyReplyData {
   });
 
   factory ReplyReplyData.fromJson(Map<String, dynamic> json) => ReplyReplyData(
-        page: json['page'] == null
-            ? null
-            : ReplyPage.fromJson(json['page'] as Map<String, dynamic>),
-        upper: json['upper'] == null
-            ? null
-            : Upper.fromJson(json['upper'] as Map<String, dynamic>),
-        replies: (json['replies'] as List<dynamic>?)
-            ?.map((e) => ReplyItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        root: json['root'] == null
-            ? null
-            : ReplyRoot.fromJson(json['root'] as Map<String, dynamic>),
-        control: json['control'] == null
-            ? null
-            : ReplyControl.fromJson(json['control'] as Map<String, dynamic>),
-      );
+    page: json['page'] == null
+        ? null
+        : ReplyPage.fromJson(json['page'] as Map<String, dynamic>),
+    upper: json['upper'] == null
+        ? null
+        : Upper.fromJson(json['upper'] as Map<String, dynamic>),
+    replies: (json['replies'] as List<dynamic>?)
+        ?.map((e) => ReplyItemModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    root: json['root'] == null
+        ? null
+        : ReplyRoot.fromJson(json['root'] as Map<String, dynamic>),
+    control: json['control'] == null
+        ? null
+        : ReplyControl.fromJson(json['control'] as Map<String, dynamic>),
+  );
 }

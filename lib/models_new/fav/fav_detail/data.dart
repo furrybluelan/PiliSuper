@@ -10,13 +10,13 @@ class FavDetailData {
   FavDetailData({this.info, this.medias, this.hasMore, this.ttl});
 
   factory FavDetailData.fromJson(Map<String, dynamic> json) => FavDetailData(
-        info: json['info'] == null
-            ? null
-            : FavFolderInfo.fromJson(json['info'] as Map<String, dynamic>),
-        medias: (json['medias'] as List<dynamic>?)
-            ?.map((e) => FavDetailItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        hasMore: json['has_more'] as bool?,
-        ttl: json['ttl'] as int?,
-      );
+    info: json['info'] == null
+        ? null
+        : FavFolderInfo.fromJson(json['info'] as Map<String, dynamic>),
+    medias: (json['medias'] as List<dynamic>?)
+        ?.map((e) => FavDetailItemModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    hasMore: json['has_more'] as bool?,
+    ttl: json['ttl'] as int?,
+  );
 }

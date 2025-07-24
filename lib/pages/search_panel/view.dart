@@ -27,9 +27,12 @@ abstract class CommonSearchPanel extends StatefulWidget {
 }
 
 abstract class CommonSearchPanelState<
-    S extends CommonSearchPanel,
-    R extends SearchNumData<T>,
-    T> extends State<S> with AutomaticKeepAliveClientMixin {
+  S extends CommonSearchPanel,
+  R extends SearchNumData<T>,
+  T
+>
+    extends State<S>
+    with AutomaticKeepAliveClientMixin {
   SearchPanelController<R, T> get controller;
 
   @override
@@ -56,24 +59,23 @@ abstract class CommonSearchPanelState<
     return SliverGrid(
       gridDelegate: switch (widget.searchType) {
         SearchType.media_bangumi ||
-        SearchType.media_ft =>
-          SliverGridDelegateWithExtentAndRatio(
-            mainAxisSpacing: 2,
-            maxCrossAxisExtent: Grid.smallCardWidth * 2,
-            childAspectRatio: StyleString.aspectRatio * 1.5,
-            minHeight: MediaQuery.textScalerOf(context).scale(155),
-          ),
+        SearchType.media_ft => SliverGridDelegateWithExtentAndRatio(
+          mainAxisSpacing: 2,
+          maxCrossAxisExtent: Grid.smallCardWidth * 2,
+          childAspectRatio: StyleString.aspectRatio * 1.5,
+          minHeight: MediaQuery.textScalerOf(context).scale(155),
+        ),
         SearchType.live_room => SliverGridDelegateWithExtentAndRatio(
-            mainAxisSpacing: StyleString.cardSpace,
-            crossAxisSpacing: StyleString.cardSpace,
-            maxCrossAxisExtent: Grid.smallCardWidth,
-            childAspectRatio: StyleString.aspectRatio,
-            mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
-          ),
+          mainAxisSpacing: StyleString.cardSpace,
+          crossAxisSpacing: StyleString.cardSpace,
+          maxCrossAxisExtent: Grid.smallCardWidth,
+          childAspectRatio: StyleString.aspectRatio,
+          mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
+        ),
         SearchType.bili_user => SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: Grid.smallCardWidth * 2,
-            mainAxisExtent: 66,
-          ),
+          maxCrossAxisExtent: Grid.smallCardWidth * 2,
+          mainAxisExtent: 66,
+        ),
         _ => Grid.videoCardHDelegate(context),
       },
       delegate: SliverChildBuilderDelegate(
@@ -96,28 +98,31 @@ abstract class CommonSearchPanelState<
 
   Widget _buildBody(ThemeData theme, LoadingState<List<T>?> loadingState) {
     return switch (loadingState) {
-      Loading() => widget.searchType == SearchType.live_room
-          ? SliverPadding(
-              padding: const EdgeInsets.only(
-                left: StyleString.cardSpace,
-                right: StyleString.cardSpace,
+      Loading() =>
+        widget.searchType == SearchType.live_room
+            ? SliverPadding(
+                padding: const EdgeInsets.only(
+                  left: StyleString.cardSpace,
+                  right: StyleString.cardSpace,
+                ),
+                sliver: _builLoading,
+              )
+            : _builLoading,
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverPadding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.paddingOf(context).bottom + 80,
+                ),
+                sliver: buildList(theme, response!),
+              )
+            : HttpError(
+                onReload: controller.onReload,
               ),
-              sliver: _builLoading,
-            )
-          : _builLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverPadding(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.paddingOf(context).bottom + 80),
-              sliver: buildList(theme, response!),
-            )
-          : HttpError(
-              onReload: controller.onReload,
-            ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: controller.onReload,
+      ),
     };
   }
 

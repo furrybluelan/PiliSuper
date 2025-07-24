@@ -20,14 +20,14 @@ class Bangumi {
   });
 
   factory Bangumi.fromJson(Map<String, dynamic> json) => Bangumi(
-        epId: json['ep_id'] as int?,
-        title: json['title'] as String?,
-        longTitle: json['long_title'] as String?,
-        episodeStatus: json['episode_status'] as int?,
-        follow: json['follow'] as int?,
-        cover: json['cover'] as String?,
-        season: json['season'] == null
-            ? null
-            : Season.fromJson(json['season'] as Map<String, dynamic>),
-      );
+    epId: json['ep_id'] as int?,
+    title: json['title'] as String?,
+    longTitle: json['long_title'] as String?,
+    episodeStatus: json['episode_status'] as int?,
+    follow: json['follow'] as int?,
+    cover: json['cover'] as String?,
+    season: json['season'] == null
+        ? null
+        : Season.fromJson(json['season'] as Map<String, dynamic>),
+  );
 }

@@ -46,27 +46,28 @@ class _DynTopicRcmdPageState extends State<DynTopicRcmdPage> {
   Widget _buildBody(LoadingState<List<TopicItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => linearLoading,
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverList.builder(
-              itemCount: response!.length,
-              itemBuilder: (context, index) {
-                return DynTopicItem(
-                  item: response[index],
-                  onTap: (item) => Get.toNamed(
-                    '/dynTopic',
-                    parameters: {
-                      'id': item.id.toString(),
-                      'name': item.name,
-                    },
-                  ),
-                );
-              },
-            )
-          : HttpError(onReload: _controller.onReload),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverList.builder(
+                itemCount: response!.length,
+                itemBuilder: (context, index) {
+                  return DynTopicItem(
+                    item: response[index],
+                    onTap: (item) => Get.toNamed(
+                      '/dynTopic',
+                      parameters: {
+                        'id': item.id.toString(),
+                        'name': item.name,
+                      },
+                    ),
+                  );
+                },
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

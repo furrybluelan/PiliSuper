@@ -34,21 +34,21 @@ class Last {
   });
 
   factory Last.fromJson(Map<String, dynamic> json) => Last(
-        id: json['id'] as int?,
-        title: json['title'] as String?,
-        state: json['state'] as int?,
-        publishTime: json['publish_time'] as int?,
-        words: json['words'] as int?,
-        imageUrls: (json['image_urls'] as List?)?.cast(),
-        category: json['category'] == null
-            ? null
-            : Category.fromJson(json['category'] as Map<String, dynamic>),
-        categories: json['categories'] as dynamic,
-        summary: json['summary'] as String?,
-        type: json['type'] as int?,
-        dynIdStr: json['dyn_id_str'] as String?,
-        attributes: json['attributes'] as int?,
-        authorUid: json['author_uid'] as int?,
-        onlyFans: json['only_fans'] as int?,
-      );
+    id: json['id'] as int?,
+    title: json['title'] as String?,
+    state: json['state'] as int?,
+    publishTime: json['publish_time'] as int?,
+    words: json['words'] as int?,
+    imageUrls: (json['image_urls'] as List?)?.cast(),
+    category: json['category'] == null
+        ? null
+        : Category.fromJson(json['category'] as Map<String, dynamic>),
+    categories: json['categories'] as dynamic,
+    summary: json['summary'] as String?,
+    type: json['type'] as int?,
+    dynIdStr: json['dyn_id_str'] as String?,
+    attributes: json['attributes'] as int?,
+    authorUid: json['author_uid'] as int?,
+    onlyFans: json['only_fans'] as int?,
+  );
 }

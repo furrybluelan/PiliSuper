@@ -74,14 +74,14 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
   }
 
   LinearGradient get gradient => LinearGradient(
-        colors: widget.linearGradient.colors,
-        stops: widget.linearGradient.stops,
-        begin: widget.linearGradient.begin,
-        end: widget.linearGradient.end,
-        transform: _SlidingGradientTransform(
-          slidePercent: _shimmerController.value,
-        ),
-      );
+    colors: widget.linearGradient.colors,
+    stops: widget.linearGradient.stops,
+    begin: widget.linearGradient.begin,
+    end: widget.linearGradient.end,
+    transform: _SlidingGradientTransform(
+      slidePercent: _shimmerController.value,
+    ),
+  );
 
   bool get isSized =>
       (context.findRenderObject() as RenderBox?)?.hasSize ?? false;

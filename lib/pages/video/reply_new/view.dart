@@ -135,8 +135,12 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
   List<Widget> buildInputView() {
     return [
       Padding(
-        padding:
-            const EdgeInsets.only(top: 12, right: 15, left: 15, bottom: 10),
+        padding: const EdgeInsets.only(
+          top: 12,
+          right: 15,
+          left: 15,
+          bottom: 10,
+        ),
         child: Form(
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Listener(
@@ -192,38 +196,40 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
             Expanded(
               child: Center(
                 child: Obx(
-                  () => TextButton(
-                    style: TextButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: const EdgeInsets.all(13),
-                      visualDensity: VisualDensity.compact,
-                      foregroundColor: _syncToDynamic.value
-                          ? themeData.colorScheme.secondary
-                          : themeData.colorScheme.outline,
-                    ),
-                    onPressed: () =>
-                        _syncToDynamic.value = !_syncToDynamic.value,
-                    child: Row(
-                      spacing: 4,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _syncToDynamic.value
-                              ? Icons.check_box
-                              : Icons.check_box_outline_blank,
-                          size: 22,
-                        ),
-                        const Flexible(
-                          child: Text(
-                            '转到动态',
-                            maxLines: 1,
-                            style: TextStyle(height: 1),
-                            strutStyle: StrutStyle(leading: 0, height: 1),
+                  () {
+                    final syncToDynamic = _syncToDynamic.value;
+                    return TextButton(
+                      style: TextButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.all(13),
+                        visualDensity: VisualDensity.compact,
+                        foregroundColor: syncToDynamic
+                            ? themeData.colorScheme.secondary
+                            : themeData.colorScheme.outline,
+                      ),
+                      onPressed: () => _syncToDynamic.value = !syncToDynamic,
+                      child: Row(
+                        spacing: 4,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            syncToDynamic
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
+                            size: 22,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                          const Flexible(
+                            child: Text(
+                              '转到动态',
+                              maxLines: 1,
+                              style: TextStyle(height: 1),
+                              strutStyle: StrutStyle(leading: 0, height: 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -232,8 +238,10 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
                 onPressed: enablePublish.value ? onPublish : null,
                 style: FilledButton.styleFrom(
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   visualDensity: VisualDensity.compact,
                 ),
                 child: const Text('发送'),
@@ -241,7 +249,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
             ),
           ],
         ),
-      )
+      ),
     ];
   }
 
@@ -303,7 +311,8 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
             onTap: () async {
               controller.keepChatPanel();
               ({String title, String url})? res = await Get.to(
-                  ReplySearchPage(type: widget.replyType, oid: widget.oid));
+                ReplySearchPage(type: widget.replyType, oid: widget.oid),
+              );
               if (res != null) {
                 onInsertText(
                   '${res.title} ',
@@ -334,8 +343,9 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
             item(
               onTap: () {
                 try {
-                  final plPlayerController =
-                      Get.find<VideoDetailController>(tag: heroTag);
+                  final plPlayerController = Get.find<VideoDetailController>(
+                    tag: heroTag,
+                  );
                   onInsertText(
                     ' ${DurationUtil.formatDuration((plPlayerController.playedTime ?? Duration.zero).inSeconds)} ',
                     RichTextType.common,
@@ -355,15 +365,18 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
                     return;
                   }
                   try {
-                    final plPlayerController =
-                        Get.find<VideoDetailController>(tag: heroTag);
+                    final plPlayerController = Get.find<VideoDetailController>(
+                      tag: heroTag,
+                    );
                     final res = await plPlayerController
-                        .plPlayerController.videoPlayerController
+                        .plPlayerController
+                        .videoPlayerController
                         ?.screenshot(format: 'image/png');
                     if (res != null) {
                       final tempDir = await getTemporaryDirectory();
                       File file = File(
-                          '${tempDir.path}/${Utils.generateRandomString(8)}.png');
+                        '${tempDir.path}/${Utils.generateRandomString(8)}.png',
+                      );
                       await file.writeAsBytes(res);
                       pathList.add(file.path);
                     } else {
@@ -373,8 +386,11 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
                     debugPrint(e.toString());
                   }
                 },
-                icon: Icon(Icons.enhance_photo_translate_outlined,
-                    size: 28, color: color),
+                icon: Icon(
+                  Icons.enhance_photo_translate_outlined,
+                  size: 28,
+                  color: color,
+                ),
                 title: '视频截图',
               ),
           ],

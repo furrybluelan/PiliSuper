@@ -26,17 +26,17 @@ class Payment {
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
-        discount: json['discount'] as int?,
-        payType: json['pay_type'] == null
-            ? null
-            : PayType.fromJson(json['pay_type'] as Map<String, dynamic>),
-        price: json['price'] as String?,
-        promotion: json['promotion'] as String?,
-        tip: json['tip'] as String?,
-        viewStartTime: json['view_start_time'] as int?,
-        vipDiscount: json['vip_discount'] as int?,
-        vipFirstPromotion: json['vip_first_promotion'] as String?,
-        vipPrice: json['vip_price'] as String?,
-        vipPromotion: json['vip_promotion'] as String?,
-      );
+    discount: json['discount'] as int?,
+    payType: json['pay_type'] == null
+        ? null
+        : PayType.fromJson(json['pay_type'] as Map<String, dynamic>),
+    price: json['price'] as String?,
+    promotion: json['promotion'] as String?,
+    tip: json['tip'] as String?,
+    viewStartTime: json['view_start_time'] as int?,
+    vipDiscount: json['vip_discount'] as int?,
+    vipFirstPromotion: json['vip_first_promotion'] as String?,
+    vipPrice: json['vip_price'] as String?,
+    vipPromotion: json['vip_promotion'] as String?,
+  );
 }

@@ -33,22 +33,22 @@ class UgcSeason {
   });
 
   factory UgcSeason.fromJson(Map<String, dynamic> json) => UgcSeason(
-        id: json['id'] as int?,
-        title: json['title'] as String?,
-        cover: json['cover'] as String?,
-        mid: json['mid'] as int?,
-        intro: json['intro'] as String?,
-        signState: json['sign_state'] as int?,
-        attribute: json['attribute'] as int?,
-        sections: (json['sections'] as List<dynamic>?)
-            ?.map((e) => SectionItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        stat: json['stat'] == null
-            ? null
-            : Stat.fromJson(json['stat'] as Map<String, dynamic>),
-        epCount: json['ep_count'] as int?,
-        seasonType: json['season_type'] as int?,
-        isPaySeason: json['is_pay_season'] as bool?,
-        enableVt: json['enable_vt'] as int?,
-      );
+    id: json['id'] as int?,
+    title: json['title'] as String?,
+    cover: json['cover'] as String?,
+    mid: json['mid'] as int?,
+    intro: json['intro'] as String?,
+    signState: json['sign_state'] as int?,
+    attribute: json['attribute'] as int?,
+    sections: (json['sections'] as List<dynamic>?)
+        ?.map((e) => SectionItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    stat: json['stat'] == null
+        ? null
+        : Stat.fromJson(json['stat'] as Map<String, dynamic>),
+    epCount: json['ep_count'] as int?,
+    seasonType: json['season_type'] as int?,
+    isPaySeason: json['is_pay_season'] as bool?,
+    enableVt: json['enable_vt'] as int?,
+  );
 }

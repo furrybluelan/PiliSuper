@@ -146,8 +146,9 @@ Widget videoSeasonWidget(
       if (itemContent.cover != null)
         if (floor == 1)
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
+            padding: const EdgeInsets.symmetric(
+              horizontal: StyleString.safeSpace,
+            ),
             child: buildCover(),
           )
         else

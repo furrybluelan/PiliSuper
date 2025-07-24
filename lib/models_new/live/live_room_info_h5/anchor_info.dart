@@ -8,12 +8,11 @@ class AnchorInfo {
   AnchorInfo({this.baseInfo, this.relationInfo});
 
   factory AnchorInfo.fromJson(Map<String, dynamic> json) => AnchorInfo(
-        baseInfo: json['base_info'] == null
-            ? null
-            : BaseInfo.fromJson(json['base_info'] as Map<String, dynamic>),
-        relationInfo: json['relation_info'] == null
-            ? null
-            : RelationInfo.fromJson(
-                json['relation_info'] as Map<String, dynamic>),
-      );
+    baseInfo: json['base_info'] == null
+        ? null
+        : BaseInfo.fromJson(json['base_info'] as Map<String, dynamic>),
+    relationInfo: json['relation_info'] == null
+        ? null
+        : RelationInfo.fromJson(json['relation_info'] as Map<String, dynamic>),
+  );
 }

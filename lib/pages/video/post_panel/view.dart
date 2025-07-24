@@ -103,7 +103,8 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                 controller: ScrollController(),
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.only(
-                    bottom: 88 + MediaQuery.paddingOf(context).bottom),
+                  bottom: 88 + MediaQuery.paddingOf(context).bottom,
+                ),
                 child: Column(
                   children: List.generate(
                     list!.length,
@@ -144,7 +145,7 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                   ),
                   child: const Icon(Icons.check),
                 ),
-              )
+              ),
             ],
           )
         : errorWidget();
@@ -173,7 +174,8 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
     required bool isFirst,
   }) {
     String value = DurationUtil.formatDuration(
-        isFirst ? item.segment.first : item.segment.second);
+      isFirst ? item.segment.first : item.segment.second,
+    );
     return [
       Text(
         '${isFirst ? '开始' : '结束'}: $value',
@@ -248,8 +250,11 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
           ).then((res) {
             if (res != null) {
               try {
-                List<num> split =
-                    res.split(':').reversed.map((e) => num.parse(e)).toList();
+                List<num> split = res
+                    .split(':')
+                    .reversed
+                    .map((e) => num.parse(e))
+                    .toList();
                 double duration = 0;
                 for (int i = 0; i < split.length; i++) {
                   duration += split[i] * pow(60, i);
@@ -275,63 +280,64 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
   void _onPost() {
     Request()
         .post(
-      '${widget.videoDetailController.blockServer}/api/skipSegments',
-      data: {
-        'videoID': videoDetailController.bvid,
-        'cid': videoDetailController.cid.value.toString(),
-        'userID': Pref.blockUserID.toString(),
-        'userAgent': Constants.userAgent,
-        'videoDuration': videoDuration,
-        'segments': list!
-            .map(
-              (item) => {
-                'segment': [
-                  item.segment.first,
-                  item.segment.second,
-                ],
-                'category': item.category.name,
-                'actionType': item.actionType.name,
-              },
-            )
-            .toList(),
-      },
-      options: Options(
-        followRedirects: true, // Defaults to true.
-        validateStatus: (int? status) {
-          return (status! >= 200 && status < 300) ||
-              const [400, 403, 429, 409] // reduce extra toast
-                  .contains(status);
-        },
-      ),
-    )
+          '${widget.videoDetailController.blockServer}/api/skipSegments',
+          data: {
+            'videoID': videoDetailController.bvid,
+            'cid': videoDetailController.cid.value.toString(),
+            'userID': Pref.blockUserID.toString(),
+            'userAgent': Constants.userAgent,
+            'videoDuration': videoDuration,
+            'segments': list!
+                .map(
+                  (item) => {
+                    'segment': [
+                      item.segment.first,
+                      item.segment.second,
+                    ],
+                    'category': item.category.name,
+                    'actionType': item.actionType.name,
+                  },
+                )
+                .toList(),
+          },
+          options: Options(
+            followRedirects: true, // Defaults to true.
+            validateStatus: (int? status) {
+              return (status! >= 200 && status < 300) ||
+                  const [400, 403, 429, 409] // reduce extra toast
+                      .contains(status);
+            },
+          ),
+        )
         .then(
-      (res) {
-        if (res.statusCode == 200) {
-          Get.back();
-          SmartDialog.showToast('提交成功');
-          list?.clear();
-          if (res.data case List list) {
-            videoDetailController.handleSBData(
-                list.map((e) => SegmentItemModel.fromJson(e)).toList());
-          }
-          plPlayerController.segmentList.value =
-              videoDetailController.segmentProgressList ?? <Segment>[];
-          if (videoDetailController.positionSubscription == null) {
-            videoDetailController.initSkip();
-          }
-        } else {
-          SmartDialog.showToast(
-            '提交失败: ${switch (res.statusCode) {
-              400 => '参数错误',
-              403 => '被自动审核机制拒绝',
-              429 => '重复提交太快',
-              409 => '重复提交',
-              _ => res.statusCode.toString()
-            }}',
-          );
-        }
-      },
-    );
+          (res) {
+            if (res.statusCode == 200) {
+              Get.back();
+              SmartDialog.showToast('提交成功');
+              list?.clear();
+              if (res.data case List list) {
+                videoDetailController.handleSBData(
+                  list.map((e) => SegmentItemModel.fromJson(e)).toList(),
+                );
+              }
+              plPlayerController.segmentList.value =
+                  videoDetailController.segmentProgressList ?? <Segment>[];
+              if (videoDetailController.positionSubscription == null) {
+                videoDetailController.initSkip();
+              }
+            } else {
+              SmartDialog.showToast(
+                '提交失败: ${switch (res.statusCode) {
+                  400 => '参数错误',
+                  403 => '被自动审核机制拒绝',
+                  429 => '重复提交太快',
+                  409 => '重复提交',
+                  _ => res.statusCode.toString(),
+                }}',
+              );
+            }
+          },
+        );
   }
 
   Widget _buildItem(ThemeData theme, int index, PostSegmentModel item) {
@@ -427,10 +433,12 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                               (context as Element).markNeedsBuild();
                             },
                             itemBuilder: (context) => SegmentType.values
-                                .map((e) => PopupMenuItem<SegmentType>(
-                                      value: e,
-                                      child: Text(e.title),
-                                    ))
+                                .map(
+                                  (e) => PopupMenuItem<SegmentType>(
+                                    value: e,
+                                    child: Text(e.title),
+                                  ),
+                                )
                                 .toList(),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -449,8 +457,9 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                                 ),
                                 Icon(
                                   MdiIcons.unfoldMoreHorizontal,
-                                  size: MediaQuery.textScalerOf(context)
-                                      .scale(14),
+                                  size: MediaQuery.textScalerOf(
+                                    context,
+                                  ).scale(14),
                                   color: theme.colorScheme.secondary,
                                 ),
                               ],
@@ -478,8 +487,8 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                             itemBuilder: (context) => ActionType.values
                                 .map(
                                   (e) => PopupMenuItem<ActionType>(
-                                    enabled:
-                                        item.category.toActionType.contains(e),
+                                    enabled: item.category.toActionType
+                                        .contains(e),
                                     value: e,
                                     child: Text(e.title),
                                   ),
@@ -502,8 +511,9 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                                 ),
                                 Icon(
                                   MdiIcons.unfoldMoreHorizontal,
-                                  size: MediaQuery.textScalerOf(context)
-                                      .scale(14),
+                                  size: MediaQuery.textScalerOf(
+                                    context,
+                                  ).scale(14),
                                   color: theme.colorScheme.secondary,
                                 ),
                               ],
@@ -548,7 +558,10 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                     await widget.plPlayerController.videoPlayerController!.seek(
                       Duration(milliseconds: start),
                     );
-                    if (!widget.plPlayerController.videoPlayerController!.state
+                    if (!widget
+                        .plPlayerController
+                        .videoPlayerController!
+                        .state
                         .playing) {
                       await widget.plPlayerController.videoPlayerController!
                           .play();

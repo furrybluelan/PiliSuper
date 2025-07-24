@@ -10,34 +10,34 @@ import 'package:get/get.dart';
 
 extension SettingsModelExt on SettingsModel {
   Widget get widget => switch (settingsType) {
-        SettingsType.normal => NormalItem(
-            title: title,
-            getTitle: getTitle,
-            subtitle: subtitle,
-            getSubtitle: getSubtitle,
-            setKey: setKey,
-            defaultVal: defaultVal,
-            onChanged: onChanged,
-            needReboot: needReboot,
-            leading: leading,
-            getTrailing: getTrailing,
-            onTap: onTap,
-            contentPadding: contentPadding,
-            titleStyle: titleStyle,
-          ),
-        SettingsType.sw1tch => SetSwitchItem(
-            title: title,
-            subtitle: subtitle,
-            setKey: setKey,
-            defaultVal: defaultVal,
-            onChanged: onChanged,
-            needReboot: needReboot,
-            leading: leading,
-            onTap: onTap,
-            contentPadding: contentPadding,
-            titleStyle: titleStyle,
-          ),
-      };
+    SettingsType.normal => NormalItem(
+      title: title,
+      getTitle: getTitle,
+      subtitle: subtitle,
+      getSubtitle: getSubtitle,
+      setKey: setKey,
+      defaultVal: defaultVal,
+      onChanged: onChanged,
+      needReboot: needReboot,
+      leading: leading,
+      getTrailing: getTrailing,
+      onTap: onTap,
+      contentPadding: contentPadding,
+      titleStyle: titleStyle,
+    ),
+    SettingsType.sw1tch => SetSwitchItem(
+      title: title,
+      subtitle: subtitle,
+      setKey: setKey,
+      defaultVal: defaultVal,
+      onChanged: onChanged,
+      needReboot: needReboot,
+      leading: leading,
+      onTap: onTap,
+      contentPadding: contentPadding,
+      titleStyle: titleStyle,
+    ),
+  };
 }
 
 class SettingsModel {
@@ -104,7 +104,7 @@ SettingsModel getBanwordModel({
                   minLines: 1,
                   maxLines: 4,
                   onChanged: (value) => banWord = value,
-                )
+                ),
               ],
             ),
             actions: [
@@ -112,8 +112,9 @@ SettingsModel getBanwordModel({
                 onPressed: Get.back,
                 child: Text(
                   '取消',
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.outline),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
               ),
               TextButton(
@@ -154,22 +155,26 @@ SettingsModel getVideoFilterSelectModel({
     subtitle: subtitle,
     getSubtitle: subtitle == null
         ? () => isFilter
-            ? '过滤掉$title小于「$value${suffix ?? ""}」的视频'
-            : '当前$title:「$value${suffix ?? ""}」'
+              ? '过滤掉$title小于「$value${suffix ?? ""}」的视频'
+              : '当前$title:「$value${suffix ?? ""}」'
         : null,
     onTap: (setState) async {
       var result = await showDialog<int>(
         context: context,
         builder: (context) {
           return SelectDialog<int>(
-              title: '选择$title${isFilter ? '（0即不过滤）' : ''}',
-              value: value,
-              values: (values
-                    ..addIf(!values.contains(value), value)
-                    ..sort())
-                  .map((e) => (e, suffix == null ? e.toString() : '$e $suffix'))
-                  .toList()
-                ..add((-1, '自定义')));
+            title: '选择$title${isFilter ? '（0即不过滤）' : ''}',
+            value: value,
+            values:
+                (values
+                      ..addIf(!values.contains(value), value)
+                      ..sort())
+                    .map(
+                      (e) => (e, suffix == null ? e.toString() : '$e $suffix'),
+                    )
+                    .toList()
+                  ..add((-1, '自定义')),
+          );
         },
       );
       if (result != null) {
@@ -193,7 +198,8 @@ SettingsModel getVideoFilterSelectModel({
                     child: Text(
                       '取消',
                       style: TextStyle(
-                          color: Theme.of(context).colorScheme.outline),
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
                   ),
                   TextButton(

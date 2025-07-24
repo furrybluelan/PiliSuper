@@ -12,8 +12,9 @@ abstract class CommonTextPubPage extends CommonPublishPage<String> {
 abstract class CommonTextPubPageState<T extends CommonTextPubPage>
     extends CommonPublishPageState<T> {
   @override
-  late final TextEditingController editController =
-      TextEditingController(text: widget.initialValue);
+  late final TextEditingController editController = TextEditingController(
+    text: widget.initialValue,
+  );
 
   @override
   void initPubState() {

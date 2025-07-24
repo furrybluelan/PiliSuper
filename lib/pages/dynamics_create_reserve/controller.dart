@@ -33,8 +33,9 @@ class CreateReserveController extends GetxController {
       ReserveInfoData data = res.data;
       key = Utils.generateRandomString(6);
       title.value = data.title!;
-      date.value =
-          DateTime.fromMillisecondsSinceEpoch(data.livePlanStartTime! * 1000);
+      date.value = DateTime.fromMillisecondsSinceEpoch(
+        data.livePlanStartTime! * 1000,
+      );
       canCreate.value = true;
     } else {
       res.toast();

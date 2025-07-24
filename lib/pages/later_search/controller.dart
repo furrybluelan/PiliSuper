@@ -14,9 +14,9 @@ class LaterSearchController
 
   @override
   Future<LoadingState<LaterData>> customGetData() => UserHttp.seeYouLater(
-        page: page,
-        keyword: editController.value.text,
-      );
+    page: page,
+    keyword: editController.value.text,
+  );
 
   @override
   List<LaterItemModel>? getDataList(LaterData response) {

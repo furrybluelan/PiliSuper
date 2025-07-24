@@ -18,10 +18,12 @@ class CaptchaDataModel {
   CaptchaDataModel.fromJson(Map<String, dynamic> json) {
     type = json["type"];
     token = json["token"];
-    geetest =
-        json["geetest"] != null ? GeetestData.fromJson(json["geetest"]) : null;
-    tencent =
-        json["tencent"] != null ? Tencent.fromJson(json["tencent"]) : null;
+    geetest = json["geetest"] != null
+        ? GeetestData.fromJson(json["geetest"])
+        : null;
+    tencent = json["tencent"] != null
+        ? Tencent.fromJson(json["tencent"])
+        : null;
   }
 }
 

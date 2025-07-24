@@ -8,11 +8,11 @@ class Skip {
   Skip({this.ed, this.op});
 
   factory Skip.fromJson(Map<String, dynamic> json) => Skip(
-        ed: json['ed'] == null
-            ? null
-            : Ed.fromJson(json['ed'] as Map<String, dynamic>),
-        op: json['op'] == null
-            ? null
-            : Op.fromJson(json['op'] as Map<String, dynamic>),
-      );
+    ed: json['ed'] == null
+        ? null
+        : Ed.fromJson(json['ed'] as Map<String, dynamic>),
+    op: json['op'] == null
+        ? null
+        : Op.fromJson(json['op'] as Map<String, dynamic>),
+  );
 }

@@ -10,8 +10,10 @@ import 'package:get/get.dart';
 
 class DanmakuBlockController extends GetxController
     with GetSingleTickerProviderStateMixin {
-  late final List<RxList<SimpleRule>> rules =
-      List.generate(DmBlockType.values.length, (_) => <SimpleRule>[].obs);
+  late final List<RxList<SimpleRule>> rules = List.generate(
+    DmBlockType.values.length,
+    (_) => <SimpleRule>[].obs,
+  );
 
   late TabController tabController;
 
@@ -57,14 +59,18 @@ class DanmakuBlockController extends GetxController
     }
   }
 
-  Future<void> danmakuFilterAdd(
-      {required String filter, required int type}) async {
+  Future<void> danmakuFilterAdd({
+    required String filter,
+    required int type,
+  }) async {
     if (type == 2) {
       filter = Crc32Xz().convert(utf8.encode(filter)).toRadixString(16);
     }
     SmartDialog.showLoading(msg: '正在添加弹幕屏蔽规则……');
-    var result =
-        await DanmakuFilterHttp.danmakuFilterAdd(filter: filter, type: type);
+    var result = await DanmakuFilterHttp.danmakuFilterAdd(
+      filter: filter,
+      type: type,
+    );
     SmartDialog.dismiss();
     if (result['status']) {
       SimpleRule rule = result['data'];

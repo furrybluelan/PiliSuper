@@ -28,18 +28,18 @@ class Part {
   });
 
   factory Part.fromJson(Map<String, dynamic> json) => Part(
-        cid: json['cid'] as int?,
-        page: json['page'] as int?,
-        from: json['from'] as String?,
-        pagePart: json['part'] as String?,
-        duration: json['duration'] as int?,
-        vid: json['vid'] as String?,
-        weblink: json['weblink'] as String?,
-        dimension: json['dimension'] == null
-            ? null
-            : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
-        ctime: json['ctime'] as int?,
-        firstFrame: json['first_frame'] as String?,
-        badge: json["badge"],
-      );
+    cid: json['cid'] as int?,
+    page: json['page'] as int?,
+    from: json['from'] as String?,
+    pagePart: json['part'] as String?,
+    duration: json['duration'] as int?,
+    vid: json['vid'] as String?,
+    weblink: json['weblink'] as String?,
+    dimension: json['dimension'] == null
+        ? null
+        : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
+    ctime: json['ctime'] as int?,
+    firstFrame: json['first_frame'] as String?,
+    badge: json["badge"],
+  );
 }

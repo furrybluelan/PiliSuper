@@ -39,34 +39,33 @@ class ReplyData {
   });
 
   factory ReplyData.fromJson(Map<String, dynamic> json) => ReplyData(
-        cursor: json['cursor'] == null
-            ? null
-            : ReplyCursor.fromJson(json['cursor'] as Map<String, dynamic>),
-        replies: (json['replies'] as List<dynamic>?)
-            ?.map((e) => ReplyItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        top: json['top'] == null
-            ? null
-            : Top.fromJson(json['top'] as Map<String, dynamic>),
-        topReplies: (json['top_replies'] as List<dynamic>?)
-            ?.map((e) => ReplyItemModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        upSelection: json['up_selection'] == null
-            ? null
-            : UpSelection.fromJson(
-                json['up_selection'] as Map<String, dynamic>),
-        assist: json['assist'] as int?,
-        blacklist: json['blacklist'] as int?,
-        vote: json['vote'] as int?,
-        upper: json['upper'] == null
-            ? null
-            : Upper.fromJson(json['upper'] as Map<String, dynamic>),
-        control: json['control'] == null
-            ? null
-            : ReplyControl.fromJson(json['control'] as Map<String, dynamic>),
-        note: json['note'] as int?,
-        esportsGradeCard: json['esports_grade_card'] as dynamic,
-        callbacks: json['callbacks'] as dynamic,
-        contextFeature: json['context_feature'] as String?,
-      );
+    cursor: json['cursor'] == null
+        ? null
+        : ReplyCursor.fromJson(json['cursor'] as Map<String, dynamic>),
+    replies: (json['replies'] as List<dynamic>?)
+        ?.map((e) => ReplyItemModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    top: json['top'] == null
+        ? null
+        : Top.fromJson(json['top'] as Map<String, dynamic>),
+    topReplies: (json['top_replies'] as List<dynamic>?)
+        ?.map((e) => ReplyItemModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    upSelection: json['up_selection'] == null
+        ? null
+        : UpSelection.fromJson(json['up_selection'] as Map<String, dynamic>),
+    assist: json['assist'] as int?,
+    blacklist: json['blacklist'] as int?,
+    vote: json['vote'] as int?,
+    upper: json['upper'] == null
+        ? null
+        : Upper.fromJson(json['upper'] as Map<String, dynamic>),
+    control: json['control'] == null
+        ? null
+        : ReplyControl.fromJson(json['control'] as Map<String, dynamic>),
+    note: json['note'] as int?,
+    esportsGradeCard: json['esports_grade_card'] as dynamic,
+    callbacks: json['callbacks'] as dynamic,
+    contextFeature: json['context_feature'] as String?,
+  );
 }

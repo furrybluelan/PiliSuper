@@ -17,15 +17,14 @@ class TopDetails {
   });
 
   factory TopDetails.fromJson(Map<String, dynamic> json) => TopDetails(
-        topicItem: json['topic_item'] == null
-            ? null
-            : TopicItem.fromJson(json['topic_item'] as Map<String, dynamic>),
-        topicCreator: json['topic_creator'] == null
-            ? null
-            : TopicCreator.fromJson(
-                json['topic_creator'] as Map<String, dynamic>),
-        hasCreateJurisdiction: json['has_create_jurisdiction'] as bool?,
-        wordColor: json['word_color'] as int?,
-        closePubLayerEntry: json['close_pub_layer_entry'] as bool?,
-      );
+    topicItem: json['topic_item'] == null
+        ? null
+        : TopicItem.fromJson(json['topic_item'] as Map<String, dynamic>),
+    topicCreator: json['topic_creator'] == null
+        ? null
+        : TopicCreator.fromJson(json['topic_creator'] as Map<String, dynamic>),
+    hasCreateJurisdiction: json['has_create_jurisdiction'] as bool?,
+    wordColor: json['word_color'] as int?,
+    closePubLayerEntry: json['close_pub_layer_entry'] as bool?,
+  );
 }

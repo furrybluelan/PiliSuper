@@ -13,12 +13,12 @@ class LiveSecondData {
   });
 
   factory LiveSecondData.fromJson(Map<String, dynamic> json) => LiveSecondData(
-        count: json['count'] as int?,
-        cardList: (json['list'] as List<dynamic>?)
-            ?.map((e) => CardLiveItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        newTags: (json['new_tags'] as List<dynamic>?)
-            ?.map((e) => LiveSecondTag.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    count: json['count'] as int?,
+    cardList: (json['list'] as List<dynamic>?)
+        ?.map((e) => CardLiveItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    newTags: (json['new_tags'] as List<dynamic>?)
+        ?.map((e) => LiveSecondTag.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

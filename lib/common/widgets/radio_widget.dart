@@ -17,16 +17,16 @@ class RadioWidget<T> extends StatelessWidget {
   });
 
   Widget _child() => Row(
-        children: [
-          Radio<T>(
-            value: value,
-            groupValue: groupValue,
-            onChanged: onChanged,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          Text(title),
-        ],
-      );
+    children: [
+      Radio<T>(
+        value: value,
+        groupValue: groupValue,
+        onChanged: onChanged,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      Text(title),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -42,11 +42,12 @@ class _MemberArticleState extends State<MemberArticle>
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverPadding(
-              padding: EdgeInsets.only(
-                top: 7,
-                bottom: MediaQuery.paddingOf(context).bottom + 80,
-              ),
-              sliver: Obx(() => _buildBody(_controller.loadingState.value)))
+            padding: EdgeInsets.only(
+              top: 7,
+              bottom: MediaQuery.paddingOf(context).bottom + 80,
+            ),
+            sliver: Obx(() => _buildBody(_controller.loadingState.value)),
+          ),
         ],
       ),
     );
@@ -55,36 +56,37 @@ class _MemberArticleState extends State<MemberArticle>
   Widget _buildBody(LoadingState<List<SpaceArticleItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: Grid.videoCardHDelegate(context),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardHSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: Grid.videoCardHDelegate(context),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardHSkeleton();
+          },
+          childCount: 10,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _controller.onLoadMore();
-                  }
-                  return MemberArticleItem(
-                    item: response[index],
-                  );
-                },
-                childCount: response!.length,
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _controller.onLoadMore();
+                    }
+                    return MemberArticleItem(
+                      item: response[index],
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(
+                onReload: _controller.onReload,
               ),
-            )
-          : HttpError(
-              onReload: _controller.onReload,
-            ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

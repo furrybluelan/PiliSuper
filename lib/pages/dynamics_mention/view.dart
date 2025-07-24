@@ -71,11 +71,14 @@ class _DynMentionPanelState extends State<DynMentionPanel> {
     _sub = _ctr.stream
         .debounce(const Duration(milliseconds: 300), trailing: true)
         .listen((value) {
-      _controller
-        ..enableClear.value = value.isNotEmpty
-        ..onRefresh().whenComplete(() => WidgetsBinding.instance
-            .addPostFrameCallback((_) => widget.scrollController?.jumpToTop()));
-    });
+          _controller
+            ..enableClear.value = value.isNotEmpty
+            ..onRefresh().whenComplete(
+              () => WidgetsBinding.instance.addPostFrameCallback(
+                (_) => widget.scrollController?.jumpToTop(),
+              ),
+            );
+        });
   }
 
   @override
@@ -126,10 +129,14 @@ class _DynMentionPanelState extends State<DynMentionPanel> {
                 padding: EdgeInsets.only(left: 12, right: 4),
                 child: Icon(Icons.search, size: 20),
               ),
-              prefixIconConstraints:
-                  const BoxConstraints(minHeight: 0, minWidth: 0),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              prefixIconConstraints: const BoxConstraints(
+                minHeight: 0,
+                minWidth: 0,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 6,
+              ),
               suffixIcon: Obx(
                 () => _controller.enableClear.value
                     ? Padding(
@@ -150,16 +157,20 @@ class _DynMentionPanelState extends State<DynMentionPanel> {
                           onTap: () => _controller
                             ..enableClear.value = false
                             ..controller.clear()
-                            ..onRefresh().whenComplete(() => WidgetsBinding
-                                .instance
-                                .addPostFrameCallback((_) =>
-                                    widget.scrollController?.jumpToTop())),
+                            ..onRefresh().whenComplete(
+                              () =>
+                                  WidgetsBinding.instance.addPostFrameCallback(
+                                    (_) => widget.scrollController?.jumpToTop(),
+                                  ),
+                            ),
                         ),
                       )
                     : const SizedBox.shrink(),
               ),
-              suffixIconConstraints:
-                  const BoxConstraints(minHeight: 0, minWidth: 0),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 0,
+                minWidth: 0,
+              ),
             ),
           ),
         ),
@@ -181,8 +192,9 @@ class _DynMentionPanelState extends State<DynMentionPanel> {
                 child: CustomScrollView(
                   controller: widget.scrollController,
                   slivers: [
-                    Obx(() =>
-                        _buildBody(theme, _controller.loadingState.value)),
+                    Obx(
+                      () => _buildBody(theme, _controller.loadingState.value),
+                    ),
                     SliverToBoxAdapter(
                       child: SizedBox(
                         height: padding + viewInset + 80,
@@ -194,7 +206,8 @@ class _DynMentionPanelState extends State<DynMentionPanel> {
               Obx(() {
                 return Positioned(
                   right: 16,
-                  bottom: padding +
+                  bottom:
+                      padding +
                       16 +
                       (_controller.showBtn.value ? viewInset : 0),
                   child: AnimatedSlide(
@@ -224,55 +237,58 @@ class _DynMentionPanelState extends State<DynMentionPanel> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<List<MentionGroup>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<MentionGroup>?> loadingState,
+  ) {
     return switch (loadingState) {
       Loading() => SliverPadding(
-          padding: const EdgeInsets.only(top: 8),
-          sliver: linearLoading,
-        ),
-      Success<List<MentionGroup>?>(:var response) => response?.isNotEmpty ==
-              true
-          ? SliverMainAxisGroup(
-              slivers: response!.map((group) {
-                if (group.items.isNullOrEmpty) {
-                  return const SliverToBoxAdapter();
-                }
-                return SliverMainAxisGroup(
-                  slivers: [
-                    SliverPersistentHeader(
-                      pinned: true,
-                      delegate: CustomSliverPersistentHeaderDelegate(
-                        extent: 40,
-                        needRebuild: true,
-                        bgColor: theme.colorScheme.surface,
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(group.groupName!),
+        padding: const EdgeInsets.only(top: 8),
+        sliver: linearLoading,
+      ),
+      Success<List<MentionGroup>?>(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverMainAxisGroup(
+                slivers: response!.map((group) {
+                  if (group.items.isNullOrEmpty) {
+                    return const SliverToBoxAdapter();
+                  }
+                  return SliverMainAxisGroup(
+                    slivers: [
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: CustomSliverPersistentHeaderDelegate(
+                          extent: 40,
+                          needRebuild: true,
+                          bgColor: theme.colorScheme.surface,
+                          child: Container(
+                            height: 40,
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(group.groupName!),
+                          ),
                         ),
                       ),
-                    ),
-                    SliverList.builder(
-                      itemCount: group.items!.length,
-                      itemBuilder: (context, index) {
-                        final item = group.items![index];
-                        return DynMentionItem(
-                          item: item,
-                          onTap: () => Get.back(result: item),
-                          onCheck: (value) => _controller.onCheck(value, item),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              }).toList(),
-            )
-          : HttpError(onReload: _controller.onReload),
+                      SliverList.builder(
+                        itemCount: group.items!.length,
+                        itemBuilder: (context, index) {
+                          final item = group.items![index];
+                          return DynMentionItem(
+                            item: item,
+                            onTap: () => Get.back(result: item),
+                            onCheck: (value) =>
+                                _controller.onCheck(value, item),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }).toList(),
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

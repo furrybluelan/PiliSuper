@@ -3,10 +3,12 @@ import 'dart:io' show Platform;
 import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -17,7 +19,13 @@ class Update {
     if (kDebugMode) return;
     SmartDialog.dismiss();
     try {
-      final res = await Request().get(Api.latestApp, uaType: 'mob');
+      final res = await Request().get(
+        Api.latestApp,
+        options: Options(
+          headers: {'user-agent': Request.headerUa()},
+          extra: {'account': NoAccount()},
+        ),
+      );
       if (res.data is Map || res.data.isEmpty) {
         if (!isAuto) {
           SmartDialog.showToast('检查更新失败，GitHub接口未返回数据，请检查网络');
@@ -26,7 +34,7 @@ class Update {
       }
       int latest =
           DateTime.parse(res.data[0]['created_at']).millisecondsSinceEpoch ~/
-              1000;
+          1000;
       if (BuildConfig.buildTime >= latest) {
         if (!isAuto) {
           SmartDialog.showToast('已是最新版本');
@@ -52,7 +60,8 @@ class Update {
                       Text('${res.data[0]['body']}'),
                       TextButton(
                         onPressed: () => PageUtils.launchURL(
-                            'https://github.com/bggRGjQaUbCoE/PiliPlus/commits/main'),
+                          'https://github.com/bggRGjQaUbCoE/PiliPlus/commits/main',
+                        ),
                         child: Text(
                           "点此查看完整更新(即commit)内容",
                           style: TextStyle(
@@ -125,7 +134,8 @@ class Update {
       }
     } catch (_) {
       PageUtils.launchURL(
-          'https://github.com/bggRGjQaUbCoE/PiliPlus/releases/latest');
+        'https://github.com/bggRGjQaUbCoE/PiliPlus/releases/latest',
+      );
     }
   }
 }

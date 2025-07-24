@@ -60,13 +60,15 @@ class VideoCardH extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           InkWell(
-            onLongPress: onLongPress ??
+            onLongPress:
+                onLongPress ??
                 () => imageSaveDialog(
-                      bvid: videoItem.bvid,
-                      title: videoItem.title,
-                      cover: videoItem.cover,
-                    ),
-            onTap: onTap ??
+                  bvid: videoItem.bvid,
+                  title: videoItem.title,
+                  cover: videoItem.cover,
+                ),
+            onTap:
+                onTap ??
                 () async {
                   if (type == 'ketang') {
                     SmartDialog.showToast('课堂视频暂不支持播放');
@@ -79,7 +81,8 @@ class VideoCardH extends StatelessWidget {
                       }
                     } else {
                       SmartDialog.showToast(
-                          'err: live_room : ${videoItem.runtimeType}');
+                        'err: live_room : ${videoItem.runtimeType}',
+                      );
                     }
                     return;
                   }
@@ -90,15 +93,18 @@ class VideoCardH extends StatelessWidget {
                     }
                   }
                   try {
-                    final int? cid = videoItem.cid ??
+                    final int? cid =
+                        videoItem.cid ??
                         await SearchHttp.ab2c(
-                            aid: videoItem.aid, bvid: videoItem.bvid);
+                          aid: videoItem.aid,
+                          bvid: videoItem.bvid,
+                        );
                     if (cid != null) {
                       PageUtils.toVideoPage(
                         'bvid=${videoItem.bvid}&cid=$cid',
                         arguments: {
                           'videoItem': videoItem,
-                          'heroTag': Utils.makeHeroTag(videoItem.aid)
+                          'heroTag': Utils.makeHeroTag(videoItem.aid),
                         },
                       );
                     }
@@ -157,11 +163,12 @@ class VideoCardH extends StatelessWidget {
                                       ? 1
                                       : progress / videoItem.duration,
                                 ),
-                              )
+                              ),
                             ] else if (videoItem.duration > 0)
                               PBadge(
                                 text: DurationUtil.formatDuration(
-                                    videoItem.duration),
+                                  videoItem.duration,
+                                ),
                                 right: 6.0,
                                 bottom: 6.0,
                                 type: PBadgeType.gray,
@@ -214,22 +221,24 @@ class VideoCardH extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                   TextSpan(
-                      children: item.titleList!
-                          .map((e) => TextSpan(
-                                text: e.text,
-                                style: TextStyle(
-                                  fontSize:
-                                      theme.textTheme.bodyMedium!.fontSize,
-                                  height: 1.42,
-                                  letterSpacing: 0.3,
-                                  color: e.isEm
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface,
-                                ),
-                              ))
-                          .toList()),
+                    children: item.titleList!
+                        .map(
+                          (e) => TextSpan(
+                            text: e.text,
+                            style: TextStyle(
+                              fontSize: theme.textTheme.bodyMedium!.fontSize,
+                              height: 1.42,
+                              letterSpacing: 0.3,
+                              color: e.isEm
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
                 ),
-              )
+              ),
           ] else
             Expanded(
               child: Text(

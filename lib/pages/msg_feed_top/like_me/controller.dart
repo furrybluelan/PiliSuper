@@ -7,8 +7,12 @@ import 'package:PiliPlus/pages/common/common_data_controller.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-class LikeMeController extends CommonDataController<MsgLikeData,
-    Pair<List<MsgLikeItem>, List<MsgLikeItem>>> {
+class LikeMeController
+    extends
+        CommonDataController<
+          MsgLikeData,
+          Pair<List<MsgLikeItem>, List<MsgLikeItem>>
+        > {
   int? cursor;
   int? cursorTime;
 

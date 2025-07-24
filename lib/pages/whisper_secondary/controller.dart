@@ -41,7 +41,9 @@ class WhisperSecController
 
   @override
   bool customHandleResponse(
-      bool isRefresh, Success<SessionSecondaryReply> response) {
+    bool isRefresh,
+    Success<SessionSecondaryReply> response,
+  ) {
     if (isRefresh) {
       threeDotItems.value = response.response.threeDotItems;
     }

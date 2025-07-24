@@ -60,99 +60,109 @@ class _LaterViewChildPageState extends State<LaterViewChildPage>
     final theme = Theme.of(context);
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: Grid.videoCardHDelegate(context),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const VideoCardHSkeleton();
-            },
-            childCount: 10,
-          ),
+        gridDelegate: Grid.videoCardHDelegate(context),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return const VideoCardHSkeleton();
+          },
+          childCount: 10,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _laterController.onLoadMore();
-                  }
-                  var videoItem = response[index];
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      VideoCardHLater(
-                        videoItem: videoItem,
-                        onViewLater: (cid) {
-                          PageUtils.toVideoPage(
-                            'bvid=${videoItem.bvid}&cid=$cid',
-                            arguments: {
-                              'videoItem': videoItem,
-                              'oid': videoItem.aid,
-                              'heroTag': Utils.makeHeroTag(videoItem.bvid),
-                              'sourceType': 'watchLater',
-                              'count': _laterController
-                                  .baseCtr.counts[LaterViewType.all],
-                              'favTitle': '稍后再看',
-                              'mediaId': _laterController.accountService.mid,
-                              'desc': false,
-                              'isContinuePlaying': index != 0,
-                            },
-                          );
-                        },
-                        onTap: !_laterController.baseCtr.enableMultiSelect.value
-                            ? null
-                            : () => _laterController.onSelect(videoItem),
-                        onLongPress: () {
-                          if (!_laterController
-                              .baseCtr.enableMultiSelect.value) {
-                            _laterController.baseCtr.enableMultiSelect.value =
-                                true;
-                            _laterController.onSelect(videoItem);
-                          }
-                        },
-                      ),
-                      Positioned(
-                        top: 5,
-                        left: 12,
-                        bottom: 5,
-                        child: IgnorePointer(
-                          child: LayoutBuilder(
-                            builder: (context, constraints) => AnimatedOpacity(
-                              opacity: videoItem.checked == true ? 1 : 0,
-                              duration: const Duration(milliseconds: 200),
-                              child: Container(
-                                alignment: Alignment.center,
-                                height: constraints.maxHeight,
-                                width: constraints.maxHeight *
-                                    StyleString.aspectRatio,
-                                decoration: BoxDecoration(
-                                  borderRadius: StyleString.mdRadius,
-                                  color: Colors.black.withValues(alpha: 0.6),
-                                ),
-                                child: SizedBox(
-                                  width: 34,
-                                  height: 34,
-                                  child: AnimatedScale(
-                                    scale: videoItem.checked == true ? 1 : 0,
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeInOut,
-                                    child: IconButton(
-                                      tooltip: '取消选择',
-                                      style: ButtonStyle(
-                                        padding: WidgetStateProperty.all(
-                                            EdgeInsets.zero),
-                                        backgroundColor:
-                                            WidgetStateProperty.resolveWith(
-                                          (states) {
-                                            return theme.colorScheme.surface
-                                                .withValues(alpha: 0.8);
-                                          },
-                                        ),
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _laterController.onLoadMore();
+                    }
+                    var videoItem = response[index];
+                    final enableMultiSelect =
+                        _laterController.baseCtr.enableMultiSelect.value;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        VideoCardHLater(
+                          videoItem: videoItem,
+                          onViewLater: (cid) {
+                            PageUtils.toVideoPage(
+                              'bvid=${videoItem.bvid}&cid=$cid',
+                              arguments: {
+                                'videoItem': videoItem,
+                                'oid': videoItem.aid,
+                                'heroTag': Utils.makeHeroTag(videoItem.bvid),
+                                'sourceType': 'watchLater',
+                                'count': _laterController
+                                    .baseCtr
+                                    .counts[LaterViewType.all],
+                                'favTitle': '稍后再看',
+                                'mediaId': _laterController.accountService.mid,
+                                'desc': false,
+                                'isContinuePlaying': index != 0,
+                              },
+                            );
+                          },
+                          onTap: !enableMultiSelect
+                              ? null
+                              : () => _laterController.onSelect(videoItem),
+                          onLongPress: () {
+                            if (!enableMultiSelect) {
+                              _laterController.baseCtr.enableMultiSelect.value =
+                                  true;
+                              _laterController.onSelect(videoItem);
+                            }
+                          },
+                        ),
+                        Positioned(
+                          top: 5,
+                          left: 12,
+                          bottom: 5,
+                          child: IgnorePointer(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) => AnimatedOpacity(
+                                opacity: videoItem.checked == true ? 1 : 0,
+                                duration: const Duration(milliseconds: 200),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: constraints.maxHeight,
+                                  width:
+                                      constraints.maxHeight *
+                                      StyleString.aspectRatio,
+                                  decoration: BoxDecoration(
+                                    borderRadius: StyleString.mdRadius,
+                                    color: Colors.black.withValues(alpha: 0.6),
+                                  ),
+                                  child: SizedBox(
+                                    width: 34,
+                                    height: 34,
+                                    child: AnimatedScale(
+                                      scale: videoItem.checked == true ? 1 : 0,
+                                      duration: const Duration(
+                                        milliseconds: 250,
                                       ),
-                                      onPressed: null,
-                                      icon: Icon(
-                                        Icons.done_all_outlined,
-                                        color: theme.colorScheme.primary,
+                                      curve: Curves.easeInOut,
+                                      child: IconButton(
+                                        tooltip: '取消选择',
+                                        style: ButtonStyle(
+                                          padding: WidgetStateProperty.all(
+                                            EdgeInsets.zero,
+                                          ),
+                                          backgroundColor:
+                                              WidgetStateProperty.resolveWith(
+                                                (states) {
+                                                  return theme
+                                                      .colorScheme
+                                                      .surface
+                                                      .withValues(alpha: 0.8);
+                                                },
+                                              ),
+                                        ),
+                                        onPressed: null,
+                                        icon: Icon(
+                                          Icons.done_all_outlined,
+                                          color: theme.colorScheme.primary,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -161,36 +171,35 @@ class _LaterViewChildPageState extends State<LaterViewChildPage>
                             ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        right: 12,
-                        bottom: 0,
-                        child: iconButton(
-                          tooltip: '移除',
-                          context: context,
-                          onPressed: () => _laterController.toViewDel(
-                            context,
-                            index,
-                            videoItem.aid,
+                        Positioned(
+                          right: 12,
+                          bottom: 0,
+                          child: iconButton(
+                            tooltip: '移除',
+                            context: context,
+                            onPressed: () => _laterController.toViewDel(
+                              context,
+                              index,
+                              videoItem.aid,
+                            ),
+                            icon: Icons.clear,
+                            iconColor: theme.colorScheme.outline,
+                            bgColor: Colors.transparent,
                           ),
-                          icon: Icons.clear,
-                          iconColor: theme.colorScheme.outline,
-                          bgColor: Colors.transparent,
                         ),
-                      ),
-                    ],
-                  );
-                },
-                childCount: response!.length,
+                      ],
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(
+                onReload: _laterController.onReload,
               ),
-            )
-          : HttpError(
-              onReload: _laterController.onReload,
-            ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _laterController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _laterController.onReload,
+      ),
     };
   }
 

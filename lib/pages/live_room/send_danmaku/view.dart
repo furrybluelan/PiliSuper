@@ -41,7 +41,8 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
   @override
   void dispose() {
     Get.delete<LiveEmotePanelController>(
-        tag: liveRoomController.roomId.toString());
+      tag: liveRoomController.roomId.toString(),
+    );
     super.dispose();
   }
 
@@ -75,22 +76,26 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
 
   @override
   Widget? get customPanel => LiveEmotePanel(
-        onChoose: onChooseEmote,
-        roomId: liveRoomController.roomId,
-        onSendEmoticonUnique: (emote) {
-          onCustomPublish(
-            message: emote.emoticonUnique!,
-            dmType: 1,
-            emoticonOptions: '[object Object]',
-          );
-        },
+    onChoose: onChooseEmote,
+    roomId: liveRoomController.roomId,
+    onSendEmoticonUnique: (emote) {
+      onCustomPublish(
+        message: emote.emoticonUnique!,
+        dmType: 1,
+        emoticonOptions: '[object Object]',
       );
+    },
+  );
 
   List<Widget> buildInputView(ThemeData theme) {
     return [
       Container(
-        padding:
-            const EdgeInsets.only(top: 12, right: 15, left: 15, bottom: 10),
+        padding: const EdgeInsets.only(
+          top: 12,
+          right: 15,
+          left: 15,
+          bottom: 10,
+        ),
         child: Form(
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Listener(
@@ -137,8 +142,10 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
               () => FilledButton.tonal(
                 onPressed: enablePublish.value ? onPublish : null,
                 style: FilledButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   visualDensity: VisualDensity.compact,
                 ),
                 child: const Text('发送'),

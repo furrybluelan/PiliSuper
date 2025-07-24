@@ -22,8 +22,8 @@ class Attributes {
   Attributes({this.clazz});
 
   factory Attributes.fromJson(Map<String, dynamic> json) => Attributes(
-        clazz: json['class'] as String?,
-      );
+    clazz: json['class'] as String?,
+  );
 }
 
 class Insert {

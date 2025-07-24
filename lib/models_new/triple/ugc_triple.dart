@@ -18,12 +18,12 @@ class UgcTriple {
   });
 
   factory UgcTriple.fromJson(Map<String, dynamic> json) => UgcTriple(
-        like: json["like"],
-        coin: json["coin"],
-        fav: json["fav"],
-        multiply: json["multiply"],
-        isRisk: json["is_risk"],
-        gaiaResType: json["gaia_res_type"],
-        gaiaData: json["gaia_data"],
-      );
+    like: json["like"],
+    coin: json["coin"],
+    fav: json["fav"],
+    multiply: json["multiply"],
+    isRisk: json["is_risk"],
+    gaiaResType: json["gaia_res_type"],
+    gaiaData: json["gaia_data"],
+  );
 }

@@ -7,8 +7,12 @@ class AiConclusionResult {
   List<Outline>? outline;
   List<Subtitle>? subtitle;
 
-  AiConclusionResult(
-      {this.resultType, this.summary, this.outline, this.subtitle});
+  AiConclusionResult({
+    this.resultType,
+    this.summary,
+    this.outline,
+    this.subtitle,
+  });
 
   factory AiConclusionResult.fromJson(Map<String, dynamic> json) =>
       AiConclusionResult(

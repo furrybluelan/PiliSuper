@@ -77,29 +77,35 @@ class BottomControl extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Obx(
-            () => SizedBox(
-              width: 35,
-              height: 35,
-              child: IconButton(
-                tooltip: '弹幕开关',
-                style: ButtonStyle(
-                  padding: WidgetStateProperty.all(EdgeInsets.zero),
+            () {
+              final enableShowDanmaku =
+                  plPlayerController.enableShowDanmaku.value;
+              return SizedBox(
+                width: 35,
+                height: 35,
+                child: IconButton(
+                  tooltip: '弹幕开关',
+                  style: ButtonStyle(
+                    padding: WidgetStateProperty.all(EdgeInsets.zero),
+                  ),
+                  onPressed: () {
+                    final newVal = !enableShowDanmaku;
+                    plPlayerController.enableShowDanmaku.value = newVal;
+                    GStorage.setting.put(
+                      SettingBoxKey.enableShowDanmaku,
+                      newVal,
+                    );
+                  },
+                  icon: Icon(
+                    size: 18,
+                    enableShowDanmaku
+                        ? Icons.subtitles_outlined
+                        : Icons.subtitles_off_outlined,
+                    color: Colors.white,
+                  ),
                 ),
-                onPressed: () {
-                  plPlayerController.enableShowDanmaku.value =
-                      !plPlayerController.enableShowDanmaku.value;
-                  GStorage.setting.put(SettingBoxKey.enableShowDanmaku,
-                      plPlayerController.enableShowDanmaku.value);
-                },
-                icon: Icon(
-                  size: 18,
-                  plPlayerController.enableShowDanmaku.value
-                      ? Icons.subtitles_outlined
-                      : Icons.subtitles_off_outlined,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+              );
+            },
           ),
           Obx(
             () => Container(
@@ -118,8 +124,10 @@ class BottomControl extends StatelessWidget {
                       onTap: () => plPlayerController.toggleVideoFit(boxFit),
                       child: Text(
                         boxFit.desc,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 13),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
                       ),
                     );
                   }).toList();
@@ -152,8 +160,10 @@ class BottomControl extends StatelessWidget {
                       onTap: () => liveRoomCtr.changeQn(e.code),
                       child: Text(
                         e.desc,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 13),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
                       ),
                     );
                   }).toList();
@@ -170,7 +180,8 @@ class BottomControl extends StatelessWidget {
               color: Colors.white,
             ),
             onTap: () => plPlayerController.triggerFullScreen(
-                status: !plPlayerController.isFullScreen.value),
+              status: !plPlayerController.isFullScreen.value,
+            ),
           ),
         ],
       ),

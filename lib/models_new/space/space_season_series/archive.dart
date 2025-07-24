@@ -36,20 +36,20 @@ class SpaceSsArchive {
   });
 
   factory SpaceSsArchive.fromJson(Map<String, dynamic> json) => SpaceSsArchive(
-        aid: json["aid"],
-        bvid: json["bvid"],
-        ctime: json["ctime"],
-        duration: json["duration"],
-        enableVt: json["enable_vt"],
-        interactiveVideo: json["interactive_video"],
-        pic: json["pic"],
-        playbackPosition: json["playback_position"],
-        pubdate: json["pubdate"],
-        stat: json["stat"] == null ? null : SpaceSsStat.fromJson(json["stat"]),
-        state: json["state"],
-        title: json["title"],
-        ugcPay: json["ugc_pay"],
-        vtDisplay: json["vt_display"],
-        isLessonVideo: json["is_lesson_video"],
-      );
+    aid: json["aid"],
+    bvid: json["bvid"],
+    ctime: json["ctime"],
+    duration: json["duration"],
+    enableVt: json["enable_vt"],
+    interactiveVideo: json["interactive_video"],
+    pic: json["pic"],
+    playbackPosition: json["playback_position"],
+    pubdate: json["pubdate"],
+    stat: json["stat"] == null ? null : SpaceSsStat.fromJson(json["stat"]),
+    state: json["state"],
+    title: json["title"],
+    ugcPay: json["ugc_pay"],
+    vtDisplay: json["vt_display"],
+    isLessonVideo: json["is_lesson_video"],
+  );
 }

@@ -69,7 +69,8 @@ class HistoryItem extends StatelessWidget {
           } else if (item.history.business == 'pgc') {
             PageUtils.viewPgc(epId: item.history.epid);
           } else {
-            int? cid = item.history.cid ??
+            int? cid =
+                item.history.cid ??
                 await SearchHttp.ab2c(
                   aid: aid,
                   bvid: bvid,
@@ -138,15 +139,17 @@ class HistoryItem extends StatelessWidget {
                                 type: PBadgeType.gray,
                               ),
                             // 右上角
-                            if (HistoryBusinessType.showBadge
-                                    .contains(item.history.business) ||
+                            if (HistoryBusinessType.showBadge.contains(
+                                  item.history.business,
+                                ) ||
                                 item.history.business ==
                                     HistoryBusinessType.live.type)
                               PBadge(
                                 text: item.badge,
                                 top: 6.0,
                                 right: 6.0,
-                                type: item.history.business ==
+                                type:
+                                    item.history.business ==
                                             HistoryBusinessType.live.type &&
                                         item.liveStatus != 1
                                     ? PBadgeType.gray
@@ -181,28 +184,34 @@ class HistoryItem extends StatelessWidget {
                                     height: 34,
                                     child: AnimatedScale(
                                       scale: item.checked == true ? 1 : 0,
-                                      duration:
-                                          const Duration(milliseconds: 250),
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
                                       curve: Curves.easeInOut,
                                       child: IconButton(
                                         tooltip: '取消选择',
                                         style: ButtonStyle(
                                           padding: WidgetStateProperty.all(
-                                              EdgeInsets.zero),
+                                            EdgeInsets.zero,
+                                          ),
                                           backgroundColor:
                                               WidgetStateProperty.resolveWith(
-                                            (states) {
-                                              return theme.colorScheme.surface
-                                                  .withValues(alpha: 0.8);
-                                            },
-                                          ),
+                                                (states) {
+                                                  return theme
+                                                      .colorScheme
+                                                      .surface
+                                                      .withValues(alpha: 0.8);
+                                                },
+                                              ),
                                         ),
                                         onPressed: () {
                                           feedBack();
                                           onChoose?.call();
                                         },
-                                        icon: Icon(Icons.done_all_outlined,
-                                            color: theme.colorScheme.primary),
+                                        icon: Icon(
+                                          Icons.done_all_outlined,
+                                          color: theme.colorScheme.primary,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -236,55 +245,60 @@ class HistoryItem extends StatelessWidget {
                   position: PopupMenuPosition.under,
                   itemBuilder: (BuildContext context) =>
                       <PopupMenuEntry<String>>[
-                    if (item.authorMid != null &&
-                        item.authorName?.isNotEmpty == true)
-                      PopupMenuItem<String>(
-                        onTap: () =>
-                            Get.toNamed('/member?mid=${item.authorMid}'),
-                        height: 35,
-                        child: Row(
-                          children: [
-                            const Icon(MdiIcons.accountCircleOutline, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              '访问：${item.authorName}',
-                              style: const TextStyle(fontSize: 13),
-                            )
-                          ],
+                        if (item.authorMid != null &&
+                            item.authorName?.isNotEmpty == true)
+                          PopupMenuItem<String>(
+                            onTap: () =>
+                                Get.toNamed('/member?mid=${item.authorMid}'),
+                            height: 35,
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  MdiIcons.accountCircleOutline,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '访问：${item.authorName}',
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (item.history.business != 'pgc' &&
+                            item.badge != '番剧' &&
+                            item.tagName?.contains('动画') != true &&
+                            item.history.business != 'live' &&
+                            item.history.business?.contains('article') != true)
+                          PopupMenuItem<String>(
+                            onTap: () async {
+                              var res = await UserHttp.toViewLater(
+                                bvid: item.history.bvid,
+                              );
+                              SmartDialog.showToast(res['msg']);
+                            },
+                            height: 35,
+                            child: const Row(
+                              children: [
+                                Icon(Icons.watch_later_outlined, size: 16),
+                                SizedBox(width: 6),
+                                Text('稍后再看', style: TextStyle(fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        PopupMenuItem<String>(
+                          onTap: () =>
+                              onDelete(item.kid, item.history.business),
+                          height: 35,
+                          child: const Row(
+                            children: [
+                              Icon(Icons.close_outlined, size: 16),
+                              SizedBox(width: 6),
+                              Text('删除记录', style: TextStyle(fontSize: 13)),
+                            ],
+                          ),
                         ),
-                      ),
-                    if (item.history.business != 'pgc' &&
-                        item.badge != '番剧' &&
-                        item.tagName?.contains('动画') != true &&
-                        item.history.business != 'live' &&
-                        item.history.business?.contains('article') != true)
-                      PopupMenuItem<String>(
-                        onTap: () async {
-                          var res = await UserHttp.toViewLater(
-                              bvid: item.history.bvid);
-                          SmartDialog.showToast(res['msg']);
-                        },
-                        height: 35,
-                        child: const Row(
-                          children: [
-                            Icon(Icons.watch_later_outlined, size: 16),
-                            SizedBox(width: 6),
-                            Text('稍后再看', style: TextStyle(fontSize: 13))
-                          ],
-                        ),
-                      ),
-                    PopupMenuItem<String>(
-                      onTap: () => onDelete(item.kid, item.history.business),
-                      height: 35,
-                      child: const Row(
-                        children: [
-                          Icon(Icons.close_outlined, size: 16),
-                          SizedBox(width: 6),
-                          Text('删除记录', style: TextStyle(fontSize: 13))
-                        ],
-                      ),
-                    ),
-                  ],
+                      ],
                 ),
               ),
             ),

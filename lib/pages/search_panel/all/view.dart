@@ -52,44 +52,46 @@ class _SearchAllPanelState
           .map(
             (item) => switch (item) {
               SearchVideoItemModel() => SizedBox(
-                  height: 120,
-                  child: VideoCardH(
-                    videoItem: item,
-                  ),
+                height: 120,
+                child: VideoCardH(
+                  videoItem: item,
                 ),
-              List<SearchPgcItemModel>() => item.length == 1
-                  ? SizedBox(
-                      height: 160,
-                      child: SearchPgcItem(item: item.first),
-                    )
-                  : SizedBox(
-                      height: Grid.smallCardWidth / 2 / 0.75 +
-                          MediaQuery.textScalerOf(context).scale(60),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 7),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: item.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            width: Grid.smallCardWidth / 2,
-                            margin: EdgeInsets.only(
-                              left: StyleString.safeSpace,
-                              right: index == item.length - 1
-                                  ? StyleString.safeSpace
-                                  : 0,
-                            ),
-                            child: PgcCardVSearch(item: item[index]),
-                          );
-                        },
+              ),
+              List<SearchPgcItemModel>() =>
+                item.length == 1
+                    ? SizedBox(
+                        height: 160,
+                        child: SearchPgcItem(item: item.first),
+                      )
+                    : SizedBox(
+                        height:
+                            Grid.smallCardWidth / 2 / 0.75 +
+                            MediaQuery.textScalerOf(context).scale(60),
+                        child: ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 7),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: item.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              width: Grid.smallCardWidth / 2,
+                              margin: EdgeInsets.only(
+                                left: StyleString.safeSpace,
+                                right: index == item.length - 1
+                                    ? StyleString.safeSpace
+                                    : 0,
+                              ),
+                              child: PgcCardVSearch(item: item[index]),
+                            );
+                          },
+                        ),
                       ),
-                    ),
               SearchUserItemModel() => Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: SearchUserItem(
-                    item: item,
-                  ),
+                padding: const EdgeInsets.only(bottom: 5),
+                child: SearchUserItem(
+                  item: item,
                 ),
+              ),
               _ => const SizedBox.shrink(),
             },
           )

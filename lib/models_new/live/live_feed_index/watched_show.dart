@@ -8,7 +8,7 @@ class WatchedShow {
   });
 
   factory WatchedShow.fromJson(Map<String, dynamic> json) => WatchedShow(
-        textSmall: json['text_small'] as String?,
-        textLarge: json['text_large'] as String?,
-      );
+    textSmall: json['text_small'] as String?,
+    textLarge: json['text_large'] as String?,
+  );
 }

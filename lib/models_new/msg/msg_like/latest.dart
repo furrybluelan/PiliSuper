@@ -7,9 +7,9 @@ class Latest {
   Latest({this.items, this.lastViewAt});
 
   factory Latest.fromJson(Map<String, dynamic> json) => Latest(
-        items: (json['items'] as List<dynamic>?)
-            ?.map((e) => MsgLikeItem.fromJson(e))
-            .toList(),
-        lastViewAt: json['last_view_at'] as int?,
-      );
+    items: (json['items'] as List<dynamic>?)
+        ?.map((e) => MsgLikeItem.fromJson(e))
+        .toList(),
+    lastViewAt: json['last_view_at'] as int?,
+  );
 }

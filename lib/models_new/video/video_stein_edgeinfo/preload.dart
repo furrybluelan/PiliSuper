@@ -6,8 +6,8 @@ class Preload {
   Preload({this.video});
 
   factory Preload.fromJson(Map<String, dynamic> json) => Preload(
-        video: (json['video'] as List<dynamic>?)
-            ?.map((e) => Video.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    video: (json['video'] as List<dynamic>?)
+        ?.map((e) => Video.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

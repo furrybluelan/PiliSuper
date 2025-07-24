@@ -6,8 +6,8 @@ class AreaMaskInfo {
   AreaMaskInfo({this.areaMasks});
 
   factory AreaMaskInfo.fromJson(Map<String, dynamic> json) => AreaMaskInfo(
-        areaMasks: json['area_masks'] == null
-            ? null
-            : AreaMasks.fromJson(json['area_masks'] as Map<String, dynamic>),
-      );
+    areaMasks: json['area_masks'] == null
+        ? null
+        : AreaMasks.fromJson(json['area_masks'] as Map<String, dynamic>),
+  );
 }

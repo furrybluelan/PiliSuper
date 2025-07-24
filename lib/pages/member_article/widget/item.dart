@@ -42,12 +42,12 @@ class MemberArticleItem extends StatelessWidget {
                   child: LayoutBuilder(
                     builder:
                         (BuildContext context, BoxConstraints boxConstraints) {
-                      return NetworkImgLayer(
-                        src: item.originImageUrls!.first,
-                        width: boxConstraints.maxWidth,
-                        height: boxConstraints.maxHeight,
-                      );
-                    },
+                          return NetworkImgLayer(
+                            src: item.originImageUrls!.first,
+                            width: boxConstraints.maxWidth,
+                            height: boxConstraints.maxHeight,
+                          );
+                        },
                   ),
                 ),
                 const SizedBox(width: 10),

@@ -16,11 +16,13 @@ class ReplySearchController extends GetxController
   final focusNode = FocusNode();
 
   late final videoCtr = Get.put(
-      ReplySearchChildController(this, ReplySearchType.video),
-      tag: Utils.generateRandomString(8));
+    ReplySearchChildController(this, ReplySearchType.video),
+    tag: Utils.generateRandomString(8),
+  );
   late final articleCtr = Get.put(
-      ReplySearchChildController(this, ReplySearchType.article),
-      tag: Utils.generateRandomString(8));
+    ReplySearchChildController(this, ReplySearchType.article),
+    tag: Utils.generateRandomString(8),
+  );
 
   void onClear() {
     if (editingController.value.text.isNotEmpty) {

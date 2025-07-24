@@ -35,8 +35,9 @@ class LiveRoomController extends GetxController {
   double volume = 0.0;
   // 静音状态
   RxBool volumeOff = false.obs;
-  PlPlayerController plPlayerController =
-      PlPlayerController.getInstance(videoType: 'live');
+  PlPlayerController plPlayerController = PlPlayerController.getInstance(
+    videoType: 'live',
+  );
   Rx<RoomInfoH5Data?> roomInfoH5 = Rx<RoomInfoH5Data?>(null);
 
   RxList<dynamic> messages = [].obs;
@@ -75,7 +76,7 @@ class LiveRoomController extends GetxController {
         httpHeaders: {
           'user-agent':
               'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_3_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15',
-          'referer': HttpString.baseUrl
+          'referer': HttpString.baseUrl,
         },
       ),
       autoplay: true,
@@ -133,9 +134,10 @@ class LiveRoomController extends GetxController {
   Future<void> queryLiveInfoH5() async {
     var res = await LiveHttp.liveRoomInfoH5(roomId: roomId);
     if (res['status']) {
-      roomInfoH5.value = res['data'];
+      RoomInfoH5Data data = res['data'];
+      roomInfoH5.value = data;
       videoPlayerServiceHandler.onVideoDetailChange(
-        roomInfoH5.value,
+        data,
         roomId,
         heroTag,
       );
@@ -192,8 +194,10 @@ class LiveRoomController extends GetxController {
         if (v['status']) {
           if ((v['data'] as List?)?.isNotEmpty == true) {
             try {
-              messages.addAll((v['data'] as List)
-                  .map((obj) => {
+              messages.addAll(
+                (v['data'] as List)
+                    .map(
+                      (obj) => {
                         'name': obj['user']['base']['name'],
                         'uid': obj['user']['uid'],
                         'text': obj['text'],
@@ -201,8 +205,10 @@ class LiveRoomController extends GetxController {
                         'uemote': obj['emoticon']['emoticon_unique'] != ""
                             ? obj['emoticon']
                             : null,
-                      })
-                  .toList());
+                      },
+                    )
+                    .toList(),
+              );
               WidgetsBinding.instance.addPostFrameCallback(
                 (_) => scrollToBottom(),
               );
@@ -265,46 +271,48 @@ class LiveRoomController extends GetxController {
     if (info.hostList.isNullOrEmpty) {
       return;
     }
-    msgStream = LiveMessageStream(
-      streamToken: info.token!,
-      roomId: roomId,
-      uid: Accounts.main.mid,
-      servers: info.hostList!
-          .map((host) => 'wss://${host.host}:${host.wssPort}/sub')
-          .toList(),
-    )
-      ..addEventListener((obj) {
-        try {
-          if (obj['cmd'] == 'DANMU_MSG') {
-            // logger.i(' 原始弹幕消息 ======> ${jsonEncode(obj)}');
-            final info = obj['info'];
-            final first = info[0];
-            final content = first[15];
-            final extra = jsonDecode(content['extra']);
-            final user = content['user'];
-            final uid = user['uid'];
-            messages.add({
-              'name': user['base']['name'],
-              'uid': uid,
-              'text': info[1],
-              'emots': extra['emots'],
-              'uemote': first[13],
-            });
-            if (showDanmaku) {
-              controller?.addDanmaku(
-                DanmakuContentItem(
-                  extra['content'],
-                  color: DmUtils.decimalToColor(extra['color']),
-                  type: DmUtils.getPosition(extra['mode']),
-                  selfSend: isLogin && uid == accountService.mid,
-                ),
-              );
-              WidgetsBinding.instance
-                  .addPostFrameCallback((_) => scrollToBottom());
-            }
-          }
-        } catch (_) {}
-      })
-      ..init();
+    msgStream =
+        LiveMessageStream(
+            streamToken: info.token!,
+            roomId: roomId,
+            uid: Accounts.main.mid,
+            servers: info.hostList!
+                .map((host) => 'wss://${host.host}:${host.wssPort}/sub')
+                .toList(),
+          )
+          ..addEventListener((obj) {
+            try {
+              if (obj['cmd'] == 'DANMU_MSG') {
+                // logger.i(' 原始弹幕消息 ======> ${jsonEncode(obj)}');
+                final info = obj['info'];
+                final first = info[0];
+                final content = first[15];
+                final extra = jsonDecode(content['extra']);
+                final user = content['user'];
+                final uid = user['uid'];
+                messages.add({
+                  'name': user['base']['name'],
+                  'uid': uid,
+                  'text': info[1],
+                  'emots': extra['emots'],
+                  'uemote': first[13],
+                });
+                if (showDanmaku) {
+                  controller?.addDanmaku(
+                    DanmakuContentItem(
+                      extra['content'],
+                      color: DmUtils.decimalToColor(extra['color']),
+                      type: DmUtils.getPosition(extra['mode']),
+                      selfSend: isLogin && uid == accountService.mid,
+                    ),
+                  );
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => scrollToBottom(),
+                  );
+                }
+              }
+            } catch (_) {}
+          })
+          ..init();
   }
 }

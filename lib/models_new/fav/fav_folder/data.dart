@@ -8,10 +8,10 @@ class FavFolderData {
   FavFolderData({this.count, this.list, this.hasMore});
 
   factory FavFolderData.fromJson(Map<String, dynamic> json) => FavFolderData(
-        count: json['count'] as int?,
-        list: (json['list'] as List<dynamic>?)
-            ?.map((e) => FavFolderInfo.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        hasMore: json['has_more'] as bool?,
-      );
+    count: json['count'] as int?,
+    list: (json['list'] as List<dynamic>?)
+        ?.map((e) => FavFolderInfo.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    hasMore: json['has_more'] as bool?,
+  );
 }

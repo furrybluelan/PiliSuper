@@ -5,7 +5,7 @@ class Rating {
   Rating({this.count, this.score});
 
   factory Rating.fromJson(Map<String, dynamic> json) => Rating(
-        count: json['count'] as int?,
-        score: (json['score'] as num?)?.toDouble(),
-      );
+    count: json['count'] as int?,
+    score: (json['score'] as num?)?.toDouble(),
+  );
 }

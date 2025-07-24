@@ -4,6 +4,6 @@ class Day {
   Day({this.argb});
 
   factory Day.fromJson(Map<String, dynamic> json) => Day(
-        argb: json['argb'] as String?,
-      );
+    argb: json['argb'] as String?,
+  );
 }

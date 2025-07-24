@@ -12,10 +12,10 @@ class Emote {
   });
 
   factory Emote.fromJson(Map<String, dynamic> json) => Emote(
-        text: json['text'] as String?,
-        url: json['url'] as String?,
-        meta: json['meta'] == null
-            ? null
-            : Meta.fromJson(json['meta'] as Map<String, dynamic>),
-      );
+    text: json['text'] as String?,
+    url: json['url'] as String?,
+    meta: json['meta'] == null
+        ? null
+        : Meta.fromJson(json['meta'] as Map<String, dynamic>),
+  );
 }

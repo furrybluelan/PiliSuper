@@ -72,8 +72,10 @@ class _PgcPanelState extends State<PgcPanel> {
   void scrollToIndex() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       listViewScrollCtr.animateTo(
-        (currentIndex * 150.0).clamp(listViewScrollCtr.position.minScrollExtent,
-            listViewScrollCtr.position.maxScrollExtent),
+        (currentIndex * 150.0).clamp(
+          listViewScrollCtr.position.minScrollExtent,
+          listViewScrollCtr.position.maxScrollExtent,
+        ),
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
@@ -162,7 +164,9 @@ class _PgcPanelState extends State<PgcPanel> {
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 10),
+                        vertical: 8,
+                        horizontal: 10,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -175,21 +179,24 @@ class _PgcPanelState extends State<PgcPanel> {
                                   height: 12,
                                   semanticLabel: "正在播放：",
                                 ),
-                                const SizedBox(width: 6)
+                                const SizedBox(width: 6),
                               ],
                               Expanded(
-                                  child: Text(
-                                item.title ?? '第${index + 1}话',
-                                maxLines: (item.longTitle != null &&
-                                        item.longTitle != '')
-                                    ? 1
-                                    : 2,
-                                style: TextStyle(
+                                child: Text(
+                                  item.title ?? '第${index + 1}话',
+                                  maxLines:
+                                      (item.longTitle != null &&
+                                          item.longTitle != '')
+                                      ? 1
+                                      : 2,
+                                  style: TextStyle(
                                     fontSize: 13,
                                     color: index == currentIndex
                                         ? theme.colorScheme.primary
-                                        : theme.colorScheme.onSurface),
-                              )),
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
                               const SizedBox(width: 2),
                               if (item.badge != null) ...[
                                 const Spacer(),
@@ -207,7 +214,7 @@ class _PgcPanelState extends State<PgcPanel> {
                                       color: theme.colorScheme.primary,
                                     ),
                                   ),
-                              ]
+                              ],
                             ],
                           ),
                           if (item.longTitle != null &&
@@ -217,13 +224,14 @@ class _PgcPanelState extends State<PgcPanel> {
                               item.longTitle!,
                               maxLines: 1,
                               style: TextStyle(
-                                  fontSize: 13,
-                                  color: index == currentIndex
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface),
+                                fontSize: 13,
+                                color: index == currentIndex
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface,
+                              ),
                               overflow: TextOverflow.ellipsis,
-                            )
-                          ]
+                            ),
+                          ],
                         ],
                       ),
                     ),

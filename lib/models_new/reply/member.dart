@@ -46,36 +46,37 @@ class ReplyMember {
   });
 
   factory ReplyMember.fromJson(Map<String, dynamic> json) => ReplyMember(
-        mid: json['mid'] as String?,
-        uname: json['uname'] as String?,
-        sex: json['sex'] as String?,
-        sign: json['sign'] as String?,
-        avatar: json['avatar'] as String?,
-        rank: json['rank'] as String?,
-        faceNftNew: json['face_nft_new'] as int?,
-        isSeniorMember: json['is_senior_member'] as int?,
-        senior: json['senior'] == null
-            ? null
-            : Senior.fromJson(json['senior'] as Map<String, dynamic>),
-        levelInfo: json['level_info'] == null
-            ? null
-            : LevelInfo.fromJson(json['level_info'] as Map<String, dynamic>),
-        pendant: json['pendant'] == null
-            ? null
-            : Pendant.fromJson(json['pendant'] as Map<String, dynamic>),
-        nameplate: json['nameplate'] == null
-            ? null
-            : Nameplate.fromJson(json['nameplate'] as Map<String, dynamic>),
-        officialVerify: json['official_verify'] == null
-            ? null
-            : BaseOfficialVerify.fromJson(
-                json['official_verify'] as Map<String, dynamic>),
-        vip: json['vip'] == null
-            ? null
-            : Vip.fromJson(json['vip'] as Map<String, dynamic>),
-        fansDetail: json['fans_detail'] as dynamic,
-        isContractor: json['is_contractor'] as bool?,
-        contractDesc: json['contract_desc'] as String?,
-        nftInteraction: json['nft_interaction'] as dynamic,
-      );
+    mid: json['mid'] as String?,
+    uname: json['uname'] as String?,
+    sex: json['sex'] as String?,
+    sign: json['sign'] as String?,
+    avatar: json['avatar'] as String?,
+    rank: json['rank'] as String?,
+    faceNftNew: json['face_nft_new'] as int?,
+    isSeniorMember: json['is_senior_member'] as int?,
+    senior: json['senior'] == null
+        ? null
+        : Senior.fromJson(json['senior'] as Map<String, dynamic>),
+    levelInfo: json['level_info'] == null
+        ? null
+        : LevelInfo.fromJson(json['level_info'] as Map<String, dynamic>),
+    pendant: json['pendant'] == null
+        ? null
+        : Pendant.fromJson(json['pendant'] as Map<String, dynamic>),
+    nameplate: json['nameplate'] == null
+        ? null
+        : Nameplate.fromJson(json['nameplate'] as Map<String, dynamic>),
+    officialVerify: json['official_verify'] == null
+        ? null
+        : BaseOfficialVerify.fromJson(
+            json['official_verify'] as Map<String, dynamic>,
+          ),
+    vip: json['vip'] == null
+        ? null
+        : Vip.fromJson(json['vip'] as Map<String, dynamic>),
+    fansDetail: json['fans_detail'] as dynamic,
+    isContractor: json['is_contractor'] as bool?,
+    contractDesc: json['contract_desc'] as String?,
+    nftInteraction: json['nft_interaction'] as dynamic,
+  );
 }

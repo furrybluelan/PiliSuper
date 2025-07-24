@@ -20,15 +20,15 @@ class MsgReplyItem {
   });
 
   factory MsgReplyItem.fromJson(Map<String, dynamic> json) => MsgReplyItem(
-        id: json['id'] as int?,
-        user: json['user'] == null
-            ? null
-            : User.fromJson(json['user'] as Map<String, dynamic>),
-        item: json['item'] == null
-            ? null
-            : MsgReplyContent.fromJson(json['item'] as Map<String, dynamic>),
-        counts: json['counts'] as int?,
-        isMulti: json['is_multi'] as int?,
-        replyTime: json['reply_time'] as int?,
-      );
+    id: json['id'] as int?,
+    user: json['user'] == null
+        ? null
+        : User.fromJson(json['user'] as Map<String, dynamic>),
+    item: json['item'] == null
+        ? null
+        : MsgReplyContent.fromJson(json['item'] as Map<String, dynamic>),
+    counts: json['counts'] as int?,
+    isMulti: json['is_multi'] as int?,
+    replyTime: json['reply_time'] as int?,
+  );
 }

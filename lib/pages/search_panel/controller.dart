@@ -52,18 +52,18 @@ class SearchPanelController<R extends SearchNumData<T>, T>
 
   @override
   Future<LoadingState<R>> customGetData() => SearchHttp.searchByType<R>(
-        searchType: searchType,
-        keyword: keyword,
-        page: page,
-        order: order.value,
-        duration: searchType == SearchType.video ? duration.value : null,
-        tids: tids,
-        orderSort: orderSort,
-        userType: userType,
-        categoryId: categoryId,
-        pubBegin: pubBegin,
-        pubEnd: pubEnd,
-      );
+    searchType: searchType,
+    keyword: keyword,
+    page: page,
+    order: order.value,
+    duration: searchType == SearchType.video ? duration.value : null,
+    tids: tids,
+    orderSort: orderSort,
+    userType: userType,
+    categoryId: categoryId,
+    pubBegin: pubBegin,
+    pubEnd: pubEnd,
+  );
 
   @override
   Future<void> onReload() {

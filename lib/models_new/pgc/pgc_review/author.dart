@@ -16,12 +16,12 @@ class Author {
   });
 
   factory Author.fromJson(Map<String, dynamic> json) => Author(
-        avatar: json['avatar'] as String?,
-        level: json['level'] as int?,
-        mid: json['mid'] as int?,
-        uname: json['uname'] as String?,
-        vip: json['vip'] == null
-            ? null
-            : Vip.fromJson(json['vip'] as Map<String, dynamic>),
-      );
+    avatar: json['avatar'] as String?,
+    level: json['level'] as int?,
+    mid: json['mid'] as int?,
+    uname: json['uname'] as String?,
+    vip: json['vip'] == null
+        ? null
+        : Vip.fromJson(json['vip'] as Map<String, dynamic>),
+  );
 }

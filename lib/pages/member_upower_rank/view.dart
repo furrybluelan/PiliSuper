@@ -57,8 +57,9 @@ class _UpowerRankPageState extends State<UpowerRankPage>
             padding: EdgeInsets.only(
               bottom: MediaQuery.paddingOf(context).bottom + 80,
             ),
-            sliver:
-                Obx(() => _bilidBody(theme, _controller.loadingState.value)),
+            sliver: Obx(
+              () => _bilidBody(theme, _controller.loadingState.value),
+            ),
           ),
         ],
       ),
@@ -66,10 +67,14 @@ class _UpowerRankPageState extends State<UpowerRankPage>
     if (widget.privilegeType == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Obx(() => _controller.name.value == null
-              ? const SizedBox.shrink()
-              : Text(
-                  '${_controller.name.value} 充电排行榜${_controller.memberTotal == 0 ? '' : '(${_controller.memberTotal})'}')),
+          title: Obx(() {
+            final name = _controller.name.value;
+            return name == null
+                ? const SizedBox.shrink()
+                : Text(
+                    '$name 充电排行榜${_controller.memberTotal == 0 ? '' : '(${_controller.memberTotal})'}',
+                  );
+          }),
         ),
         body: SafeArea(
           top: false,
@@ -78,58 +83,68 @@ class _UpowerRankPageState extends State<UpowerRankPage>
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 625),
               child: Obx(
-                () => _controller.tabs.value != null
-                    ? DefaultTabController(
-                        length: _controller.tabs.value!.length,
-                        child: Builder(
-                          builder: (context) {
-                            return Column(
-                              children: [
-                                TabBar(
-                                  isScrollable: true,
-                                  tabAlignment: TabAlignment.start,
-                                  tabs: _controller.tabs.value!
-                                      .map((e) => Tab(
-                                          text:
-                                              '${e.name!}(${e.memberTotal ?? 0})'))
-                                      .toList(),
-                                  onTap: (index) {
-                                    if (!DefaultTabController.of(context)
-                                        .indexIsChanging) {
-                                      try {
-                                        if (index == 0) {
-                                          _controller.animateToTop();
-                                        } else {
-                                          Get.find<UpowerRankController>(
-                                                  tag:
-                                                      '$_tag${_controller.tabs.value![index].privilegeType}')
-                                              .animateToTop();
-                                        }
-                                      } catch (_) {}
-                                    }
-                                  },
-                                ),
-                                Expanded(
-                                  child: tabBarView(
-                                    children: [
-                                      KeepAliveWrapper(
-                                          builder: (context) => child),
-                                      ..._controller.tabs.value!
-                                          .sublist(1)
-                                          .map((e) => UpowerRankPage(
+                () {
+                  final tabs = _controller.tabs.value;
+                  return tabs != null
+                      ? DefaultTabController(
+                          length: tabs.length,
+                          child: Builder(
+                            builder: (context) {
+                              return Column(
+                                children: [
+                                  TabBar(
+                                    isScrollable: true,
+                                    tabAlignment: TabAlignment.start,
+                                    tabs: tabs
+                                        .map(
+                                          (e) => Tab(
+                                            text:
+                                                '${e.name!}(${e.memberTotal ?? 0})',
+                                          ),
+                                        )
+                                        .toList(),
+                                    onTap: (index) {
+                                      if (!DefaultTabController.of(
+                                        context,
+                                      ).indexIsChanging) {
+                                        try {
+                                          if (index == 0) {
+                                            _controller.animateToTop();
+                                          } else {
+                                            Get.find<UpowerRankController>(
+                                              tag:
+                                                  '$_tag${tabs[index].privilegeType}',
+                                            ).animateToTop();
+                                          }
+                                        } catch (_) {}
+                                      }
+                                    },
+                                  ),
+                                  Expanded(
+                                    child: tabBarView(
+                                      children: [
+                                        KeepAliveWrapper(
+                                          builder: (context) => child,
+                                        ),
+                                        ...tabs
+                                            .sublist(1)
+                                            .map(
+                                              (e) => UpowerRankPage(
                                                 upMid: _upMid,
                                                 tag: _tag,
                                                 privilegeType: e.privilegeType,
-                                              ))
-                                    ],
+                                              ),
+                                            ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      )
-                    : child,
+                                ],
+                              );
+                            },
+                          ),
+                        )
+                      : child;
+                },
               ),
             ),
           ),
@@ -141,17 +156,19 @@ class _UpowerRankPageState extends State<UpowerRankPage>
   }
 
   Widget _bilidBody(
-      ThemeData theme, LoadingState<List<UpowerRankInfo>?> loadingState) {
+    ThemeData theme,
+    LoadingState<List<UpowerRankInfo>?> loadingState,
+  ) {
     late final width = MediaQuery.textScalerOf(context).scale(32);
     return switch (loadingState) {
       Loading() => const SliverToBoxAdapter(
-          child: SizedBox(
-            height: 125,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
+        child: SizedBox(
+          height: 125,
+          child: Center(
+            child: CircularProgressIndicator(),
           ),
         ),
+      ),
       Success<List<UpowerRankInfo>?>(:var response) =>
         response?.isNotEmpty == true
             ? SliverList.builder(
@@ -222,9 +239,9 @@ class _UpowerRankPageState extends State<UpowerRankPage>
               )
             : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 

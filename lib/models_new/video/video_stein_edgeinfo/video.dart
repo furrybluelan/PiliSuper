@@ -5,7 +5,7 @@ class Video {
   Video({this.aid, this.cid});
 
   factory Video.fromJson(Map<String, dynamic> json) => Video(
-        aid: json['aid'] as int?,
-        cid: json['cid'] as int?,
-      );
+    aid: json['aid'] as int?,
+    cid: json['cid'] as int?,
+  );
 }

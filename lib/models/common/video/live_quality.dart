@@ -29,12 +29,12 @@ extension LiveQualityExt on LiveQuality {
   }
 
   String get description => const [
-        '杜比',
-        '4K',
-        '原画',
-        '蓝光',
-        '超清',
-        '高清',
-        '流畅',
-      ][index];
+    '杜比',
+    '4K',
+    '原画',
+    '蓝光',
+    '超清',
+    '高清',
+    '流畅',
+  ][index];
 }

@@ -29,7 +29,8 @@ class SpaceArchiveData {
         episodicButton: json['episodic_button'] == null
             ? null
             : EpisodicButton.fromJson(
-                json['episodic_button'] as Map<String, dynamic>),
+                json['episodic_button'] as Map<String, dynamic>,
+              ),
         order: (json['order'] as List<dynamic>?)
             ?.map((e) => Order.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -40,7 +41,8 @@ class SpaceArchiveData {
         lastWatchedLocator: json['last_watched_locator'] == null
             ? null
             : LastWatchedLocator.fromJson(
-                json['last_watched_locator'] as Map<String, dynamic>),
+                json['last_watched_locator'] as Map<String, dynamic>,
+              ),
         hasNext: json['has_next'] as bool?,
         hasPrev: json['has_prev'] as bool?,
         next: json['next'],

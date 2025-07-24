@@ -44,7 +44,8 @@ class DynamicPanel extends StatelessWidget {
     final child = Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onTap: isDetail &&
+        onTap:
+            isDetail &&
                 !const {
                   'DYNAMIC_TYPE_AV',
                   'DYNAMIC_TYPE_UGC_SEASON',

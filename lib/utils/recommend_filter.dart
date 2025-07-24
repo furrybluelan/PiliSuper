@@ -7,8 +7,10 @@ class RecommendFilter {
   static int minLikeRatioForRecommend = Pref.minLikeRatioForRecommend;
   static bool exemptFilterForFollowed = Pref.exemptFilterForFollowed;
   static bool applyFilterToRelatedVideos = Pref.applyFilterToRelatedVideos;
-  static RegExp rcmdRegExp =
-      RegExp(Pref.banWordForRecommend, caseSensitive: false);
+  static RegExp rcmdRegExp = RegExp(
+    Pref.banWordForRecommend,
+    caseSensitive: false,
+  );
   static bool enableFilter = rcmdRegExp.pattern.isNotEmpty;
 
   static bool filter(BaseVideoItemModel videoItem) {

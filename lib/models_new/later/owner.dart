@@ -6,8 +6,8 @@ class Owner {
   Owner({this.mid, this.name, this.face});
 
   factory Owner.fromJson(Map<String, dynamic> json) => Owner(
-        mid: json['mid'] as int?,
-        name: json['name'] as String?,
-        face: json['face'] as String?,
-      );
+    mid: json['mid'] as int?,
+    name: json['name'] as String?,
+    face: json['face'] as String?,
+  );
 }

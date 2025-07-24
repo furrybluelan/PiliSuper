@@ -7,8 +7,8 @@ class CustomSliverPersistentHeaderDelegate
     required this.bgColor,
     double extent = 45,
     this.needRebuild,
-  })  : _minExtent = extent,
-        _maxExtent = extent;
+  }) : _minExtent = extent,
+       _maxExtent = extent;
   final double _minExtent;
   final double _maxExtent;
   final Widget child;
@@ -17,7 +17,10 @@ class CustomSliverPersistentHeaderDelegate
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     //创建child子组件
     //shrinkOffset：child偏移值minExtent~maxExtent
     //overlapsContent：SliverPersistentHeader覆盖其他子组件返回true，否则返回false

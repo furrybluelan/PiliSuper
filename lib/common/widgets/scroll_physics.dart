@@ -4,22 +4,20 @@ import 'package:flutter/material.dart';
 Widget videoTabBarView({
   required List<Widget> children,
   TabController? controller,
-}) =>
-    TabBarView(
-      physics: const CustomTabBarViewClampingScrollPhysics(),
-      controller: controller,
-      children: children,
-    );
+}) => TabBarView(
+  physics: const CustomTabBarViewClampingScrollPhysics(),
+  controller: controller,
+  children: children,
+);
 
 Widget tabBarView({
   required List<Widget> children,
   TabController? controller,
-}) =>
-    TabBarView(
-      physics: const CustomTabBarViewScrollPhysics(),
-      controller: controller,
-      children: children,
-    );
+}) => TabBarView(
+  physics: const CustomTabBarViewScrollPhysics(),
+  controller: controller,
+  children: children,
+);
 
 class CustomTabBarViewScrollPhysics extends ScrollPhysics {
   const CustomTabBarViewScrollPhysics({super.parent});
@@ -45,12 +43,21 @@ class CustomTabBarViewClampingScrollPhysics extends ClampingScrollPhysics {
   SpringDescription get spring => CustomSpringDescription();
 }
 
-class MemberVideoScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const MemberVideoScrollPhysics({super.parent});
+mixin ReloadMixin {
+  late bool reload = false;
+}
+
+class ReloadScrollPhysics extends AlwaysScrollableScrollPhysics {
+  const ReloadScrollPhysics({super.parent, required this.controller});
+
+  final ReloadMixin controller;
 
   @override
-  MemberVideoScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return MemberVideoScrollPhysics(parent: buildParent(ancestor));
+  ReloadScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return ReloadScrollPhysics(
+      parent: buildParent(ancestor),
+      controller: controller,
+    );
   }
 
   @override
@@ -60,7 +67,8 @@ class MemberVideoScrollPhysics extends AlwaysScrollableScrollPhysics {
     required bool isScrolling,
     required double velocity,
   }) {
-    if (newPosition.maxScrollExtent < oldPosition.maxScrollExtent) {
+    if (controller.reload) {
+      controller.reload = false;
       return 0;
     }
     return super.adjustPositionForNewDimensions(

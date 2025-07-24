@@ -49,7 +49,8 @@ class _MemberBangumiState extends State<MemberBangumi>
               left: StyleString.safeSpace,
               right: StyleString.safeSpace,
               top: StyleString.safeSpace,
-              bottom: StyleString.safeSpace +
+              bottom:
+                  StyleString.safeSpace +
                   MediaQuery.paddingOf(context).bottom +
                   80,
             ),
@@ -65,32 +66,33 @@ class _MemberBangumiState extends State<MemberBangumi>
   Widget _buildBody(LoadingState<List<SpaceArchiveItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => const SliverToBoxAdapter(),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: SliverGridDelegateWithExtentAndRatio(
-                mainAxisSpacing: StyleString.cardSpace,
-                crossAxisSpacing: StyleString.cardSpace,
-                maxCrossAxisExtent: Grid.smallCardWidth / 3 * 2,
-                childAspectRatio: 0.75,
-                mainAxisExtent: MediaQuery.textScalerOf(context).scale(52),
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _controller.onLoadMore();
-                  }
-                  return PgcCardVMemberPgc(
-                    item: response[index],
-                  );
-                },
-                childCount: response!.length,
-              ),
-            )
-          : HttpError(onReload: _controller.onReload),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: SliverGridDelegateWithExtentAndRatio(
+                  mainAxisSpacing: StyleString.cardSpace,
+                  crossAxisSpacing: StyleString.cardSpace,
+                  maxCrossAxisExtent: Grid.smallCardWidth / 3 * 2,
+                  childAspectRatio: 0.75,
+                  mainAxisExtent: MediaQuery.textScalerOf(context).scale(52),
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _controller.onLoadMore();
+                    }
+                    return PgcCardVMemberPgc(
+                      item: response[index],
+                    );
+                  },
+                  childCount: response!.length,
+                ),
+              )
+            : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

@@ -152,8 +152,8 @@ class MainController extends GetxController
     final countStr = count == 0
         ? ''
         : count > 99
-            ? '99+'
-            : count.toString();
+        ? '99+'
+        : count.toString();
     if (msgUnReadCount.value == countStr) {
       if (isChangeType) {
         msgUnReadCount.refresh();
@@ -201,12 +201,15 @@ class MainController extends GetxController
     if (navBarSort == null) {
       navigationBars = NavigationBarType.values;
     } else {
-      navigationBars =
-          navBarSort.map((i) => NavigationBarType.values[i]).toList();
+      navigationBars = navBarSort
+          .map((i) => NavigationBarType.values[i])
+          .toList();
     }
     this.navigationBars = navigationBars;
-    selectedIndex.value =
-        max(0, navigationBars.indexWhere((e) => e.index == defaultHomePage));
+    selectedIndex.value = max(
+      0,
+      navigationBars.indexWhere((e) => e.index == defaultHomePage),
+    );
   }
 
   @override

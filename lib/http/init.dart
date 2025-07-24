@@ -37,7 +37,9 @@ class Request {
     Accounts.refresh();
     final List<Cookie> cookies = Accounts.main.cookieJar.toList();
     final webManager = web.CookieManager();
-    await Future.wait(cookies.map((item) => webManager.setCookie(
+    await Future.wait(
+      cookies.map(
+        (item) => webManager.setCookie(
           url: web.WebUri(item.domain ?? ''),
           name: item.name,
           value: item.value,
@@ -45,7 +47,9 @@ class Request {
           domain: item.domain,
           isSecure: item.secure,
           isHttpOnly: item.httpOnly,
-        )));
+        ),
+      ),
+    );
 
     if (Accounts.main.isLogin) {
       final coin = GStorage.userInfo.get('userInfoCache')?.money;
@@ -73,10 +77,11 @@ class Request {
       //     options: Options(extra: {'account': account}));
       // final String spmPrefix = _spmPrefixExp.firstMatch(html.data)!.group(1)!;
       final String randPngEnd = base64.encode(
-          List<int>.generate(32, (_) => Utils.random.nextInt(256)) +
-              List<int>.filled(4, 0) +
-              [73, 69, 78, 68] +
-              List<int>.generate(4, (_) => Utils.random.nextInt(256)));
+        List<int>.generate(32, (_) => Utils.random.nextInt(256)) +
+            List<int>.filled(4, 0) +
+            [73, 69, 78, 68] +
+            List<int>.generate(4, (_) => Utils.random.nextInt(256)),
+      );
 
       String jsonData = json.encode({
         '3064': 1,
@@ -88,9 +93,11 @@ class Request {
         },
       });
 
-      await Request().post(Api.activateBuvidApi,
-          data: {'payload': jsonData},
-          options: Options(contentType: Headers.jsonContentType));
+      await Request().post(
+        Api.activateBuvidApi,
+        data: {'payload': jsonData},
+        options: Options(contentType: Headers.jsonContentType),
+      );
     } catch (_) {}
   }
 
@@ -100,68 +107,68 @@ class Request {
   Request._internal() {
     //BaseOptions、Options、RequestOptions 都可以配置参数，优先级别依次递增，且可以根据优先级别覆盖参数
     BaseOptions options = BaseOptions(
-        //请求基地址,可以包含子路径
-        baseUrl: HttpString.apiBaseUrl,
-        //连接服务器超时时间，单位是毫秒.
-        connectTimeout: const Duration(milliseconds: 10000),
-        //响应流上前后两次接受到数据的间隔，单位为毫秒。
-        receiveTimeout: const Duration(milliseconds: 10000),
-        //Http请求头.
-        headers: {
-          'connection': 'keep-alive',
-          'accept-encoding': 'br,gzip',
-          'user-agent': 'Dart/3.6 (dart:io)', // Http2Adapter不会自动添加标头
-          'referer': HttpString.baseUrl,
-          'env': 'prod',
-          'app-key': 'android64',
-          'x-bili-aurora-zone': 'sh001',
-        },
-        responseDecoder: responseDecoder, // Http2Adapter没有自动解压
-        persistentConnection: true);
+      //请求基地址,可以包含子路径
+      baseUrl: HttpString.apiBaseUrl,
+      //连接服务器超时时间，单位是毫秒.
+      connectTimeout: const Duration(milliseconds: 10000),
+      //响应流上前后两次接受到数据的间隔，单位为毫秒。
+      receiveTimeout: const Duration(milliseconds: 10000),
+      //Http请求头.
+      headers: {
+        'user-agent': 'Dart/3.6 (dart:io)', // Http2Adapter不会自动添加标头
+      },
+      responseDecoder: responseDecoder, // Http2Adapter没有自动解压
+      persistentConnection: true,
+    );
 
     final bool enableSystemProxy = Pref.enableSystemProxy;
     final String systemProxyHost = Pref.systemProxyHost;
     final String systemProxyPort = Pref.systemProxyPort;
 
-    final http11Adapter = IOHttpClientAdapter(createHttpClient: () {
-      final client = HttpClient()
-        ..idleTimeout = const Duration(seconds: 15)
-        ..autoUncompress = false; // Http2Adapter没有自动解压, 统一行为
-      // 设置代理
-      if (enableSystemProxy) {
-        client
-          ..findProxy = ((_) => 'PROXY $systemProxyHost:$systemProxyPort')
-          ..badCertificateCallback =
-              (X509Certificate cert, String host, int port) => true;
-      }
-      return client;
-    });
+    final http11Adapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient()
+          ..idleTimeout = const Duration(seconds: 15)
+          ..autoUncompress = false; // Http2Adapter没有自动解压, 统一行为
+        // 设置代理
+        if (enableSystemProxy) {
+          client
+            ..findProxy = ((_) => 'PROXY $systemProxyHost:$systemProxyPort')
+            ..badCertificateCallback =
+                (X509Certificate cert, String host, int port) => true;
+        }
+        return client;
+      },
+    );
 
     late Uri proxy;
     if (enableSystemProxy) {
       proxy = Uri(
-          scheme: 'http',
-          host: systemProxyHost,
-          port: int.parse(systemProxyPort));
+        scheme: 'http',
+        host: systemProxyHost,
+        port: int.parse(systemProxyPort),
+      );
     }
 
     dio = Dio(options)
       ..httpClientAdapter = Pref.enableHttp2
           ? Http2Adapter(
               ConnectionManager(
-                  idleTimeout: const Duration(seconds: 15),
-                  onClientCreate: enableSystemProxy
-                      ? (_, config) {
-                          config
-                            ..proxy = proxy
-                            ..onBadCertificate = (_) => true;
-                        }
-                      : Pref.badCertificateCallback
-                          ? (_, config) {
-                              config.onBadCertificate = (_) => true;
-                            }
-                          : null),
-              fallbackAdapter: http11Adapter)
+                idleTimeout: const Duration(seconds: 15),
+                onClientCreate: enableSystemProxy
+                    ? (_, config) {
+                        config
+                          ..proxy = proxy
+                          ..onBadCertificate = (_) => true;
+                      }
+                    : Pref.badCertificateCallback
+                    ? (_, config) {
+                        config.onBadCertificate = (_) => true;
+                      }
+                    : null,
+              ),
+              fallbackAdapter: http11Adapter,
+            )
           : http11Adapter;
 
     // 先于其他Interceptor
@@ -169,11 +176,13 @@ class Request {
 
     // 日志拦截器 输出请求、响应内容
     if (kDebugMode) {
-      dio.interceptors.add(LogInterceptor(
-        request: false,
-        requestHeader: false,
-        responseHeader: false,
-      ));
+      dio.interceptors.add(
+        LogInterceptor(
+          request: false,
+          requestHeader: false,
+          responseHeader: false,
+        ),
+      );
     }
 
     dio.transformer = BackgroundTransformer();
@@ -190,14 +199,7 @@ class Request {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
-    String? uaType,
   }) async {
-    if (uaType != null) {
-      options ??= Options();
-      options.headers ??= <String, dynamic>{};
-      options.headers!['user-agent'] = headerUa(type: uaType);
-    }
-
     try {
       return await dio.get<T>(
         url,
@@ -208,7 +210,7 @@ class Request {
     } on DioException catch (e) {
       return Response(
         data: {
-          'message': await AccountManager.dioError(e)
+          'message': await AccountManager.dioError(e),
         }, // 将自定义 Map 数据赋值给 Response 的 data 属性
         statusCode: e.response?.statusCode ?? -1,
         requestOptions: e.requestOptions,
@@ -239,7 +241,7 @@ class Request {
       AccountManager.toast(e);
       return Response(
         data: {
-          'message': await AccountManager.dioError(e)
+          'message': await AccountManager.dioError(e),
         }, // 将自定义 Map 数据赋值给 Response 的 data 属性
         statusCode: e.response?.statusCode ?? -1,
         requestOptions: e.requestOptions,
@@ -250,8 +252,11 @@ class Request {
   /*
    * 下载文件
    */
-  Future<Response> downloadFile(String urlPath, String savePath,
-      {CancelToken? cancelToken}) async {
+  Future<Response> downloadFile(
+    String urlPath,
+    String savePath, {
+    CancelToken? cancelToken,
+  }) async {
     try {
       final response = await dio.download(
         urlPath,
@@ -291,19 +296,26 @@ class Request {
       'mob' =>
         'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Mobile Safari/537.36',
       _ =>
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Safari/605.1.15'
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Safari/605.1.15',
     };
   }
 
-  static String responseDecoder(List<int> responseBytes, RequestOptions options,
-      ResponseBody responseBody) {
+  static String responseDecoder(
+    List<int> responseBytes,
+    RequestOptions options,
+    ResponseBody responseBody,
+  ) {
     switch (responseBody.headers['content-encoding']?.firstOrNull) {
       case 'gzip':
-        return utf8.decode(_gzipDecoder.decodeBytes(responseBytes),
-            allowMalformed: true);
+        return utf8.decode(
+          _gzipDecoder.decodeBytes(responseBytes),
+          allowMalformed: true,
+        );
       case 'br':
-        return utf8.decode(_brotilDecoder.convert(responseBytes),
-            allowMalformed: true);
+        return utf8.decode(
+          _brotilDecoder.convert(responseBytes),
+          allowMalformed: true,
+        );
       default:
         return utf8.decode(responseBytes, allowMalformed: true);
     }

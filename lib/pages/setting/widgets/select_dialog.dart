@@ -78,7 +78,9 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
     _cdnSpeedTest = Pref.cdnSpeedTest;
     if (_cdnSpeedTest) {
       _cdnResList = List.generate(
-          CDNService.values.length, (_) => ValueNotifier<String?>(null));
+        CDNService.values.length,
+        (_) => ValueNotifier<String?>(null),
+      );
       _cancelToken = CancelToken();
       _startSpeedTest();
     }
@@ -97,8 +99,10 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
   }
 
   Future<VideoItem> _getSampleUrl() async {
-    final result =
-        await VideoHttp.videoUrl(cid: 196018899, bvid: 'BV1fK4y1t7hj');
+    final result = await VideoHttp.videoUrl(
+      cid: 196018899,
+      bvid: 'BV1fK4y1t7hj',
+    );
     if (!result['status']) throw Exception('无法获取视频流');
     return result['data'].dash.video.first;
   }

@@ -25,11 +25,11 @@ class FansController extends CommonListController<FansData, FansItemModel> {
 
   @override
   Future<LoadingState<FansData>> customGetData() => FanHttp.fans(
-        vmid: mid,
-        pn: page,
-        ps: ps,
-        orderType: 'attention',
-      );
+    vmid: mid,
+    pn: page,
+    ps: ps,
+    orderType: 'attention',
+  );
 
   Future<void> onRemoveFan(int index, int mid) async {
     final res = await VideoHttp.relationMod(

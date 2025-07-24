@@ -22,8 +22,10 @@ class PgcReviewPage extends StatefulWidget {
 
 class _PgcReviewPageState extends State<PgcReviewPage>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  late final _tabController =
-      TabController(length: PgcReviewType.values.length, vsync: this);
+  late final _tabController = TabController(
+    length: PgcReviewType.values.length,
+    vsync: this,
+  );
 
   @override
   void dispose() {
@@ -51,8 +53,10 @@ class _PgcReviewPageState extends State<PgcReviewPage>
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 splashFactory: NoSplash.splashFactory,
                 padding: const EdgeInsets.only(left: 6),
-                indicatorPadding:
-                    const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+                indicatorPadding: const EdgeInsets.symmetric(
+                  horizontal: 3,
+                  vertical: 8,
+                ),
                 indicator: BoxDecoration(
                   color: theme.colorScheme.secondaryContainer,
                   borderRadius: const BorderRadius.all(Radius.circular(20)),
@@ -60,9 +64,10 @@ class _PgcReviewPageState extends State<PgcReviewPage>
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: theme.colorScheme.onSecondaryContainer,
                 unselectedLabelColor: theme.colorScheme.outline,
-                labelStyle: TabBarTheme.of(context)
-                        .labelStyle
-                        ?.copyWith(fontSize: 13) ??
+                labelStyle:
+                    TabBarTheme.of(
+                      context,
+                    ).labelStyle?.copyWith(fontSize: 13) ??
                     const TextStyle(fontSize: 13),
                 dividerColor: Colors.transparent,
                 tabs: PgcReviewType.values
@@ -73,9 +78,8 @@ class _PgcReviewPageState extends State<PgcReviewPage>
                     if (!_tabController.indexIsChanging) {
                       final item = PgcReviewType.values[index];
                       Get.find<PgcReviewController>(
-                              tag: '${widget.mediaId}${item.name}')
-                          .scrollController
-                          .animToTop();
+                        tag: '${widget.mediaId}${item.name}',
+                      ).scrollController.animToTop();
                     }
                   } catch (_) {}
                 },
@@ -86,11 +90,13 @@ class _PgcReviewPageState extends State<PgcReviewPage>
                 controller: _tabController,
                 physics: const NeverScrollableScrollPhysics(),
                 children: PgcReviewType.values
-                    .map((e) => PgcReviewChildPage(
-                          type: e,
-                          name: widget.name,
-                          mediaId: widget.mediaId,
-                        ))
+                    .map(
+                      (e) => PgcReviewChildPage(
+                        type: e,
+                        name: widget.name,
+                        mediaId: widget.mediaId,
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -141,7 +147,7 @@ class _PgcReviewPageState extends State<PgcReviewPage>
                           '/webview',
                           parameters: {
                             'url':
-                                'https://member.bilibili.com/article-text/mobile?theme=${Get.isDarkMode ? 1 : 0}&media_id=${widget.mediaId}'
+                                'https://member.bilibili.com/article-text/mobile?theme=${Get.isDarkMode ? 1 : 0}&media_id=${widget.mediaId}',
                           },
                         ),
                     ),

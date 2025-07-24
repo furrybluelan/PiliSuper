@@ -96,7 +96,7 @@ class _PgcIntroPageState extends State<PgcIntroPage>
                           imgList: [
                             SourceModel(
                               url: item.cover!,
-                            )
+                            ),
                           ],
                           onDismissed: videoDetailCtr.onDismissed,
                         );
@@ -124,7 +124,9 @@ class _PgcIntroPageState extends State<PgcIntroPage>
                 Expanded(
                   child: GestureDetector(
                     onTap: () => widget.showIntroDetail(
-                        item, pgcIntroController.videoTags),
+                      item,
+                      pgcIntroController.videoTags.value,
+                    ),
                     behavior: HitTestBehavior.opaque,
                     child: SizedBox(
                       height: isLandscape ? 115 : 115 / 0.75,
@@ -147,55 +149,57 @@ class _PgcIntroPageState extends State<PgcIntroPage>
                                 ),
                               ),
                               Obx(
-                                () => FilledButton.tonal(
-                                  style: FilledButton.styleFrom(
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 10,
+                                () {
+                                  final isFollowed =
+                                      pgcIntroController.isFollowed.value;
+                                  final followStatus =
+                                      pgcIntroController.followStatus.value;
+                                  return FilledButton.tonal(
+                                    style: FilledButton.styleFrom(
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
+                                      visualDensity: VisualDensity.compact,
+                                      foregroundColor: isFollowed
+                                          ? theme.colorScheme.outline
+                                          : null,
+                                      backgroundColor: isFollowed
+                                          ? theme.colorScheme.onInverseSurface
+                                          : null,
                                     ),
-                                    visualDensity: VisualDensity.compact,
-                                    foregroundColor:
-                                        pgcIntroController.isFollowed.value
-                                            ? theme.colorScheme.outline
-                                            : null,
-                                    backgroundColor:
-                                        pgcIntroController.isFollowed.value
-                                            ? theme.colorScheme.onInverseSurface
-                                            : null,
-                                  ),
-                                  onPressed: pgcIntroController
-                                              .followStatus.value ==
-                                          -1
-                                      ? null
-                                      : () {
-                                          if (pgcIntroController
-                                              .isFollowed.value) {
-                                            showPgcFollowDialog(
-                                              context: context,
-                                              type: pgcIntroController.type,
-                                              followStatus: pgcIntroController
-                                                  .followStatus.value,
-                                              onUpdateStatus: (followStatus) {
-                                                if (followStatus == -1) {
-                                                  pgcIntroController.pgcDel();
-                                                } else {
-                                                  pgcIntroController
-                                                      .pgcUpdate(followStatus);
-                                                }
-                                              },
-                                            );
-                                          } else {
-                                            pgcIntroController.pgcAdd();
-                                          }
-                                        },
-                                  child: Text(
-                                    pgcIntroController.isFollowed.value
-                                        ? '已${pgcIntroController.type}'
-                                        : '${pgcIntroController.type}',
-                                  ),
-                                ),
+                                    onPressed: followStatus == -1
+                                        ? null
+                                        : () {
+                                            if (isFollowed) {
+                                              showPgcFollowDialog(
+                                                context: context,
+                                                type: pgcIntroController.type,
+                                                followStatus: followStatus,
+                                                onUpdateStatus: (followStatus) {
+                                                  if (followStatus == -1) {
+                                                    pgcIntroController.pgcDel();
+                                                  } else {
+                                                    pgcIntroController
+                                                        .pgcUpdate(
+                                                          followStatus,
+                                                        );
+                                                  }
+                                                },
+                                              );
+                                            } else {
+                                              pgcIntroController.pgcAdd();
+                                            }
+                                          },
+                                    child: Text(
+                                      isFollowed
+                                          ? '已${pgcIntroController.type}'
+                                          : '${pgcIntroController.type}',
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -213,7 +217,7 @@ class _PgcIntroPageState extends State<PgcIntroPage>
                               if (isLandscape) ...[
                                 areasAndPubTime(theme, item),
                                 newEpDesc(theme, item),
-                              ]
+                              ],
                             ],
                           ),
                           SizedBox(height: isLandscape ? 2 : 6),
@@ -250,7 +254,7 @@ class _PgcIntroPageState extends State<PgcIntroPage>
                 changeFuc: pgcIntroController.changeSeasonOrbangu,
                 showEpisodes: widget.showEpisodes,
                 newEp: item.newEp,
-              )
+              ),
             ],
           ],
         ),
@@ -258,8 +262,11 @@ class _PgcIntroPageState extends State<PgcIntroPage>
     );
   }
 
-  Widget actionGrid(ThemeData theme, PgcInfoModel item,
-      PgcIntroController pgcIntroController) {
+  Widget actionGrid(
+    ThemeData theme,
+    PgcInfoModel item,
+    PgcIntroController pgcIntroController,
+  ) {
     return SizedBox(
       height: 48,
       child: Row(
@@ -271,11 +278,11 @@ class _PgcIntroPageState extends State<PgcIntroPage>
               onTap: () => handleState(pgcIntroController.actionLikeVideo),
               onLongPress: pgcIntroController.actionOneThree,
               selectStatus: pgcIntroController.hasLike.value,
-              isLoading: false,
               semanticsLabel: '点赞',
               text: NumUtil.numFormat(item.stat!.likes),
               needAnim: true,
-              hasTriple: pgcIntroController.hasLike.value &&
+              hasTriple:
+                  pgcIntroController.hasLike.value &&
                   pgcIntroController.hasCoin &&
                   pgcIntroController.hasFav.value,
               callBack: (start) {
@@ -297,7 +304,6 @@ class _PgcIntroPageState extends State<PgcIntroPage>
               selectIcon: const Icon(FontAwesomeIcons.b),
               onTap: () => handleState(pgcIntroController.actionCoinVideo),
               selectStatus: pgcIntroController.hasCoin,
-              isLoading: false,
               semanticsLabel: '投币',
               text: NumUtil.numFormat(item.stat!.coins),
               needAnim: true,
@@ -309,10 +315,11 @@ class _PgcIntroPageState extends State<PgcIntroPage>
               icon: const Icon(FontAwesomeIcons.star),
               selectIcon: const Icon(FontAwesomeIcons.solidStar),
               onTap: () => pgcIntroController.showFavBottomSheet(context),
-              onLongPress: () => pgcIntroController.showFavBottomSheet(context,
-                  type: 'longPress'),
+              onLongPress: () => pgcIntroController.showFavBottomSheet(
+                context,
+                type: 'longPress',
+              ),
               selectStatus: pgcIntroController.hasFav.value,
-              isLoading: false,
               semanticsLabel: '收藏',
               text: NumUtil.numFormat(item.stat!.favorite),
               needAnim: true,
@@ -323,7 +330,6 @@ class _PgcIntroPageState extends State<PgcIntroPage>
             selectIcon: const Icon(FontAwesomeIcons.reply),
             onTap: () => videoDetailCtr.tabCtr.animateTo(1),
             selectStatus: false,
-            isLoading: false,
             semanticsLabel: '评论',
             text: NumUtil.numFormat(item.stat!.reply),
           ),
@@ -331,7 +337,6 @@ class _PgcIntroPageState extends State<PgcIntroPage>
             icon: const Icon(FontAwesomeIcons.shareFromSquare),
             onTap: () => pgcIntroController.actionShareVideo(context),
             selectStatus: false,
-            isLoading: false,
             semanticsLabel: '转发',
             text: NumUtil.numFormat(item.stat!.share),
           ),

@@ -8,10 +8,10 @@ class SubtitleInfo {
   SubtitleInfo({this.lan, this.lanDoc, this.subtitles});
 
   factory SubtitleInfo.fromJson(Map<String, dynamic> json) => SubtitleInfo(
-        lan: json['lan'] as String?,
-        lanDoc: json['lan_doc'] as String?,
-        subtitles: (json['subtitles'] as List<dynamic>?)
-            ?.map((e) => Subtitle.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    lan: json['lan'] as String?,
+    lanDoc: json['lan_doc'] as String?,
+    subtitles: (json['subtitles'] as List<dynamic>?)
+        ?.map((e) => Subtitle.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }

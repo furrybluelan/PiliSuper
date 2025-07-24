@@ -12,9 +12,9 @@ class Subtitle {
   });
 
   factory Subtitle.fromJson(Map<String, dynamic> json) => Subtitle(
-        lan: json["lan"],
-        lanDoc: json["lan_doc"],
-        subtitleUrl: json["subtitle_url"],
-        subtitleUrlV2: json["subtitle_url_v2"],
-      );
+    lan: json["lan"],
+    lanDoc: json["lan_doc"],
+    subtitleUrl: json["subtitle_url"],
+    subtitleUrlV2: json["subtitle_url_v2"],
+  );
 }

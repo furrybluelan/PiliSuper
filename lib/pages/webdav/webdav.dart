@@ -29,15 +29,16 @@ class WebDav {
 
     try {
       _client = null;
-      final client = webdav.newClient(
-        webDavUri,
-        user: webDavUsername,
-        password: webDavPassword,
-      )
-        ..setHeaders({'accept-charset': 'utf-8'})
-        ..setConnectTimeout(4000)
-        ..setReceiveTimeout(4000)
-        ..setSendTimeout(4000);
+      final client =
+          webdav.newClient(
+              webDavUri,
+              user: webDavUsername,
+              password: webDavPassword,
+            )
+            ..setHeaders({'accept-charset': 'utf-8'})
+            ..setConnectTimeout(4000)
+            ..setReceiveTimeout(4000)
+            ..setSendTimeout(4000);
 
       await client.mkdirAll(_webdavDirectory);
 

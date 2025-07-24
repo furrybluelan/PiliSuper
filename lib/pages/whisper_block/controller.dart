@@ -5,8 +5,9 @@ import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
-class WhisperBlockController extends CommonListController<
-    KeywordBlockingListReply, KeywordBlockingItem> {
+class WhisperBlockController
+    extends
+        CommonListController<KeywordBlockingListReply, KeywordBlockingItem> {
   @override
   void onInit() {
     super.onInit();

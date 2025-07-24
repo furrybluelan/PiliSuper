@@ -20,15 +20,15 @@ class MsgLikeItem {
   });
 
   factory MsgLikeItem.fromJson(Map<String, dynamic> json) => MsgLikeItem(
-        id: json['id'] as int?,
-        users: (json['users'] as List<dynamic>?)
-            ?.map((e) => User.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        item: json['item'] == null
-            ? null
-            : MsgLikeContent.fromJson(json['item'] as Map<String, dynamic>),
-        counts: json['counts'] as int?,
-        likeTime: json['like_time'] as int?,
-        noticeState: json['notice_state'] as int?,
-      );
+    id: json['id'] as int?,
+    users: (json['users'] as List<dynamic>?)
+        ?.map((e) => User.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    item: json['item'] == null
+        ? null
+        : MsgLikeContent.fromJson(json['item'] as Map<String, dynamic>),
+    counts: json['counts'] as int?,
+    likeTime: json['like_time'] as int?,
+    noticeState: json['notice_state'] as int?,
+  );
 }

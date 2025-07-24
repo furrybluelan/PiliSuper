@@ -45,7 +45,8 @@ class _SubDetailPageState extends State<SubDetailPage> {
                   bottom: MediaQuery.paddingOf(context).bottom + 80,
                 ),
                 sliver: Obx(
-                    () => _buildBody(_subDetailController.loadingState.value)),
+                  () => _buildBody(_subDetailController.loadingState.value),
+                ),
               ),
             ],
           ),
@@ -57,34 +58,35 @@ class _SubDetailPageState extends State<SubDetailPage> {
   Widget _buildBody(LoadingState<List<SubDetailItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverGrid(
-          gridDelegate: Grid.videoCardHDelegate(context),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => const VideoCardHSkeleton(),
-            childCount: 10,
-          ),
+        gridDelegate: Grid.videoCardHDelegate(context),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => const VideoCardHSkeleton(),
+          childCount: 10,
         ),
-      Success(:var response) => response?.isNotEmpty == true
-          ? SliverGrid(
-              gridDelegate: Grid.videoCardHDelegate(context),
-              delegate: SliverChildBuilderDelegate(
-                childCount: response!.length,
-                (context, index) {
-                  if (index == response.length - 1) {
-                    _subDetailController.onLoadMore();
-                  }
-                  return SubVideoCardH(
-                    videoItem: response[index],
-                  );
-                },
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? SliverGrid(
+                gridDelegate: Grid.videoCardHDelegate(context),
+                delegate: SliverChildBuilderDelegate(
+                  childCount: response!.length,
+                  (context, index) {
+                    if (index == response.length - 1) {
+                      _subDetailController.onLoadMore();
+                    }
+                    return SubVideoCardH(
+                      videoItem: response[index],
+                    );
+                  },
+                ),
+              )
+            : HttpError(
+                onReload: _subDetailController.onReload,
               ),
-            )
-          : HttpError(
-              onReload: _subDetailController.onReload,
-            ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _subDetailController.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _subDetailController.onReload,
+      ),
     };
   }
 
@@ -155,7 +157,8 @@ class _SubDetailPageState extends State<SubDetailPage> {
                     GestureDetector(
                       onTap: () {
                         Get.toNamed(
-                            '/member?mid=${_subDetailController.subInfo.upper!.mid}');
+                          '/member?mid=${_subDetailController.subInfo.upper!.mid}',
+                        );
                       },
                       child: Text(
                         _subDetailController.subInfo.upper!.name!,
@@ -164,12 +167,16 @@ class _SubDetailPageState extends State<SubDetailPage> {
                     ),
                     const Spacer(),
                     Obx(
-                      () => _subDetailController.mediaCount.value == 0
-                          ? const SizedBox.shrink()
-                          : Text(
-                              '共${_subDetailController.mediaCount.value}条视频',
-                              style: style,
-                            ),
+                      () {
+                        final mediaCount =
+                            _subDetailController.mediaCount.value;
+                        return mediaCount == 0
+                            ? const SizedBox.shrink()
+                            : Text(
+                                '共$mediaCount条视频',
+                                style: style,
+                              );
+                      },
                     ),
                     Obx(
                       () => Text(

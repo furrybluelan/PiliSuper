@@ -181,7 +181,7 @@ class VideoDetailData {
         epId: json['redirect_url'] == null
             ? null
             : PiliScheme.uriDigitRegExp
-                .firstMatch(json['redirect_url'])
-                ?.group(1),
+                  .firstMatch(json['redirect_url'])
+                  ?.group(1),
       );
 }

@@ -223,8 +223,9 @@ class LiveMessageStream {
                   decompressedData = ZLibDecoder().convert(data.sublist(0x10));
                   break;
                 case 3:
-                  decompressedData =
-                      const BrotliDecoder().convert(data.sublist(0x10));
+                  decompressedData = const BrotliDecoder().convert(
+                    data.sublist(0x10),
+                  );
                 //debugPrint('Body: ${utf8.decode()}');
               }
               _processingData(decompressedData);
@@ -243,11 +244,13 @@ class LiveMessageStream {
 
   void _processingData(List<int> data) {
     try {
-      PackageHeader? subHeader =
-          PackageHeader.fromBytesData(Uint8List.fromList(data));
+      PackageHeader? subHeader = PackageHeader.fromBytesData(
+        Uint8List.fromList(data),
+      );
       if (subHeader != null) {
-        var msgBody = utf8
-            .decode(data.sublist(subHeader.headerSize, subHeader.totalSize));
+        var msgBody = utf8.decode(
+          data.sublist(subHeader.headerSize, subHeader.totalSize),
+        );
         for (var f in eventListeners) {
           f(jsonDecode(msgBody));
         }

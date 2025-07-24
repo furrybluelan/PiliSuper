@@ -41,7 +41,7 @@ class DynamicsTabPage extends CommonPage {
               itemCount: 10,
             ),
           ),
-          const SliverFillRemaining()
+          const SliverFillRemaining(),
         ],
       );
     }
@@ -135,61 +135,64 @@ class _DynamicsTabPageState
 
   Widget _buildBody(LoadingState<List<DynamicItemModel>?> loadingState) {
     return switch (loadingState) {
-      Loading() =>
-        DynamicsTabPage.dynSkeleton(GlobalData().dynamicsWaterfallFlow),
-      Success(:var response) => response?.isNotEmpty == true
-          ? GlobalData().dynamicsWaterfallFlow
-              ? SliverWaterfallFlow.extent(
-                  maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                  crossAxisSpacing: StyleString.cardSpace / 2,
-                  lastChildLayoutTypeBuilder: (index) {
-                    if (index == response.length - 1) {
-                      controller.onLoadMore();
-                    }
-                    return index == response.length
-                        ? LastChildLayoutType.foot
-                        : LastChildLayoutType.none;
-                  },
-                  children: [
-                    for (int index = 0; index < response!.length; index++)
-                      DynamicPanel(
-                        item: response[index],
-                        onRemove: (idStr) => controller.onRemove(index, idStr),
-                        onBlock: () => controller.onBlock(index),
-                      )
-                  ],
-                )
-              : SliverCrossAxisGroup(
-                  slivers: [
-                    const SliverFillRemaining(),
-                    SliverConstrainedCrossAxis(
-                      maxExtent: Grid.smallCardWidth * 2,
-                      sliver: SliverList.builder(
-                        itemBuilder: (context, index) {
-                          if (index == response.length - 1) {
-                            controller.onLoadMore();
-                          }
-                          final item = response[index];
-                          return DynamicPanel(
-                            item: item,
+      Loading() => DynamicsTabPage.dynSkeleton(
+        GlobalData().dynamicsWaterfallFlow,
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? GlobalData().dynamicsWaterfallFlow
+                  ? SliverWaterfallFlow.extent(
+                      maxCrossAxisExtent: Grid.smallCardWidth * 2,
+                      crossAxisSpacing: StyleString.cardSpace / 2,
+                      lastChildLayoutTypeBuilder: (index) {
+                        if (index == response.length - 1) {
+                          controller.onLoadMore();
+                        }
+                        return index == response.length
+                            ? LastChildLayoutType.foot
+                            : LastChildLayoutType.none;
+                      },
+                      children: [
+                        for (int index = 0; index < response!.length; index++)
+                          DynamicPanel(
+                            item: response[index],
                             onRemove: (idStr) =>
                                 controller.onRemove(index, idStr),
                             onBlock: () => controller.onBlock(index),
-                          );
-                        },
-                        itemCount: response!.length,
-                      ),
-                    ),
-                    const SliverFillRemaining(),
-                  ],
-                )
-          : HttpError(
-              onReload: controller.onReload,
-            ),
+                          ),
+                      ],
+                    )
+                  : SliverCrossAxisGroup(
+                      slivers: [
+                        const SliverFillRemaining(),
+                        SliverConstrainedCrossAxis(
+                          maxExtent: Grid.smallCardWidth * 2,
+                          sliver: SliverList.builder(
+                            itemBuilder: (context, index) {
+                              if (index == response.length - 1) {
+                                controller.onLoadMore();
+                              }
+                              final item = response[index];
+                              return DynamicPanel(
+                                item: item,
+                                onRemove: (idStr) =>
+                                    controller.onRemove(index, idStr),
+                                onBlock: () => controller.onBlock(index),
+                              );
+                            },
+                            itemCount: response!.length,
+                          ),
+                        ),
+                        const SliverFillRemaining(),
+                      ],
+                    )
+            : HttpError(
+                onReload: controller.onReload,
+              ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: controller.onReload,
+      ),
     };
   }
 }

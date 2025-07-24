@@ -5,7 +5,7 @@ class Coin {
   Coin({this.maxNum, this.coinNumber});
 
   factory Coin.fromJson(Map<String, dynamic> json) => Coin(
-        maxNum: json['max_num'] as num?,
-        coinNumber: json['coin_number'] as num?,
-      );
+    maxNum: json['max_num'] as num?,
+    coinNumber: json['coin_number'] as num?,
+  );
 }

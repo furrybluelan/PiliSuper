@@ -29,9 +29,15 @@ class RetryInterceptor extends Interceptor {
             }
             Request.dio
                 .fetch(options)
-                .then((i) => handler.resolve(i
-                  ..redirects.add(RedirectRecord(status, options.method, uri))
-                  ..isRedirect = true))
+                .then(
+                  (i) => handler.resolve(
+                    i
+                      ..redirects.add(
+                        RedirectRecord(status, options.method, uri),
+                      )
+                      ..isRedirect = true,
+                  ),
+                )
                 .onError<DioException>((error, _) => handler.next(error));
             return;
           }
@@ -46,13 +52,14 @@ class RetryInterceptor extends Interceptor {
         case DioExceptionType.unknown:
           if ((err.requestOptions.extra['_rt'] ??= 0) < _count) {
             Future.delayed(
-                Duration(
-                    milliseconds: ++err.requestOptions.extra['_rt'] * _delay),
-                () => Request.dio
-                    .fetch(err.requestOptions)
-                    .then(handler.resolve)
-                    .onError<DioException>(
-                        (error, _) => handler.reject(error)));
+              Duration(
+                milliseconds: ++err.requestOptions.extra['_rt'] * _delay,
+              ),
+              () => Request.dio
+                  .fetch(err.requestOptions)
+                  .then(handler.resolve)
+                  .onError<DioException>((error, _) => handler.reject(error)),
+            );
           } else {
             handler.next(err);
           }

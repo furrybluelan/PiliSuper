@@ -7,8 +7,7 @@ enum StatType {
   reply(Icons.comment_outlined),
   follow(Icons.favorite_border),
   play(Icons.play_circle_outlined),
-  listen(Icons.headset_outlined),
-  ;
+  listen(Icons.headset_outlined);
 
   final IconData iconData;
   const StatType(this.iconData);

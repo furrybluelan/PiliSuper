@@ -11,8 +11,7 @@ enum FullScreenMode {
   // 屏幕长宽比<1.25或为竖屏视频时竖屏，否则横屏
   ratio('屏幕长宽比<1.25或为竖屏视频时竖屏，否则横屏'),
   // 强制重力转屏（仅安卓）
-  gravity('忽略系统方向锁定，强制按重力转屏（仅安卓）'),
-  ;
+  gravity('忽略系统方向锁定，强制按重力转屏（仅安卓）');
 
   final String desc;
   const FullScreenMode(this.desc);

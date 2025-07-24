@@ -29,10 +29,12 @@ class CreateVoteController extends GetxController {
 
   void updateCanCreate() {
     if (type.value == 0) {
-      canCreate.value = title.value.isNotEmpty &&
+      canCreate.value =
+          title.value.isNotEmpty &&
           options.every((e) => e.optDesc?.isNotEmpty == true);
     } else {
-      canCreate.value = title.value.isNotEmpty &&
+      canCreate.value =
+          title.value.isNotEmpty &&
           options.every(
             (e) =>
                 e.optDesc?.isNotEmpty == true && e.imgUrl?.isNotEmpty == true,

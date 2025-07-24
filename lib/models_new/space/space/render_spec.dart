@@ -4,6 +4,6 @@ class RenderSpec {
   RenderSpec({this.opacity});
 
   factory RenderSpec.fromJson(Map<String, dynamic> json) => RenderSpec(
-        opacity: json['opacity'] as int?,
-      );
+    opacity: json['opacity'] as int?,
+  );
 }

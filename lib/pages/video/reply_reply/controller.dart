@@ -147,54 +147,56 @@ class VideoReplyReplyController extends ReplyController
 
     Navigator.of(context)
         .push(
-      GetDialogRoute(
-        pageBuilder: (buildContext, animation, secondaryAnimation) {
-          return ReplyPage(
-            oid: oid,
-            root: root,
-            parent: root,
-            replyType: this.replyType,
-            replyItem: replyItem,
-            items: savedReplies[key],
-            onSave: (reply) {
-              if (reply.isEmpty) {
-                savedReplies.remove(key);
-              } else {
-                savedReplies[key] = reply.toList();
-              }
+          GetDialogRoute(
+            pageBuilder: (buildContext, animation, secondaryAnimation) {
+              return ReplyPage(
+                oid: oid,
+                root: root,
+                parent: root,
+                replyType: this.replyType,
+                replyItem: replyItem,
+                items: savedReplies[key],
+                onSave: (reply) {
+                  if (reply.isEmpty) {
+                    savedReplies.remove(key);
+                  } else {
+                    savedReplies[key] = reply.toList();
+                  }
+                },
+              );
             },
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 500),
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(0.0, 1.0);
-          const end = Offset.zero;
-          const curve = Curves.linear;
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.linear;
 
-          var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var tween = Tween(
+                begin: begin,
+                end: end,
+              ).chain(CurveTween(curve: curve));
 
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
-      ),
-    )
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+          ),
+        )
         .then((res) {
-      if (res != null) {
-        savedReplies.remove(key);
-        ReplyInfo replyInfo = RequestUtils.replyCast(res);
+          if (res != null) {
+            savedReplies.remove(key);
+            ReplyInfo replyInfo = RequestUtils.replyCast(res);
 
-        count.value += 1;
-        loadingState
-          ..value.dataOrNull?.insert(index! + 1, replyInfo)
-          ..refresh();
-        if (enableCommAntifraud) {
-          onCheckReply(replyInfo, isManual: false);
-        }
-      }
-    });
+            count.value += 1;
+            loadingState
+              ..value.dataOrNull?.insert(index! + 1, replyInfo)
+              ..refresh();
+            if (enableCommAntifraud) {
+              onCheckReply(replyInfo, isManual: false);
+            }
+          }
+        });
   }
 
   @override

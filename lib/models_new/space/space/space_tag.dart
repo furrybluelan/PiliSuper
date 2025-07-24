@@ -20,13 +20,13 @@ class SpaceTag {
   });
 
   factory SpaceTag.fromJson(Map<String, dynamic> json) => SpaceTag(
-        type: json['type'] as String?,
-        title: json['title'] as String?,
-        textColor: json['text_color'] as String?,
-        nightTextColor: json['night_text_color'] as String?,
-        backgroundColor: json['background_color'] as String?,
-        nightBackgroundColor: json['night_background_color'] as String?,
-        uri: json['uri'] as String?,
-        icon: json['icon'] as String?,
-      );
+    type: json['type'] as String?,
+    title: json['title'] as String?,
+    textColor: json['text_color'] as String?,
+    nightTextColor: json['night_text_color'] as String?,
+    backgroundColor: json['background_color'] as String?,
+    nightBackgroundColor: json['night_background_color'] as String?,
+    uri: json['uri'] as String?,
+    icon: json['icon'] as String?,
+  );
 }

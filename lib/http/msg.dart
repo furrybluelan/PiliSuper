@@ -26,8 +26,8 @@ class MsgHttp {
     var res = await Request().get(
       Api.msgFeedReply,
       queryParameters: {
-        if (cursor != null) 'id': cursor,
-        if (cursorTime != null) 'reply_time': cursorTime,
+        'id': ?cursor,
+        'reply_time': ?cursorTime,
         'platform': 'web',
         'mobi_app': 'web',
         'build': 0,
@@ -41,13 +41,15 @@ class MsgHttp {
     }
   }
 
-  static Future<LoadingState<MsgAtData>> msgFeedAtMe(
-      {int? cursor, int? cursorTime}) async {
+  static Future<LoadingState<MsgAtData>> msgFeedAtMe({
+    int? cursor,
+    int? cursorTime,
+  }) async {
     var res = await Request().get(
       Api.msgFeedAt,
       queryParameters: {
-        if (cursor != null) 'id': cursor,
-        if (cursorTime != null) 'at_time': cursorTime,
+        'id': ?cursor,
+        'at_time': ?cursorTime,
         'platform': 'web',
         'mobi_app': 'web',
         'build': 0,
@@ -61,16 +63,21 @@ class MsgHttp {
     }
   }
 
-  static Future<LoadingState<MsgLikeData>> msgFeedLikeMe(
-      {int? cursor, int? cursorTime}) async {
-    var res = await Request().get(Api.msgFeedLike, queryParameters: {
-      if (cursor != null) 'id': cursor,
-      if (cursorTime != null) 'like_time': cursorTime,
-      'platform': 'web',
-      'mobi_app': 'web',
-      'build': 0,
-      'web_location': 333.40164,
-    });
+  static Future<LoadingState<MsgLikeData>> msgFeedLikeMe({
+    int? cursor,
+    int? cursorTime,
+  }) async {
+    var res = await Request().get(
+      Api.msgFeedLike,
+      queryParameters: {
+        'id': ?cursor,
+        'like_time': ?cursorTime,
+        'platform': 'web',
+        'mobi_app': 'web',
+        'build': 0,
+        'web_location': 333.40164,
+      },
+    );
     if (res.data['code'] == 0) {
       return Success(MsgLikeData.fromJson(res.data['data']));
     } else {
@@ -101,12 +108,14 @@ class MsgHttp {
     }
   }
 
-  static Future<LoadingState<List<MsgSysItem>?>> msgFeedNotify(
-      {int? cursor, int pageSize = 20}) async {
+  static Future<LoadingState<List<MsgSysItem>?>> msgFeedNotify({
+    int? cursor,
+    int pageSize = 20,
+  }) async {
     var res = await Request().get(
       Api.msgSysNotify,
       queryParameters: {
-        if (cursor != null) 'cursor': cursor,
+        'cursor': ?cursor,
         'page_size': pageSize,
         'mobi_app': 'web',
         'build': 0,
@@ -114,9 +123,11 @@ class MsgHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['data'] as List?)
-          ?.map((e) => MsgSysItem.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['data'] as List?)
+            ?.map((e) => MsgSysItem.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -124,10 +135,13 @@ class MsgHttp {
 
   static Future msgSysUpdateCursor(int cursor) async {
     String csrf = Accounts.main.csrf;
-    var res = await Request().get(Api.msgSysUpdateCursor, queryParameters: {
-      'csrf': csrf,
-      'cursor': cursor,
-    });
+    var res = await Request().get(
+      Api.msgSysUpdateCursor,
+      queryParameters: {
+        'csrf': csrf,
+        'cursor': cursor,
+      },
+    );
     if (res.data['code'] == 0) {
       return {
         'status': true,
@@ -176,8 +190,8 @@ class MsgHttp {
     final file = await MultipartFile.fromFile(path);
     Map<String, dynamic> data = {
       'file_up': file,
-      if (category != null) 'category': category,
-      if (biz != null) 'biz': biz,
+      'category': ?category,
+      'biz': ?biz,
       'csrf': Accounts.main.csrf,
     };
     var res = await Request().post(
@@ -233,8 +247,8 @@ class MsgHttp {
       },
       data: {
         "dyn_id_str": dynIdStr,
-        if (dynType != null) "dyn_type": dynType,
-        if (ridStr != null) "rid_str": ridStr,
+        "dyn_type": ?dynType,
+        "rid_str": ?ridStr,
       },
     );
     if (res.data['code'] == 0) {
@@ -254,7 +268,7 @@ class MsgHttp {
       'build': 0,
       'mobi_app': 'web',
       'csrf_token': csrf,
-      'csrf': csrf
+      'csrf': csrf,
     });
     var res = await Request().post(
       HttpString.tUrl + Api.removeMsg,
@@ -336,10 +350,12 @@ class MsgHttp {
       'build': 0,
       'mobi_app': 'web',
       'csrf_token': csrf,
-      'csrf': csrf
+      'csrf': csrf,
     });
-    var res = await Request()
-        .post(HttpString.tUrl + Api.setTop, data: FormData.fromMap(data));
+    var res = await Request().post(
+      HttpString.tUrl + Api.setTop,
+      data: FormData.fromMap(data),
+    );
     if (res.data['code'] == 0) {
       return {'status': true};
     } else {
@@ -363,7 +379,7 @@ class MsgHttp {
       'build': 0,
       'mobi_app': 'web',
       'csrf_token': csrf,
-      'csrf': csrf
+      'csrf': csrf,
     });
     var res = await Request().get(Api.ackSessionMsg, queryParameters: params);
     if (res.data['code'] == 0) {
@@ -374,7 +390,8 @@ class MsgHttp {
     } else {
       return {
         'status': false,
-        'msg': "message: ${res.data['message']},"
+        'msg':
+            "message: ${res.data['message']},"
             " msg: ${res.data['msg']},"
             " code: ${res.data['code']}",
       };
@@ -530,9 +547,11 @@ class MsgHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['data'] as List?)
-          ?.map((e) => ImUserInfosData.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['data'] as List?)
+            ?.map((e) => ImUserInfosData.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -575,9 +594,11 @@ class MsgHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return Success((res.data['data']?['uid_settings'] as List?)
-          ?.map((e) => UidSetting.fromJson(e))
-          .toList());
+      return Success(
+        (res.data['data']?['uid_settings'] as List?)
+            ?.map((e) => UidSetting.fromJson(e))
+            .toList(),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -596,7 +617,7 @@ class MsgHttp {
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'data': SingleUnreadData.fromJson(res.data['data'])
+        'data': SingleUnreadData.fromJson(res.data['data']),
       };
     } else {
       return {'status': false, 'data': res.data['message']};
@@ -615,7 +636,7 @@ class MsgHttp {
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'data': MsgFeedUnreadData.fromJson(res.data['data'])
+        'data': MsgFeedUnreadData.fromJson(res.data['data']),
       };
     } else {
       return {'status': false, 'data': res.data['message']};

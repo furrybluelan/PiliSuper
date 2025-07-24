@@ -25,25 +25,27 @@ class SpaceImages {
   });
 
   factory SpaceImages.fromJson(Map<String, dynamic> json) => SpaceImages(
-        imgUrl: json['imgUrl'] as String?,
-        nightImgurl: json['night_imgurl'] as String?,
-        goodsAvailable: json['goods_available'] as bool?,
-        purchaseButton: json['purchase_button'] == null
-            ? null
-            : PurchaseButton.fromJson(
-                json['purchase_button'] as Map<String, dynamic>),
-        entranceButton: json['entrance_button'] == null
-            ? null
-            : EntranceButton.fromJson(
-                json['entrance_button'] as Map<String, dynamic>),
-        digitalInfo: json['digital_info'] == null
-            ? null
-            : DigitalInfo.fromJson(
-                json['digital_info'] as Map<String, dynamic>),
-        showDigital: json['show_digital'] as bool?,
-        collectionTopSimple: json['collection_top_simple'] == null
-            ? null
-            : CollectionTopSimple.fromJson(
-                json['collection_top_simple'] as Map<String, dynamic>),
-      );
+    imgUrl: json['imgUrl'] as String?,
+    nightImgurl: json['night_imgurl'] as String?,
+    goodsAvailable: json['goods_available'] as bool?,
+    purchaseButton: json['purchase_button'] == null
+        ? null
+        : PurchaseButton.fromJson(
+            json['purchase_button'] as Map<String, dynamic>,
+          ),
+    entranceButton: json['entrance_button'] == null
+        ? null
+        : EntranceButton.fromJson(
+            json['entrance_button'] as Map<String, dynamic>,
+          ),
+    digitalInfo: json['digital_info'] == null
+        ? null
+        : DigitalInfo.fromJson(json['digital_info'] as Map<String, dynamic>),
+    showDigital: json['show_digital'] as bool?,
+    collectionTopSimple: json['collection_top_simple'] == null
+        ? null
+        : CollectionTopSimple.fromJson(
+            json['collection_top_simple'] as Map<String, dynamic>,
+          ),
+  );
 }

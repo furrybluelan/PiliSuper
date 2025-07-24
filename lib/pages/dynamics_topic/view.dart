@@ -34,8 +34,10 @@ class DynTopicPage extends StatefulWidget {
 }
 
 class _DynTopicPageState extends State<DynTopicPage> {
-  final DynTopicController _controller =
-      Get.put(DynTopicController(), tag: Utils.generateRandomString(8));
+  final DynTopicController _controller = Get.put(
+    DynTopicController(),
+    tag: Utils.generateRandomString(8),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -70,8 +72,8 @@ class _DynTopicPageState extends State<DynTopicPage> {
             slivers: [
               Obx(() => _buildAppBar(theme, _controller.topState.value)),
               Obx(() {
-                if (_controller.topicSortByConf.value?.allSortBy?.isNotEmpty ==
-                    true) {
+                final allSortBy = _controller.topicSortByConf.value?.allSortBy;
+                if (allSortBy != null && allSortBy.isNotEmpty) {
                   return SliverPersistentHeader(
                     pinned: true,
                     delegate: CustomSliverPersistentHeaderDelegate(
@@ -82,30 +84,30 @@ class _DynTopicPageState extends State<DynTopicPage> {
                         child: Builder(
                           builder: (context) {
                             return Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 12, bottom: 6),
+                              padding: const EdgeInsets.only(
+                                left: 12,
+                                bottom: 6,
+                              ),
                               child: ToggleButtons(
                                 fillColor: theme.colorScheme.secondaryContainer,
                                 selectedColor:
                                     theme.colorScheme.onSecondaryContainer,
                                 constraints: const BoxConstraints(
-                                    minWidth: 54, minHeight: 24),
+                                  minWidth: 54,
+                                  minHeight: 24,
+                                ),
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(25)),
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(25),
+                                ),
                                 onPressed: (index) {
-                                  _controller.onSort(_controller.topicSortByConf
-                                      .value!.allSortBy![index].sortBy!);
+                                  _controller.onSort(allSortBy[index].sortBy!);
                                   (context as Element).markNeedsBuild();
                                 },
-                                isSelected: _controller
-                                    .topicSortByConf.value!.allSortBy!
-                                    .map((e) {
+                                isSelected: allSortBy.map((e) {
                                   return e.sortBy == _controller.sortBy;
                                 }).toList(),
-                                children: _controller
-                                    .topicSortByConf.value!.allSortBy!
-                                    .map((e) {
+                                children: allSortBy.map((e) {
                                   return Text(
                                     e.sortName!,
                                     style: const TextStyle(
@@ -178,7 +180,8 @@ class _DynTopicPageState extends State<DynTopicPage> {
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => Get.toNamed(
-                        '/member?mid=${response.topicCreator!.uid}'),
+                      '/member?mid=${response.topicCreator!.uid}',
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -231,15 +234,18 @@ class _DynTopicPageState extends State<DynTopicPage> {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
                           width: 1,
-                          color:
-                              theme.colorScheme.outline.withValues(alpha: 0.2),
+                          color: theme.colorScheme.outline.withValues(
+                            alpha: 0.2,
+                          ),
                         ),
                         foregroundColor: _controller.isLike.value == true
                             ? null
                             : theme.colorScheme.onSurfaceVariant,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        visualDensity:
-                            const VisualDensity(horizontal: -4, vertical: -4),
+                        visualDensity: const VisualDensity(
+                          horizontal: -4,
+                          vertical: -4,
+                        ),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       onPressed: _controller.onLike,
@@ -257,15 +263,18 @@ class _DynTopicPageState extends State<DynTopicPage> {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
                           width: 1,
-                          color:
-                              theme.colorScheme.outline.withValues(alpha: 0.2),
+                          color: theme.colorScheme.outline.withValues(
+                            alpha: 0.2,
+                          ),
                         ),
                         foregroundColor: _controller.isFav.value == true
                             ? null
                             : theme.colorScheme.onSurfaceVariant,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        visualDensity:
-                            const VisualDensity(horizontal: -4, vertical: -4),
+                        visualDensity: const VisualDensity(
+                          horizontal: -4,
+                          vertical: -4,
+                        ),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       onPressed: _controller.onFav,
@@ -287,9 +296,9 @@ class _DynTopicPageState extends State<DynTopicPage> {
           actions: [
             IconButton(
               onPressed: () => Utils.shareText(
-                  '${_controller.topicName} https://m.bilibili.com/topic-detail?topic_id=${_controller.topicId}')
+                '${_controller.topicName} https://m.bilibili.com/topic-detail?topic_id=${_controller.topicId}',
+              ),
               // https://www.bilibili.com/v/topic/detail?topic_id=${_controller.topicId}
-              ,
               icon: const Icon(MdiIcons.share),
             ),
             PopupMenuButton(
@@ -298,7 +307,8 @@ class _DynTopicPageState extends State<DynTopicPage> {
                   PopupMenuItem(
                     onTap: _controller.onFav,
                     child: Text(
-                        '${_controller.isFav.value == true ? '取消' : ''}收藏'),
+                      '${_controller.isFav.value == true ? '取消' : ''}收藏',
+                    ),
                   ),
                   PopupMenuItem(
                     child: const Text('举报'),
@@ -309,7 +319,8 @@ class _DynTopicPageState extends State<DynTopicPage> {
                       }
                       final isDark = Get.isDarkMode;
                       PageUtils.inAppWebview(
-                          'https://www.bilibili.com/h5/topic-active/topic-report?topic_id=${_controller.topicId}&topic_name=${_controller.topicName}&native.theme=${isDark ? 2 : 1}&night=${isDark ? 1 : 0}');
+                        'https://www.bilibili.com/h5/topic-active/topic-report?topic_id=${_controller.topicId}&topic_name=${_controller.topicName}&native.theme=${isDark ? 2 : 1}&night=${isDark ? 1 : 0}',
+                      );
                     },
                   ),
                 ];
@@ -319,69 +330,71 @@ class _DynTopicPageState extends State<DynTopicPage> {
           ],
         ),
       _ => SliverAppBar(
-          pinned: true,
-          title: Text(_controller.topicName),
-        ),
+        pinned: true,
+        title: Text(_controller.topicName),
+      ),
     };
   }
 
   Widget _buildBody(LoadingState<List<TopicCardItem>?> loadingState) {
     return switch (loadingState) {
-      Loading() =>
-        DynamicsTabPage.dynSkeleton(GlobalData().dynamicsWaterfallFlow),
-      Success(:var response) => response?.isNotEmpty == true
-          ? GlobalData().dynamicsWaterfallFlow
-              ? SliverWaterfallFlow.extent(
-                  maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                  crossAxisSpacing: StyleString.cardSpace / 2,
-                  lastChildLayoutTypeBuilder: (index) {
-                    if (index == response.length - 1) {
-                      _controller.onLoadMore();
-                    }
-                    return index == response.length
-                        ? LastChildLayoutType.foot
-                        : LastChildLayoutType.none;
-                  },
-                  children: [
-                    for (var item in response!)
-                      if (item.dynamicCardItem != null)
-                        DynamicPanel(item: item.dynamicCardItem!)
-                      else
-                        Text(item.topicType ?? 'err'),
-                  ],
-                )
-              : SliverCrossAxisGroup(
-                  slivers: [
-                    const SliverFillRemaining(),
-                    SliverConstrainedCrossAxis(
-                      maxExtent: Grid.smallCardWidth * 2,
-                      sliver: SliverList.builder(
-                        itemBuilder: (context, index) {
-                          if (index == response.length - 1) {
-                            _controller.onLoadMore();
-                          }
-                          final item = response[index];
-                          if (item.dynamicCardItem != null) {
-                            return DynamicPanel(
-                              item: item.dynamicCardItem!,
-                            );
-                          } else {
-                            return Text(item.topicType ?? 'err');
-                          }
-                        },
-                        itemCount: response!.length,
-                      ),
-                    ),
-                    const SliverFillRemaining(),
-                  ],
-                )
-          : HttpError(
-              onReload: _controller.onReload,
-            ),
+      Loading() => DynamicsTabPage.dynSkeleton(
+        GlobalData().dynamicsWaterfallFlow,
+      ),
+      Success(:var response) =>
+        response?.isNotEmpty == true
+            ? GlobalData().dynamicsWaterfallFlow
+                  ? SliverWaterfallFlow.extent(
+                      maxCrossAxisExtent: Grid.smallCardWidth * 2,
+                      crossAxisSpacing: StyleString.cardSpace / 2,
+                      lastChildLayoutTypeBuilder: (index) {
+                        if (index == response.length - 1) {
+                          _controller.onLoadMore();
+                        }
+                        return index == response.length
+                            ? LastChildLayoutType.foot
+                            : LastChildLayoutType.none;
+                      },
+                      children: [
+                        for (var item in response!)
+                          if (item.dynamicCardItem != null)
+                            DynamicPanel(item: item.dynamicCardItem!)
+                          else
+                            Text(item.topicType ?? 'err'),
+                      ],
+                    )
+                  : SliverCrossAxisGroup(
+                      slivers: [
+                        const SliverFillRemaining(),
+                        SliverConstrainedCrossAxis(
+                          maxExtent: Grid.smallCardWidth * 2,
+                          sliver: SliverList.builder(
+                            itemBuilder: (context, index) {
+                              if (index == response.length - 1) {
+                                _controller.onLoadMore();
+                              }
+                              final item = response[index];
+                              if (item.dynamicCardItem != null) {
+                                return DynamicPanel(
+                                  item: item.dynamicCardItem!,
+                                );
+                              } else {
+                                return Text(item.topicType ?? 'err');
+                              }
+                            },
+                            itemCount: response!.length,
+                          ),
+                        ),
+                        const SliverFillRemaining(),
+                      ],
+                    )
+            : HttpError(
+                onReload: _controller.onReload,
+              ),
       Error(:var errMsg) => HttpError(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

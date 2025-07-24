@@ -30,22 +30,28 @@ class SearchAllData extends SearchNumData {
           switch (item['result_type']) {
             case 'media_bangumi' || 'media_bangumi':
               if (isRefresh) {
-                list!.add((item['data'] as List)
-                    .map((e) => SearchPgcItemModel.fromJson(e))
-                    .toList());
+                list!.add(
+                  (item['data'] as List)
+                      .map((e) => SearchPgcItemModel.fromJson(e))
+                      .toList(),
+                );
               }
               break;
             case 'bili_user':
               if (isRefresh) {
-                list!.addAll((item['data'] as List)
-                    .map((e) => SearchUserItemModel.fromJson(e))
-                    .toList());
+                list!.addAll(
+                  (item['data'] as List)
+                      .map((e) => SearchUserItemModel.fromJson(e))
+                      .toList(),
+                );
               }
               break;
             case 'video':
-              list!.addAll((item['data'] as List)
-                  .map((e) => SearchVideoItemModel.fromJson(e))
-                  .toList());
+              list!.addAll(
+                (item['data'] as List)
+                    .map((e) => SearchVideoItemModel.fromJson(e))
+                    .toList(),
+              );
               break;
           }
         }

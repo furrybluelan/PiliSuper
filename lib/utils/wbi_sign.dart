@@ -49,7 +49,7 @@ class WbiSign {
     12,
     38,
     41,
-    13
+    13,
   ];
 
   // 对 imgKey 和 subKey 进行字符顺序打乱编码
@@ -63,11 +63,14 @@ class WbiSign {
     // 按照 key 重排参数
     final List<String> keys = params.keys.toList()..sort();
     final queryStr = keys
-        .map((i) =>
-            '${Uri.encodeComponent(i)}=${Uri.encodeComponent(params[i].toString().replaceAll(chrFilter, ''))}')
+        .map(
+          (i) =>
+              '${Uri.encodeComponent(i)}=${Uri.encodeComponent(params[i].toString().replaceAll(chrFilter, ''))}',
+        )
         .join('&');
-    params['w_rid'] =
-        md5.convert(utf8.encode(queryStr + mixinKey)).toString(); // 计算 w_rid
+    params['w_rid'] = md5
+        .convert(utf8.encode(queryStr + mixinKey))
+        .toString(); // 计算 w_rid
   }
 
   // 获取最新的 img_key 和 sub_key 可以从缓存中获取
@@ -76,8 +79,8 @@ class WbiSign {
     String? mixinKey = localCache.get(LocalCacheKey.mixinKey);
     if (mixinKey != null &&
         DateTime.fromMillisecondsSinceEpoch(
-                    localCache.get(LocalCacheKey.timeStamp) as int)
-                .day ==
+              localCache.get(LocalCacheKey.timeStamp) as int,
+            ).day ==
             nowDate.day) {
       return mixinKey;
     }
@@ -87,8 +90,9 @@ class WbiSign {
       final wbiUrls = resp.data['data']['wbi_img'];
 
       mixinKey = getMixinKey(
-          Utils.getFileName(wbiUrls['img_url'], fileExt: false) +
-              Utils.getFileName(wbiUrls['sub_url'], fileExt: false));
+        Utils.getFileName(wbiUrls['img_url'], fileExt: false) +
+            Utils.getFileName(wbiUrls['sub_url'], fileExt: false),
+      );
 
       localCache
         ..put(LocalCacheKey.mixinKey, mixinKey)
@@ -101,7 +105,8 @@ class WbiSign {
   }
 
   static Future<Map<String, dynamic>> makSign(
-      Map<String, dynamic> params) async {
+    Map<String, dynamic> params,
+  ) async {
     // params 为需要加密的请求参数
     final String mixinKey = await lock.synchronized(getWbiKeys);
     encWbi(params, mixinKey);

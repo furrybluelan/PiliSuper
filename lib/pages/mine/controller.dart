@@ -23,9 +23,10 @@ class MineController extends GetxController {
   AccountService accountService = Get.find<AccountService>();
 
   Rx<ThemeType> themeType = ThemeType.system.obs;
-  static RxBool anonymity = (Accounts.account.isNotEmpty &&
-          !Accounts.get(AccountType.heartbeat).isLogin)
-      .obs;
+  static RxBool anonymity =
+      (Accounts.account.isNotEmpty &&
+              !Accounts.get(AccountType.heartbeat).isLogin)
+          .obs;
   ThemeType get nextThemeType =>
       ThemeType.values[(themeType.value.index + 1) % ThemeType.values.length];
 
@@ -42,8 +43,10 @@ class MineController extends GetxController {
     if (!accountService.isLogin.value || longPress) {
       Get.toNamed('/loginPage', preventDuplicates: false);
     } else {
-      Get.toNamed('/member?mid=${userInfo.value.mid}',
-          preventDuplicates: false);
+      Get.toNamed(
+        '/member?mid=${userInfo.value.mid}',
+        preventDuplicates: false,
+      );
     }
   }
 
@@ -88,8 +91,9 @@ class MineController extends GetxController {
       SmartDialog.showToast('请先登录');
       return;
     }
-    anonymity.value = !anonymity.value;
-    if (anonymity.value) {
+    final newVal = !anonymity.value;
+    anonymity.value = newVal;
+    if (newVal) {
       SmartDialog.dismiss();
       SmartDialog.show<bool>(
         clickMaskDismiss: false,
@@ -98,8 +102,9 @@ class MineController extends GetxController {
         alignment: Alignment.bottomCenter,
         builder: (context) {
           final theme = Theme.of(context);
-          final style =
-              TextStyle(color: theme.colorScheme.onSecondaryContainer);
+          final style = TextStyle(
+            color: theme.colorScheme.onSecondaryContainer,
+          );
           return ColoredBox(
             color: theme.colorScheme.secondaryContainer,
             child: Padding(
@@ -117,7 +122,7 @@ class MineController extends GetxController {
                     children: <Widget>[
                       const Icon(MdiIcons.incognito, size: 20),
                       const SizedBox(width: 10),
-                      Text('已进入无痕模式', style: theme.textTheme.titleMedium)
+                      Text('已进入无痕模式', style: theme.textTheme.titleMedium),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -195,12 +200,13 @@ class MineController extends GetxController {
   }
 
   void onChangeTheme() {
-    themeType.value = nextThemeType;
+    final newVal = nextThemeType;
+    themeType.value = newVal;
     try {
-      Get.find<MineController>().themeType.value = themeType.value;
+      Get.find<MineController>().themeType.value = newVal;
     } catch (_) {}
-    GStorage.setting.put(SettingBoxKey.themeMode, themeType.value.index);
-    Get.changeThemeMode(themeType.value.toThemeMode);
+    GStorage.setting.put(SettingBoxKey.themeMode, newVal.index);
+    Get.changeThemeMode(newVal.toThemeMode);
   }
 
   void pushFollow() {
@@ -224,7 +230,9 @@ class MineController extends GetxController {
       SmartDialog.showToast('账号未登录');
       return;
     }
-    Get.toNamed('/memberDynamics?mid=${userInfo.value.mid}',
-        preventDuplicates: false);
+    Get.toNamed(
+      '/memberDynamics?mid=${userInfo.value.mid}',
+      preventDuplicates: false,
+    );
   }
 }

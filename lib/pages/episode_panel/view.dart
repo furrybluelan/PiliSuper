@@ -100,9 +100,9 @@ class _EpisodePanelState extends CommonSlidePageState<EpisodePanel> {
   // item
   late int _currentItemIndex;
   int get _findCurrentItemIndex => max(
-        0,
-        _getCurrEpisodes.indexWhere((item) => item.cid == widget.cid),
-      );
+    0,
+    _getCurrEpisodes.indexWhere((item) => item.cid == widget.cid),
+  );
 
   late final List<bool> _isReversed;
   late final List<ItemScrollController> _itemScrollController;
@@ -152,8 +152,10 @@ class _EpisodePanelState extends CommonSlidePageState<EpisodePanel> {
   @override
   void initState() {
     super.initState();
-    _itemScrollController =
-        List.generate(widget.list.length, (_) => ItemScrollController());
+    _itemScrollController = List.generate(
+      widget.list.length,
+      (_) => ItemScrollController(),
+    );
     _isReversed = List.generate(widget.list.length, (_) => false);
 
     if (widget.type == EpisodeType.season && Accounts.main.isLogin) {
@@ -176,8 +178,9 @@ class _EpisodePanelState extends CommonSlidePageState<EpisodePanel> {
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           try {
-            _itemScrollController[widget.initialTabIndex]
-                .jumpTo(index: _currentItemIndex);
+            _itemScrollController[widget.initialTabIndex].jumpTo(
+              index: _currentItemIndex,
+            );
           } catch (_) {}
         });
       }
@@ -208,13 +211,13 @@ class _EpisodePanelState extends CommonSlidePageState<EpisodePanel> {
     final isMulti = widget.type == EpisodeType.season && widget.list.length > 1;
 
     Widget tabbar() => TabBar(
-          controller: _tabController,
-          padding: const EdgeInsets.only(right: 60),
-          isScrollable: true,
-          tabs: widget.list.map((item) => Tab(text: item.title)).toList(),
-          dividerHeight: 1,
-          dividerColor: theme.dividerColor.withValues(alpha: 0.1),
-        );
+      controller: _tabController,
+      padding: const EdgeInsets.only(right: 60),
+      isScrollable: true,
+      tabs: widget.list.map((item) => Tab(text: item.title)).toList(),
+      dividerHeight: 1,
+      dividerColor: theme.dividerColor.withValues(alpha: 0.1),
+    );
 
     if (isMulti && enableSlide) {
       return CustomTabBarView(
@@ -303,13 +306,15 @@ class _EpisodePanelState extends CommonSlidePageState<EpisodePanel> {
                     episodeItem,
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 5),
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
                       child: PagesPanel(
                         list:
                             widget.initialTabIndex == _currentTabIndex.value &&
-                                    itemIndex == _currentItemIndex
-                                ? null
-                                : episode.pages,
+                                itemIndex == _currentItemIndex
+                            ? null
+                            : episode.pages,
                         cover: episode.arc?.pic,
                         heroTag: widget.heroTag,
                         videoIntroController: widget.videoIntroController,
@@ -411,8 +416,8 @@ class _EpisodePanelState extends CommonSlidePageState<EpisodePanel> {
             if (widget.type == EpisodeType.season) {
               try {
                 Get.find<VideoDetailController>(
-                        tag: widget.videoIntroController.heroTag)
-                    .seasonCid = episode.cid;
+                  tag: widget.videoIntroController.heroTag,
+                ).seasonCid = episode.cid;
               } catch (_) {}
             }
           },
@@ -541,129 +546,134 @@ class _EpisodePanelState extends CommonSlidePageState<EpisodePanel> {
   Widget _buildFavBtn(LoadingState loadingState) {
     return switch (loadingState) {
       Success(:var response) => mediumButton(
-          tooltip: response ? '取消订阅' : '订阅',
-          icon: response
-              ? Icons.notifications_off_outlined
-              : Icons.notifications_active_outlined,
-          onPressed: () async {
-            var result = await FavHttp.seasonFav(
-              isFav: response,
-              seasonId: widget.seasonId,
-            );
-            if (result['status']) {
-              SmartDialog.showToast('${response ? '取消' : ''}订阅成功');
-              _favState!.value = Success(!response);
-            } else {
-              SmartDialog.showToast(result['msg']);
-            }
-          },
-        ),
+        tooltip: response ? '取消订阅' : '订阅',
+        icon: response
+            ? Icons.notifications_off_outlined
+            : Icons.notifications_active_outlined,
+        onPressed: () async {
+          var result = await FavHttp.seasonFav(
+            isFav: response,
+            seasonId: widget.seasonId,
+          );
+          if (result['status']) {
+            SmartDialog.showToast('${response ? '取消' : ''}订阅成功');
+            _favState!.value = Success(!response);
+          } else {
+            SmartDialog.showToast(result['msg']);
+          }
+        },
+      ),
       _ => const SizedBox.shrink(),
     };
   }
 
   Widget get _buildReverseBtn => mediumButton(
-        tooltip: widget.isReversed == true ? '正序播放' : '倒序播放',
-        icon: widget.isReversed == true
-            ? MdiIcons.sortDescending
-            : MdiIcons.sortAscending,
-        onPressed: () => widget.onReverse?.call(),
-      );
+    tooltip: widget.isReversed == true ? '正序播放' : '倒序播放',
+    icon: widget.isReversed == true
+        ? MdiIcons.sortDescending
+        : MdiIcons.sortAscending,
+    onPressed: () => widget.onReverse?.call(),
+  );
 
   Widget _buildToolbar(ThemeData theme) => Container(
-        height: 45,
-        padding: EdgeInsets.symmetric(horizontal: widget.showTitle ? 14 : 6),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: theme.dividerColor.withValues(alpha: 0.1),
-            ),
+    height: 45,
+    padding: EdgeInsets.symmetric(horizontal: widget.showTitle ? 14 : 6),
+    decoration: BoxDecoration(
+      border: Border(
+        bottom: BorderSide(
+          color: theme.dividerColor.withValues(alpha: 0.1),
+        ),
+      ),
+    ),
+    child: Row(
+      children: [
+        if (widget.showTitle)
+          Text(
+            widget.type.title,
+            style: theme.textTheme.titleMedium,
           ),
+        if (_favState != null) Obx(() => _buildFavBtn(_favState!.value)),
+        mediumButton(
+          tooltip: '跳至顶部',
+          icon: Icons.vertical_align_top,
+          onPressed: () {
+            try {
+              final currentTabIndex = _currentTabIndex.value;
+              _itemScrollController[currentTabIndex].scrollTo(
+                index: !_isReversed[currentTabIndex]
+                    ? 0
+                    : _getCurrEpisodes.length - 1,
+                duration: const Duration(milliseconds: 200),
+              );
+            } catch (e) {
+              if (kDebugMode) debugPrint('to top: $e');
+            }
+          },
         ),
-        child: Row(
-          children: [
-            if (widget.showTitle)
-              Text(
-                widget.type.title,
-                style: theme.textTheme.titleMedium,
-              ),
-            if (_favState != null) Obx(() => _buildFavBtn(_favState!.value)),
-            mediumButton(
-              tooltip: '跳至顶部',
-              icon: Icons.vertical_align_top,
-              onPressed: () {
-                try {
-                  _itemScrollController[_currentTabIndex.value].scrollTo(
-                    index: !_isReversed[_currentTabIndex.value]
-                        ? 0
-                        : _getCurrEpisodes.length - 1,
-                    duration: const Duration(milliseconds: 200),
-                  );
-                } catch (e) {
-                  if (kDebugMode) debugPrint('to top: $e');
-                }
-              },
-            ),
-            mediumButton(
-              tooltip: '跳至底部',
-              icon: Icons.vertical_align_bottom,
-              onPressed: () {
-                try {
-                  _itemScrollController[_currentTabIndex.value].scrollTo(
-                    index: !_isReversed[_currentTabIndex.value]
-                        ? _getCurrEpisodes.length - 1
-                        : 0,
-                    duration: const Duration(milliseconds: 200),
-                  );
-                } catch (e) {
-                  if (kDebugMode) debugPrint('to bottom: $e');
-                }
-              },
-            ),
-            mediumButton(
-              tooltip: '跳至当前',
-              icon: Icons.my_location,
-              onPressed: () async {
-                try {
-                  if (_currentTabIndex.value != widget.initialTabIndex) {
-                    _tabController.animateTo(widget.initialTabIndex);
-                    await Future.delayed(const Duration(milliseconds: 225));
-                  }
-                  _itemScrollController[_currentTabIndex.value].scrollTo(
-                    index: _currentItemIndex,
-                    duration: const Duration(milliseconds: 200),
-                  );
-                } catch (_) {}
-              },
-            ),
-            if (widget.isSupportReverse == true)
-              Obx(
-                () {
-                  return _currentTabIndex.value == widget.initialTabIndex
-                      ? _buildReverseBtn
-                      : const SizedBox.shrink();
-                },
-              ),
-            const Spacer(),
-            Obx(
-              () => mediumButton(
-                tooltip: _isReversed[_currentTabIndex.value] ? '顺序' : '倒序',
-                icon: !_isReversed[_currentTabIndex.value]
-                    ? MdiIcons.sortNumericAscending
-                    : MdiIcons.sortNumericDescending,
-                onPressed: () => setState(() {
-                  _isReversed[_currentTabIndex.value] =
-                      !_isReversed[_currentTabIndex.value];
-                }),
-              ),
-            ),
-            if (widget.onClose != null)
-              mediumButton(
-                tooltip: '关闭',
-                icon: Icons.close,
-                onPressed: widget.onClose,
-              ),
-          ],
+        mediumButton(
+          tooltip: '跳至底部',
+          icon: Icons.vertical_align_bottom,
+          onPressed: () {
+            try {
+              final currentTabIndex = _currentTabIndex.value;
+              _itemScrollController[currentTabIndex].scrollTo(
+                index: !_isReversed[currentTabIndex]
+                    ? _getCurrEpisodes.length - 1
+                    : 0,
+                duration: const Duration(milliseconds: 200),
+              );
+            } catch (e) {
+              if (kDebugMode) debugPrint('to bottom: $e');
+            }
+          },
         ),
-      );
+        mediumButton(
+          tooltip: '跳至当前',
+          icon: Icons.my_location,
+          onPressed: () async {
+            try {
+              final currentTabIndex = _currentTabIndex.value;
+              if (currentTabIndex != widget.initialTabIndex) {
+                _tabController.animateTo(widget.initialTabIndex);
+                await Future.delayed(const Duration(milliseconds: 225));
+              }
+              _itemScrollController[currentTabIndex].scrollTo(
+                index: _currentItemIndex,
+                duration: const Duration(milliseconds: 200),
+              );
+            } catch (_) {}
+          },
+        ),
+        if (widget.isSupportReverse == true)
+          Obx(
+            () {
+              return _currentTabIndex.value == widget.initialTabIndex
+                  ? _buildReverseBtn
+                  : const SizedBox.shrink();
+            },
+          ),
+        const Spacer(),
+        Obx(
+          () {
+            final currentTabIndex = _currentTabIndex.value;
+            return mediumButton(
+              tooltip: _isReversed[currentTabIndex] ? '顺序' : '倒序',
+              icon: !_isReversed[currentTabIndex]
+                  ? MdiIcons.sortNumericAscending
+                  : MdiIcons.sortNumericDescending,
+              onPressed: () => setState(() {
+                _isReversed[currentTabIndex] = !_isReversed[currentTabIndex];
+              }),
+            );
+          },
+        ),
+        if (widget.onClose != null)
+          mediumButton(
+            tooltip: '关闭',
+            icon: Icons.close,
+            onPressed: widget.onClose,
+          ),
+      ],
+    ),
+  );
 }

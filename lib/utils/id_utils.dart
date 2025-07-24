@@ -16,8 +16,10 @@ class IdUtils {
   static final invData = {for (var (i, c) in data.codeUnits.indexed) c: i};
 
   static final bvRegex = RegExp(r'bv[0-9a-zA-Z]{10}', caseSensitive: false);
-  static final bvRegexExact =
-      RegExp(r'^bv[0-9a-zA-Z]{10}$', caseSensitive: false);
+  static final bvRegexExact = RegExp(
+    r'^bv[0-9a-zA-Z]{10}$',
+    caseSensitive: false,
+  );
   static final avRegex = RegExp(r'av(\d+)', caseSensitive: false);
   static final avRegexExact = RegExp(r'^av(\d+)$', caseSensitive: false);
   static final digitOnlyRegExp = RegExp(r'^\d+$');

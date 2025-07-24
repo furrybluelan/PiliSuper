@@ -15,14 +15,15 @@ class TopicCardList {
   });
 
   factory TopicCardList.fromJson(Map<String, dynamic> json) => TopicCardList(
-        hasMore: json['has_more'] as bool?,
-        items: (json['items'] as List<dynamic>?)
-            ?.map((e) => TopicCardItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        offset: json['offset'] as String?,
-        topicSortByConf: json['topic_sort_by_conf'] == null
-            ? null
-            : TopicSortByConf.fromJson(
-                json['topic_sort_by_conf'] as Map<String, dynamic>),
-      );
+    hasMore: json['has_more'] as bool?,
+    items: (json['items'] as List<dynamic>?)
+        ?.map((e) => TopicCardItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    offset: json['offset'] as String?,
+    topicSortByConf: json['topic_sort_by_conf'] == null
+        ? null
+        : TopicSortByConf.fromJson(
+            json['topic_sort_by_conf'] as Map<String, dynamic>,
+          ),
+  );
 }

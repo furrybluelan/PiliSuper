@@ -19,8 +19,13 @@ class SearchArticlePanel extends CommonSearchPanel {
   State<SearchArticlePanel> createState() => _SearchArticlePanelState();
 }
 
-class _SearchArticlePanelState extends CommonSearchPanelState<
-    SearchArticlePanel, SearchArticleData, SearchArticleItemModel> {
+class _SearchArticlePanelState
+    extends
+        CommonSearchPanelState<
+          SearchArticlePanel,
+          SearchArticleData,
+          SearchArticleItemModel
+        > {
   @override
   late final SearchArticleController controller = Get.put(
     SearchArticleController(

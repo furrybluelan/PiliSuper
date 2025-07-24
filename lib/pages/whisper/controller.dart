@@ -15,7 +15,7 @@ class WhisperController extends CommonWhisperController<SessionMainReply> {
   SessionPageType sessionPageType = SessionPageType.SESSION_PAGE_TYPE_HOME;
 
   late final List<({bool enabled, IconData icon, String name, String route})>
-      msgFeedTopItems;
+  msgFeedTopItems;
   late final RxList<int> unreadCounts;
 
   PbMap<int, Offset>? offset;
@@ -79,7 +79,9 @@ class WhisperController extends CommonWhisperController<SessionMainReply> {
 
   @override
   bool customHandleResponse(
-      bool isRefresh, Success<SessionMainReply> response) {
+    bool isRefresh,
+    Success<SessionMainReply> response,
+  ) {
     if (isRefresh) {
       threeDotItems.value = response.response.threeDotItems;
       outsideItem.value = response.response.outsideItem;

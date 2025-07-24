@@ -12,7 +12,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
-import 'editable_text.dart' show EditableTextContextMenuBuilder;
+import 'package:PiliPlus/common/widgets/text_field/editable_text.dart'
+    show EditableTextContextMenuBuilder;
 
 /// Controls how spell check is performed for text input.
 ///
@@ -32,11 +33,11 @@ class SpellCheckConfiguration {
 
   /// Creates a configuration that disables spell check.
   const SpellCheckConfiguration.disabled()
-      : _spellCheckEnabled = false,
-        spellCheckService = null,
-        spellCheckSuggestionsToolbarBuilder = null,
-        misspelledTextStyle = null,
-        misspelledSelectionColor = null;
+    : _spellCheckEnabled = false,
+      spellCheckService = null,
+      spellCheckSuggestionsToolbarBuilder = null,
+      misspelledTextStyle = null,
+      misspelledSelectionColor = null;
 
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
@@ -85,7 +86,7 @@ class SpellCheckConfiguration {
       misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
       spellCheckSuggestionsToolbarBuilder:
           spellCheckSuggestionsToolbarBuilder ??
-              this.spellCheckSuggestionsToolbarBuilder,
+          this.spellCheckSuggestionsToolbarBuilder,
     );
   }
 
@@ -114,11 +115,11 @@ class SpellCheckConfiguration {
 
   @override
   int get hashCode => Object.hash(
-        spellCheckService,
-        misspelledTextStyle,
-        spellCheckSuggestionsToolbarBuilder,
-        _spellCheckEnabled,
-      );
+    spellCheckService,
+    misspelledTextStyle,
+    spellCheckSuggestionsToolbarBuilder,
+    _spellCheckEnabled,
+  );
 }
 
 // Methods for displaying spell check results:
@@ -153,8 +154,9 @@ List<SuggestionSpan> _correctSpellCheckResults(
     // Try finding SuggestionSpan from resultsText in new text.
     final String escapedText = RegExp.escape(currentSpanText);
     final RegExp currentSpanTextRegexp = RegExp('\\b$escapedText\\b');
-    final int foundIndex =
-        newText.substring(searchStart).indexOf(currentSpanTextRegexp);
+    final int foundIndex = newText
+        .substring(searchStart)
+        .indexOf(currentSpanTextRegexp);
 
     // Check whether word was found exactly where expected or elsewhere in the newText.
     final bool currentSpanFoundExactly =
@@ -170,14 +172,17 @@ List<SuggestionSpan> _correctSpellCheckResults(
       // corrected results.
       final SuggestionSpan adjustedSpan = SuggestionSpan(
         TextRange(
-            start: currentSpan.range.start + offset,
-            end: currentSpan.range.end + offset),
+          start: currentSpan.range.start + offset,
+          end: currentSpan.range.end + offset,
+        ),
         currentSpan.suggestions,
       );
 
       // Start search for the next misspelled word at the end of currentSpan.
-      searchStart =
-          math.min(currentSpan.range.end + 1 + offset, newText.length);
+      searchStart = math.min(
+        currentSpan.range.end + 1 + offset,
+        newText.length,
+      );
       correctedSpellCheckResults.add(adjustedSpan);
     } else if (currentSpanFoundElsewhere) {
       // Word was pushed forward but not modified.
@@ -302,7 +307,8 @@ List<TextSpan> _buildSubtreesWithoutComposingRegion(
         endIndex = currentSpan.range.end < text.length
             ? currentSpan.range.end
             : text.length;
-        cursorInCurrentSpan = currentSpan.range.start <= cursorIndex &&
+        cursorInCurrentSpan =
+            currentSpan.range.start <= cursorIndex &&
             currentSpan.range.end >= cursorIndex;
         textSpanTreeChildren.add(
           TextSpan(
@@ -346,7 +352,7 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
   final TextRange composingRegion = value.composing;
   final TextStyle composingTextStyle =
       style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
-          const TextStyle(decoration: TextDecoration.underline);
+      const TextStyle(decoration: TextDecoration.underline);
   final TextStyle misspelledJointStyle =
       style?.merge(misspelledStyle) ?? misspelledStyle;
   bool textPointerWithinComposingRegion = false;
@@ -364,8 +370,8 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
             : text.length;
         textPointerWithinComposingRegion =
             composingRegion.start >= textPointer &&
-                composingRegion.end <= endIndex &&
-                !composingWithinCurrentTextRange;
+            composingRegion.end <= endIndex &&
+            !composingWithinCurrentTextRange;
 
         if (textPointerWithinComposingRegion) {
           _addComposingRegionTextSpans(
@@ -378,8 +384,9 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
           );
           textSpanTreeChildren.add(
             TextSpan(
-                style: style,
-                text: text.substring(composingRegion.end, endIndex)),
+              style: style,
+              text: text.substring(composingRegion.end, endIndex),
+            ),
           );
         } else {
           textSpanTreeChildren.add(
@@ -392,7 +399,8 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
         endIndex = currentSpan.range.end < text.length
             ? currentSpan.range.end
             : text.length;
-        currentSpanIsComposingRegion = textPointer >= composingRegion.start &&
+        currentSpanIsComposingRegion =
+            textPointer >= composingRegion.start &&
             endIndex <= composingRegion.end &&
             !composingWithinCurrentTextRange;
         textSpanTreeChildren.add(
@@ -426,8 +434,9 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
       if (composingRegion.end != text.length) {
         textSpanTreeChildren.add(
           TextSpan(
-              style: style,
-              text: text.substring(composingRegion.end, text.length)),
+            style: style,
+            text: text.substring(composingRegion.end, text.length),
+          ),
         );
       }
     } else {
@@ -450,8 +459,9 @@ void _addComposingRegionTextSpans(
   TextStyle? style,
   TextStyle composingTextStyle,
 ) {
-  treeChildren.add(TextSpan(
-      style: style, text: text.substring(start, composingRegion.start)));
+  treeChildren.add(
+    TextSpan(style: style, text: text.substring(start, composingRegion.start)),
+  );
   treeChildren.add(
     TextSpan(
       style: composingTextStyle,

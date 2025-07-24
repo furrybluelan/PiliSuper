@@ -55,7 +55,8 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
 
   @override
   void checkIsEnd(int length) {
-    if (count.value != -1 && length >= count.value) {
+    final count = this.count.value;
+    if (count != -1 && length >= count) {
       isEnd = true;
     }
   }
@@ -128,73 +129,75 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     dynamic key = oid ?? replyItem!.oid + replyItem.id;
     Navigator.of(context)
         .push(
-      GetDialogRoute(
-        pageBuilder: (buildContext, animation, secondaryAnimation) {
-          return ReplyPage(
-            oid: oid ?? replyItem!.oid.toInt(),
-            root: oid != null ? 0 : replyItem!.id.toInt(),
-            parent: oid != null ? 0 : replyItem!.id.toInt(),
-            replyType: replyItem?.type.toInt() ?? replyType!,
-            replyItem: replyItem,
-            items: savedReplies[key],
-            onSave: (reply) {
-              if (reply.isEmpty) {
-                savedReplies.remove(key);
-              } else {
-                savedReplies[key] = reply.toList();
-              }
+          GetDialogRoute(
+            pageBuilder: (buildContext, animation, secondaryAnimation) {
+              return ReplyPage(
+                oid: oid ?? replyItem!.oid.toInt(),
+                root: oid != null ? 0 : replyItem!.id.toInt(),
+                parent: oid != null ? 0 : replyItem!.id.toInt(),
+                replyType: replyItem?.type.toInt() ?? replyType!,
+                replyItem: replyItem,
+                items: savedReplies[key],
+                onSave: (reply) {
+                  if (reply.isEmpty) {
+                    savedReplies.remove(key);
+                  } else {
+                    savedReplies[key] = reply.toList();
+                  }
+                },
+                hint: hint,
+              );
             },
-            hint: hint,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 500),
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(0.0, 1.0);
-          const end = Offset.zero;
-          const curve = Curves.linear;
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.linear;
 
-          var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var tween = Tween(
+                begin: begin,
+                end: end,
+              ).chain(CurveTween(curve: curve));
 
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
-        settings: RouteSettings(arguments: Get.arguments),
-      ),
-    )
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+            settings: RouteSettings(arguments: Get.arguments),
+          ),
+        )
         .then(
-      (res) {
-        if (res != null) {
-          savedReplies.remove(key);
-          ReplyInfo replyInfo = RequestUtils.replyCast(res);
-          if (loadingState.value.isSuccess) {
-            List<ReplyInfo>? list = loadingState.value.data;
-            if (list == null) {
-              loadingState.value = Success([replyInfo]);
-            } else {
-              if (oid != null) {
-                list.insert(hasUpTop ? 1 : 0, replyInfo);
+          (res) {
+            if (res != null) {
+              savedReplies.remove(key);
+              ReplyInfo replyInfo = RequestUtils.replyCast(res);
+              if (loadingState.value.isSuccess) {
+                List<ReplyInfo>? list = loadingState.value.data;
+                if (list == null) {
+                  loadingState.value = Success([replyInfo]);
+                } else {
+                  if (oid != null) {
+                    list.insert(hasUpTop ? 1 : 0, replyInfo);
+                  } else {
+                    replyItem!
+                      ..count += 1
+                      ..replies.add(replyInfo);
+                  }
+                  loadingState.refresh();
+                }
               } else {
-                replyItem!
-                  ..count += 1
-                  ..replies.add(replyInfo);
+                loadingState.value = Success([replyInfo]);
               }
-              loadingState.refresh();
-            }
-          } else {
-            loadingState.value = Success([replyInfo]);
-          }
-          count.value += 1;
+              count.value += 1;
 
-          // check reply
-          if (enableCommAntifraud) {
-            onCheckReply(replyInfo, isManual: false);
-          }
-        }
-      },
-    );
+              // check reply
+              if (enableCommAntifraud) {
+                onCheckReply(replyInfo, isManual: false);
+              }
+            }
+          },
+        );
   }
 
   void onRemove(int index, ReplyInfo item, int? subIndex) {

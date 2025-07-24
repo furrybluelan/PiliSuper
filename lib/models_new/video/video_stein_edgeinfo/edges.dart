@@ -10,14 +10,14 @@ class Edges {
   Edges({this.dimension, this.questions, this.skin});
 
   factory Edges.fromJson(Map<String, dynamic> json) => Edges(
-        dimension: json['dimension'] == null
-            ? null
-            : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
-        questions: (json['questions'] as List<dynamic>?)
-            ?.map((e) => Question.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        skin: json['skin'] == null
-            ? null
-            : Skin.fromJson(json['skin'] as Map<String, dynamic>),
-      );
+    dimension: json['dimension'] == null
+        ? null
+        : Dimension.fromJson(json['dimension'] as Map<String, dynamic>),
+    questions: (json['questions'] as List<dynamic>?)
+        ?.map((e) => Question.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    skin: json['skin'] == null
+        ? null
+        : Skin.fromJson(json['skin'] as Map<String, dynamic>),
+  );
 }

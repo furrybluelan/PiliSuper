@@ -143,8 +143,8 @@ class _ZanButtonGrpcState extends State<ZanButtonGrpc> {
                   duration: const Duration(milliseconds: 400),
                   transitionBuilder:
                       (Widget child, Animation<double> animation) {
-                    return ScaleTransition(scale: animation, child: child);
-                  },
+                        return ScaleTransition(scale: animation, child: child);
+                      },
                   child: Text(
                     NumUtil.numFormat(widget.replyItem.like.toInt()),
                     style: TextStyle(

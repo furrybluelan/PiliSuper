@@ -16,11 +16,11 @@ class LoginLogItem {
   });
 
   factory LoginLogItem.fromJson(Map<String, dynamic> json) => LoginLogItem(
-        ip: json['ip'] ?? '',
-        time: json['time'] as int?,
-        timeAt: json['time_at'] ?? '',
-        status: json['status'] as bool?,
-        type: json['type'] as int?,
-        geo: json['geo'] ?? '',
-      );
+    ip: json['ip'] ?? '',
+    time: json['time'] as int?,
+    timeAt: json['time_at'] ?? '',
+    status: json['status'] as bool?,
+    type: json['type'] as int?,
+    geo: json['geo'] ?? '',
+  );
 }

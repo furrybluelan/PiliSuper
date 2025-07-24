@@ -4,6 +4,6 @@ class Senior {
   Senior({this.status});
 
   factory Senior.fromJson(Map<String, dynamic> json) => Senior(
-        status: json['status'] as int?,
-      );
+    status: json['status'] as int?,
+  );
 }

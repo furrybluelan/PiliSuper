@@ -10,8 +10,8 @@ class SpaceSsPage {
   });
 
   factory SpaceSsPage.fromJson(Map<String, dynamic> json) => SpaceSsPage(
-        pageNum: json["page_num"],
-        pageSize: json["page_size"],
-        total: json["total"],
-      );
+    pageNum: json["page_num"],
+    pageSize: json["page_size"],
+    total: json["total"],
+  );
 }

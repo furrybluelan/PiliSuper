@@ -68,7 +68,7 @@ class VideoCardHSkeleton extends StatelessWidget {
                           height: 13,
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),

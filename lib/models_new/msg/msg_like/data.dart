@@ -8,11 +8,11 @@ class MsgLikeData {
   MsgLikeData({this.latest, this.total});
 
   factory MsgLikeData.fromJson(Map<String, dynamic> json) => MsgLikeData(
-        latest: json['latest'] == null
-            ? null
-            : Latest.fromJson(json['latest'] as Map<String, dynamic>),
-        total: json['total'] == null
-            ? null
-            : Total.fromJson(json['total'] as Map<String, dynamic>),
-      );
+    latest: json['latest'] == null
+        ? null
+        : Latest.fromJson(json['latest'] as Map<String, dynamic>),
+    total: json['total'] == null
+        ? null
+        : Total.fromJson(json['total'] as Map<String, dynamic>),
+  );
 }

@@ -45,14 +45,17 @@ class FavArticleItem extends StatelessWidget {
                     AspectRatio(
                       aspectRatio: StyleString.aspectRatio,
                       child: LayoutBuilder(
-                        builder: (BuildContext context,
-                            BoxConstraints boxConstraints) {
-                          return NetworkImgLayer(
-                            src: item.cover!.url,
-                            width: boxConstraints.maxWidth,
-                            height: boxConstraints.maxHeight,
-                          );
-                        },
+                        builder:
+                            (
+                              BuildContext context,
+                              BoxConstraints boxConstraints,
+                            ) {
+                              return NetworkImgLayer(
+                                src: item.cover!.url,
+                                width: boxConstraints.maxWidth,
+                                height: boxConstraints.maxHeight,
+                              );
+                            },
                       ),
                     ),
                     const SizedBox(width: 10),

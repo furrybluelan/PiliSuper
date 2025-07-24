@@ -122,7 +122,7 @@ class ReplyUtils {
                         '/webview',
                         parameters: {
                           'url':
-                              'https://www.bilibili.com/h5/comment/appeal?native.theme=2&night=${Get.isDarkMode ? 1 : 0}'
+                              'https://www.bilibili.com/h5/comment/appeal?native.theme=2&night=${Get.isDarkMode ? 1 : 0}',
                         },
                       );
                     },
@@ -200,20 +200,22 @@ class ReplyUtils {
               );
             } else {
               // found
-              showReplyCheckResult(isManual
-                  ? '无账号状态下找到了你的评论，评论正常！\n\n你的评论：$message'
-                  : '''
+              showReplyCheckResult(
+                isManual
+                    ? '无账号状态下找到了你的评论，评论正常！\n\n你的评论：$message'
+                    : '''
 你评论状态有点可疑，虽然无账号翻找评论区获取不到你的评论，但是无账号可通过
 https://api.bilibili.com/x/v2/reply/reply?oid=$oid&pn=1&ps=20&root=$id&type=$type
 获取你的评论，疑似评论区被戒严或者这是你的视频。
 
-你的评论：$message''');
+你的评论：$message''',
+              );
             }
           }
         }
       }
     } else {
-      for (int i = 1;; i++) {
+      for (int i = 1; ; i++) {
         final res3 = await ReplyHttp.replyReplyList(
           isLogin: false,
           oid: oid,
@@ -242,7 +244,7 @@ https://api.bilibili.com/x/v2/reply/reply?oid=$oid&pn=1&ps=20&root=$id&type=$typ
         }
       }
 
-      for (int i = 1;; i++) {
+      for (int i = 1; ; i++) {
         final res4 = await ReplyHttp.replyReplyList(
           isLogin: true,
           oid: oid,

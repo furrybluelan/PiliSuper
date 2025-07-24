@@ -30,31 +30,33 @@ class LiveCardVSearch extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: StyleString.aspectRatio,
-              child: LayoutBuilder(builder: (context, boxConstraints) {
-                double maxWidth = boxConstraints.maxWidth;
-                double maxHeight = boxConstraints.maxHeight;
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    NetworkImgLayer(
-                      src: item.cover!,
-                      width: maxWidth,
-                      height: maxHeight,
-                      radius: 0,
-                    ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: AnimatedOpacity(
-                        opacity: 1,
-                        duration: const Duration(milliseconds: 200),
-                        child: videoStat(context),
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  double maxWidth = boxConstraints.maxWidth;
+                  double maxHeight = boxConstraints.maxHeight;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      NetworkImgLayer(
+                        src: item.cover!,
+                        width: maxWidth,
+                        height: maxHeight,
+                        radius: 0,
                       ),
-                    ),
-                  ],
-                );
-              }),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: AnimatedOpacity(
+                          opacity: 1,
+                          duration: const Duration(milliseconds: 200),
+                          child: videoStat(context),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(5, 8, 5, 4),

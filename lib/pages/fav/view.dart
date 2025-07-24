@@ -62,8 +62,8 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
                         if (data != null) {
                           List<FavFolderInfo>? list =
                               _favController.loadingState.value.isSuccess
-                                  ? _favController.loadingState.value.data
-                                  : null;
+                              ? _favController.loadingState.value.data
+                              : null;
                           if (list?.isNotEmpty == true) {
                             list!.insert(1, data);
                             _favController.loadingState.refresh();
@@ -88,7 +88,8 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
                           return;
                         }
                         Get.to(
-                            FavFolderSortPage(favController: _favController));
+                          FavFolderSortPage(favController: _favController),
+                        );
                       }
                     },
                     icon: const Icon(Icons.sort),
@@ -136,8 +137,7 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
                   case FavTabType.video:
                     _favController.scrollController.animToTop();
                   case FavTabType.article:
-                    Get.find<FavArticleController>()
-                        .scrollController
+                    Get.find<FavArticleController>().scrollController
                         .animToTop();
                   case FavTabType.topic:
                     Get.find<FavTopicController>().scrollController.animToTop();

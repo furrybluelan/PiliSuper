@@ -43,15 +43,17 @@ class SearchArticleItem extends StatelessWidget {
               if (item.imageUrls?.isNotEmpty == true)
                 AspectRatio(
                   aspectRatio: StyleString.aspectRatio,
-                  child: LayoutBuilder(builder: (context, boxConstraints) {
-                    double maxWidth = boxConstraints.maxWidth;
-                    double maxHeight = boxConstraints.maxHeight;
-                    return NetworkImgLayer(
-                      width: maxWidth,
-                      height: maxHeight,
-                      src: item.imageUrls?.firstOrNull,
-                    );
-                  }),
+                  child: LayoutBuilder(
+                    builder: (context, boxConstraints) {
+                      double maxWidth = boxConstraints.maxWidth;
+                      double maxHeight = boxConstraints.maxHeight;
+                      return NetworkImgLayer(
+                        width: maxWidth,
+                        height: maxHeight,
+                        src: item.imageUrls?.firstOrNull,
+                      );
+                    },
+                  ),
                 ),
               const SizedBox(width: 10),
               Expanded(
@@ -62,16 +64,19 @@ class SearchArticleItem extends StatelessWidget {
                     Text.rich(
                       maxLines: 2,
                       TextSpan(
-                          children: item.title
-                              .map((e) => TextSpan(
-                                    text: e.text,
-                                    style: TextStyle(
-                                      color: e.isEm
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.onSurface,
-                                    ),
-                                  ))
-                              .toList()),
+                        children: item.title
+                            .map(
+                              (e) => TextSpan(
+                                text: e.text,
+                                style: TextStyle(
+                                  color: e.isEm
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
                     ),
                     const Spacer(),
                     Text(

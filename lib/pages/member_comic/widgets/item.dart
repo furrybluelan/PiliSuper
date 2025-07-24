@@ -24,7 +24,7 @@ class MemberComicItem extends StatelessWidget {
           Get.toNamed(
             '/webview',
             parameters: {
-              'url': 'https://manga.bilibili.com/detail/mc${item.param}'
+              'url': 'https://manga.bilibili.com/detail/mc${item.param}',
             },
           );
         },
@@ -43,13 +43,13 @@ class MemberComicItem extends StatelessWidget {
                 child: LayoutBuilder(
                   builder:
                       (BuildContext context, BoxConstraints boxConstraints) {
-                    return NetworkImgLayer(
-                      radius: 4,
-                      src: item.cover,
-                      width: boxConstraints.maxWidth,
-                      height: boxConstraints.maxHeight,
-                    );
-                  },
+                        return NetworkImgLayer(
+                          radius: 4,
+                          src: item.cover,
+                          width: boxConstraints.maxWidth,
+                          height: boxConstraints.maxHeight,
+                        );
+                      },
                 ),
               ),
               const SizedBox(width: 10),

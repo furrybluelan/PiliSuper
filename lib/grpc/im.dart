@@ -153,8 +153,9 @@ class ImGrpc {
     );
   }
 
-  static Future<LoadingState<GetImSettingsReply>> getImSettings(
-      {IMSettingType? type}) {
+  static Future<LoadingState<GetImSettingsReply>> getImSettings({
+    IMSettingType? type,
+  }) {
     return GrpcReq.request(
       GrpcUrl.getImSettings,
       GetImSettingsReq(
@@ -164,8 +165,9 @@ class ImGrpc {
     );
   }
 
-  static Future<LoadingState<SetImSettingsReply>> setImSettings(
-      {PbMap<int, Setting>? settings}) {
+  static Future<LoadingState<SetImSettingsReply>> setImSettings({
+    PbMap<int, Setting>? settings,
+  }) {
     return GrpcReq.request(
       GrpcUrl.setImSettings,
       SetImSettingsReq(
@@ -184,7 +186,8 @@ class ImGrpc {
   }
 
   static Future<LoadingState<KeywordBlockingAddReply>> keywordBlockingAdd(
-      String keyword) {
+    String keyword,
+  ) {
     return GrpcReq.request(
       GrpcUrl.keywordBlockingAdd,
       KeywordBlockingAddReq(keyword: keyword),
@@ -193,7 +196,8 @@ class ImGrpc {
   }
 
   static Future<LoadingState<KeywordBlockingDeleteReply>> keywordBlockingDelete(
-      String keyword) {
+    String keyword,
+  ) {
     return GrpcReq.request(
       GrpcUrl.keywordBlockingDelete,
       KeywordBlockingDeleteReq(keyword: keyword),
@@ -201,8 +205,9 @@ class ImGrpc {
     );
   }
 
-  static Future<LoadingState<RspTotalUnread>> getTotalUnread(
-      {int? unreadType}) {
+  static Future<LoadingState<RspTotalUnread>> getTotalUnread({
+    int? unreadType,
+  }) {
     return GrpcReq.request(
       GrpcUrl.getTotalUnread,
       ReqTotalUnread(unreadType: unreadType, showUnfollowList: 1),

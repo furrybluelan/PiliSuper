@@ -9,12 +9,16 @@ class SearchTrendingData extends SearchRcmdData {
   factory SearchTrendingData.fromJson(Map<String, dynamic> json) =>
       SearchTrendingData(
         list: (json['list'] as List<dynamic>?)
-            ?.map((e) =>
-                SearchTrendingItemModel.fromJson(e as Map<String, dynamic>))
+            ?.map(
+              (e) =>
+                  SearchTrendingItemModel.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
         topList: (json['top_list'] as List<dynamic>?)
-            ?.map((e) =>
-                SearchTrendingItemModel.fromJson(e as Map<String, dynamic>))
+            ?.map(
+              (e) =>
+                  SearchTrendingItemModel.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
       );
 }

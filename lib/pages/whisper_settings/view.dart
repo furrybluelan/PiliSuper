@@ -42,7 +42,10 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
   }
 
   Future<bool> onSet(
-      int key, PbMap<int, Setting> response, Setting item) async {
+    int key,
+    PbMap<int, Setting> response,
+    Setting item,
+  ) async {
     PbMap<int, Setting> settings = PbMap<int, Setting>(
       response.keyFieldType,
       response.valueFieldType,
@@ -55,7 +58,11 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
   }
 
   void onRedirect(
-      ThemeData theme, int key, PbMap<int, Setting> response, Setting item) {
+    ThemeData theme,
+    int key,
+    PbMap<int, Setting> response,
+    Setting item,
+  ) {
     if (item.redirect.settingPage.hasParentSettingType()) {
       Get.to(
         WhisperSettingsPage(
@@ -126,8 +133,10 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
       if (item.redirect.title == '黑名单') {
         Get.toNamed('/blackListPage');
       } else if (item.redirect.otherPage.url.startsWith('http')) {
-        Get.toNamed('/webview',
-            parameters: {'url': item.redirect.otherPage.url});
+        Get.toNamed(
+          '/webview',
+          parameters: {'url': item.redirect.otherPage.url},
+        );
       } else {
         SmartDialog.showToast(item.redirect.otherPage.url);
       }
@@ -135,8 +144,10 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
       if (item.redirect.title == '消息屏蔽词') {
         Get.to(const WhisperBlockPage());
       } else if (item.redirect.settingPage.url.startsWith('http')) {
-        Get.toNamed('/webview',
-            parameters: {'url': item.redirect.settingPage.url});
+        Get.toNamed(
+          '/webview',
+          parameters: {'url': item.redirect.settingPage.url},
+        );
       } else {
         SmartDialog.showToast(item.redirect.settingPage.url);
       }
@@ -144,19 +155,22 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
   }
 
   Widget _buildBody(
-      ThemeData theme, LoadingState<PbMap<int, Setting>> loadingState) {
+    ThemeData theme,
+    LoadingState<PbMap<int, Setting>> loadingState,
+  ) {
     late final divider = Divider(
       height: 1,
       color: theme.colorScheme.outline.withValues(alpha: 0.1),
     );
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
-      Success<PbMap<int, Setting>>(:var response) =>
-        Builder(builder: (context) {
+      Success<PbMap<int, Setting>>(:var response) => Builder(
+        builder: (context) {
           final keys = response.keys.toList()..sort();
           return ListView.separated(
             padding: EdgeInsets.only(
-                bottom: MediaQuery.paddingOf(context).bottom + 80),
+              bottom: MediaQuery.paddingOf(context).bottom + 80,
+            ),
             itemCount: keys.length,
             itemBuilder: (context, index) {
               final key = keys[index];
@@ -169,11 +183,12 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
             },
             separatorBuilder: (context, index) => divider,
           );
-        }),
+        },
+      ),
       Error(:var errMsg) => scrollErrorWidget(
-          errMsg: errMsg,
-          onReload: _controller.onReload,
-        ),
+        errMsg: errMsg,
+        onReload: _controller.onReload,
+      ),
     };
   }
 }

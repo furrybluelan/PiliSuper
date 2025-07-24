@@ -6,6 +6,7 @@ import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/member_card_info/data.dart';
 import 'package:PiliPlus/models/common/member/contribute_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/member/info.dart';
@@ -39,7 +40,7 @@ class MemberHttp {
         {
           'mid': mid,
           'reason': reason,
-          if (reasonV2 != null) 'reason_v2': reasonV2,
+          'reason_v2': ?reasonV2,
           'csrf': Accounts.main.csrf,
         },
       ),
@@ -98,7 +99,8 @@ class MemberHttp {
     );
     if (res.data['code'] == 0) {
       return Success(
-          SpaceSsData.fromJson(res.data['data']?['items_lists'] ?? {}));
+        SpaceSsData.fromJson(res.data['data']?['items_lists'] ?? {}),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -130,8 +132,8 @@ class MemberHttp {
       if (seasonId != null) 'season_id': seasonId.toString(),
       if (seriesId != null) 'series_id': seriesId.toString(),
       'qn': type == ContributeType.video ? '80' : '32',
-      if (order != null) 'order': order,
-      if (sort != null) 'sort': sort,
+      'order': ?order,
+      'sort': ?sort,
       if (includeCursor != null) 'include_cursor': includeCursor.toString(),
       'statistics': Constants.statisticsApp,
       'vmid': mid.toString(),
@@ -171,7 +173,7 @@ class MemberHttp {
         'ps': 20,
         'order': 1,
         'uid': mid,
-        'web_location': 333.1387
+        'web_location': 333.1387,
       },
     );
     if (res.data['code'] == 0) {
@@ -234,7 +236,7 @@ class MemberHttp {
       'mobi_app': 'android',
       'platform': 'android',
       's_locale': 'zh_CN',
-      if (fromViewAid != null) 'from_view_aid': fromViewAid,
+      'from_view_aid': ?fromViewAid,
       'statistics': Constants.statisticsApp,
       'vmid': mid.toString(),
     };
@@ -285,7 +287,7 @@ class MemberHttp {
     if (res.data['code'] == 0) {
       return {
         'status': true,
-        'data': MemberInfoModel.fromJson(res.data['data'])
+        'data': MemberInfoModel.fromJson(res.data['data']),
       };
     } else {
       return {'status': false, 'msg': res.data['message']};
@@ -310,7 +312,10 @@ class MemberHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return {'status': true, 'data': res.data['data']};
+      return {
+        'status': true,
+        'data': MemberCardInfoData.fromJson(res.data['data']),
+      };
     } else {
       return {'status': false, 'msg': res.data['message']};
     }
@@ -332,7 +337,7 @@ class MemberHttp {
       'ps': ps,
       'tid': tid,
       'pn': pn,
-      if (keyword != null) 'keyword': keyword,
+      'keyword': ?keyword,
       'order': order,
       'platform': 'web',
       'web_location': '1550101',
@@ -345,11 +350,13 @@ class MemberHttp {
     var res = await Request().get(
       Api.searchArchive,
       queryParameters: params,
-      options: Options(headers: {
-        HttpHeaders.userAgentHeader: Request.headerUa(type: 'pc'),
-        HttpHeaders.refererHeader: '${HttpString.spaceBaseUrl}/$mid',
-        'origin': HttpString.spaceBaseUrl,
-      }),
+      options: Options(
+        headers: {
+          HttpHeaders.userAgentHeader: Request.headerUa(type: 'pc'),
+          HttpHeaders.refererHeader: '${HttpString.spaceBaseUrl}/$mid',
+          'origin': HttpString.spaceBaseUrl,
+        },
+      ),
     );
     if (res.data['code'] == 0) {
       return Success(SearchArchiveData.fromJson(res.data['data']));
@@ -461,7 +468,7 @@ class MemberHttp {
         'status': true,
         'data': res.data['data']
             .map<MemberTagItemModel>((e) => MemberTagItemModel.fromJson(e))
-            .toList()
+            .toList(),
       };
     } else {
       return {'status': false, 'msg': res.data['message']};
@@ -498,7 +505,7 @@ class MemberHttp {
       Api.addUsers,
       queryParameters: {
         'x-bili-device-req-json':
-            '{"platform":"web","device":"pc","spmid":"333.1387"}'
+            '{"platform":"web","device":"pc","spmid":"333.1387"}',
       },
       data: {
         'fids': fids.join(','),
@@ -534,10 +541,13 @@ class MemberHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return Success(FollowData(
+      return Success(
+        FollowData(
           list: (res.data['data'] as List?)
               ?.map<FollowItemModel>((e) => FollowItemModel.fromJson(e))
-              .toList()));
+              .toList(),
+        ),
+      );
     } else {
       return Error(res.data['message']);
     }
@@ -618,7 +628,7 @@ class MemberHttp {
         'status': true,
         'data': res.data['data']
             .map<MemberTagItemModel>((e) => MemberTagItemModel.fromJson(e))
-            .toList()
+            .toList(),
       };
     } else {
       return {'status': false, 'msg': res.data['message']};
@@ -627,8 +637,10 @@ class MemberHttp {
 
   // 获取up播放数、点赞数
   static Future memberView({required int mid}) async {
-    var res = await Request()
-        .get(Api.getMemberViewApi, queryParameters: {'mid': mid});
+    var res = await Request().get(
+      Api.getMemberViewApi,
+      queryParameters: {'mid': mid},
+    );
     if (res.data['code'] == 0) {
       return {'status': true, 'data': res.data['data']};
     } else {
@@ -654,11 +666,14 @@ class MemberHttp {
       'web_location': 333.999,
     };
     Map params = await WbiSign.makSign(data);
-    var res = await Request().get(Api.followSearch, queryParameters: {
-      ...data,
-      'w_rid': params['w_rid'],
-      'wts': params['wts'],
-    });
+    var res = await Request().get(
+      Api.followSearch,
+      queryParameters: {
+        ...data,
+        'w_rid': params['w_rid'],
+        'wts': params['wts'],
+      },
+    );
     if (res.data['code'] == 0) {
       return Success(FollowData.fromJson(res.data['data']));
     } else {
@@ -700,7 +715,7 @@ class MemberHttp {
         'up_mid': upMid,
         'pn': page,
         'ps': 100,
-        if (privilegeType != null) 'privilege_type': privilegeType,
+        'privilege_type': ?privilegeType,
         'mobi_app': 'web',
         'web_location': 333.1196,
         if (Accounts.main.isLogin) 'csrf': Accounts.main.csrf,

@@ -60,10 +60,11 @@ class ActionRowLineItem extends StatelessWidget {
                 child: Text(
                   text!,
                   style: TextStyle(
-                      fontSize: 13,
-                      color: selectStatus
-                          ? theme.colorScheme.onSecondaryContainer
-                          : theme.colorScheme.outline),
+                    fontSize: 13,
+                    color: selectStatus
+                        ? theme.colorScheme.onSecondaryContainer
+                        : theme.colorScheme.outline,
+                  ),
                 ),
               ),
             ],

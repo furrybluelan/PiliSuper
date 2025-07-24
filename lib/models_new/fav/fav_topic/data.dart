@@ -6,8 +6,8 @@ class FavTopicData {
   FavTopicData({this.topicList});
 
   factory FavTopicData.fromJson(Map<String, dynamic> json) => FavTopicData(
-        topicList: json['topic_list'] == null
-            ? null
-            : TopicList.fromJson(json['topic_list'] as Map<String, dynamic>),
-      );
+    topicList: json['topic_list'] == null
+        ? null
+        : TopicList.fromJson(json['topic_list'] as Map<String, dynamic>),
+  );
 }

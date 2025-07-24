@@ -31,15 +31,17 @@ class LoginUtils {
       final cookies = account.cookieJar.toList();
       final webManager = web.CookieManager();
       Future.wait([
-        ...cookies.map((item) => webManager.setCookie(
-              url: web.WebUri(item.domain ?? ''),
-              name: item.name,
-              value: item.value,
-              path: item.path ?? '',
-              domain: item.domain,
-              isSecure: item.secure,
-              isHttpOnly: item.httpOnly,
-            ))
+        ...cookies.map(
+          (item) => webManager.setCookie(
+            url: web.WebUri(item.domain ?? ''),
+            name: item.name,
+            value: item.value,
+            path: item.path ?? '',
+            domain: item.domain,
+            isSecure: item.secure,
+            isHttpOnly: item.httpOnly,
+          ),
+        ),
       ]);
     } catch (e) {
       SmartDialog.showToast('设置登录态失败，$e');
@@ -80,21 +82,24 @@ class LoginUtils {
         } catch (_) {}
 
         try {
-          Get.find<PgcController>(tag: HomeTabType.bangumi.name)
-              .queryPgcFollow();
+          Get.find<PgcController>(
+            tag: HomeTabType.bangumi.name,
+          ).queryPgcFollow();
         } catch (_) {}
 
         try {
-          Get.find<PgcController>(tag: HomeTabType.cinema.name)
-              .queryPgcFollow();
+          Get.find<PgcController>(
+            tag: HomeTabType.cinema.name,
+          ).queryPgcFollow();
         } catch (_) {}
       }
     } else {
       // 获取用户信息失败
       await Accounts.deleteAll({account});
       SmartDialog.showNotify(
-          msg: '登录失败，请检查cookie是否正确，${result['msg']}',
-          notifyType: NotifyType.warning);
+        msg: '登录失败，请检查cookie是否正确，${result['msg']}',
+        notifyType: NotifyType.warning,
+      );
     }
   }
 
@@ -149,10 +154,10 @@ class LoginUtils {
   }
 
   static String generateBuvid() {
-    var md5Str =
-        Iterable.generate(32, (_) => random.nextInt(16).toRadixString(16))
-            .join()
-            .toUpperCase();
+    var md5Str = Iterable.generate(
+      32,
+      (_) => random.nextInt(16).toRadixString(16),
+    ).join().toUpperCase();
     return 'XY${md5Str[2]}${md5Str[12]}${md5Str[22]}$md5Str';
   }
 
@@ -174,12 +179,14 @@ class LoginUtils {
         .replaceAll(RegExp(r'[-:TZ]'), '')
         .substring(0, 14);
 
-    final String randomHex32 =
-        List.generate(32, (index) => random.nextInt(16).toRadixString(16))
-            .join();
-    final String randomHex16 =
-        List.generate(16, (index) => random.nextInt(16).toRadixString(16))
-            .join();
+    final String randomHex32 = List.generate(
+      32,
+      (index) => random.nextInt(16).toRadixString(16),
+    ).join();
+    final String randomHex16 = List.generate(
+      16,
+      (index) => random.nextInt(16).toRadixString(16),
+    ).join();
 
     final String deviceID = randomHex32 + yyyyMMddHHmmss + randomHex16;
 

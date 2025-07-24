@@ -25,7 +25,11 @@ abstract class CommonWhisperController<R>
   }
 
   Future<void> onSetTop(
-      Session item, int index, bool isTop, SessionId sessionId) async {
+    Session item,
+    int index,
+    bool isTop,
+    SessionId sessionId,
+  ) async {
     var res = isTop
         ? await ImGrpc.unpinSession(sessionId: sessionId)
         : await ImGrpc.pinSession(sessionId: sessionId);

@@ -17,7 +17,9 @@ class SpaceSettingController
 
   @override
   bool customHandleResponse(
-      bool isRefresh, Success<SpaceSettingData> response) {
+    bool isRefresh,
+    Success<SpaceSettingData> response,
+  ) {
     loadingState.value = Success(response.response.privacy);
     return true;
   }
