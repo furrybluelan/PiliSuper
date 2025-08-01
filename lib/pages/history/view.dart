@@ -67,126 +67,123 @@ class _HistoryPageState extends State<HistoryPage>
                   }
                 },
                 child: Scaffold(
-                  appBar: widget.type != null
-                      ? null
-                      : AppBarWidget(
-                          visible: enableMultiSelect,
-                          child1: AppBar(
-                            title: const Text('观看记录'),
-                            actions: [
-                              IconButton(
-                                tooltip: '搜索',
-                                onPressed: () => Get.toNamed('/historySearch'),
-                                icon: const Icon(Icons.search_outlined),
-                              ),
-                              PopupMenuButton<String>(
-                                onSelected: (String type) {
-                                  // 处理菜单项选择的逻辑
-                                  switch (type) {
-                                    case 'pause':
-                                      _historyController.baseCtr.onPauseHistory(
-                                        context,
-                                      );
-                                      break;
-                                    case 'clear':
-                                      _historyController.baseCtr.onClearHistory(
-                                        context,
-                                        () {
-                                          _historyController
-                                              .loadingState
-                                              .value = const Success(
+                  appBar: AppBarWidget(
+                    visible: enableMultiSelect,
+                    child1: AppBar(
+                      title: const Text('观看记录'),
+                      actions: [
+                        IconButton(
+                          tooltip: '搜索',
+                          onPressed: () => Get.toNamed('/historySearch'),
+                          icon: const Icon(Icons.search_outlined),
+                        ),
+                        PopupMenuButton<String>(
+                          onSelected: (String type) {
+                            // 处理菜单项选择的逻辑
+                            switch (type) {
+                              case 'pause':
+                                _historyController.baseCtr.onPauseHistory(
+                                  context,
+                                );
+                                break;
+                              case 'clear':
+                                _historyController.baseCtr.onClearHistory(
+                                  context,
+                                  () {
+                                    _historyController.loadingState.value =
+                                        const Success(
+                                          null,
+                                        );
+                                    if (_historyController.tabController !=
+                                        null) {
+                                      for (final item
+                                          in _historyController.tabs) {
+                                        try {
+                                          Get.find<HistoryController>(
+                                            tag: item.type,
+                                          ).loadingState.value = const Success(
                                             null,
                                           );
-                                          if (_historyController
-                                                  .tabController !=
-                                              null) {
-                                            for (final item
-                                                in _historyController.tabs) {
-                                              try {
-                                                Get.find<HistoryController>(
-                                                      tag: item.type,
-                                                    ).loadingState.value =
-                                                    const Success(null);
-                                              } catch (_) {}
-                                            }
-                                          }
-                                        },
-                                      );
-                                      break;
-                                    case 'del':
-                                      currCtr().onDelHistory();
-                                      break;
-                                    case 'multiple':
-                                      _historyController
+                                        } catch (_) {}
+                                      }
+                                    }
+                                  },
+                                );
+                                break;
+                              case 'del':
+                                currCtr().onDelHistory();
+                                break;
+                              case 'multiple':
+                                _historyController
+                                        .baseCtr
+                                        .enableMultiSelect
+                                        .value =
+                                    true;
+                                break;
+                            }
+                          },
+                          itemBuilder: (BuildContext context) =>
+                              <PopupMenuEntry<String>>[
+                                PopupMenuItem<String>(
+                                  value: 'pause',
+                                  child: Obx(
+                                    () => Text(
+                                      !_historyController
                                               .baseCtr
-                                              .enableMultiSelect
-                                              .value =
-                                          true;
-                                      break;
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) =>
-                                    <PopupMenuEntry<String>>[
-                                      PopupMenuItem<String>(
-                                        value: 'pause',
-                                        child: Obx(
-                                          () => Text(
-                                            !_historyController
-                                                    .baseCtr
-                                                    .pauseStatus
-                                                    .value
-                                                ? '暂停观看记录'
-                                                : '恢复观看记录',
-                                          ),
-                                        ),
-                                      ),
-                                      const PopupMenuItem<String>(
-                                        value: 'clear',
-                                        child: Text('清空观看记录'),
-                                      ),
-                                      const PopupMenuItem<String>(
-                                        value: 'del',
-                                        child: Text('删除已看记录'),
-                                      ),
-                                      const PopupMenuItem<String>(
-                                        value: 'multiple',
-                                        child: Text('多选删除'),
-                                      ),
-                                    ],
-                              ),
-                              const SizedBox(width: 6),
-                            ],
-                          ),
-                          child2: AppBar(
-                            leading: IconButton(
-                              tooltip: '取消',
-                              onPressed: currCtr().handleSelect,
-                              icon: const Icon(Icons.close_outlined),
-                            ),
-                            title: Obx(
-                              () => Text(
-                                '已选: ${_historyController.baseCtr.checkedCount.value}',
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => currCtr().handleSelect(true),
-                                child: const Text('全选'),
-                              ),
-                              TextButton(
-                                onPressed: () =>
-                                    currCtr().onDelCheckedHistory(context),
-                                child: Text(
-                                  '删除',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error,
+                                              .pauseStatus
+                                              .value
+                                          ? '暂停观看记录'
+                                          : '恢复观看记录',
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                            ],
+                                const PopupMenuItem<String>(
+                                  value: 'clear',
+                                  child: Text('清空观看记录'),
+                                ),
+                                const PopupMenuItem<String>(
+                                  value: 'del',
+                                  child: Text('删除已看记录'),
+                                ),
+                                const PopupMenuItem<String>(
+                                  value: 'multiple',
+                                  child: Text('多选删除'),
+                                ),
+                              ],
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                    ),
+                    child2: AppBar(
+                      leading: IconButton(
+                        tooltip: '取消',
+                        onPressed: currCtr().handleSelect,
+                        icon: const Icon(Icons.close_outlined),
+                      ),
+                      title: Obx(
+                        () => Text(
+                          '已选: ${_historyController.baseCtr.checkedCount.value}',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => currCtr().handleSelect(true),
+                          child: const Text('全选'),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              currCtr().onDelCheckedHistory(context),
+                          child: Text(
+                            '删除',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 6),
+                      ],
+                    ),
+                  ),
                   body: Obx(
                     () => _historyController.tabs.isNotEmpty
                         ? SafeArea(
@@ -300,8 +297,22 @@ class _HistoryPageState extends State<HistoryPage>
                   childCount: response!.length,
                 ),
               )
-            : HttpError(
-                onReload: _historyController.onReload,
+            : Builder(
+                builder: (context) {
+                  final pauseStatus =
+                      _historyController.baseCtr.pauseStatus.value;
+                  return HttpError(
+                    errMsg: pauseStatus ? '历史记录功能已关闭' : null,
+                    btnText: pauseStatus ? '点击开启' : null,
+                    onReload: () {
+                      if (pauseStatus) {
+                        _historyController.baseCtr.onPauseHistory(context);
+                      } else {
+                        _historyController.onReload();
+                      }
+                    },
+                  );
+                },
               ),
       Error(:var errMsg) => HttpError(
         errMsg: errMsg,

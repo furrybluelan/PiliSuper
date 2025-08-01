@@ -2,21 +2,18 @@ import 'package:PiliPlus/models_new/pgc/pgc_info_model/badge_info.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/dimension.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/rights.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/skip.dart';
+import 'package:PiliPlus/models_new/video/video_detail/episode.dart'
+    show BaseEpisodeItem;
 
-class EpisodeItem {
-  int? aid;
-  String? badge;
+class EpisodeItem extends BaseEpisodeItem {
   BadgeInfo? badgeInfo;
   int? badgeType;
-  String? bvid;
-  int? cid;
   String? cover;
   Dimension? dimension;
   int? duration;
   bool? enableVt;
   int? epId;
   String? from;
-  int? id;
   bool? isViewHide;
   String? link;
   String? longTitle;
@@ -33,23 +30,22 @@ class EpisodeItem {
   Skip? skip;
   int? status;
   String? subtitle;
-  String? title;
   String? vid;
 
   EpisodeItem({
-    this.aid,
-    this.badge,
+    super.aid,
+    super.badge,
     this.badgeInfo,
     this.badgeType,
-    this.bvid,
-    this.cid,
+    super.bvid,
+    super.cid,
     this.cover,
     this.dimension,
     this.duration,
     this.enableVt,
     this.epId,
     this.from,
-    this.id,
+    super.id,
     this.isViewHide,
     this.link,
     this.longTitle,
@@ -66,7 +62,7 @@ class EpisodeItem {
     this.skip,
     this.status,
     this.subtitle,
-    this.title,
+    super.title,
     this.vid,
   });
 

@@ -8,6 +8,7 @@ import 'package:PiliPlus/common/widgets/refresh_indicator.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/fav_order_type.dart';
+import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/data.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/media.dart';
 import 'package:PiliPlus/models_new/fav/fav_folder/list.dart';
@@ -507,7 +508,7 @@ class _FavDetailPageState extends State<FavDetailPage> {
                                 arguments: {
                                   'videoItem': item,
                                   'heroTag': Utils.makeHeroTag(item.bvid),
-                                  'sourceType': 'fav',
+                                  'sourceType': SourceType.fav,
                                   'mediaId': folderInfo.id,
                                   'oid': item.id,
                                   'favTitle': folderInfo.title,
@@ -540,53 +541,52 @@ class _FavDetailPageState extends State<FavDetailPage> {
                           bottom: 5,
                           child: IgnorePointer(
                             child: LayoutBuilder(
-                              builder: (context, constraints) => AnimatedOpacity(
-                                opacity: item.checked == true ? 1 : 0,
-                                duration: const Duration(milliseconds: 200),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  height: constraints.maxHeight,
-                                  width:
-                                      constraints.maxHeight *
-                                      StyleString.aspectRatio,
-                                  decoration: BoxDecoration(
-                                    borderRadius: StyleString.mdRadius,
-                                    color: Colors.black.withValues(alpha: 0.6),
-                                  ),
-                                  child: SizedBox(
-                                    width: 34,
-                                    height: 34,
-                                    child: AnimatedScale(
-                                      scale: item.checked == true ? 1 : 0,
-                                      duration: const Duration(
-                                        milliseconds: 250,
-                                      ),
-                                      curve: Curves.easeInOut,
-                                      child: IconButton(
-                                        style: ButtonStyle(
-                                          padding: WidgetStateProperty.all(
-                                            EdgeInsets.zero,
-                                          ),
-                                          backgroundColor:
-                                              WidgetStateProperty.resolveWith(
-                                                (states) {
-                                                  return theme
-                                                      .colorScheme
-                                                      .surface
-                                                      .withValues(alpha: 0.8);
-                                                },
-                                              ),
+                              builder: (context, constraints) =>
+                                  AnimatedOpacity(
+                                    opacity: item.checked == true ? 1 : 0,
+                                    duration: const Duration(milliseconds: 200),
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      height: constraints.maxHeight,
+                                      width:
+                                          constraints.maxHeight *
+                                          StyleString.aspectRatio,
+                                      decoration: BoxDecoration(
+                                        borderRadius: StyleString.mdRadius,
+                                        color: Colors.black.withValues(
+                                          alpha: 0.6,
                                         ),
-                                        onPressed: null,
-                                        icon: Icon(
-                                          Icons.done_all_outlined,
-                                          color: theme.colorScheme.primary,
+                                      ),
+                                      child: SizedBox(
+                                        width: 34,
+                                        height: 34,
+                                        child: AnimatedScale(
+                                          scale: item.checked == true ? 1 : 0,
+                                          duration: const Duration(
+                                            milliseconds: 250,
+                                          ),
+                                          curve: Curves.easeInOut,
+                                          child: IconButton(
+                                            style: ButtonStyle(
+                                              padding: WidgetStateProperty.all(
+                                                EdgeInsets.zero,
+                                              ),
+                                              backgroundColor:
+                                                  WidgetStatePropertyAll(
+                                                    theme.colorScheme.surface
+                                                        .withValues(alpha: 0.8),
+                                                  ),
+                                            ),
+                                            onPressed: null,
+                                            icon: Icon(
+                                              Icons.done_all_outlined,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
                             ),
                           ),
                         ),

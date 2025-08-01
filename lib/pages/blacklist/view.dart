@@ -7,6 +7,7 @@ import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/blacklist/list.dart';
 import 'package:PiliPlus/pages/blacklist/controller.dart';
 import 'package:PiliPlus/utils/date_util.dart';
+import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,9 +25,13 @@ class _BlackListPageState extends State<BlackListPage> {
   @override
   void dispose() {
     if (_blackListController.loadingState.value.isSuccess) {
-      Pref.blackMids = _blackListController.loadingState.value.data!
-          .map((e) => e.mid!)
-          .toSet();
+      final blackMids =
+          _blackListController.loadingState.value.data
+              ?.map((e) => e.mid!)
+              .toSet() ??
+          {};
+      GlobalData().blackMids = blackMids;
+      Pref.blackMids = blackMids;
     }
     super.dispose();
   }

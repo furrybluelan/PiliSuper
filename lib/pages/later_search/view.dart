@@ -1,5 +1,6 @@
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
+import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/models_new/later/data.dart';
 import 'package:PiliPlus/models_new/later/list.dart';
 import 'package:PiliPlus/pages/common/common_search_page.dart';
@@ -49,7 +50,7 @@ class _LaterSearchPageState
                       'videoItem': item,
                       'oid': item.aid,
                       'heroTag': Utils.makeHeroTag(item.bvid),
-                      'sourceType': 'watchLater',
+                      'sourceType': SourceType.watchLater,
                       'count': controller.count,
                       'favTitle': '稍后再看',
                       'mediaId': controller.mid,

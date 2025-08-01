@@ -8,11 +8,15 @@ import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/models_new/msgfeed_unread/data.dart';
 import 'package:PiliPlus/models_new/single_unread/data.dart';
+import 'package:PiliPlus/pages/dynamics/controller.dart';
+import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/services/account_service.dart';
+import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/update.dart';
+import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,20 +25,25 @@ class MainController extends GetxController
   AccountService accountService = Get.find<AccountService>();
 
   List<NavigationBarType> navigationBars = <NavigationBarType>[];
-  RxInt dynCount = 0.obs;
 
   StreamController<bool>? bottomBarStream;
   late bool hideTabBar = Pref.hideTabBar;
   late dynamic controller;
   RxInt selectedIndex = 0.obs;
 
+  RxInt dynCount = 0.obs;
   late DynamicBadgeMode dynamicBadgeMode;
   late bool checkDynamic = Pref.checkDynamic;
-  late int dynamicPeriod = Pref.dynamicPeriod;
+  late int dynamicPeriod = Pref.dynamicPeriod * 60 * 1000;
   late int _lastCheckDynamicAt = 0;
-  late int dynIndex = -1;
+  late bool hasDyn = false;
+  late final DynamicsController dynamicController = Get.put(
+    DynamicsController(),
+  );
 
-  late int homeIndex = -1;
+  late bool hasHome = false;
+  late final HomeController homeController = Get.put(HomeController());
+
   late DynamicBadgeMode msgBadgeMode = Pref.msgBadgeMode;
   late Set<MsgUnReadType> msgUnReadTypes = Pref.msgUnReadTypeV2;
   late final RxString msgUnReadCount = ''.obs;
@@ -43,10 +52,12 @@ class MainController extends GetxController
   final enableMYBar = Pref.enableMYBar;
   final useSideBar = Pref.useSideBar;
   final mainTabBarView = Pref.mainTabBarView;
-  late bool navSearchStreamDebounce = Pref.navSearchStreamDebounce;
   late final optTabletNav = Pref.optTabletNav;
 
   late bool directExitOnBack = Pref.directExitOnBack;
+
+  static const _period = 5 * 60 * 1000;
+  late int _lastSelectTime = 0;
 
   @override
   void onInit() {
@@ -70,9 +81,9 @@ class MainController extends GetxController
     }
     dynamicBadgeMode = DynamicBadgeMode.values[Pref.dynamicBadgeMode];
 
-    dynIndex = navigationBars.indexOf(NavigationBarType.dynamics);
+    hasDyn = navigationBars.contains(NavigationBarType.dynamics);
     if (dynamicBadgeMode != DynamicBadgeMode.hidden) {
-      if (dynIndex != -1) {
+      if (hasDyn) {
         if (checkDynamic) {
           _lastCheckDynamicAt = DateTime.now().millisecondsSinceEpoch;
         }
@@ -80,9 +91,9 @@ class MainController extends GetxController
       }
     }
 
-    homeIndex = navigationBars.indexOf(NavigationBarType.home);
+    hasHome = navigationBars.contains(NavigationBarType.home);
     if (msgBadgeMode != DynamicBadgeMode.hidden) {
-      if (homeIndex != -1) {
+      if (hasHome) {
         lastCheckUnreadAt = DateTime.now().millisecondsSinceEpoch;
         queryUnreadMsg();
       }
@@ -138,7 +149,7 @@ class MainController extends GetxController
 
   Future<void> queryUnreadMsg([bool isChangeType = false]) async {
     if (!accountService.isLogin.value ||
-        homeIndex == -1 ||
+        !hasHome ||
         msgUnReadTypes.isEmpty ||
         msgBadgeMode == DynamicBadgeMode.hidden) {
       msgUnReadCount.value = '';
@@ -163,31 +174,31 @@ class MainController extends GetxController
     }
   }
 
-  Future<void> getUnreadDynamic() async {
-    if (!accountService.isLogin.value || dynIndex == -1) {
+  void getUnreadDynamic() {
+    if (!accountService.isLogin.value || !hasDyn) {
       return;
     }
     DynGrpc.dynRed().then((res) {
       if (res != null) {
-        setCount(res);
+        setDynCount(res);
       }
     });
   }
 
-  Future<void> setCount([int count = 0]) async {
-    if (dynIndex == -1 || dynCount.value == count) return;
+  void setDynCount([int count = 0]) {
+    if (!hasDyn) return;
     dynCount.value = count;
   }
 
   void checkUnreadDynamic() {
-    if (dynIndex == -1 ||
+    if (!hasDyn ||
         !accountService.isLogin.value ||
         dynamicBadgeMode == DynamicBadgeMode.hidden ||
         !checkDynamic) {
       return;
     }
     int now = DateTime.now().millisecondsSinceEpoch;
-    if (now - _lastCheckDynamicAt >= dynamicPeriod * 60 * 1000) {
+    if (now - _lastCheckDynamicAt >= dynamicPeriod) {
       _lastCheckDynamicAt = now;
       getUnreadDynamic();
     }
@@ -198,7 +209,7 @@ class MainController extends GetxController
         (GStorage.setting.get(SettingBoxKey.navBarSort) as List?)?.cast();
     int defaultHomePage = Pref.defaultHomePage;
     late final List<NavigationBarType> navigationBars;
-    if (navBarSort == null) {
+    if (navBarSort == null || navBarSort.isEmpty) {
       navigationBars = NavigationBarType.values;
     } else {
       navigationBars = navBarSort
@@ -210,6 +221,92 @@ class MainController extends GetxController
       0,
       navigationBars.indexWhere((e) => e.index == defaultHomePage),
     );
+  }
+
+  void checkDefaultSearch([bool shouldCheck = false]) {
+    if (hasHome && homeController.enableSearchWord) {
+      if (shouldCheck &&
+          navigationBars[selectedIndex.value] != NavigationBarType.home) {
+        return;
+      }
+      int now = DateTime.now().millisecondsSinceEpoch;
+      if (now - homeController.lateCheckSearchAt >= _period) {
+        homeController
+          ..lateCheckSearchAt = now
+          ..querySearchDefault();
+      }
+    }
+  }
+
+  void checkUnread([bool shouldCheck = false]) {
+    if (accountService.isLogin.value &&
+        hasHome &&
+        msgBadgeMode != DynamicBadgeMode.hidden) {
+      if (shouldCheck &&
+          navigationBars[selectedIndex.value] != NavigationBarType.home) {
+        return;
+      }
+      int now = DateTime.now().millisecondsSinceEpoch;
+      if (now - lastCheckUnreadAt >= _period) {
+        lastCheckUnreadAt = now;
+        queryUnreadMsg();
+      }
+    }
+  }
+
+  void toMinePage() {
+    final index = navigationBars.indexOf(NavigationBarType.mine);
+    if (index != -1) {
+      setIndex(index);
+    }
+  }
+
+  void setIndex(int value) {
+    feedBack();
+
+    final currentNav = navigationBars[value];
+    if (value != selectedIndex.value) {
+      selectedIndex.value = value;
+      if (mainTabBarView) {
+        controller.animateTo(value);
+      } else {
+        controller.jumpToPage(value);
+      }
+      if (currentNav == NavigationBarType.home) {
+        checkDefaultSearch();
+        checkUnread();
+      } else if (currentNav == NavigationBarType.dynamics) {
+        setDynCount();
+      }
+    } else {
+      int now = DateTime.now().millisecondsSinceEpoch;
+      if (now - _lastSelectTime < 500) {
+        EasyThrottle.throttle(
+          'topOrRefresh',
+          const Duration(milliseconds: 500),
+          () {
+            if (currentNav == NavigationBarType.home) {
+              homeController.onRefresh();
+            } else if (currentNav == NavigationBarType.dynamics) {
+              dynamicController.onRefresh();
+            }
+          },
+        );
+      } else {
+        if (currentNav == NavigationBarType.home) {
+          homeController.toTopOrRefresh();
+        } else if (currentNav == NavigationBarType.dynamics) {
+          dynamicController.toTopOrRefresh();
+        }
+      }
+      _lastSelectTime = now;
+    }
+  }
+
+  void setSearchBar() {
+    if (hasHome) {
+      homeController.searchBarStream?.add(true);
+    }
   }
 
   @override

@@ -175,7 +175,7 @@ class SearchHttp {
     }
   }
 
-  static Future<LoadingState<PgcInfoModel>> pgcInfoNew({
+  static Future<LoadingState<PgcInfoModel>> pgcInfo({
     int? seasonId,
     int? epId,
   }) async {
@@ -204,27 +204,6 @@ class SearchHttp {
       return Success(res.data['data']);
     } else {
       return Error(res.data['message']);
-    }
-  }
-
-  static Future<Map<String, dynamic>> pgcInfo({
-    dynamic seasonId,
-    dynamic epId,
-  }) async {
-    var res = await Request().get(
-      Api.pgcInfo,
-      queryParameters: {
-        'season_id': ?seasonId,
-        'ep_id': ?epId,
-      },
-    );
-    if (res.data['code'] == 0) {
-      return {
-        'status': true,
-        'data': PgcInfoModel.fromJson(res.data['result']),
-      };
-    } else {
-      return {'status': false, 'msg': res.data['message']};
     }
   }
 

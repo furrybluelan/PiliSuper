@@ -1,4 +1,5 @@
 import 'package:PiliPlus/http/login.dart';
+import 'package:PiliPlus/models/common/setting_type.dart';
 import 'package:PiliPlus/pages/about/view.dart';
 import 'package:PiliPlus/pages/login/controller.dart';
 import 'package:PiliPlus/pages/setting/extra_setting.dart';
@@ -18,14 +19,12 @@ import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class _SettingsModel {
-  final String name;
-  final String title;
+  final SettingType type;
   final String? subtitle;
   final IconData icon;
 
   const _SettingsModel({
-    required this.name,
-    required this.title,
+    required this.type,
     this.subtitle,
     required this.icon,
   });
@@ -39,55 +38,47 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  late String _type = 'privacySetting';
+  late SettingType _type = SettingType.privacySetting;
   final RxBool _noAccount = Accounts.accountMode.isEmpty.obs;
-  bool get _isPortrait => context.orientation == Orientation.portrait;
+  late bool _isPortrait;
 
-  final List<_SettingsModel> _items = [
-    const _SettingsModel(
-      name: 'privacySetting',
-      title: '隐私设置',
+  final List<_SettingsModel> _items = const [
+    _SettingsModel(
+      type: SettingType.privacySetting,
       subtitle: '黑名单、无痕模式',
       icon: Icons.privacy_tip_outlined,
     ),
-    const _SettingsModel(
-      name: 'recommendSetting',
-      title: '推荐流设置',
+    _SettingsModel(
+      type: SettingType.recommendSetting,
       subtitle: '推荐来源（web/app）、刷新保留内容、过滤器',
       icon: Icons.explore_outlined,
     ),
-    const _SettingsModel(
-      name: 'videoSetting',
-      title: '音视频设置',
+    _SettingsModel(
+      type: SettingType.videoSetting,
       subtitle: '画质、音质、解码、缓冲、音频输出等',
       icon: Icons.video_settings_outlined,
     ),
-    const _SettingsModel(
-      name: 'playSetting',
-      title: '播放器设置',
+    _SettingsModel(
+      type: SettingType.playSetting,
       subtitle: '双击/长按、全屏、后台播放、弹幕、字幕、底部进度条等',
       icon: Icons.touch_app_outlined,
     ),
-    const _SettingsModel(
-      name: 'styleSetting',
-      title: '外观设置',
+    _SettingsModel(
+      type: SettingType.styleSetting,
       subtitle: '横屏适配（平板）、侧栏、列宽、首页、动态红点、主题、字号、图片、帧率等',
       icon: Icons.style_outlined,
     ),
-    const _SettingsModel(
-      name: 'extraSetting',
-      title: '其它设置',
+    _SettingsModel(
+      type: SettingType.extraSetting,
       subtitle: '震动、搜索、收藏、ai、评论、动态、代理、更新检查等',
       icon: Icons.extension_outlined,
     ),
-    const _SettingsModel(
-      name: 'webdavSetting',
-      title: 'WebDAV 设置',
+    _SettingsModel(
+      type: SettingType.webdavSetting,
       icon: MdiIcons.databaseCogOutline,
     ),
-    const _SettingsModel(
-      name: 'about',
-      title: '关于',
+    _SettingsModel(
+      type: SettingType.about,
       icon: Icons.info_outline,
     ),
   ];
@@ -95,21 +86,10 @@ class _SettingPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    _isPortrait = context.orientation == Orientation.portrait;
     return Scaffold(
       appBar: AppBar(
-        title: _isPortrait
-            ? const Text('设置')
-            : Text(switch (_type) {
-                'privacySetting' => '隐私设置',
-                'recommendSetting' => '推荐流设置',
-                'videoSetting' => '音视频设置',
-                'playSetting' => '播放器设置',
-                'styleSetting' => '外观设置',
-                'extraSetting' => '其它设置',
-                'webdavSetting' => 'WebDAV 设置',
-                'about' => '关于',
-                _ => '设置',
-              }),
+        title: _isPortrait ? const Text('设置') : Text(_type.title),
       ),
       body: _isPortrait
           ? _buildList(theme)
@@ -136,21 +116,28 @@ class _SettingPageState extends State<SettingPage> {
                     removeLeft: true,
                     removeTop: true,
                     child: switch (_type) {
-                      'privacySetting' => const PrivacySetting(
+                      SettingType.privacySetting => const PrivacySetting(
                         showAppBar: false,
                       ),
-                      'recommendSetting' => const RecommendSetting(
+                      SettingType.recommendSetting => const RecommendSetting(
                         showAppBar: false,
                       ),
-                      'videoSetting' => const VideoSetting(showAppBar: false),
-                      'playSetting' => const PlaySetting(showAppBar: false),
-                      'styleSetting' => const StyleSetting(showAppBar: false),
-                      'extraSetting' => const ExtraSetting(showAppBar: false),
-                      'webdavSetting' => const WebDavSettingPage(
+                      SettingType.videoSetting => const VideoSetting(
                         showAppBar: false,
                       ),
-                      'about' => const AboutPage(showAppBar: false),
-                      _ => const SizedBox.shrink(),
+                      SettingType.playSetting => const PlaySetting(
+                        showAppBar: false,
+                      ),
+                      SettingType.styleSetting => const StyleSetting(
+                        showAppBar: false,
+                      ),
+                      SettingType.extraSetting => const ExtraSetting(
+                        showAppBar: false,
+                      ),
+                      SettingType.webdavSetting => const WebDavSettingPage(
+                        showAppBar: false,
+                      ),
+                      SettingType.about => const AboutPage(showAppBar: false),
                     },
                   ),
                 ),
@@ -159,20 +146,20 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  void _toPage(String name) {
+  void _toPage(SettingType type) {
     if (_isPortrait) {
-      Get.toNamed('/$name');
+      Get.toNamed('/${type.name}');
     } else {
-      _type = name;
+      _type = type;
       setState(() {});
     }
   }
 
-  Color? _getTileColor(ThemeData theme, String name) {
+  Color? _getTileColor(ThemeData theme, SettingType type) {
     if (_isPortrait) {
       return null;
     } else {
-      return name == _type ? theme.colorScheme.onInverseSurface : null;
+      return type == _type ? theme.colorScheme.onInverseSurface : null;
     }
   }
 
@@ -188,10 +175,10 @@ class _SettingPageState extends State<SettingPage> {
             .sublist(0, _items.length - 1)
             .map(
               (item) => ListTile(
-                tileColor: _getTileColor(theme, item.name),
-                onTap: () => _toPage(item.name),
+                tileColor: _getTileColor(theme, item.type),
+                onTap: () => _toPage(item.type),
                 leading: Icon(item.icon),
-                title: Text(item.title, style: titleStyle),
+                title: Text(item.type.title, style: titleStyle),
                 subtitle: item.subtitle == null
                     ? null
                     : Text(item.subtitle!, style: subTitleStyle),
@@ -212,10 +199,10 @@ class _SettingPageState extends State<SettingPage> {
                 ),
         ),
         ListTile(
-          tileColor: _getTileColor(theme, _items.last.name),
-          onTap: () => _toPage(_items.last.name),
+          tileColor: _getTileColor(theme, _items.last.type),
+          onTap: () => _toPage(_items.last.type),
           leading: Icon(_items.last.icon),
-          title: Text(_items.last.title, style: titleStyle),
+          title: Text(_items.last.type.title, style: titleStyle),
         ),
         SizedBox(height: MediaQuery.paddingOf(context).bottom + 80),
       ],

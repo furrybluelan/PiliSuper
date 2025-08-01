@@ -3,6 +3,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/member.dart';
 import 'package:PiliPlus/http/search.dart';
 import 'package:PiliPlus/models/common/member/contribute_type.dart';
+import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/models_new/space/space_archive/data.dart';
 import 'package:PiliPlus/models_new/space/space_archive/episodic_button.dart';
 import 'package:PiliPlus/models_new/space/space_archive/item.dart';
@@ -157,7 +158,7 @@ class MemberVideoCtr
           'bvid=$bvid&cid=$cid',
           arguments: {
             'heroTag': Utils.makeHeroTag(oid),
-            'sourceType': 'archive',
+            'sourceType': SourceType.archive,
             'mediaId': seasonId ?? seriesId ?? mid,
             'oid': oid,
             'favTitle': '$username: ${title ?? episodicButton.text ?? '播放全部'}',
@@ -198,7 +199,7 @@ class MemberVideoCtr
             arguments: {
               'videoItem': element,
               'heroTag': Utils.makeHeroTag(element.bvid),
-              'sourceType': 'archive',
+              'sourceType': SourceType.archive,
               'mediaId': seasonId ?? seriesId ?? mid,
               'oid': IdUtils.bv2av(element.bvid!),
               'favTitle':

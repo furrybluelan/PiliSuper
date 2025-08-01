@@ -195,13 +195,9 @@ class HistoryItem extends StatelessWidget {
                                             EdgeInsets.zero,
                                           ),
                                           backgroundColor:
-                                              WidgetStateProperty.resolveWith(
-                                                (states) {
-                                                  return theme
-                                                      .colorScheme
-                                                      .surface
-                                                      .withValues(alpha: 0.8);
-                                                },
+                                              WidgetStatePropertyAll(
+                                                theme.colorScheme.surface
+                                                    .withValues(alpha: 0.8),
                                               ),
                                         ),
                                         onPressed: () {

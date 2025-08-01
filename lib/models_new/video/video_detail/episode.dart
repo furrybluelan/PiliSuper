@@ -1,33 +1,45 @@
 import 'package:PiliPlus/models_new/video/video_detail/arc.dart';
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
 
-class EpisodeItem {
-  int? seasonId;
-  int? sectionId;
+abstract class BaseEpisodeItem {
   int? id;
   int? aid;
   int? cid;
+  String? bvid;
+  String? badge;
   String? title;
+
+  BaseEpisodeItem({
+    this.id,
+    this.aid,
+    this.cid,
+    this.bvid,
+    this.badge,
+    this.title,
+  });
+}
+
+class EpisodeItem extends BaseEpisodeItem {
+  int? seasonId;
+  int? sectionId;
   int? attribute;
   Arc? arc;
   Part? page;
-  String? bvid;
   List<Part>? pages;
-  String? badge;
 
   EpisodeItem({
     this.seasonId,
     this.sectionId,
-    this.id,
-    this.aid,
-    this.cid,
-    this.title,
+    super.id,
+    super.aid,
+    super.cid,
+    super.title,
     this.attribute,
     this.arc,
     this.page,
-    this.bvid,
+    super.bvid,
     this.pages,
-    this.badge,
+    super.badge,
   });
 
   factory EpisodeItem.fromJson(Map<String, dynamic> json) => EpisodeItem(

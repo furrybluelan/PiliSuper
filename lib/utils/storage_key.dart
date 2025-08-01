@@ -123,7 +123,6 @@ class SettingBoxKey {
       appFontWeight = 'appFontWeight',
       fastForBackwardDuration = 'fastForBackwardDuration',
       recordSearchHistory = 'recordSearchHistory',
-      navSearchStreamDebounce = 'navSearchStreamDebounce',
       showPgcTimeline = 'showPgcTimeline',
       pageTransition = 'pageTransition',
       optTabletNav = 'optTabletNav',
@@ -134,7 +133,7 @@ class SettingBoxKey {
       directExitOnBack = 'directExitOnBack',
       quickFavId = 'quickFavId';
 
-  static const String subtitlePreference = 'subtitlePreference',
+  static const String subtitlePreferenceV2 = 'subtitlePreferenceV2',
       enableDragSubtitle = 'enableDragSubtitle',
       subtitlePaddingH = 'subtitlePaddingH',
       subtitlePaddingB = 'subtitlePaddingB',
@@ -194,6 +193,8 @@ class SettingBoxKey {
       enableMYBar = 'enableMYBar',
       hideSearchBar = 'hideSearchBar',
       hideTabBar = 'hideTabBar',
+      scrollThreshold = 'scrollThreshold',
+      enableScrollThreshold = 'enableScrollThreshold',
       tabBarSort = 'tabBarSort',
       dynamicBadgeMode = 'dynamicBadgeMode',
       msgBadgeMode = 'msgBadgeMode',

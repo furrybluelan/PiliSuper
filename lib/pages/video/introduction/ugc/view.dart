@@ -528,7 +528,7 @@ class _VideoIntroPanelState extends State<VideoIntroPanel>
               selectStatus: videoIntroController.hasLike.value,
               semanticsLabel: '点赞',
               text: !isLoading
-                  ? NumUtil.numFormat(videoDetail.stat!.like!)
+                  ? NumUtil.numFormat(videoDetail.stat!.like)
                   : null,
               needAnim: true,
               hasTriple:
@@ -566,7 +566,7 @@ class _VideoIntroPanelState extends State<VideoIntroPanel>
               selectStatus: videoIntroController.hasCoin,
               semanticsLabel: '投币',
               text: !isLoading
-                  ? NumUtil.numFormat(videoDetail.stat!.coin!)
+                  ? NumUtil.numFormat(videoDetail.stat!.coin)
                   : null,
               needAnim: true,
             ),
@@ -579,12 +579,12 @@ class _VideoIntroPanelState extends State<VideoIntroPanel>
               onTap: () => videoIntroController.showFavBottomSheet(context),
               onLongPress: () => videoIntroController.showFavBottomSheet(
                 context,
-                type: 'longPress',
+                isLongPress: true,
               ),
               selectStatus: videoIntroController.hasFav.value,
               semanticsLabel: '收藏',
               text: !isLoading
-                  ? NumUtil.numFormat(videoDetail.stat!.favorite!)
+                  ? NumUtil.numFormat(videoDetail.stat!.favorite)
                   : null,
               needAnim: true,
             ),

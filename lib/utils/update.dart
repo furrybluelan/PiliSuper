@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -22,7 +23,7 @@ class Update {
       final res = await Request().get(
         Api.latestApp,
         options: Options(
-          headers: {'user-agent': Request.headerUa()},
+          headers: {'user-agent': UaType.mob.ua},
           extra: {'account': NoAccount()},
         ),
       );

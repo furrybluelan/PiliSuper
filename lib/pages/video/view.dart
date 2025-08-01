@@ -37,6 +37,7 @@ import 'package:PiliPlus/pages/video/reply_reply/view.dart';
 import 'package:PiliPlus/pages/video/view_point/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
@@ -181,6 +182,22 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     if (state == AppLifecycleState.resumed) {
       videoIntroController.startTimer();
       videoDetailController.plPlayerController.showDanmaku = true;
+
+      // 修复从后台恢复时全屏状态下屏幕方向错误的问题
+      if (isFullScreen && Platform.isIOS) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // 根据视频方向重新设置屏幕方向
+          final isVertical = videoDetailController.isVertical.value;
+          final mode = plPlayerController?.mode;
+
+          if (!(mode == FullScreenMode.vertical ||
+              (mode == FullScreenMode.auto && isVertical) ||
+              (mode == FullScreenMode.ratio &&
+                  (Get.height / Get.width < 1.25 || isVertical)))) {
+            landScape();
+          }
+        });
+      }
     } else if (state == AppLifecycleState.paused) {
       videoIntroController.canelTimer();
       videoDetailController.plPlayerController.showDanmaku = false;
@@ -325,7 +342,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     WidgetsBinding.instance.removeObserver(this);
     if (!Get.previousRoute.startsWith('/video')) {
-      ScreenBrightness().resetApplicationScreenBrightness();
+      ScreenBrightness.instance.resetApplicationScreenBrightness();
       PlPlayerController.setPlayCallBack(null);
     }
     videoDetailController.positionSubscription?.cancel();
@@ -361,7 +378,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     WidgetsBinding.instance.removeObserver(this);
 
-    ScreenBrightness().resetApplicationScreenBrightness();
+    ScreenBrightness.instance.resetApplicationScreenBrightness();
 
     videoDetailController.positionSubscription?.cancel();
     videoIntroController.canelTimer();
@@ -405,14 +422,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           videoDetailController.brightness!,
         );
         if (videoDetailController.brightness != -1.0) {
-          ScreenBrightness().setApplicationScreenBrightness(
+          ScreenBrightness.instance.setApplicationScreenBrightness(
             videoDetailController.brightness!,
           );
         } else {
-          ScreenBrightness().resetApplicationScreenBrightness();
+          ScreenBrightness.instance.resetApplicationScreenBrightness();
         }
       } else {
-        ScreenBrightness().resetApplicationScreenBrightness();
+        ScreenBrightness.instance.resetApplicationScreenBrightness();
       }
     }
     super.didPopNext();
@@ -428,9 +445,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       await videoDetailController.playerInit();
     }
 
-    Future.delayed(const Duration(milliseconds: 600), () {
-      AutoOrientation.fullAutoMode();
-    });
+    Future.delayed(
+      const Duration(milliseconds: 600),
+      AutoOrientation.fullAutoMode,
+    );
     plPlayerController?.addStatusLister(playerListener);
     plPlayerController?.addPositionListener(positionListener);
   }
@@ -940,8 +958,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       final double width = size.width;
       final double height = size.height;
       final padding = MediaQuery.paddingOf(context);
-      if (enableVerticalExpand &&
-          videoDetailController.direction.value == 'vertical') {
+      if (enableVerticalExpand && videoDetailController.isVertical.value) {
         final double videoHeight =
             height - (removeSafeArea ? 0 : padding.vertical);
         final double videoWidth = videoHeight * 9 / 16;
@@ -1026,8 +1043,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       final double width = size.width;
       final double height = size.height;
       final padding = MediaQuery.paddingOf(context);
-      if (enableVerticalExpand &&
-          videoDetailController.direction.value == 'vertical') {
+      if (enableVerticalExpand && videoDetailController.isVertical.value) {
         final double videoHeight = height - (removeSafeArea ? 0 : padding.top);
         final double videoWidth = videoHeight * 9 / 16;
         return Row(
@@ -2148,14 +2164,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
 
     void changeEpisode(episode) {
+      final isEpisode = episode is BaseEpisodeItem;
+      final isPgc = episode is pgc.EpisodeItem;
       videoIntroController.changeSeasonOrbangu(
-        episode is pgc.EpisodeItem ? episode.epId : null,
-        episode.runtimeType.toString() == "EpisodeItem" ? episode.bvid : bvid,
+        isPgc ? episode.epId : null,
+        isEpisode ? episode.bvid : bvid,
         episode.cid,
-        episode.runtimeType.toString() == "EpisodeItem" ? episode.aid : aid,
+        isEpisode ? episode.aid : aid,
         episode is EpisodeItem
             ? episode.arc?.pic
-            : episode is pgc.EpisodeItem
+            : isPgc
             ? episode.cover
             : null,
       );

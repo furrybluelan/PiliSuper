@@ -16,9 +16,10 @@ import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_control_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
+import 'package:PiliPlus/plugin/pl_player/models/double_tap_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/duration.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
-import 'package:PiliPlus/plugin/pl_player/utils.dart';
+import 'package:PiliPlus/plugin/pl_player/models/gesture_type.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/app_bar_ani.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/backward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/bottom_control.dart';
@@ -110,7 +111,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   late final RxBool showRestoreScaleBtn = false.obs;
 
   Offset _initialFocalPoint = Offset.zero;
-  String? _gestureType;
+  GestureType? _gestureType;
   //播放器放缩
   bool interacting = false;
 
@@ -138,20 +139,20 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
   }
 
-  void doubleTapFuc(String type) {
+  void doubleTapFuc(DoubleTapType type) {
     if (!plPlayerController.enableQuickDouble) {
       onDoubleTapCenter();
       return;
     }
     switch (type) {
-      case 'left':
+      case DoubleTapType.left:
         // 双击左边区域 👈
         onDoubleTapSeekBackward();
         break;
-      case 'center':
+      case DoubleTapType.center:
         onDoubleTapCenter();
         break;
-      case 'right':
+      case DoubleTapType.right:
         // 双击右边区域 👈
         onDoubleTapSeekForward();
         break;
@@ -194,8 +195,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     Future.microtask(() async {
       try {
-        _brightnessValue.value = await ScreenBrightness().application;
-        _listener = ScreenBrightness().onApplicationScreenBrightnessChanged
+        _brightnessValue.value = await ScreenBrightness.instance.application;
+        _listener = ScreenBrightness
+            .instance
+            .onApplicationScreenBrightnessChanged
             .listen((double value) {
               if (mounted) {
                 _brightnessValue.value = value;
@@ -224,7 +227,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   Future<void> setBrightness(double value) async {
     try {
-      await ScreenBrightness().setApplicationScreenBrightness(value);
+      await ScreenBrightness.instance.setApplicationScreenBrightness(value);
     } catch (_) {}
     _brightnessIndicator.value = true;
     _brightnessTimer?.cancel();
@@ -317,6 +320,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       /// 时间进度
       BottomControlType.time: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           // 播放时间
           Obx(() {
@@ -767,7 +771,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     if (cumulativeDelta.distance < 1) return;
                     if (cumulativeDelta.dx.abs() >
                         3 * cumulativeDelta.dy.abs()) {
-                      _gestureType = 'horizontal';
+                      _gestureType = GestureType.horizontal;
                     } else if (cumulativeDelta.dy.abs() >
                         3 * cumulativeDelta.dx.abs()) {
                       if (!plPlayerController.enableSlideVolumeBrightness &&
@@ -784,19 +788,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           return;
                         }
                         // 左边区域
-                        _gestureType = 'left';
+                        _gestureType = GestureType.left;
                       } else if (tapPosition < sectionWidth * 2) {
                         if (!plPlayerController.enableSlideFS) {
                           return;
                         }
                         // 全屏
-                        _gestureType = 'center';
+                        _gestureType = GestureType.center;
                       } else {
                         if (!plPlayerController.enableSlideVolumeBrightness) {
                           return;
                         }
                         // 右边区域
-                        _gestureType = 'right';
+                        _gestureType = GestureType.right;
                       }
                     } else {
                       return;
@@ -805,9 +809,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
                   Offset delta = details.focalPointDelta;
 
-                  if (_gestureType == 'horizontal') {
+                  if (_gestureType == GestureType.horizontal) {
                     // live模式下禁用
-                    if (plPlayerController.videoType.value == 'live') return;
+                    if (plPlayerController.isLive) return;
 
                     final int curSliderPosition =
                         plPlayerController.sliderPosition.value.inMilliseconds;
@@ -881,14 +885,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         }
                       } catch (_) {}
                     }
-                  } else if (_gestureType == 'left') {
+                  } else if (_gestureType == GestureType.left) {
                     // 左边区域 👈
                     final double level = maxHeight * 3;
                     final double brightness =
                         _brightnessValue.value - delta.dy / level;
                     final double result = brightness.clamp(0.0, 1.0);
                     setBrightness(result);
-                  } else if (_gestureType == 'center') {
+                  } else if (_gestureType == GestureType.center) {
                     // 全屏
                     const double threshold = 2.5; // 滑动阈值
                     double cumulativeDy =
@@ -899,7 +903,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     }
 
                     if (cumulativeDy > threshold) {
-                      _gestureType = 'center_down';
+                      _gestureType = GestureType.center_down;
                       if (isFullScreen ^
                           plPlayerController.fullScreenGestureReverse) {
                         fullScreenTrigger(
@@ -908,7 +912,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       }
                       // if (kDebugMode) debugPrint('center_down:$cumulativeDy');
                     } else if (cumulativeDy < -threshold) {
-                      _gestureType = 'center_up';
+                      _gestureType = GestureType.center_up;
                       if (!isFullScreen ^
                           plPlayerController.fullScreenGestureReverse) {
                         fullScreenTrigger(
@@ -917,7 +921,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       }
                       // if (kDebugMode) debugPrint('center_up:$cumulativeDy');
                     }
-                  } else if (_gestureType == 'right') {
+                  } else if (_gestureType == GestureType.right) {
                     // 右边区域
                     final double level = maxHeight * 0.5;
                     EasyThrottle.throttle(
@@ -944,7 +948,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     } else {
                       plPlayerController.seekTo(
                         plPlayerController.sliderPosition.value,
-                        type: 'slider',
+                        isSeek: false,
                       );
                     }
                     plPlayerController.onChangedSliderEnd();
@@ -972,25 +976,25 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   }
                   final double tapPosition = details.localPosition.dx;
                   final double sectionWidth = maxWidth / 3;
-                  late String gestureType;
+                  late GestureType gestureType;
                   if (tapPosition < sectionWidth) {
                     if (!plPlayerController.enableSlideVolumeBrightness) {
                       return;
                     }
                     // 左边区域
-                    gestureType = 'left';
+                    gestureType = GestureType.left;
                   } else if (tapPosition < sectionWidth * 2) {
                     if (!plPlayerController.enableSlideFS) {
                       return;
                     }
                     // 全屏
-                    gestureType = 'center';
+                    gestureType = GestureType.center;
                   } else {
                     if (!plPlayerController.enableSlideVolumeBrightness) {
                       return;
                     }
                     // 右边区域
-                    gestureType = 'right';
+                    gestureType = GestureType.right;
                   }
 
                   if (_gestureType != null && _gestureType != gestureType) {
@@ -998,14 +1002,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   }
                   _gestureType = gestureType;
 
-                  if (_gestureType == 'left') {
+                  if (_gestureType == GestureType.left) {
                     // 左边区域 👈
                     final double level = maxHeight * 3;
                     final double brightness =
                         _brightnessValue.value - details.delta.dy / level;
                     final double result = brightness.clamp(0.0, 1.0);
                     setBrightness(result);
-                  } else if (_gestureType == 'center') {
+                  } else if (_gestureType == GestureType.center) {
                     // 全屏
                     const double threshold = 2.5; // 滑动阈值
                     double cumulativeDy =
@@ -1016,7 +1020,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     }
 
                     if (cumulativeDy > threshold) {
-                      _gestureType = 'center_down';
+                      _gestureType = GestureType.center_down;
                       if (isFullScreen ^
                           plPlayerController.fullScreenGestureReverse) {
                         fullScreenTrigger(
@@ -1025,7 +1029,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       }
                       // if (kDebugMode) debugPrint('center_down:$cumulativeDy');
                     } else if (cumulativeDy < -threshold) {
-                      _gestureType = 'center_up';
+                      _gestureType = GestureType.center_up;
                       if (!isFullScreen ^
                           plPlayerController.fullScreenGestureReverse) {
                         fullScreenTrigger(
@@ -1034,7 +1038,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       }
                       // if (kDebugMode)   debugPrint('center_up:$cumulativeDy');
                     }
-                  } else if (_gestureType == 'right') {
+                  } else if (_gestureType == GestureType.right) {
                     // 右边区域
                     final double level = maxHeight * 0.5;
                     EasyThrottle.throttle(
@@ -1062,19 +1066,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   if (plPlayerController.controlsLock.value) {
                     return;
                   }
-                  if (plPlayerController.videoType.value == 'live') {
-                    doubleTapFuc('center');
+                  if (plPlayerController.isLive) {
+                    doubleTapFuc(DoubleTapType.center);
                     return;
                   }
                   final double tapPosition = details.localPosition.dx;
                   final double sectionWidth = maxWidth / 4;
-                  String type = 'left';
+                  DoubleTapType type;
                   if (tapPosition < sectionWidth) {
-                    type = 'left';
+                    type = DoubleTapType.left;
                   } else if (tapPosition < sectionWidth * 3) {
-                    type = 'center';
+                    type = DoubleTapType.center;
                   } else {
-                    type = 'right';
+                    type = DoubleTapType.right;
                   }
                   doubleTapFuc(type);
                 },
@@ -1172,14 +1176,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                               const SizedBox(width: 2),
                               Obx(
                                 () {
-                                  final durationSeconds =
-                                      plPlayerController.durationSeconds.value;
                                   return Text(
-                                    durationSeconds.inMinutes >= 60
-                                        ? printDurationWithHours(
-                                            durationSeconds,
-                                          )
-                                        : printDuration(durationSeconds),
+                                    DurationUtil.formatDuration(
+                                      plPlayerController
+                                          .durationSeconds
+                                          .value
+                                          .inSeconds,
+                                    ),
                                     style: textStyle,
                                   );
                                 },
@@ -1423,7 +1426,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     }
                 }
 
-                if (plPlayerController.videoType.value == 'live') {
+                if (plPlayerController.isLive) {
                   return const SizedBox.shrink();
                 }
 
@@ -1548,9 +1551,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             SafeArea(
               child: Obx(
                 () => Visibility(
-                  visible:
-                      plPlayerController.videoType.value != 'live' &&
-                      isFullScreen,
+                  visible: !plPlayerController.isLive && isFullScreen,
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: FractionalTranslation(
@@ -1766,10 +1767,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                                       player.state.duration,
                                     );
                                     plPlayerController
-                                      ..seekTo(
-                                        result,
-                                        type: 'slider',
-                                      )
+                                      ..seekTo(result, isSeek: false)
                                       ..play();
                                   },
                                 ),
@@ -1800,10 +1798,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                                       player.state.duration,
                                     );
                                     plPlayerController
-                                      ..seekTo(
-                                        result,
-                                        type: 'slider',
-                                      )
+                                      ..seekTo(result, isSeek: false)
                                       ..play();
                                   },
                                 ),
@@ -1892,7 +1887,7 @@ Widget buildSeekPreviewWidget(PlPlayerController plPlayerController) {
           try {
             double scale =
                 plPlayerController.isFullScreen.value &&
-                    plPlayerController.direction.value == 'horizontal'
+                    !plPlayerController.isVertical
                 ? 4
                 : 2.5;
             // offset

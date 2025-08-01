@@ -23,6 +23,7 @@ class _WebDavSettingPageState extends State<WebDavSettingPage> {
   final _usernameCtr = TextEditingController(text: Pref.webdavUsername);
   final _passwordCtr = TextEditingController(text: Pref.webdavPassword);
   final _directoryCtr = TextEditingController(text: Pref.webdavDirectory);
+  bool _obscureText = true;
 
   @override
   void dispose() {
@@ -67,10 +68,17 @@ class _WebDavSettingPageState extends State<WebDavSettingPage> {
           TextField(
             controller: _passwordCtr,
             autofillHints: const [AutofillHints.password],
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: '密码',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                onPressed: () => setState(() => _obscureText = !_obscureText),
+                icon: _obscureText
+                    ? const Icon(Icons.visibility)
+                    : const Icon(Icons.visibility_off),
+              ),
             ),
+            obscureText: _obscureText,
           ),
           const SizedBox(height: 20),
           TextField(

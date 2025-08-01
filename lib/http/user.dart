@@ -28,14 +28,14 @@ class UserHttp {
     }
   }
 
-  static Future<dynamic> userInfo() async {
+  static Future<LoadingState<UserInfoData>> userInfo() async {
     var res = await Request().get(Api.userInfo);
     if (res.data['code'] == 0) {
       UserInfoData data = UserInfoData.fromJson(res.data['data']);
       GlobalData().coins = data.money;
-      return {'status': true, 'data': data};
+      return Success(data);
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 

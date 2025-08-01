@@ -42,13 +42,13 @@ class Utils {
 
   static Future<void> shareText(String text) async {
     try {
-      Rect? sharePositionOrigin;
-      if (await isIpad()) {
-        sharePositionOrigin = Rect.fromLTWH(0, 0, Get.width, Get.height / 2);
-      }
-      Share.share(
-        text,
-        sharePositionOrigin: sharePositionOrigin,
+      SharePlus.instance.share(
+        ShareParams(
+          text: text,
+          sharePositionOrigin: await Utils.isIpad()
+              ? Rect.fromLTWH(0, 0, Get.width, Get.height / 2)
+              : null,
+        ),
       );
     } catch (e) {
       SmartDialog.showToast(e.toString());

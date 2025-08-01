@@ -8,13 +8,11 @@ class HotKeyword extends StatelessWidget {
   final double width;
   final List<SearchTrendingItemModel> hotSearchList;
   final Function? onClick;
-  final bool showMore;
   const HotKeyword({
     super.key,
     required double width,
     required this.hotSearchList,
     this.onClick,
-    this.showMore = true,
   }) : width = width / 2 - 4;
 
   @override

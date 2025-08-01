@@ -708,8 +708,8 @@ class PageUtils {
       SmartDialog.showLoading(msg: '资源获取中');
       var result = await SearchHttp.pgcInfo(seasonId: seasonId, epId: epId);
       SmartDialog.dismiss();
-      if (result['status']) {
-        PgcInfoModel data = result['data'];
+      if (result.isSuccess) {
+        PgcInfoModel data = result.data;
 
         // epId episode -> progress episode -> first episode
         EpisodeItem? episode;
@@ -771,7 +771,7 @@ class PageUtils {
           preventDuplicates: false,
         );
       } else {
-        SmartDialog.showToast(result['msg']);
+        result.toast();
       }
     } catch (e) {
       SmartDialog.dismiss();

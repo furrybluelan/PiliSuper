@@ -44,14 +44,75 @@ class _VotePanelState extends State<VotePanel> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
+    final usePortrait =
+        context.orientation == Orientation.portrait || context.isTablet;
+    final right = [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            _enabled
+                ? '投票选项'
+                : groupValue.isEmpty
+                ? '已结束'
+                : '已完成',
+          ),
+          if (_enabled) Obx(() => Text('${groupValue.length} / $_maxCnt')),
+        ],
+      ),
+      Flexible(
+        child: ListView.builder(
+          key: const PageStorageKey('vote_opions'),
+          shrinkWrap: true,
+          itemCount: _voteInfo.options.length,
+          itemBuilder: (context, index) => _buildOptions(index),
+        ),
+      ),
+      if (_enabled) ...[
+        _checkBoxs,
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Obx(
+            () => OutlinedButton(
+              onPressed: groupValue.isNotEmpty
+                  ? () async {
+                      final res = await widget.callback(
+                        groupValue,
+                        anonymity,
+                      );
+                      if (res.isSuccess) {
+                        if (mounted) {
+                          setState(() {
+                            _enabled = false;
+                            _showPercentage = true;
+                            _voteInfo = res.data;
+                            _percentage = _cnt2Percentage(_voteInfo.options);
+                          });
+                        }
+                      } else {
+                        res.toast();
+                      }
+                    }
+                  : null,
+              child: const Center(child: Text('投票')),
+            ),
+          ),
+        ),
+      ],
+    ];
+    Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_voteInfo.title != null)
           Text(_voteInfo.title!, style: theme.textTheme.titleMedium),
         if (_voteInfo.desc != null)
-          Text(_voteInfo.desc!, style: theme.textTheme.titleSmall),
+          Text(
+            _voteInfo.desc!,
+            style: theme.textTheme.titleSmall!.copyWith(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Wrap(
@@ -75,71 +136,49 @@ class _VotePanelState extends State<VotePanel> {
             ],
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _enabled
-                  ? '投票选项'
-                  : groupValue.isEmpty
-                  ? '已结束'
-                  : '已完成',
-            ),
-            if (_enabled) Obx(() => Text('${groupValue.length} / $_maxCnt')),
-          ],
-        ),
-        Flexible(fit: FlexFit.loose, child: _buildContext()),
-        if (_enabled)
-          Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Obx(
-              () => OutlinedButton(
-                onPressed: groupValue.isNotEmpty
-                    ? () async {
-                        final res = await widget.callback(
-                          groupValue,
-                          anonymity,
-                        );
-                        if (res.isSuccess) {
-                          if (mounted) {
-                            setState(() {
-                              _enabled = false;
-                              _showPercentage = true;
-                              _voteInfo = res.data;
-                              _percentage = _cnt2Percentage(_voteInfo.options);
-                            });
-                          }
-                        } else {
-                          res.toast();
-                        }
-                      }
-                    : null,
-                child: const Center(child: Text('投票')),
-              ),
-            ),
-          ),
+        if (usePortrait) ...right,
       ],
     );
+    if (!usePortrait) {
+      child = Row(
+        spacing: 12,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: child),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: right,
+            ),
+          ),
+        ],
+      );
+    }
+    return child;
   }
 
-  List<Widget> get _checkBoxs => [
-    CheckBoxText(
-      text: '显示比例',
-      selected: _showPercentage,
-      onChanged: (value) {
-        setState(() {
-          _showPercentage = value;
-        });
-      },
-    ),
-    CheckBoxText(
-      text: '匿名',
-      selected: anonymity,
-      onChanged: (val) {
-        anonymity = val;
-      },
-    ),
-  ];
+  Widget get _checkBoxs => Row(
+    spacing: 16,
+    children: [
+      CheckBoxText(
+        text: '显示比例',
+        selected: _showPercentage,
+        onChanged: (value) {
+          setState(() {
+            _showPercentage = value;
+          });
+        },
+      ),
+      CheckBoxText(
+        text: '匿名',
+        selected: anonymity,
+        onChanged: (val) {
+          anonymity = val;
+        },
+      ),
+    ],
+  );
 
   Widget _buildOptions(int index) {
     return Padding(
@@ -176,19 +215,6 @@ class _VotePanelState extends State<VotePanel> {
     } else {
       (context as Element).markNeedsBuild();
     }
-  }
-
-  Widget _buildContext() {
-    return CustomScrollView(
-      shrinkWrap: true,
-      slivers: [
-        SliverList.builder(
-          itemCount: _voteInfo.options.length,
-          itemBuilder: (context, index) => _buildOptions(index),
-        ),
-        if (_enabled) SliverList.list(children: _checkBoxs),
-      ],
-    );
   }
 
   static List<double> _cnt2Percentage(List<Option> options) {
@@ -288,16 +314,19 @@ Future showVoteDialog(
     if (voteInfo.isSuccess) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          content: SizedBox(
-            width: 160,
-            child: VotePanel(
-              voteInfo: voteInfo.data,
-              callback: (votes, anonymity) => DynamicsHttp.doVote(
-                voteId: voteId,
-                votes: votes.toList(),
-                anonymity: anonymity,
-                dynamicId: dynamicId,
+        builder: (context) => Dialog(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 625),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: VotePanel(
+                voteInfo: voteInfo.data,
+                callback: (votes, anonymity) => DynamicsHttp.doVote(
+                  voteId: voteId,
+                  votes: votes.toList(),
+                  anonymity: anonymity,
+                  dynamicId: dynamicId,
+                ),
               ),
             ),
           ),

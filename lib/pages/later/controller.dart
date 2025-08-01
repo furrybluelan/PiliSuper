@@ -2,6 +2,7 @@ import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/models/common/later_view_type.dart';
+import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/models_new/later/data.dart';
 import 'package:PiliPlus/models_new/later/list.dart';
 import 'package:PiliPlus/pages/common/multi_select_controller.dart';
@@ -219,7 +220,7 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel> {
             arguments: {
               'videoItem': item,
               'heroTag': Utils.makeHeroTag(item.bvid),
-              'sourceType': 'watchLater',
+              'sourceType': SourceType.watchLater,
               'count': baseCtr.counts[LaterViewType.all],
               'favTitle': '稍后再看',
               'mediaId': accountService.mid,

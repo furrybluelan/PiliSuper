@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
@@ -343,15 +344,61 @@ List<SettingsModel> get styleSettings => [
   ),
   SettingsModel(
     settingsType: SettingsType.sw1tch,
-    title: '降低收起/展开顶/底栏频率',
-    leading: const Icon(Icons.vertical_distribute),
-    setKey: SettingBoxKey.navSearchStreamDebounce,
+    title: '顶/底栏滚动阈值',
+    subtitle: '滚动多少像素后收起/展开顶底栏，默认50像素',
+    leading: const Icon(Icons.swipe_vertical),
     defaultVal: false,
-    onChanged: (value) {
-      try {
-        Get.find<MainController>().navSearchStreamDebounce = value;
-        Get.forceAppUpdate();
-      } catch (_) {}
+    setKey: SettingBoxKey.enableScrollThreshold,
+    needReboot: true,
+    onTap: () {
+      String scrollThreshold = Pref.scrollThreshold.toString();
+      showDialog(
+        context: Get.context!,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('滚动阈值'),
+            content: TextFormField(
+              autofocus: true,
+              initialValue: scrollThreshold,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              onChanged: (value) {
+                scrollThreshold = value;
+              },
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
+              ],
+              decoration: const InputDecoration(suffixText: 'px'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  GStorage.setting.put(
+                    SettingBoxKey.scrollThreshold,
+                    max(
+                      10.0,
+                      double.tryParse(scrollThreshold) ?? 50.0,
+                    ),
+                  );
+                  SmartDialog.showToast('重启生效');
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
     },
   ),
   SettingsModel(

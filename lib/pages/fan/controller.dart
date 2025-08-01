@@ -8,7 +8,6 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class FansController extends CommonListController<FansData, FansItemModel> {
   FansController(this.mid);
-  int ps = 20;
   int total = 0;
   int mid;
 
@@ -27,7 +26,6 @@ class FansController extends CommonListController<FansData, FansItemModel> {
   Future<LoadingState<FansData>> customGetData() => FanHttp.fans(
     vmid: mid,
     pn: page,
-    ps: ps,
     orderType: 'attention',
   );
 

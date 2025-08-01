@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:PiliPlus/http/search.dart';
+import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/pages/video/reply_reply/view.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -632,7 +633,7 @@ class PiliScheme {
                 'bvid=$bvid&cid=$cid',
                 arguments: {
                   'heroTag': Utils.makeHeroTag(bvid),
-                  'sourceType': 'playlist',
+                  'sourceType': SourceType.playlist,
                   'favTitle': '播放列表',
                   'mediaId': mediaId,
                   'mediaType': 3,

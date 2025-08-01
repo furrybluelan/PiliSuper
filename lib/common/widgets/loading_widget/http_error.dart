@@ -51,9 +51,9 @@ class HttpError extends StatelessWidget {
           FilledButton.tonal(
             onPressed: onReload,
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.resolveWith((states) {
-                return theme.colorScheme.primary.withAlpha(20);
-              }),
+              backgroundColor: WidgetStatePropertyAll(
+                theme.colorScheme.primary.withAlpha(20),
+              ),
             ),
             child: Text(
               btnText ?? '点击重试',

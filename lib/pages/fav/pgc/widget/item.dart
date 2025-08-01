@@ -55,98 +55,103 @@ class FavPgcItem extends StatelessWidget {
                   AspectRatio(
                     aspectRatio: 3 / 4,
                     child: LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints boxConstraints) {
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            NetworkImgLayer(
-                              radius: 4,
-                              src: item.cover,
-                              width: boxConstraints.maxWidth,
-                              height: boxConstraints.maxHeight,
-                            ),
-                            PBadge(
-                              right: 4,
-                              top: 4,
-                              text: item.badge,
-                              size: PBadgeSize.small,
-                              fontSize: 10,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                                vertical: 1,
-                              ),
-                            ),
-                            Positioned.fill(
-                              child: IgnorePointer(
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) =>
-                                      AnimatedOpacity(
-                                        opacity: item.checked == true ? 1 : 0,
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          height: constraints.maxHeight,
-                                          width:
-                                              constraints.maxHeight *
-                                              StyleString.aspectRatio,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(4),
-                                                ),
-                                            color: Colors.black.withValues(
-                                              alpha: 0.6,
-                                            ),
-                                          ),
-                                          child: SizedBox(
-                                            width: 34,
-                                            height: 34,
-                                            child: AnimatedScale(
-                                              scale: item.checked == true
-                                                  ? 1
-                                                  : 0,
-                                              duration: const Duration(
-                                                milliseconds: 250,
-                                              ),
-                                              curve: Curves.easeInOut,
-                                              child: IconButton(
-                                                tooltip: '取消选择',
-                                                style: ButtonStyle(
-                                                  padding:
-                                                      WidgetStateProperty.all(
-                                                        EdgeInsets.zero,
-                                                      ),
-                                                  backgroundColor:
-                                                      WidgetStateProperty.resolveWith(
-                                                        (states) {
-                                                          return theme
-                                                              .colorScheme
-                                                              .surface
-                                                              .withValues(
-                                                                alpha: 0.8,
-                                                              );
-                                                        },
-                                                      ),
-                                                ),
-                                                onPressed: null,
-                                                icon: Icon(
-                                                  Icons.done_all_outlined,
-                                                  color:
-                                                      theme.colorScheme.primary,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                      builder:
+                          (
+                            BuildContext context,
+                            BoxConstraints boxConstraints,
+                          ) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                NetworkImgLayer(
+                                  radius: 4,
+                                  src: item.cover,
+                                  width: boxConstraints.maxWidth,
+                                  height: boxConstraints.maxHeight,
                                 ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                                PBadge(
+                                  right: 4,
+                                  top: 4,
+                                  text: item.badge,
+                                  size: PBadgeSize.small,
+                                  fontSize: 10,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 2,
+                                    vertical: 1,
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: IgnorePointer(
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) =>
+                                          AnimatedOpacity(
+                                            opacity: item.checked == true
+                                                ? 1
+                                                : 0,
+                                            duration: const Duration(
+                                              milliseconds: 200,
+                                            ),
+                                            child: Container(
+                                              alignment: Alignment.center,
+                                              height: constraints.maxHeight,
+                                              width:
+                                                  constraints.maxHeight *
+                                                  StyleString.aspectRatio,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                      Radius.circular(4),
+                                                    ),
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.6,
+                                                ),
+                                              ),
+                                              child: SizedBox(
+                                                width: 34,
+                                                height: 34,
+                                                child: AnimatedScale(
+                                                  scale: item.checked == true
+                                                      ? 1
+                                                      : 0,
+                                                  duration: const Duration(
+                                                    milliseconds: 250,
+                                                  ),
+                                                  curve: Curves.easeInOut,
+                                                  child: IconButton(
+                                                    tooltip: '取消选择',
+                                                    style: ButtonStyle(
+                                                      padding:
+                                                          WidgetStateProperty.all(
+                                                            EdgeInsets.zero,
+                                                          ),
+                                                      backgroundColor:
+                                                          WidgetStatePropertyAll(
+                                                            theme
+                                                                .colorScheme
+                                                                .surface
+                                                                .withValues(
+                                                                  alpha: 0.8,
+                                                                ),
+                                                          ),
+                                                    ),
+                                                    onPressed: null,
+                                                    icon: Icon(
+                                                      Icons.done_all_outlined,
+                                                      color: theme
+                                                          .colorScheme
+                                                          .primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                     ),
                   ),
                   const SizedBox(width: 10),

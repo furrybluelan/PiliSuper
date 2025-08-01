@@ -99,7 +99,8 @@ List<SettingsModel> get extraSettings => [
                     SettingBoxKey.dynamicPeriod,
                     dynamicPeriod,
                   );
-                  Get.find<MainController>().dynamicPeriod = dynamicPeriod;
+                  Get.find<MainController>().dynamicPeriod =
+                      dynamicPeriod * 60 * 1000;
                 },
                 child: const Text('确定'),
               ),
@@ -704,13 +705,6 @@ List<SettingsModel> get extraSettings => [
   ),
   SettingsModel(
     settingsType: SettingsType.sw1tch,
-    title: '全屏展示点赞/投币/收藏等操作按钮',
-    leading: const Icon(MdiIcons.dotsHorizontalCircleOutline),
-    setKey: SettingBoxKey.showFSActionItem,
-    defaultVal: true,
-  ),
-  SettingsModel(
-    settingsType: SettingsType.sw1tch,
     title: '启用双指缩小视频',
     leading: const Icon(Icons.pinch),
     setKey: SettingBoxKey.enableShrinkVideoSize,
@@ -773,7 +767,14 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.enableSearchWord,
     defaultVal: true,
     onChanged: (val) {
-      Get.find<HomeController>().defaultSearch.value = '';
+      try {
+        final controller = Get.find<HomeController>()..enableSearchWord = val;
+        if (val) {
+          controller.querySearchDefault();
+        } else {
+          controller.defaultSearch.value = '';
+        }
+      } catch (_) {}
     },
   ),
   SettingsModel(

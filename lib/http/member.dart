@@ -6,7 +6,7 @@ import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/member_card_info/data.dart';
+import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/models/common/member/contribute_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/member/info.dart';
@@ -15,6 +15,7 @@ import 'package:PiliPlus/models_new/follow/data.dart';
 import 'package:PiliPlus/models_new/follow/list.dart';
 import 'package:PiliPlus/models_new/member/coin_like_arc/data.dart';
 import 'package:PiliPlus/models_new/member/search_archive/data.dart';
+import 'package:PiliPlus/models_new/member_card_info/data.dart';
 import 'package:PiliPlus/models_new/space/space/data.dart';
 import 'package:PiliPlus/models_new/space/space_archive/data.dart';
 import 'package:PiliPlus/models_new/space/space_article/data.dart';
@@ -280,7 +281,7 @@ class MemberHttp {
         headers: {
           'origin': 'https://space.bilibili.com',
           'referer': 'https://space.bilibili.com/$mid/dynamic',
-          'user-agent': Request.headerUa(type: 'pc'),
+          'user-agent': UaType.pc.ua,
         },
       ),
     );
@@ -352,7 +353,7 @@ class MemberHttp {
       queryParameters: params,
       options: Options(
         headers: {
-          HttpHeaders.userAgentHeader: Request.headerUa(type: 'pc'),
+          HttpHeaders.userAgentHeader: UaType.pc.ua,
           HttpHeaders.refererHeader: '${HttpString.spaceBaseUrl}/$mid',
           'origin': HttpString.spaceBaseUrl,
         },
@@ -525,12 +526,12 @@ class MemberHttp {
   }
 
   // 获取某分组下的up
-  static Future<LoadingState<FollowData>> followUpGroup(
+  static Future<LoadingState<FollowData>> followUpGroup({
     int? mid,
     int? tagid,
     int? pn,
-    int? ps,
-  ) async {
+    int ps = 20,
+  }) async {
     var res = await Request().get(
       Api.followUpGroup,
       queryParameters: {
@@ -543,9 +544,11 @@ class MemberHttp {
     if (res.data['code'] == 0) {
       return Success(
         FollowData(
-          list: (res.data['data'] as List?)
-              ?.map<FollowItemModel>((e) => FollowItemModel.fromJson(e))
-              .toList(),
+          list:
+              (res.data['data'] as List?)
+                  ?.map<FollowItemModel>((e) => FollowItemModel.fromJson(e))
+                  .toList() ??
+              <FollowItemModel>[],
         ),
       );
     } else {

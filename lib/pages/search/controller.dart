@@ -6,6 +6,7 @@ import 'package:PiliPlus/http/search.dart';
 import 'package:PiliPlus/models/search/suggest.dart';
 import 'package:PiliPlus/models_new/search/search_rcmd/data.dart';
 import 'package:PiliPlus/models_new/search/search_trending/data.dart';
+import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -20,7 +21,7 @@ class SSearchController extends GetxController {
   final searchFocusNode = FocusNode();
   final controller = TextEditingController();
 
-  String hintText = '搜索';
+  String? hintText;
 
   int initIndex = 0;
 
@@ -48,15 +49,11 @@ class SSearchController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // 其他页面跳转过来
-    if (Get.parameters['keyword'] != null) {
-      onClickKeyword(Get.parameters['keyword']!);
-    }
-    if (Get.parameters['hintText'] != null) {
-      hintText = Get.parameters['hintText']!;
-    }
-    if (Get.parameters['text'] != null) {
-      controller.text = Get.parameters['text']!;
+    final params = Get.parameters;
+    hintText = params['hintText'];
+    final text = params['text'];
+    if (text != null) {
+      controller.text = text;
     }
 
     historyList = List<String>.from(
@@ -111,10 +108,10 @@ class SSearchController extends GetxController {
   // 搜索
   Future<void> submit() async {
     if (controller.text.isEmpty) {
-      if (hintText.isEmpty) {
+      if (hintText.isNullOrEmpty) {
         return;
       }
-      controller.text = hintText;
+      controller.text = hintText!;
       validateUid();
     }
 
@@ -126,7 +123,6 @@ class SSearchController extends GetxController {
     }
 
     searchFocusNode.unfocus();
-
     await Get.toNamed(
       '/searchResult',
       parameters: {

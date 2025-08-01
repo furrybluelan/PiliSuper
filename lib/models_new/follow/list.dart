@@ -1,13 +1,11 @@
+import 'package:PiliPlus/models/dynamics/up.dart';
 import 'package:PiliPlus/models/model_avatar.dart';
 
-class FollowItemModel {
-  int? mid;
+class FollowItemModel extends UpItem {
   int? attribute;
   int? mtime;
   dynamic tag;
   int? special;
-  String? uname;
-  String? face;
   String? sign;
   int? faceNft;
   BaseOfficialVerify? officialVerify;
@@ -18,13 +16,13 @@ class FollowItemModel {
   String? followTime;
 
   FollowItemModel({
-    this.mid,
+    required super.mid,
     this.attribute,
     this.mtime,
     this.tag,
     this.special,
-    this.uname,
-    this.face,
+    super.uname,
+    super.face,
     this.sign,
     this.faceNft,
     this.officialVerify,
@@ -37,7 +35,7 @@ class FollowItemModel {
 
   factory FollowItemModel.fromJson(Map<String, dynamic> json) =>
       FollowItemModel(
-        mid: json['mid'] as int?,
+        mid: json['mid'] as int? ?? 0,
         attribute: json['attribute'] as int?,
         mtime: json['mtime'] as int?,
         tag: json['tag'] as dynamic,

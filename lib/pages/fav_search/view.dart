@@ -1,4 +1,5 @@
 import 'package:PiliPlus/models/common/fav_order_type.dart';
+import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/data.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/media.dart';
 import 'package:PiliPlus/pages/common/common_search_page.dart';
@@ -80,7 +81,7 @@ class _FavSearchPageState
               arguments: {
                 'videoItem': item,
                 'heroTag': Utils.makeHeroTag(item.bvid),
-                'sourceType': 'fav',
+                'sourceType': SourceType.fav,
                 'mediaId': controller.mediaId,
                 'oid': item.id,
                 'favTitle': controller.title,

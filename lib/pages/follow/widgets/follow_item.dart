@@ -31,7 +31,7 @@ class FollowItem extends StatelessWidget {
           if (onSelect != null) {
             onSelect!.call(
               UserModel(
-                mid: item.mid!,
+                mid: item.mid,
                 name: item.uname!,
                 avatar: item.face!,
               ),

@@ -18,6 +18,8 @@ import 'package:PiliPlus/models/common/sponsor_block/segment_model.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/skip_type.dart';
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
+import 'package:PiliPlus/models/common/video/source_type.dart';
+import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
 import 'package:PiliPlus/models/common/video/video_decode_type.dart';
 import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/models/video/play/url.dart';
@@ -38,6 +40,7 @@ import 'package:PiliPlus/pages/video/send_danmaku/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
+import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/duration_util.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -47,6 +50,7 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart' show Options;
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -68,7 +72,7 @@ class VideoDetailController extends GetxController
   final heroTag = Get.arguments['heroTag'];
   final RxString cover = ''.obs;
   // 视频类型 默认投稿视频
-  final videoType = Get.arguments['videoType'] ?? SearchType.video;
+  final SearchType videoType = Get.arguments['videoType'] ?? SearchType.video;
 
   /// tabs相关配置
   late TabController tabCtr;
@@ -121,7 +125,7 @@ class VideoDetailController extends GetxController
   StreamSubscription<Duration>? positionSubscription;
 
   late final scrollKey = GlobalKey<ExtendedNestedScrollViewState>();
-  late final RxString direction = 'horizontal'.obs;
+  late final RxBool isVertical = false.obs;
   late final RxDouble scrollRatio = 0.0.obs;
   late final ScrollController scrollCtr = ScrollController()
     ..addListener(scrollListener);
@@ -149,21 +153,17 @@ class VideoDetailController extends GetxController
   }
 
   void setVideoHeight() {
-    String direction = firstVideo.width != null && firstVideo.height != null
-        ? firstVideo.width! > firstVideo.height!
-              ? 'horizontal'
-              : 'vertical'
-        : 'horizontal';
+    final isVertical = firstVideo.width != null && firstVideo.height != null
+        ? firstVideo.width! < firstVideo.height!
+        : false;
     if (!scrollCtr.hasClients) {
-      videoHeight = direction == 'vertical' ? maxVideoHeight : minVideoHeight;
-      this.direction.value = direction;
+      videoHeight = isVertical ? maxVideoHeight : minVideoHeight;
+      this.isVertical.value = isVertical;
       return;
     }
-    if (this.direction.value != direction) {
-      this.direction.value = direction;
-      double videoHeight = direction == 'vertical'
-          ? maxVideoHeight
-          : minVideoHeight;
+    if (this.isVertical.value != isVertical) {
+      this.isVertical.value = isVertical;
+      double videoHeight = isVertical ? maxVideoHeight : minVideoHeight;
       if (this.videoHeight != videoHeight) {
         if (videoHeight > this.videoHeight) {
           // current minVideoHeight
@@ -236,18 +236,11 @@ class VideoDetailController extends GetxController
   }
 
   // 页面来源 稍后再看 收藏夹
-  String sourceType = 'normal';
+  SourceType sourceType = Get.arguments['sourceType'] ?? SourceType.normal;
   late bool _mediaDesc = false;
   late final RxList<MediaListItemModel> mediaList = <MediaListItemModel>[].obs;
   late String watchLaterTitle = '';
-  bool get isPlayAll =>
-      const ['watchLater', 'fav', 'archive', 'playlist'].contains(sourceType);
-  int get _mediaType => switch (sourceType) {
-    'archive' => 1,
-    'watchLater' => 2,
-    'fav' || 'playlist' => 3,
-    _ => -1,
-  };
+  bool get isPlayAll => sourceType != SourceType.normal;
 
   late dynamic epId = Get.parameters['epId'];
   late dynamic seasonId = Get.parameters['seasonId'];
@@ -276,9 +269,7 @@ class VideoDetailController extends GetxController
       }
     }
 
-    sourceType = Get.arguments['sourceType'] ?? 'normal';
-
-    if (sourceType != 'normal') {
+    if (isPlayAll) {
       watchLaterTitle = Get.arguments['favTitle'];
       _mediaDesc = Get.arguments['desc'];
       getMediaList();
@@ -310,7 +301,7 @@ class VideoDetailController extends GetxController
       return;
     }
     var res = await UserHttp.getMediaList(
-      type: Get.arguments['mediaType'] ?? _mediaType,
+      type: Get.arguments['mediaType'] ?? sourceType.mediaType,
       bizId: Get.arguments['mediaId'] ?? -1,
       ps: 20,
       direction: isLoadPrevious ? true : false,
@@ -394,10 +385,11 @@ class VideoDetailController extends GetxController
             ? () => getMediaList(isLoadPrevious: true)
             : null,
         onDelete:
-            sourceType == 'watchLater' ||
-                (sourceType == 'fav' && Get.arguments?['isOwner'] == true)
+            sourceType == SourceType.watchLater ||
+                (sourceType == SourceType.fav &&
+                    Get.arguments?['isOwner'] == true)
             ? (item, index) async {
-                if (sourceType == 'watchLater') {
+                if (sourceType == SourceType.watchLater) {
                   var res = await UserHttp.toViewDel(
                     aids: [item.aid],
                   );
@@ -700,6 +692,7 @@ class VideoDetailController extends GetxController
         'videoID': bvid,
         'cid': cid.value,
       },
+      options: Options(validateStatus: (status) => true),
     );
     if (result.statusCode == 200) {
       if (result.data case List list) {
@@ -1138,7 +1131,7 @@ class VideoDetailController extends GetxController
               ? null
               : Duration(milliseconds: data.timeLength!)),
       // 宽>高 水平 否则 垂直
-      direction: direction.value,
+      isVertical: isVertical.value,
       bvid: bvid,
       cid: cid.value,
       autoplay: autoplay ?? autoPlay.value,
@@ -1442,7 +1435,7 @@ class VideoDetailController extends GetxController
       return;
     }
 
-    void setSub(subtitle) {
+    void setSub(String subtitle) {
       plPlayerController.videoPlayerController?.setSubtitleTrack(
         SubtitleTrack.data(
           subtitle,
@@ -1560,12 +1553,13 @@ class VideoDetailController extends GetxController
         int idx = 0;
         subtitles.value = playInfo.subtitle!.subtitles!;
 
-        String preference = Pref.subtitlePreference;
-        if (preference != 'off') {
+        SubtitlePrefType preference =
+            SubtitlePrefType.values[Pref.subtitlePreferenceV2];
+        if (preference != SubtitlePrefType.off) {
           idx = subtitles.indexWhere((i) => !i.lan!.startsWith('ai')) + 1;
           if (idx == 0) {
-            if (preference == 'on' ||
-                (preference == 'auto' &&
+            if (preference == SubtitlePrefType.on ||
+                (preference == SubtitlePrefType.auto &&
                     (await FlutterVolumeController.getVolume() ?? 0) <= 0)) {
               idx = 1;
             }
@@ -1598,7 +1592,7 @@ class VideoDetailController extends GetxController
                     ? -1
                     : playedTime!.inSeconds
               : playedTime!.inSeconds,
-          type: 'status',
+          type: HeartBeatType.status,
           isManual: true,
           bvid: bvid,
           cid: cid.value,

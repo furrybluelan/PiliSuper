@@ -56,7 +56,7 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
     initPubState();
 
     if (widget.autofocus) {
-      Future.delayed(const Duration(milliseconds: 300)).whenComplete(() {
+      Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
           focusNode.requestFocus();
         }
@@ -77,9 +77,8 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
     super.dispose();
   }
 
-  Future<void> _requestFocus() async {
-    await Future.delayed(const Duration(microseconds: 200));
-    focusNode.requestFocus();
+  void _requestFocus() {
+    Future.delayed(const Duration(microseconds: 200), focusNode.requestFocus);
   }
 
   @override

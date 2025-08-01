@@ -48,13 +48,12 @@ class FollowChildController
   @override
   Future<LoadingState<FollowData>> customGetData() {
     if (tagid != null) {
-      return MemberHttp.followUpGroup(mid, tagid, page, 20);
+      return MemberHttp.followUpGroup(mid: mid, tagid: tagid, pn: page);
     }
 
-    return FollowHttp.followingsNew(
+    return FollowHttp.followings(
       vmid: mid,
       pn: page,
-      ps: 20,
       orderType: orderType.value.type,
     );
   }

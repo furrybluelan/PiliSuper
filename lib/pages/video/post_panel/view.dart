@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class PostPanel extends CommonCollapseSlidePage {
@@ -326,18 +326,25 @@ class _PostPanelState extends CommonCollapseSlidePageState<PostPanel> {
                 videoDetailController.initSkip();
               }
             } else {
-              SmartDialog.showToast(
-                '提交失败: ${switch (res.statusCode) {
-                  400 => '参数错误',
-                  403 => '被自动审核机制拒绝',
-                  429 => '重复提交太快',
-                  409 => '重复提交',
-                  _ => res.statusCode.toString(),
-                }}',
-              );
+              SmartDialog.showToast('提交失败: ${_errMsg(res)}');
             }
           },
         );
+  }
+
+  String _errMsg(Response res) {
+    if (res.data case String e) {
+      if (e.isNotEmpty) {
+        return e;
+      }
+    }
+    return switch (res.statusCode) {
+      400 => '参数错误',
+      403 => '被自动审核机制拒绝',
+      429 => '重复提交太快',
+      409 => '重复提交',
+      _ => '${res.data}(${res.statusCode})',
+    };
   }
 
   Widget _buildItem(ThemeData theme, int index, PostSegmentModel item) {

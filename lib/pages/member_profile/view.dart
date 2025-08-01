@@ -531,9 +531,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               .then((res) {
                 if (res.data['code'] == 0) {
                   SmartDialog.showToast('修改成功');
-                  Future.delayed(
-                    const Duration(milliseconds: 500),
-                  ).whenComplete(_getInfo);
+                  Future.delayed(const Duration(milliseconds: 500), _getInfo);
                 } else {
                   SmartDialog.showToast(res.data['message']);
                 }

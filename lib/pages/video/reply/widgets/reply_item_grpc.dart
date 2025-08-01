@@ -772,7 +772,7 @@ class ReplyItemGrpc extends StatelessWidget {
                             Duration(
                               seconds: DurationUtil.parseDuration(matchStr),
                             ),
-                            type: 'slider',
+                            isSeek: false,
                           );
                         } catch (e) {
                           SmartDialog.showToast('跳转失败: $e');

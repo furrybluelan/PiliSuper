@@ -124,7 +124,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     videoPlayerServiceHandler.onVideoDetailDispose(heroTag);
     _listener?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    ScreenBrightness().resetApplicationScreenBrightness();
+    ScreenBrightness.instance.resetApplicationScreenBrightness();
     PlPlayerController.setPlayCallBack(null);
     _liveRoomController
       ..msgStream?.close()

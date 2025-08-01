@@ -26,7 +26,6 @@ import 'package:PiliPlus/pages/live_room/view.dart';
 import 'package:PiliPlus/pages/login/view.dart';
 import 'package:PiliPlus/pages/main/view.dart';
 import 'package:PiliPlus/pages/match_info/view.dart';
-import 'package:PiliPlus/pages/media/view.dart';
 import 'package:PiliPlus/pages/member/view.dart';
 import 'package:PiliPlus/pages/member_dynamics/view.dart';
 import 'package:PiliPlus/pages/member_profile/view.dart';
@@ -80,8 +79,6 @@ class Routes {
     CustomGetPage(name: '/webview', page: () => const WebviewPage()),
     // 设置
     CustomGetPage(name: '/setting', page: () => const SettingPage()),
-    //
-    CustomGetPage(name: '/media', page: () => const MediaPage()),
     //
     CustomGetPage(name: '/fav', page: () => const FavPage()),
     //

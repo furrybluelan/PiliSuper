@@ -16,8 +16,8 @@ enum ThemeType {
   };
 
   Icon get icon => switch (this) {
-    ThemeType.light => const Icon(MdiIcons.weatherSunny, size: 24),
-    ThemeType.dark => const Icon(MdiIcons.weatherNight, size: 24),
-    ThemeType.system => const Icon(MdiIcons.themeLightDark, size: 24),
+    ThemeType.light => const Icon(MdiIcons.weatherSunny),
+    ThemeType.dark => const Icon(MdiIcons.weatherNight),
+    ThemeType.system => const Icon(MdiIcons.themeLightDark),
   };
 }

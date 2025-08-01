@@ -7,7 +7,7 @@ class FanHttp {
   static Future<LoadingState<FansData>> fans({
     int? vmid,
     int? pn,
-    int? ps,
+    int ps = 20,
     String? orderType,
   }) async {
     var res = await Request().get(

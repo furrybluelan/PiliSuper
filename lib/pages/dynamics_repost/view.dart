@@ -285,11 +285,9 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
                     tooltip: '返回',
                     style: ButtonStyle(
                       padding: WidgetStateProperty.all(EdgeInsets.zero),
-                      backgroundColor: WidgetStateProperty.resolveWith((
-                        states,
-                      ) {
-                        return theme.colorScheme.secondaryContainer;
-                      }),
+                      backgroundColor: WidgetStatePropertyAll(
+                        theme.colorScheme.secondaryContainer,
+                      ),
                     ),
                     onPressed: Get.back,
                     icon: Icon(

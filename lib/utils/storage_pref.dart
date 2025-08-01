@@ -5,7 +5,6 @@ import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
-import 'package:PiliPlus/models/common/home_tab_type.dart';
 import 'package:PiliPlus/models/common/member/tab_type.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
@@ -42,7 +41,7 @@ class Pref {
   );
 
   static Set<int> get blackMids =>
-      _localCache.get(LocalCacheKey.blackMids, defaultValue: const <int>{});
+      _localCache.get(LocalCacheKey.blackMids, defaultValue: <int>{});
 
   static set blackMids(Set<int> blackMidsSet) {
     _localCache.put(LocalCacheKey.blackMids, blackMidsSet);
@@ -95,41 +94,34 @@ class Pref {
     ),
   );
 
-  static List<int> get tabbarSort => List<int>.from(
-    _setting.get(SettingBoxKey.tabBarSort) ??
-        HomeTabType.values.map((item) => item.index).toList(),
-  );
+  static List<int>? get tabbarSort =>
+      (_setting.get(SettingBoxKey.tabBarSort) as List?)?.cast<int>();
 
   static List<Pair<SegmentType, SkipType>> get blockSettings {
-    List<int> list = List<int>.from(
-      _setting.get(SettingBoxKey.blockSettings) ??
-          List.generate(SegmentType.values.length, (_) => 1),
-    );
+    List<int>? list = (_setting.get(SettingBoxKey.blockSettings) as List?)
+        ?.cast<int>();
     return SegmentType.values
         .map(
           (item) => Pair<SegmentType, SkipType>(
             first: item,
-            second: SkipType.values[list[item.index]],
+            second: SkipType.values[list?[item.index] ?? 1],
           ),
         )
         .toList();
   }
 
   static List<Color> get blockColor {
-    List<String> list = List<String>.from(
-      _setting.get(SettingBoxKey.blockColor) ??
-          List.generate(SegmentType.values.length, (_) => ''),
-    );
-    return SegmentType.values
-        .map(
-          (item) => list[item.index].isNotEmpty
-              ? Color(
-                  int.tryParse('FF${list[item.index]}', radix: 16) ??
-                      0xFF000000,
-                )
-              : item.color,
-        )
-        .toList();
+    List<String>? list = (_setting.get(SettingBoxKey.blockColor) as List?)
+        ?.cast<String>();
+    return SegmentType.values.map(
+      (item) {
+        final e = list?[item.index];
+        final color = e != null && e.isNotEmpty
+            ? int.tryParse('FF$e', radix: 16)
+            : null;
+        return color != null ? Color(color) : item.color;
+      },
+    ).toList();
   }
 
   static bool get hiddenSettingUnlocked =>
@@ -186,9 +178,9 @@ class Pref {
     defaultValue: BtmProgressBehavior.alwaysShow.index,
   );
 
-  static String get subtitlePreference => _setting.get(
-    SettingBoxKey.subtitlePreference,
-    defaultValue: SubtitlePrefType.off.code,
+  static int get subtitlePreferenceV2 => _setting.get(
+    SettingBoxKey.subtitlePreferenceV2,
+    defaultValue: SubtitlePrefType.off.index,
   );
 
   static bool get useRelativeSlide =>
@@ -510,9 +502,6 @@ class Pref {
   static bool get recordSearchHistory =>
       _setting.get(SettingBoxKey.recordSearchHistory, defaultValue: true);
 
-  static bool get navSearchStreamDebounce =>
-      _setting.get(SettingBoxKey.navSearchStreamDebounce, defaultValue: false);
-
   static String get webdavUri =>
       _setting.get(SettingBoxKey.webdavUri, defaultValue: '');
 
@@ -614,6 +603,12 @@ class Pref {
 
   static bool get hideSearchBar =>
       _setting.get(SettingBoxKey.hideSearchBar, defaultValue: true);
+
+  static bool get enableScrollThreshold =>
+      _setting.get(SettingBoxKey.enableScrollThreshold, defaultValue: false);
+
+  static double get scrollThreshold =>
+      _setting.get(SettingBoxKey.scrollThreshold, defaultValue: 50.0);
 
   static bool get enableSearchWord =>
       _setting.get(SettingBoxKey.enableSearchWord, defaultValue: true);

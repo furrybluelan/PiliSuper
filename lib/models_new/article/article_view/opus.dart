@@ -10,10 +10,8 @@ class ArticleOpus {
     opusid = json['opus_id'];
     opussource = json['opus_source'];
     title = json['title'];
-    if (json['content']?['paragraphs'] is List) {
-      content = (json['content']['paragraphs'] as List)
-          .map((i) => ArticleContentModel.fromJson(i))
-          .toList();
+    if (json['content']?['paragraphs'] case List list) {
+      content = list.map((i) => ArticleContentModel.fromJson(i)).toList();
     }
   }
 }

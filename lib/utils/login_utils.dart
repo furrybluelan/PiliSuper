@@ -10,7 +10,6 @@ import 'package:PiliPlus/models/user/stat.dart';
 import 'package:PiliPlus/pages/dynamics/controller.dart';
 import 'package:PiliPlus/pages/dynamics_tab/controller.dart';
 import 'package:PiliPlus/pages/live/controller.dart';
-import 'package:PiliPlus/pages/media/controller.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/pages/pgc/controller.dart';
 import 'package:PiliPlus/services/account_service.dart';
@@ -47,8 +46,8 @@ class LoginUtils {
       SmartDialog.showToast('设置登录态失败，$e');
     }
     final result = await UserHttp.userInfo();
-    if (result['status']) {
-      final UserInfoData data = result['data'];
+    if (result.isSuccess) {
+      final UserInfoData data = result.data;
       if (data.isLogin == true) {
         Get.find<AccountService>()
           ..mid = data.mid!
@@ -60,7 +59,7 @@ class LoginUtils {
         await GStorage.userInfo.put('userInfoCache', data);
 
         try {
-          Get.find<MineController>().queryUserInfo();
+          Get.find<MineController>().onRefresh();
         } catch (_) {}
 
         try {
@@ -72,10 +71,6 @@ class LoginUtils {
             Get.find<DynamicsTabController>(tag: item.name).onRefresh();
           } catch (_) {}
         }
-
-        try {
-          Get.find<MediaController>().onRefresh();
-        } catch (_) {}
 
         try {
           Get.find<LiveController>().onRefresh();
@@ -97,7 +92,7 @@ class LoginUtils {
       // 获取用户信息失败
       await Accounts.deleteAll({account});
       SmartDialog.showNotify(
-        msg: '登录失败，请检查cookie是否正确，${result['msg']}',
+        msg: '登录失败，请检查cookie是否正确，${result.toString()}',
         notifyType: NotifyType.warning,
       );
     }
@@ -120,16 +115,13 @@ class LoginUtils {
     try {
       Get.find<MineController>()
         ..userInfo.value = UserInfoData()
-        ..userStat.value = UserStat();
+        ..userStat.value = UserStat()
+        ..loadingState.value = LoadingState.loading();
       // MineController.anonymity.value = false;
     } catch (_) {}
 
     try {
       Get.find<DynamicsController>().onRefresh();
-    } catch (_) {}
-
-    try {
-      Get.find<MediaController>().loadingState.value = LoadingState.loading();
     } catch (_) {}
 
     try {

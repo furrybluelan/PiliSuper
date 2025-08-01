@@ -143,7 +143,7 @@ class LiveHeaderControl extends StatelessWidget {
                     if ((await floating.isPipAvailable) == true) {
                       plPlayerController.hiddenControls(false);
                       floating.enable(
-                        plPlayerController.direction.value == 'vertical'
+                        plPlayerController.isVertical
                             ? const EnableManual(
                                 aspectRatio: Rational.vertical(),
                               )

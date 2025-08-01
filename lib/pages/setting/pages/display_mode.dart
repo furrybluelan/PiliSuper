@@ -91,7 +91,8 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
                       ).whenComplete(
                         () => Future.delayed(
                           const Duration(milliseconds: 100),
-                        ).whenComplete(fetchAll),
+                          fetchAll,
+                        ),
                       );
                     },
                   );

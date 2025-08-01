@@ -7,13 +7,13 @@ import 'package:PiliPlus/utils/accounts.dart';
 class BlackHttp {
   static Future<LoadingState<BlackListData>> blackList({
     required int pn,
-    int? ps,
+    int ps = 50,
   }) async {
     var res = await Request().get(
       Api.blackLst,
       queryParameters: {
         'pn': pn,
-        'ps': ps ?? 50,
+        'ps': ps,
         're_version': 0,
         'jsonp': 'jsonp',
         'csrf': Accounts.main.csrf,

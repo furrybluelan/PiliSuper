@@ -36,7 +36,7 @@ class LiveRoomController extends GetxController {
   // 静音状态
   RxBool volumeOff = false.obs;
   PlPlayerController plPlayerController = PlPlayerController.getInstance(
-    videoType: 'live',
+    isLive: true,
   );
   Rx<RoomInfoH5Data?> roomInfoH5 = Rx<RoomInfoH5Data?>(null);
 
@@ -80,7 +80,7 @@ class LiveRoomController extends GetxController {
         },
       ),
       autoplay: true,
-      direction: isPortrait.value ? 'vertical' : 'horizontal',
+      isVertical: isPortrait.value,
     );
   }
 

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/models/common/webview_menu_type.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
@@ -22,7 +22,7 @@ class WebviewPage extends StatefulWidget {
   // note
   final int? oid;
   final String? title;
-  final String? uaType;
+  final UaType? uaType;
 
   @override
   State<WebviewPage> createState() => _WebviewPageState();
@@ -30,7 +30,8 @@ class WebviewPage extends StatefulWidget {
 
 class _WebviewPageState extends State<WebviewPage> {
   late final String _url = widget.url ?? Get.parameters['url'] ?? '';
-  late final uaType = widget.uaType ?? Get.parameters['uaType'] ?? 'mob';
+  late final UaType uaType =
+      widget.uaType ?? UaType.values.byName(Get.parameters['uaType'] ?? 'mob');
   final RxString title = ''.obs;
   final RxDouble progress = 1.0.obs;
   bool? _inApp;
@@ -158,7 +159,7 @@ class _WebviewPageState extends State<WebviewPage> {
             useHybridComposition: false,
             algorithmicDarkeningAllowed: true,
             useShouldOverrideUrlLoading: true,
-            userAgent: Request.headerUa(type: uaType),
+            userAgent: uaType.ua,
             mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
           ),
           initialUrlRequest: URLRequest(

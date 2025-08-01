@@ -56,7 +56,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
           IconButton(
             tooltip: '搜索',
-            onPressed: () => _searchController.submit(),
+            onPressed: _searchController.submit,
             icon: const Icon(Icons.search, size: 22),
           ),
           const SizedBox(width: 10),
@@ -68,7 +68,7 @@ class _SearchPageState extends State<SearchPage> {
           textInputAction: TextInputAction.search,
           onChanged: _searchController.onChange,
           decoration: InputDecoration(
-            hintText: _searchController.hintText,
+            hintText: _searchController.hintText ?? '搜索',
             border: InputBorder.none,
           ),
           onSubmitted: (value) => _searchController.submit(),
