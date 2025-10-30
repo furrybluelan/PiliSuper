@@ -6,6 +6,7 @@
 
 <div align="center">
     <h1>PiliSuper</h1>
+    <h1>PiliSuper</h1>
 <div align="center">
     
 ![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper) 
@@ -261,6 +262,7 @@
 ## 致谢
 
 - [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
+- [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
@@ -278,7 +280,11 @@
 ## Star History
 
 <a href="https://www.star-history.com/#furrybluelan/PiliSuper&Date">
+<a href="https://www.star-history.com/#furrybluelan/PiliSuper&Date">
  <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date&theme=dark" />
    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
