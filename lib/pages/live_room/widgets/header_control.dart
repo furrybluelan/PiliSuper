@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
-import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliSuper/plugin/pl_player/controller.dart';
+import 'package:PiliSuper/plugin/pl_player/widgets/common_btn.dart';
+import 'package:PiliSuper/utils/page_utils.dart';
+import 'package:PiliSuper/utils/utils.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

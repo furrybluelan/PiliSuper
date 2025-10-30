@@ -1,4 +1,4 @@
-PiliPlus is a third-party Bilibili client developed in Flutter, 
+PiliSuper is a third-party Bilibili client developed in Flutter, 
 fork from PiliPalaX (https://github.com/orz12/PiliPalaX).
 
 Top Features:

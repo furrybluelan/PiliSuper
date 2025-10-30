@@ -127,7 +127,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: ca2bb137bd0e4b221df3bc5ba1492d2902c78624
-      url: "https://github.com/bggRGjQaUbCoE/auto_orientation.git"
+      url: "https://github.com/furrybluelan/auto_orientation.git"
     source: git
     version: "2.3.1"
   boolean_selector:
@@ -224,7 +224,7 @@ packages:
       path: "."
       ref: main
       resolved-ref: "9986919515728fb501e3e62bf4d277dfcd96b799"
-      url: "https://github.com/bggRGjQaUbCoE/canvas_danmaku.git"
+      url: "https://github.com/furrybluelan/canvas_danmaku.git"
     source: git
     version: "0.2.6"
   catcher_2:
@@ -249,7 +249,7 @@ packages:
       path: "packages/chat_bottom_container"
       ref: main
       resolved-ref: acccababf698ef1712031c383ea4b7ff54ae630c
-      url: "https://github.com/bggRGjQaUbCoE/flutter_chat_packages.git"
+      url: "https://github.com/furrybluelan/flutter_chat_packages.git"
     source: git
     version: "0.3.2"
   checked_yaml:
@@ -474,7 +474,7 @@ packages:
       path: "."
       ref: mod
       resolved-ref: "4bb4e827628b3b7ccc88a4b98ef76a036a5a51ac"
-      url: "https://github.com/bggRGjQaUbCoE/extended_nested_scroll_view.git"
+      url: "https://github.com/furrybluelan/extended_nested_scroll_view.git"
     source: git
     version: "6.2.1"
   fake_async:
@@ -571,7 +571,7 @@ packages:
       path: "."
       ref: version-3
       resolved-ref: a66ec0b9dabde6b5880a3f4f3425e57842a38e51
-      url: "https://github.com/bggRGjQaUbCoE/floating.git"
+      url: "https://github.com/furrybluelan/floating.git"
     source: git
     version: "3.0.0"
   flutter:
@@ -726,7 +726,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: ed2d47c7a8cc0d218bc322ab770fd19c0b56a863
-      url: "https://github.com/bggRGjQaUbCoE/flutter_sortable_wrap.git"
+      url: "https://github.com/furrybluelan/flutter_sortable_wrap.git"
     source: git
     version: "1.0.6"
   flutter_svg:
@@ -1089,7 +1089,7 @@ packages:
       path: "."
       ref: const
       resolved-ref: c11f18c031f1045900dc3e817f7519eb863c2550
-      url: "https://github.com/bggRGjQaUbCoE/material_design_icons_flutter.git"
+      url: "https://github.com/furrybluelan/material_design_icons_flutter.git"
     source: git
     version: "7.0.7447"
   media_kit:
@@ -1098,7 +1098,7 @@ packages:
       path: media_kit
       ref: "version_1.2.5"
       resolved-ref: bc999bf181ddf12d60891f76e41359e4177b93a7
-      url: "https://github.com/bggRGjQaUbCoE/media-kit.git"
+      url: "https://github.com/furrybluelan/media-kit.git"
     source: git
     version: "1.1.11"
   media_kit_libs_android_video:
@@ -1107,7 +1107,7 @@ packages:
       path: "libs/android/media_kit_libs_android_video"
       ref: "version_1.2.5"
       resolved-ref: bc999bf181ddf12d60891f76e41359e4177b93a7
-      url: "https://github.com/bggRGjQaUbCoE/media-kit.git"
+      url: "https://github.com/furrybluelan/media-kit.git"
     source: git
     version: "1.3.7"
   media_kit_libs_ios_video:
@@ -1140,7 +1140,7 @@ packages:
       path: "libs/universal/media_kit_libs_video"
       ref: "version_1.2.5"
       resolved-ref: bc999bf181ddf12d60891f76e41359e4177b93a7
-      url: "https://github.com/bggRGjQaUbCoE/media-kit.git"
+      url: "https://github.com/furrybluelan/media-kit.git"
     source: git
     version: "1.0.5"
   media_kit_libs_windows_video:
@@ -1149,7 +1149,7 @@ packages:
       path: "libs/windows/media_kit_libs_windows_video"
       ref: "version_1.2.5"
       resolved-ref: bc999bf181ddf12d60891f76e41359e4177b93a7
-      url: "https://github.com/bggRGjQaUbCoE/media-kit.git"
+      url: "https://github.com/furrybluelan/media-kit.git"
     source: git
     version: "1.0.10"
   media_kit_native_event_loop:
@@ -1158,7 +1158,7 @@ packages:
       path: media_kit_native_event_loop
       ref: "version_1.2.5"
       resolved-ref: bc999bf181ddf12d60891f76e41359e4177b93a7
-      url: "https://github.com/bggRGjQaUbCoE/media-kit.git"
+      url: "https://github.com/furrybluelan/media-kit.git"
     source: git
     version: "1.0.9"
   media_kit_video:
@@ -1167,7 +1167,7 @@ packages:
       path: media_kit_video
       ref: "version_1.2.5"
       resolved-ref: bc999bf181ddf12d60891f76e41359e4177b93a7
-      url: "https://github.com/bggRGjQaUbCoE/media-kit.git"
+      url: "https://github.com/furrybluelan/media-kit.git"
     source: git
     version: "1.2.5"
   menu_base:
@@ -1709,7 +1709,7 @@ packages:
       path: "."
       ref: mod
       resolved-ref: "71f34fa179e2d05818004e22e632dd59f2a223be"
-      url: "https://github.com/bggRGjQaUbCoE/super_sliver_list.git"
+      url: "https://github.com/furrybluelan/super_sliver_list.git"
     source: git
     version: "0.4.1"
   synchronized:
@@ -1983,7 +1983,7 @@ packages:
       path: "packages/window_manager"
       ref: main
       resolved-ref: "974ab0a71d37cfca9d9bd5b295d7bd1df80b790b"
-      url: "https://github.com/bggRGjQaUbCoE/window_manager.git"
+      url: "https://github.com/furrybluelan/window_manager.git"
     source: git
     version: "0.5.1"
   xdg_directories:
