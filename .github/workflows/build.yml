@@ -73,6 +73,10 @@ jobs:
           flutter-version-file: pubspec.yaml
           cache: true
 
+      - name: Add Rename CLI tool
+        run: |
+            dart pub global activate rename
+
       - name: Build
         env:
           KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
@@ -149,6 +153,10 @@ jobs:
         with:
           channel: stable
           flutter-version-file: pubspec.yaml
+      
+      - name: Add Rename CLI tool
+        run: |
+            dart pub global activate rename
 
       - name: Build
         run: |
@@ -201,6 +209,10 @@ jobs:
 
       - name: Install create-dmg
         run: npm install --global create-dmg
+
+      - name: Add Rename CLI tool
+        run: |
+            dart pub global activate rename
 
       - name: Build
         run: |
@@ -261,6 +273,10 @@ jobs:
         run: |
           Copy-Item "windows/packaging/exe/ChineseSimplified.isl" `
             "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
+      
+      - name: Add Rename CLI tool
+        run: |
+            dart pub global activate rename
 
       - name: Build
         shell: bash
@@ -340,6 +356,10 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
           cache: true
+
+      - name: Add Rename CLI tool
+        run: |
+            dart pub global activate rename
 
       - name: Build
         run: |
