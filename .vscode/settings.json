@@ -7,5 +7,9 @@
     "source.organizeImports": "explicit"
   },
   "cmake.sourceDirectory": "K:/coding/PiliSuper/windows",
-  "dart.flutterSdkPath": ".fvm/versions/3.41.2"
+  "dart.flutterSdkPath": ".fvm/versions/3.41.2",
+  "conventionalCommits.scopes": [
+    "setting",
+    "vscode"
+  ]
 }
