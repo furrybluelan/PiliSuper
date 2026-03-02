@@ -239,9 +239,55 @@
 
 <br/>
 
-## 下载
+## 编译
 
-可以通过右侧release进行下载或拉取代码到本地进行编译
+### 首先，克隆仓库到本地
+
+``` Shell
+# 使用https方式克隆仓库
+git clone https://github.com/FRBLanApps/PiliSuper.git
+```
+
+``` Shell
+# 或者，使用ssh方式克隆仓库
+git clone git@github.com:FRBLanApps/PiliSuper.git
+```
+
+``` Shell
+# 又或者，使用gh repo clone命令克隆仓库
+gh repo clone FRBLanApps/PiliSuper
+```
+
+### 然后，按照教程，安装依赖
+
+[安装 Flutter](https://docs.flutter.dev/install/custom)
+[安装多平台构建依赖](https://docs.flutter.dev/platform-integration)
+
+### 然后，安装Python以便运行构建脚本
+
+[安装 Python](https://www.python.org/downloads/)
+
+### 最后，运行构建脚本
+
+首先，切换到项目目录
+
+``` Shell
+cd PiliSuper
+```
+
+然后，运行构建脚本
+
+``` Shell
+python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
+                [--original-app-name NAME] [--skip-rename] [--dart-define-from-file FILE]  
+                [--dart-define K=V] [--arch ARCH] [--version VERSION] [--no-prebuild]      
+                [--no-split] [--sign] [--keystore-file PATH] [--keystore-base64 B64]       
+                [--key-alias ALIAS] [--key-password PASS] [--store-password PASS]
+                [--clean-keys] [--installer]
+                [--linux-targets {tar.gz,zst,arch,deb,rpm,appimage,all} [{tar.gz,zst,arch,deb,rpm,appimage,all} ...]]
+                [--output DIR] [--output-prefix PREFIX] [--no-patches] [--no-pub-get]      
+                {android,ios,macos,windows,linux,all}
+```
 
 <br/>
 
@@ -273,20 +319,17 @@
 <br/>
 <br/>
 
-## 你们的精神状态还好吗？
-
-[已经疯掉了，下一个问题。](https://github.com/FRBLanApps/PiliSuper/blob/main/screaming.txt)
 
 ## Star History
 
-<a href="https://www.star-history.com/#furrybluelan/PiliSuper&Date">
-<a href="https://www.star-history.com/#furrybluelan/PiliSuper&Date">
+<a href="https://www.star-history.com/#FRBLanApps/PiliSuper&Date">
+<a href="https://www.star-history.com/#FRBLanApps/PiliSuper&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
  </picture>
 </a>
