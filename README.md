@@ -5,12 +5,12 @@
 
 
 <div align="center">
-    <h1>PiliPlus</h1>
+    <h1>PiliSuper</h1>
 <div align="center">
     
-![GitHub repo size](https://img.shields.io/github/repo-size/bggRGjQaUbCoE/PiliPlus) 
-![GitHub Repo stars](https://img.shields.io/github/stars/bggRGjQaUbCoE/PiliPlus) 
-![GitHub all releases](https://img.shields.io/github/downloads/bggRGjQaUbCoE/PiliPlus/total) 
+![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper) 
+![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper) 
+![GitHub all releases](https://img.shields.io/github/downloads/FRBLanApps/PiliSuper/total) 
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
     
@@ -24,6 +24,17 @@
 
 
 <br/>
+
+## 此项目现状
+目前不方便提交代码
+~~因为没电脑（发怒摔坏了~~
+可能得明年才有大更新
+如果有人愿意来做这个项目，联系：3784474660@qq.com
+谢谢对此项目关心的人的帮助与支持！
+
+## 登陆凭证与设置的迁移
+直接在关于那里找导入/导出登录信息/设置即可。
+产生的文本既适用于本项目，也适用于上游的PiliPlus。
 
 ## 适配平台
 
@@ -43,7 +54,6 @@
 
 ## feat
 
-- [x] 编辑动态
 - [x] DLNA 投屏
 - [x] 离线缓存/播放
 - [x] 移动端支持点击弹幕悬停，点赞、复制、举报 by [@My-Responsitories](https://github.com/My-Responsitories)
@@ -211,6 +221,23 @@
 
 <br/>
 
+## 大饼(
+
+- [ ] Apple 通知推送（不可能的，那玩意需要Apple开发者账号，维护者没有人掏得出来这笔钱）
+- [ ] iOS视频小窗支持
+- [ ] 3D视频支持
+- [ ] 专栏/视频上传支持（好像有单独项目吧？）
+- [ ] 主题支持
+- [ ] 界面多样式切换
+- [ ] 创作中心
+- [ ] i18n
+- [ ] 有点麻烦的弹幕防挡
+- [ ] 听视频
+- [ ] Google FCM推送
+- [ ] 一些细节问题
+
+<br/>
+
 ## 下载
 
 可以通过右侧release进行下载或拉取代码到本地进行编译
@@ -219,10 +246,11 @@
 
 ## 声明
 
-此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
-所用API皆从官方网站收集，不提供任何破解内容。
-在此致敬原作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+此项目（PiliSuper）是个人为了兴趣而开发, 仅用于学习和测试，请按照您当地的法律处理此软件。
+
+在此致敬原作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
+在此致敬上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+在此致敬上上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
 本仓库做了更激进的修改，感谢原作者的开源精神。
 
 感谢使用
@@ -232,6 +260,7 @@
 
 ## 致谢
 
+- [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
@@ -242,12 +271,16 @@
 <br/>
 <br/>
 
+## 你们的精神状态还好吗？
+
+[已经疯掉了，下一个问题。](https://github.com/FRBLanApps/PiliSuper/blob/main/screaming.txt)
+
 ## Star History
 
-<a href="https://www.star-history.com/#bggRGjQaUbCoE/PiliPlus&Date">
+<a href="https://www.star-history.com/#furrybluelan/PiliSuper&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=furrybluelan/PiliSuper&type=Date" />
  </picture>
 </a>
