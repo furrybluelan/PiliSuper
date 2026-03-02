@@ -12,6 +12,16 @@ on:
         required: false
         default: ""
         type: string
+      pkg_id:
+        description: "包名（留空则使用默认值）"
+        required: false
+        default: "com.pili.super"
+        type: string
+      app_name:
+        description: "应用名（留空则使用默认值）"
+        required: false
+        default: "PiliSuper"
+        type: string
       build_android:
         description: "Build Android"
         default: true
@@ -81,10 +91,25 @@ jobs:
               --clean-keys
             )
           fi
+
+          NAME_ARGS=()
+          if [[ -n "${{ inputs.app_name }}" ]]; then
+            NAME_ARGS+=(
+              --app-name "${{ inputs.app_name }}"
+            )
+          fi
+
+          if [[ -n "${{ inputs.pkg_id }}" ]]; then
+            NAME_ARGS+=(
+              --pkg-id "${{ inputs.pkg_id }}"
+            )
+          fi
+
           python3 build.py android \
             --output-prefix PiliPlus \
             --output dist \
-            "${SIGN_ARGS[@]}"
+            "${SIGN_ARGS[@]}" \
+            "${NAME_ARGS[@]}" \
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -127,7 +152,21 @@ jobs:
 
       - name: Build
         run: |
+          NAME_ARGS=()
+          if [[ -n "${{ inputs.app_name }}" ]]; then
+            NAME_ARGS+=(
+              --app-name "${{ inputs.app_name }}"
+            )
+          fi
+
+          if [[ -n "${{ inputs.pkg_id }}" ]]; then
+            NAME_ARGS+=(
+              --pkg-id "${{ inputs.pkg_id }}"
+            )
+          fi
+          
           python3 build.py ios \
+            "${NAME_ARGS[@]}" \
             --output-prefix PiliPlus \
             --output dist
 
@@ -165,7 +204,21 @@ jobs:
 
       - name: Build
         run: |
+          NAME_ARGS=()
+          if [[ -n "${{ inputs.app_name }}" ]]; then
+            NAME_ARGS+=(
+              --app-name "${{ inputs.app_name }}"
+            )
+          fi
+
+          if [[ -n "${{ inputs.pkg_id }}" ]]; then
+            NAME_ARGS+=(
+              --pkg-id "${{ inputs.pkg_id }}"
+            )
+          fi
+
           python3 build.py macos \
+            "${NAME_ARGS[@]}" \
             --output-prefix PiliPlus \
             --output dist
 
@@ -210,9 +263,18 @@ jobs:
             "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
 
       - name: Build
+        shell: bash
         run: |
-          python build.py windows --installer `
-            --output-prefix PiliPlus `
+          NAME_ARGS=()
+          if [[ -n "${{ inputs.app_name }}" ]]; then
+            NAME_ARGS+=(--app-name "${{ inputs.app_name }}")
+          fi
+          if [[ -n "${{ inputs.pkg_id }}" ]]; then
+            NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
+          fi
+          python build.py windows --installer \
+            "${NAME_ARGS[@]}" \
+            --output-prefix PiliPlus \
             --output dist
 
       - name: Release
@@ -281,7 +343,21 @@ jobs:
 
       - name: Build
         run: |
+          NAME_ARGS=()
+          if [[ -n "${{ inputs.app_name }}" ]]; then
+            NAME_ARGS+=(
+              --app-name "${{ inputs.app_name }}"
+            )
+          fi
+
+          if [[ -n "${{ inputs.pkg_id }}" ]]; then
+            NAME_ARGS+=(
+              --pkg-id "${{ inputs.pkg_id }}"
+            )
+          fi
+
           python3 build.py linux \
+            "${NAME_ARGS[@]}" \
             --output-prefix PiliPlus \
             --output dist \
             --linux-targets tar.gz deb rpm appimage
