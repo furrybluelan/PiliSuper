@@ -2,19 +2,17 @@
     <img width="200" height="200" src="assets/images/logo/logo.png">
 </div>
 
-
-
 <div align="center">
     <h1>PiliSuper</h1>
     <h1>PiliSuper</h1>
 <div align="center">
-    
-![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper) 
-![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper) 
-![GitHub all releases](https://img.shields.io/github/downloads/FRBLanApps/PiliSuper/total) 
+
+![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper)
+![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper)
+![GitHub all releases](https://img.shields.io/github/downloads/FRBLanApps/PiliSuper/total)
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
-    
+
 <img src="assets/screenshots/510shots_so.png" width="32%" alt="home" />
 <img src="assets/screenshots/174shots_so.png" width="32%" alt="home" />
 <img src="assets/screenshots/850shots_so.png" width="32%" alt="home" />
@@ -23,17 +21,18 @@
 <br/>
 </div>
 
-
 <br/>
 
 ## 此项目现状
+
 目前不方便提交代码
 ~~因为没电脑（发怒摔坏了~~
 可能得明年才有大更新
-如果有人愿意来做这个项目，联系：3784474660@qq.com
+如果有人愿意来做这个项目，联系：<3784474660@qq.com>
 谢谢对此项目关心的人的帮助与支持！
 
 ## 登陆凭证与设置的迁移
+
 直接在关于那里找导入/导出登录信息/设置即可。
 产生的文本既适用于本项目，也适用于上游的PiliPlus。
 
@@ -55,6 +54,7 @@
 
 ## feat
 
+- [x] 编辑动态
 - [x] DLNA 投屏
 - [x] 离线缓存/播放
 - [x] 移动端支持点击弹幕悬停，点赞、复制、举报 by [@My-Responsitories](https://github.com/My-Responsitories)
@@ -192,14 +192,14 @@
   - [x] 字幕
   - [x] 记忆播放
   - [x] 视频比例：高度/宽度适应、填充、包含等
-     
+
 - [x] 搜索相关
   - [x] 热搜
   - [x] 搜索历史
   - [x] 默认搜索词
   - [x] 投稿、番剧、直播间、用户搜索
   - [x] 视频搜索排序、按时长筛选
-    
+
 - [x] 视频详情页相关
   - [x] 视频选集(分p)切换
   - [x] 点赞、投币、收藏/取消收藏
@@ -211,7 +211,7 @@
   - [x] 评论笔记图片查看、保存
 
 - [x] 设置相关
-  - [x] 画质、音质、解码方式预设      
+  - [x] 画质、音质、解码方式预设
   - [x] 图片质量设定
   - [x] 主题模式：亮色/暗色/跟随系统
   - [x] 震动反馈(可选)
@@ -302,7 +302,6 @@ python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
 
 感谢使用
 
-
 <br/>
 
 ## 致谢
@@ -318,7 +317,6 @@ python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
 <br/>
 <br/>
 <br/>
-
 
 ## Star History
 
