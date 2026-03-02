@@ -4,7 +4,6 @@
 
 <div align="center">
     <h1>PiliSuper</h1>
-    <h1>PiliSuper</h1>
 <div align="center">
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper)
@@ -307,7 +306,6 @@ python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
 ## 致谢
 
 - [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
-- [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
@@ -316,16 +314,18 @@ python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
 
 <br/>
 <br/>
+
+
+## 你们的精神状态还好吗？
+
+[已经疯掉了，下一个问题。](screaming.txt)
+
 <br/>
 
 ## Star History
 
 <a href="https://www.star-history.com/#FRBLanApps/PiliSuper&Date">
-<a href="https://www.star-history.com/#FRBLanApps/PiliSuper&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date&theme=dark" />
    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
