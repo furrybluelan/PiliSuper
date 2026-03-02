@@ -212,7 +212,7 @@
 <br/>
 
 ## 大饼(
-  
+
 请见[TODO.md](TODO.md)
 
 里面列出了很多功能和优化的想法，欢迎查看并提出建议)
@@ -288,6 +288,7 @@ python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
 
 - [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
+- [BACNext](https://github.com/BACNext/BACNext)
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
 - [dio](https://pub.dev/packages/dio)

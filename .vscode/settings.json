@@ -11,6 +11,7 @@
   "conventionalCommits.scopes": [
     "setting",
     "vscode",
-    "ci"
+    "ci",
+    "thanks"
   ]
 }
