@@ -12,6 +12,7 @@ Flutter 多平台构建脚本
 """
 
 import argparse
+import io
 import json
 import os
 import re
@@ -22,6 +23,11 @@ import textwrap
 import time
 import platform as _sys_platform
 from pathlib import Path
+
+# Windows stdout UTF-8（▶ 等字符在 cp1252 下无法输出）
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 # ══════════════════════════════════════════════════════════════════
 #  输出工具
@@ -845,13 +851,16 @@ def parse_args():
     g.add_argument("--no-patches",     dest="apply_patches", action="store_false", default=True)
     g.add_argument("--no-pub-get",     action="store_true")
 
-    # 透传参数放最后，用 -- 隔开
-    p.add_argument("extra_build_args", nargs=argparse.REMAINDER, default=[])
+    args, unknown = p.parse_known_args()
 
-    args = p.parse_args()
-
-    if args.extra_build_args and args.extra_build_args[0] == "--":
-        args.extra_build_args = args.extra_build_args[1:]
+    # 透传给 flutter build 的参数：只收集 -- 之后的内容，其余 unknown 报警
+    try:
+        sep = sys.argv.index("--")
+        args.extra_build_args = sys.argv[sep + 1:]
+    except ValueError:
+        args.extra_build_args = []
+        if unknown:
+            warn(f"未知参数（已忽略）: {unknown}")
 
     if not args.output_prefix and Path("pubspec.yaml").exists():
         args.output_prefix = pubspec_name()
