@@ -276,8 +276,7 @@ jobs:
       - name: Add Inno Setup Chinese language
         shell: pwsh
         run: |
-          Copy-Item "windows/packaging/ex
-          e/ChineseSimplified.isl" `
+          Copy-Item "windows/packaging/exe/ChineseSimplified.isl" `
             "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
       
       - name: Add Rename CLI tool
