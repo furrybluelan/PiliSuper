@@ -227,6 +227,7 @@ def sed_rename(args):
       • pubspec.yaml  name: 字段
       • Dart 文件中  package:old_name/ → package:new_name/
       • 原生代码中   com/old/pkg 目录路径形式
+      • 仓库 URL    github.com/old/repo → github.com/new/repo
     rename CLI 负责：
       • Android applicationId（build.gradle / AndroidManifest）
       • iOS/macOS Bundle Identifier（plist / pbxproj）
@@ -280,6 +281,16 @@ def sed_rename(args):
         if old_path != new_path:
             step(f"sed patch: 包路径  {old_path} → {new_path}")
             _sed_files(old_path, new_path, native_globs)
+
+    # ── 仓库 URL 替换 ──
+    if args.repo and args.original_repo and args.repo != args.original_repo:
+        step(f"sed patch: 仓库 URL  {args.original_repo} → {args.repo}")
+        repo_globs = [
+            "assets/linux/DEBIAN/*",
+            "lib/**/*.dart",
+            "windows/packaging/exe/make_config.yaml",
+        ]
+        _sed_files(args.original_repo, args.repo, repo_globs)
 
 
 def rename_cli(args):
@@ -1020,7 +1031,7 @@ def parse_args():
     g.add_argument(
         "--pkg-id",
         metavar="ID",
-        default="io.github.frblanapps.pili.super",
+        default="com.pili.super",
         help="新 Bundle ID，如 com.myfork.app",
     )
     g.add_argument(
@@ -1042,6 +1053,18 @@ def parse_args():
         help="上游 pubspec name（默认: piliPlus）",
     )
     g.add_argument("--skip-rename", action="store_true")
+    g.add_argument(
+        "--repo",
+        metavar="USER/REPO",
+        default="FRBLanApps/PiliSuper",
+        help="新仓库路径（默认: FRBLanApps/PiliSuper）",
+    )
+    g.add_argument(
+        "--original-repo",
+        metavar="USER/REPO",
+        default="bggRGjQaUbCoE/PiliPlus",
+        help="上游仓库路径（默认: bggRGjQaUbCoE/PiliPlus）",
+    )
 
     g = p.add_argument_group("构建参数")
     g.add_argument(
@@ -1083,7 +1106,7 @@ def parse_args():
 
     g = p.add_argument_group("通用")
     g.add_argument("--output", "-o", default="dist", metavar="DIR")
-    g.add_argument("--output-prefix", default=None, metavar="PREFIX")
+    g.add_argument("--output-prefix", default="PiliSuper", metavar="PREFIX")
     g.add_argument(
         "--no-patches", dest="apply_patches", action="store_false", default=True
     )
