@@ -54,11 +54,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: "17"
@@ -121,22 +121,22 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
-          files:    dist/PiliPlus_android_*.apk
+          files:    dist/PiliSuper_android_*.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Android_arm64-v8a
-          path: dist/PiliPlus_android_*_arm64-v8a.apk
+          path: dist/PiliSuper_android_*_arm64-v8a.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Android_armeabi-v7a
-          path: dist/PiliPlus_android_*_armeabi-v7a.apk
+          path: dist/PiliSuper_android_*_armeabi-v7a.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Android_x86_64
-          path: dist/PiliPlus_android_*_x86_64.apk
+          path: dist/PiliSuper_android_*_x86_64.apk
 
   # ───────────── iOS ─────────────
   ios:
@@ -145,7 +145,7 @@ jobs:
     runs-on: macos-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -184,12 +184,12 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
-          files:    dist/PiliPlus_ios_*.ipa
+          files:    dist/PiliSuper_ios_*.ipa
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: iOS
-          path: dist/PiliPlus_ios_*.ipa
+          path: dist/PiliSuper_ios_*.ipa
 
   # ───────────── macOS ─────────────
   macos:
@@ -198,7 +198,7 @@ jobs:
     runs-on: macos-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -240,12 +240,12 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
-          files:    dist/PiliPlus_macos_*.dmg
+          files:    dist/PiliSuper_macos_*.dmg
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: macOS
-          path: dist/PiliPlus_macos_*.dmg
+          path: dist/PiliSuper_macos_*.dmg
 
   # ───────────── Windows ─────────────
   windows:
@@ -254,7 +254,7 @@ jobs:
     runs-on: windows-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -271,7 +271,8 @@ jobs:
       - name: Add Inno Setup Chinese language
         shell: pwsh
         run: |
-          Copy-Item "windows/packaging/exe/ChineseSimplified.isl" `
+          Copy-Item "windows/packaging/ex
+          e/ChineseSimplified.isl" `
             "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
       
       - name: Add Rename CLI tool
@@ -300,18 +301,18 @@ jobs:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
           files: |
-            dist/PiliPlus_windows_*_portable.zip
-            dist/PiliPlus_windows_*_setup.exe
+            dist/PiliSuper_windows_*_portable.zip
+            dist/PiliSuper_windows_*_setup.exe
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Windows_portable_x64
-          path: dist/PiliPlus_windows_*_portable.zip
+          path: dist/PiliSuper_windows_*_portable.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Windows_setup_x64
-          path: dist/PiliPlus_windows_*_setup.exe
+          path: dist/PiliSuper_windows_*_setup.exe
 
   # ───────────── Linux ─────────────
   linux:
@@ -320,7 +321,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -389,27 +390,27 @@ jobs:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
           files: |
-            dist/PiliPlus_linux_*.tar.gz
-            dist/PiliPlus_linux_*.deb
-            dist/PiliPlus_linux_*.rpm
-            dist/PiliPlus_linux_*.AppImage
+            dist/PiliSuper_linux_*.tar.gz
+            dist/PiliSuper_linux_*.deb
+            dist/PiliSuper_linux_*.rpm
+            dist/PiliSuper_linux_*.AppImage
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Linux_tar.gz_amd64
-          path: dist/PiliPlus_linux_*.tar.gz
+          path: dist/PiliSuper_linux_*.tar.gz
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Linux_deb_amd64
-          path: dist/PiliPlus_linux_*.deb
+          path: dist/PiliSuper_linux_*.deb
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Linux_rpm_amd64
-          path: dist/PiliPlus_linux_*.rpm
+          path: dist/PiliSuper_linux_*.rpm
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Linux_AppImage_amd64
-          path: dist/PiliPlus_linux_*.AppImage
+          path: dist/PiliSuper_linux_*.AppImage
