@@ -22,14 +22,6 @@
 
 <br/>
 
-## 此项目现状
-
-目前不方便提交代码
-~~因为没电脑（发怒摔坏了~~
-可能得明年才有大更新
-如果有人愿意来做这个项目，联系：<3784474660@qq.com>
-谢谢对此项目关心的人的帮助与支持！
-
 ## 登陆凭证与设置的迁移
 
 直接在关于那里找导入/导出登录信息/设置即可。
@@ -42,8 +34,6 @@
 - [x] Pad
 - [x] Windows
 - [x] Linux
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/piliplus.svg)](https://repology.org/project/piliplus/versions)
 
 ## refactor
 
@@ -223,18 +213,9 @@
 
 ## 大饼(
 
-- [ ] Apple 通知推送（不可能的，那玩意需要Apple开发者账号，维护者没有人掏得出来这笔钱）
-- [ ] iOS视频小窗支持
-- [ ] 3D视频支持
-- [ ] 专栏/视频上传支持（好像有单独项目吧？）
-- [ ] 主题支持
-- [ ] 界面多样式切换
-- [ ] 创作中心
-- [ ] i18n
-- [ ] 有点麻烦的弹幕防挡
-- [ ] 听视频
-- [ ] Google FCM推送
-- [ ] 一些细节问题
+请见[TODO.md](TODO.md)
+
+里面列出了很多功能和优化的想法，欢迎查看并提出建议)
 
 <br/>
 
@@ -307,6 +288,7 @@ python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
 
 - [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
+- [BACNext](https://github.com/BACNext/BACNext)
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
 - [dio](https://pub.dev/packages/dio)

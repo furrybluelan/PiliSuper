@@ -1,16 +1,10 @@
 {
-  "editor.formatOnSave": true,
-  "[dart]": {
-    "editor.formatOnType": true
-  },
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
-  },
-  "cmake.sourceDirectory": "K:/coding/PiliSuper/windows",
-  "dart.flutterSdkPath": ".fvm/versions/3.41.2",
-  "conventionalCommits.scopes": [
-    "setting",
-    "vscode",
-    "ci"
-  ]
+    "editor.formatOnSave": true,
+    "[dart]": {
+        "editor.formatOnType": true
+    },
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        // "source.fixAll": "explicit",
+    }
 }
