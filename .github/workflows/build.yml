@@ -110,7 +110,7 @@ jobs:
           fi
 
           python3 build.py android \
-            --output-prefix PiliPlus \
+            --output-prefix PiliSuper \
             --output dist \
             "${SIGN_ARGS[@]}" \
             "${NAME_ARGS[@]}" \
@@ -175,7 +175,7 @@ jobs:
           
           python3 build.py ios \
             "${NAME_ARGS[@]}" \
-            --output-prefix PiliPlus \
+            --output-prefix PiliSuper \
             --output dist
 
       - name: Release
@@ -231,7 +231,7 @@ jobs:
 
           python3 build.py macos \
             "${NAME_ARGS[@]}" \
-            --output-prefix PiliPlus \
+            --output-prefix PiliSuper \
             --output dist
 
       - name: Release
@@ -290,7 +290,7 @@ jobs:
           fi
           python build.py windows --installer \
             "${NAME_ARGS[@]}" \
-            --output-prefix PiliPlus \
+            --output-prefix PiliSuper \
             --output dist
 
       - name: Release
@@ -378,7 +378,7 @@ jobs:
 
           python3 build.py linux \
             "${NAME_ARGS[@]}" \
-            --output-prefix PiliPlus \
+            --output-prefix PiliSuper \
             --output dist \
             --linux-targets tar.gz deb rpm appimage
 
