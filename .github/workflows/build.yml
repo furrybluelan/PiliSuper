@@ -127,16 +127,19 @@ jobs:
         with:
           name: Android_arm64-v8a
           path: dist/PiliSuper_android_*_arm64-v8a.apk
+          archive: false
 
       - uses: actions/upload-artifact@v7
         with:
           name: Android_armeabi-v7a
           path: dist/PiliSuper_android_*_armeabi-v7a.apk
+          archive: false
 
       - uses: actions/upload-artifact@v7
         with:
           name: Android_x86_64
           path: dist/PiliSuper_android_*_x86_64.apk
+          archive: false
 
   # ───────────── iOS ─────────────
   ios:
@@ -190,6 +193,7 @@ jobs:
         with:
           name: iOS
           path: dist/PiliSuper_ios_*.ipa
+          archive: false
 
   # ───────────── macOS ─────────────
   macos:
@@ -246,6 +250,7 @@ jobs:
         with:
           name: macOS
           path: dist/PiliSuper_macos_*.dmg
+          archive: false
 
   # ───────────── Windows ─────────────
   windows:
@@ -308,11 +313,13 @@ jobs:
         with:
           name: Windows_portable_x64
           path: dist/PiliSuper_windows_*_portable.zip
+          archive: false
 
       - uses: actions/upload-artifact@v7
         with:
           name: Windows_setup_x64
           path: dist/PiliSuper_windows_*_setup.exe
+          archive: false
 
   # ───────────── Linux ─────────────
   linux:
@@ -399,18 +406,22 @@ jobs:
         with:
           name: Linux_tar.gz_amd64
           path: dist/PiliSuper_linux_*.tar.gz
+          archive: false
 
       - uses: actions/upload-artifact@v7
         with:
           name: Linux_deb_amd64
           path: dist/PiliSuper_linux_*.deb
+          archive: false
 
       - uses: actions/upload-artifact@v7
         with:
           name: Linux_rpm_amd64
           path: dist/PiliSuper_linux_*.rpm
+          archive: false
 
       - uses: actions/upload-artifact@v7
         with:
           name: Linux_AppImage_amd64
           path: dist/PiliSuper_linux_*.AppImage
+          archive: false
