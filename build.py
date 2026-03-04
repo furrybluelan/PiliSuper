@@ -354,6 +354,7 @@ def git_patch(patch_file: str | Path,
               finished_message: str = "已应用 patch", 
               bad_message: str = "应用 patch 失败"
             ):
+    patch_file = Path(patch_file).resolve()
     if not patch_file.exists():
         warn(notfound_message)
         return
