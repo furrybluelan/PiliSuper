@@ -18,6 +18,7 @@ import os
 import platform as _sys_platform
 import re
 import shutil
+import types
 import subprocess
 import sys
 import textwrap
@@ -312,6 +313,56 @@ def do_rename(args):
     sed_rename(args)
     rename_cli(args)
 
+# ══════════════════════════════════════════════════════════════════
+#  Git Tools
+# ══════════════════════════════════════════════════════════════════
+
+def git_revert(commit_hash: str, 
+               cwd: str = None , 
+               finished_message: str = "已回滚", 
+               bad_message: str = "回滚失败"
+               ):
+    try:
+        run(["git", "config", "user.name", "ci"],cwd=cwd)
+        run(["git", "config", "user.email", "ci@example.com"],cwd=cwd)
+        run(["git", "stash"],cwd=cwd, check=False)
+        run(["git", "revert", commit_hash, "--no-edit"],cwd=cwd)
+        run(["git", "stash", "pop"], cwd=cwd, check=False)
+        ok(finished_message)
+    except subprocess.CalledProcessError:
+        warn(bad_message)
+       
+def git_cherry_pick(commit_hash: str, 
+                    cwd: str = None, 
+                    finished_message: str = "已应用 cherry-pick", 
+                    bad_message: str = "应用 cherry-pick 失败"
+                    ):
+    try:
+        run(["git", "config", "user.name", "ci"],cwd=cwd)
+        run(["git", "config", "user.email", "ci@example.com"],cwd=cwd)
+        run(["git", "stash"],cwd=cwd, check=False)
+        run(["git", "cherry-pick", commit_hash, "--no-edit"],cwd=cwd)
+        run(["git", "reset", "--soft", "HEAD~1"],cwd=cwd)
+        run(["git", "stash", "pop"], cwd=cwd, check=False)
+        ok(finished_message)
+    except subprocess.CalledProcessError:
+        warn(bad_message)
+        
+def git_patch(patch_file: str | Path, 
+              cwd: str = None, 
+              notfound_message: str = "patch 不存在，跳过",
+              finished_message: str = "已应用 patch", 
+              bad_message: str = "应用 patch 失败"
+            ):
+    patch_file = Path(patch_file).resolve()
+    if not patch_file.exists():
+        warn(notfound_message)
+        return
+    try:
+        run(["git", "apply", str(patch_file), "--ignore-whitespace"], cwd=cwd)
+        ok(finished_message)
+    except subprocess.CalledProcessError:
+        warn(bad_message)
 
 # ══════════════════════════════════════════════════════════════════
 #  Flutter patches & pub get
@@ -330,16 +381,20 @@ def apply_patches(root: str, platform: str = ""):
     if platform == "android":
         REVERT_HASH = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
         step(f"revert overscroll indicator commit ({REVERT_HASH[:9]}…)")
-        try:
-            run(["git", "config", "user.name", "ci"], cwd=root)
-            run(["git", "config", "user.email", "ci@example.com"], cwd=root)
-            run(["git", "stash"], cwd=root, check=False)
-            run(["git", "revert", REVERT_HASH, "--no-edit"], cwd=root)
-            run(["git", "reset", "--soft", "HEAD~1"], cwd=root)
-            run(["git", "stash", "pop"], cwd=root, check=False)
-            ok("overscroll indicator revert 完成")
-        except subprocess.CalledProcessError:
-            warn("overscroll indicator revert 失败（已忽略）")
+        git_revert(REVERT_HASH, 
+                   cwd=root, 
+                   finished_message="overscroll indicator revert 完成", 
+                   bad_message="overscroll indicator revert 失败（已忽略）"
+                   )
+    
+    if platform in ["linux","macos","windows"]:
+        CHECKOUT_HASH = "56956c33ef102ac0b5fc46b62bd2dd9f50a86616"
+        step(f"checkout Add RawTooltip.ignorePointer commit ({CHECKOUT_HASH[:9]}…)")
+        git_cherry_pick(CHECKOUT_HASH, 
+                        cwd=root, 
+                        finished_message="Add RawTooltip.ignorePointer 应用完成", 
+                        bad_message="Add RawTooltip.ignorePointer 应用失败（已忽略）"
+                        )
 
     for name in [
         "bottom_sheet_patch.diff",
@@ -347,14 +402,12 @@ def apply_patches(root: str, platform: str = ""):
         "mouse_cursor_patch.diff",
     ]:
         p = Path("lib/scripts") / name
-        if not p.exists():
-            warn(f"patch 不存在，跳过: {name}")
-            continue
-        try:
-            run(["git", "apply", str(p.resolve()), "--ignore-whitespace"], cwd=root)
-            ok(f"patch OK: {name}")
-        except subprocess.CalledProcessError:
-            warn(f"patch 失败（已忽略）: {name}")
+        git_patch(p, 
+                    cwd=root, 
+                    notfound_message=f"patch 不存在，跳过: {name}",
+                    finished_message=f"Patch OK: {name}",
+                    bad_message=f"Patch 应用失败（已忽略）: {name}"
+                )
 
 
 def common_setup(args):
