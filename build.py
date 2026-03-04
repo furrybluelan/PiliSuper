@@ -327,6 +327,7 @@ def git_revert(commit_hash: str,
         run(["git", "config", "user.email", "ci@example.com"],cwd=cwd)
         run(["git", "stash"],cwd=cwd, check=False)
         run(["git", "revert", commit_hash, "--no-edit"],cwd=cwd)
+        run(["git", "reset", "--soft", "HEAD~1"],cwd=cwd)
         run(["git", "stash", "pop"], cwd=cwd, check=False)
         ok(finished_message)
     except subprocess.CalledProcessError:
