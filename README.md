@@ -6,12 +6,13 @@
     <h1>PiliSuper</h1>
 <div align="center">
 
-![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper)
-![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper)
-![GitHub all releases](https://img.shields.io/github/downloads/FRBLanApps/PiliSuper/total)
+![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper?style=flat&logo=Github)
+![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper?style=flat&logo=Github)
+![GitHub License](https://img.shields.io/github/license/FRBLanApps/PiliSuper?style=flat&logo=GNU&link=https%3A%2F%2Fwww.gnu.org%2Flicenses%2Fgpl-3.0.en.html)
+![GitHub all releases](https://img.shields.io/github/downloads/FRBLanApps/PiliSuper/total?style=flat&logo=Github)
 
 [![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/FRBLanApps_Group)
-[![QQ Group](https://img.shields.io/badge/QQ-Join%20Group-green?logo=tencent-qq)](https://qm.qq.com/cgi-bin/qm/qr?k=1047446965)
+[![QQ Group](https://img.shields.io/badge/QQ-Join%20Group-green?logo=QQ)](https://qm.qq.com/cgi-bin/qm/qr?k=1047446965)
 
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
