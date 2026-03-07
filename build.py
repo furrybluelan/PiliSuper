@@ -11,117 +11,194 @@ Flutter 多平台构建脚本
   python build.py android -- --obfuscate --split-debug-info=./debug
 """
 
+from __future__ import annotations
+
 import argparse
+from dataclasses import dataclass
 import io
 import json
+import logging
 import os
-import platform as _sys_platform
+import platform as platform_module
 import re
 import shutil
-import types
 import subprocess
 import sys
 import textwrap
 import time
 from pathlib import Path
+from typing import Sequence
+from urllib.request import urlopen
+
+try:
+    from rich.console import Console
+    from rich.logging import RichHandler
+    from rich.traceback import install as install_rich_traceback
+except ImportError:
+    Console = None
+    RichHandler = None
+    install_rich_traceback = None
 
 # Windows stdout UTF-8（▶ 等字符在 cp1252 下无法输出）
 if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-# ══════════════════════════════════════════════════════════════════
-#  输出工具
-# ══════════════════════════════════════════════════════════════════
+
+@dataclass
+class VersionInfo:
+    version_name: str
+    version_code: int
+    version_full: str
 
 
-class C:
-    RED = "\033[91m"
-    GREEN = "\033[92m"
-    YELLOW = "\033[93m"
-    CYAN = "\033[96m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
+def configure_logging() -> tuple[logging.Logger, Console | None]:
+    logger = logging.getLogger("pilisuper.build")
+    logger.handlers.clear()
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    if RichHandler is not None and Console is not None:
+        console: Console | None = Console(stderr=True, soft_wrap=True)
+        if install_rich_traceback is not None:
+            install_rich_traceback(show_locals=False)
+        handler: logging.Handler = RichHandler(
+            console=console,
+            rich_tracebacks=True,
+            markup=True,
+            show_time=False,
+            show_level=False,
+            show_path=False,
+        )
+    else:
+        console = None
+        handler = logging.StreamHandler()
+
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    logger.addHandler(handler)
+    return logger, console
 
 
-def info(m):
-    print(f"{C.CYAN}[INFO]{C.RESET}  {m}")
+LOGGER, RICH_CONSOLE = configure_logging()
+SKIP_RENAME_DIR_NAMES = {".git", ".dart_tool", "build", "Pods", "ephemeral"}
 
 
-def ok(m):
-    print(f"{C.GREEN}[ OK ]{C.RESET}  {m}")
+def _format_log_message(label: str, message: str, style: str) -> str:
+    if RICH_CONSOLE is not None:
+        return f"[{style}]{label:<5}[/] {message}"
+    return f"{label:<5} {message}"
 
 
-def warn(m):
-    print(f"{C.YELLOW}[WARN]{C.RESET}  {m}")
+def log_info(message: str) -> None:
+    LOGGER.info(_format_log_message("INFO", message, "cyan"))
 
 
-def err(m):
-    print(f"{C.RED}[ERR ]{C.RESET}  {m}")
+def log_success(message: str) -> None:
+    LOGGER.info(_format_log_message("OK", message, "green"))
 
 
-def step(m):
-    print(f"\n{C.BOLD}{C.CYAN}▶ {m}{C.RESET}")
+def log_warning(message: str) -> None:
+    LOGGER.warning(_format_log_message("WARN", message, "yellow"))
+
+
+def log_error(message: str) -> None:
+    LOGGER.error(_format_log_message("ERROR", message, "red"))
+
+
+def log_step(message: str) -> None:
+    if RICH_CONSOLE is not None:
+        RICH_CONSOLE.rule(f"[bold cyan]{message}[/bold cyan]")
+        return
+    LOGGER.info("")
+    LOGGER.info(_format_log_message("STEP", message, "cyan"))
 
 
 # ══════════════════════════════════════════════════════════════════
 #  Shell 工具
 # ══════════════════════════════════════════════════════════════════
 
-_IS_WIN = _sys_platform.system() == "Windows"
+IS_WINDOWS = platform_module.system() == "Windows"
 
 
-def _resolve_cmd(cmd: list) -> list:
+def _resolve_command(command: Sequence[str]) -> list[str]:
     """
     Windows 上 flutter / dart 等工具是 .bat 文件，
     subprocess shell=False 找不到，用 shutil.which 解析完整路径。
     """
-    if not _IS_WIN:
-        return cmd
-    resolved = shutil.which(cmd[0])
+    command_parts = [str(part) for part in command]
+    if not IS_WINDOWS:
+        return command_parts
+    resolved = shutil.which(command_parts[0])
     if resolved:
-        cmd = [resolved] + cmd[1:]
-    return cmd
+        command_parts = [resolved] + command_parts[1:]
+    return command_parts
 
 
-def run(cmd, cwd=None, check=True, capture=False, env=None):
-    merged = {**os.environ, **(env or {})}
-    if isinstance(cmd, str):
-        cmd = cmd.split()
-    cmd = _resolve_cmd([str(c) for c in cmd])
-    if not capture:
-        info("$ " + " ".join(cmd))
+def run_command(
+    command: Sequence[str],
+    cwd: str | Path | None = None,
+    check: bool = True,
+    capture_output: bool = False,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    if isinstance(command, str):
+        raise TypeError(
+            "run_command() expects a sequence of arguments. "
+            "Use run_shell_command() for string commands."
+        )
+    merged_env = {**os.environ, **(env or {})}
+    command_parts = list(command)
+    command_parts = _resolve_command(command_parts)
+    if not capture_output:
+        log_info("$ " + " ".join(command_parts))
     return subprocess.run(
-        cmd, cwd=cwd, check=check, capture_output=capture, text=True, env=merged
+        command_parts,
+        cwd=cwd,
+        check=check,
+        capture_output=capture_output,
+        text=True,
+        env=merged_env,
     )
 
 
-def sh(cmd, cwd=None, check=True, capture=False, env=None):
-    merged = {**os.environ, **(env or {})}
-    if not capture:
-        info("$ " + cmd)
+def run_shell_command(
+    command: str,
+    cwd: str | Path | None = None,
+    check: bool = True,
+    capture_output: bool = False,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    merged_env = {**os.environ, **(env or {})}
+    if not capture_output:
+        log_info("$ " + command)
     return subprocess.run(
-        cmd,
+        command,
         shell=True,
         cwd=cwd,
         check=check,
-        capture_output=capture,
+        capture_output=capture_output,
         text=True,
-        env=merged,
+        env=merged_env,
     )
 
 
-def git_out(args):
+def get_git_output(args: Sequence[str]) -> str:
     try:
-        return run(["git"] + args, capture=True).stdout.strip()
+        return run_command(["git", *args], capture_output=True).stdout.strip()
     except subprocess.CalledProcessError:
         return ""
 
 
-def need(tool, hint=""):
-    if not shutil.which(tool):
-        err(f"找不到 {tool}。{hint}")
+def require_command(tool_name: str, hint: str = "") -> None:
+    if not shutil.which(tool_name):
+        log_error(f"找不到 {tool_name}。{hint}")
         sys.exit(1)
+
+
+def download_file(url: str, destination: Path) -> None:
+    log_info(f"下载: {url}")
+    with urlopen(url, timeout=60) as response, destination.open("wb") as file_obj:
+        shutil.copyfileobj(response, file_obj)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -129,18 +206,18 @@ def need(tool, hint=""):
 # ══════════════════════════════════════════════════════════════════
 
 
-def pubspec_read() -> str:
+def read_pubspec_text() -> str:
     return Path("pubspec.yaml").read_text(encoding="utf-8")
 
 
-def pubspec_name() -> str:
-    m = re.search(r"^name:\s+(\S+)", pubspec_read(), re.MULTILINE)
-    return m.group(1) if m else "app"
+def get_pubspec_name() -> str:
+    match = re.search(r"^name:\s+(\S+)", read_pubspec_text(), re.MULTILINE)
+    return match.group(1) if match else "app"
 
 
-def pubspec_version_base() -> str:
-    m = re.search(r"^version:\s*([\d.]+)", pubspec_read(), re.MULTILINE)
-    return m.group(1) if m else "0.0.0"
+def get_pubspec_version_base() -> str:
+    match = re.search(r"^version:\s*([\d.]+)", read_pubspec_text(), re.MULTILINE)
+    return match.group(1) if match else "0.0.0"
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -148,40 +225,40 @@ def pubspec_version_base() -> str:
 # ══════════════════════════════════════════════════════════════════
 
 
-def prebuild(platform: str) -> dict:
-    step("Prebuild（移植 build.ps1）")
+def run_prebuild(platform_name: str) -> VersionInfo:
+    log_step("Prebuild（移植 build.ps1）")
 
-    lines = pubspec_read().splitlines()
+    lines = read_pubspec_text().splitlines()
     version_name = None
-    idx = None
-    for i, line in enumerate(lines):
-        m = re.match(r"^\s*version:\s*([\d.]+)", line)
-        if m:
-            version_name = m.group(1)
-            idx = i
+    version_line_index = None
+    for index, line in enumerate(lines):
+        match = re.match(r"^\s*version:\s*([\d.]+)", line)
+        if match:
+            version_name = match.group(1)
+            version_line_index = index
             break
 
     if version_name is None:
-        err("pubspec.yaml 中未找到 version 字段")
+        log_error("pubspec.yaml 中未找到 version 字段")
         sys.exit(1)
 
-    version_code_str = git_out(["rev-list", "--count", "HEAD"])
+    version_code_str = get_git_output(["rev-list", "--count", "HEAD"])
     version_code = int(version_code_str) if version_code_str.isdigit() else 0
-    commit_hash = git_out(["rev-parse", "HEAD"]) or "unknown"
+    commit_hash = get_git_output(["rev-parse", "HEAD"]) or "unknown"
 
-    display = version_name
-    if platform == "android":
-        display = f"{version_name}-{commit_hash[:9]}"
+    display_version = version_name
+    if platform_name == "android":
+        display_version = f"{version_name}-{commit_hash[:9]}"
 
-    version_full = f"{display}+{version_code}"
-    lines[idx] = f"version: {version_full}"
+    version_full = f"{display_version}+{version_code}"
+    lines[version_line_index] = f"version: {version_full}"
     Path("pubspec.yaml").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    ok(f"pubspec.yaml version → {version_full}")
+    log_success(f"pubspec.yaml version → {version_full}")
 
     Path("pili_release.json").write_text(
         json.dumps(
             {
-                "pili.name": display,
+                "pili.name": display_version,
                 "pili.code": version_code,
                 "pili.hash": commit_hash,
                 "pili.time": int(time.time()),
@@ -190,12 +267,12 @@ def prebuild(platform: str) -> dict:
         ),
         encoding="utf-8",
     )
-    ok("pili_release.json 已生成")
-    return {
-        "version_name": display,
-        "version_code": version_code,
-        "version_full": version_full,
-    }
+    log_success("pili_release.json 已生成")
+    return VersionInfo(
+        version_name=display_version,
+        version_code=version_code,
+        version_full=version_full,
+    )
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -205,24 +282,26 @@ def prebuild(platform: str) -> dict:
 # ══════════════════════════════════════════════════════════════════
 
 
-def _sed_files(old: str, new: str, globs: list):
+def replace_text_in_files(old: str, new: str, globs: list[str]) -> None:
     import glob as _glob
 
-    for pat in globs:
-        for f in _glob.glob(pat, recursive=True):
-            p = Path(f)
-            if not p.is_file():
+    for pattern in globs:
+        for file_name in _glob.glob(pattern, recursive=True):
+            file_path = Path(file_name)
+            if not file_path.is_file() or any(
+                part in SKIP_RENAME_DIR_NAMES for part in file_path.parts
+            ):
                 continue
             try:
-                content = p.read_text(encoding="utf-8")
+                content = file_path.read_text(encoding="utf-8")
                 if old in content:
-                    p.write_text(content.replace(old, new), encoding="utf-8")
-                    info(f"  sed: {f}")
-            except Exception as e:
-                warn(f"  跳过 {f}: {e}")
+                    file_path.write_text(content.replace(old, new), encoding="utf-8")
+                    log_info(f"  sed: {file_name}")
+            except Exception as exc:
+                log_warning(f"  跳过 {file_name}: {exc}")
 
 
-def sed_rename(args):
+def rename_with_search_replace(args: argparse.Namespace) -> None:
     """
     sed 负责：
       • pubspec.yaml  name: 字段
@@ -262,11 +341,13 @@ def sed_rename(args):
     ]
 
     if new_name and orig_name and new_name != orig_name:
-        step(f"sed patch: pubspec name  {orig_name} → {new_name}")
+        log_step(f"sed patch: pubspec name  {orig_name} → {new_name}")
         # Dart import 路径
-        _sed_files(f"package:{orig_name}/", f"package:{new_name}/", dart_globs)
+        replace_text_in_files(
+            f"package:{orig_name}/", f"package:{new_name}/", dart_globs
+        )
         # pubspec.yaml name: 字段
-        content = pubspec_read()
+        content = read_pubspec_text()
         content = re.sub(
             r"^(name:\s+)" + re.escape(orig_name),
             r"\g<1>" + new_name,
@@ -274,151 +355,204 @@ def sed_rename(args):
             flags=re.MULTILINE,
         )
         Path("pubspec.yaml").write_text(content, encoding="utf-8")
-        ok("pubspec.yaml name 字段已更新")
+        log_success("pubspec.yaml name 字段已更新")
 
     if new_pkg and orig_pkg and new_pkg != orig_pkg:
         old_path = orig_pkg.replace(".", "/")
         new_path = new_pkg.replace(".", "/")
         if old_path != new_path:
-            step(f"sed patch: 包路径  {old_path} → {new_path}")
-            _sed_files(old_path, new_path, native_globs)
+            log_step(f"sed patch: 包路径  {old_path} → {new_path}")
+            replace_text_in_files(old_path, new_path, native_globs)
 
     # ── 仓库 URL 替换 ──
     if args.repo and args.original_repo and args.repo != args.original_repo:
-        step(f"sed patch: 仓库 URL  {args.original_repo} → {args.repo}")
+        log_step(f"sed patch: 仓库 URL  {args.original_repo} → {args.repo}")
         repo_globs = [
             "assets/linux/DEBIAN/*",
             "lib/**/*.dart",
             "windows/packaging/exe/make_config.yaml",
         ]
-        _sed_files(args.original_repo, args.repo, repo_globs)
+        replace_text_in_files(args.original_repo, args.repo, repo_globs)
 
 
-def rename_cli(args):
+def rename_with_cli(args: argparse.Namespace) -> None:
     if not args.pkg_id and not args.app_name:
         return
-    step("rename CLI（Bundle ID / 显示名）")
-    need("rename", "请先运行：dart pub global activate rename")
+    log_step("rename CLI（Bundle ID / 显示名）")
+    require_command("rename", "请先运行：dart pub global activate rename")
     if args.pkg_id:
-        info(f"setBundleId → {args.pkg_id}")
-        run(["rename", "setBundleId", "--value", args.pkg_id])
+        log_info(f"setBundleId → {args.pkg_id}")
+        run_command(["rename", "setBundleId", "--value", args.pkg_id])
     if args.app_name:
-        info(f"setAppName → {args.app_name}")
-        run(["rename", "setAppName", "--value", args.app_name])
+        log_info(f"setAppName → {args.app_name}")
+        run_command(["rename", "setAppName", "--value", args.app_name])
 
 
-def do_rename(args):
+def apply_project_rename(args: argparse.Namespace) -> None:
     if args.skip_rename:
         return
-    sed_rename(args)
-    rename_cli(args)
+    rename_with_search_replace(args)
+    rename_with_cli(args)
+
 
 # ══════════════════════════════════════════════════════════════════
 #  Git Tools
 # ══════════════════════════════════════════════════════════════════
 
-def git_revert(commit_hash: str, 
-               cwd: str = None , 
-               finished_message: str = "已回滚", 
-               bad_message: str = "回滚失败"
-               ):
+
+def stash_worktree_changes(cwd: str | None) -> bool:
+    result = run_command(
+        ["git", "stash", "push", "--include-untracked", "-m", "build.py-temp"],
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+    )
+    stash_output = (result.stdout or "") + (result.stderr or "")
+    if result.returncode != 0:
+        log_warning("git stash 失败，继续尝试应用补丁")
+        return False
+    return "No local changes to save" not in stash_output
+
+
+def restore_stashed_changes(cwd: str | None, has_stash: bool) -> None:
+    if not has_stash:
+        return
+    result = run_command(
+        ["git", "stash", "pop"],
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        log_warning("git stash pop 失败，请手动检查 Flutter SDK 仓库状态")
+
+
+def abort_git_sequence(operation: str, cwd: str | None) -> None:
+    run_command(
+        ["git", operation, "--abort"],
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+    )
+
+def apply_git_revert(
+    commit_hash: str,
+    cwd: str | None = None,
+    finished_message: str = "已回滚",
+    bad_message: str = "回滚失败",
+) -> None:
+    has_stash = stash_worktree_changes(cwd)
     try:
-        run(["git", "config", "user.name", "ci"],cwd=cwd)
-        run(["git", "config", "user.email", "ci@example.com"],cwd=cwd)
-        run(["git", "stash"],cwd=cwd, check=False)
-        run(["git", "revert", commit_hash, "--no-edit"],cwd=cwd)
-        run(["git", "reset", "--soft", "HEAD~1"],cwd=cwd)
-        run(["git", "stash", "pop"], cwd=cwd, check=False)
-        ok(finished_message)
+        run_command(["git", "config", "user.name", "ci"], cwd=cwd)
+        run_command(["git", "config", "user.email", "ci@example.com"], cwd=cwd)
+        run_command(["git", "revert", commit_hash, "--no-edit"], cwd=cwd)
     except subprocess.CalledProcessError:
-        warn(bad_message)
-       
-def git_cherry_pick(commit_hash: str, 
-                    cwd: str = None, 
-                    finished_message: str = "已应用 cherry-pick", 
-                    bad_message: str = "应用 cherry-pick 失败"
-                    ):
+        abort_git_sequence("revert", cwd)
+        log_warning(bad_message)
+    else:
+        run_command(["git", "reset", "--soft", "HEAD~1"], cwd=cwd)
+        log_success(finished_message)
+    finally:
+        restore_stashed_changes(cwd, has_stash)
+
+
+def apply_git_cherry_pick(
+    commit_hash: str,
+    cwd: str | None = None,
+    finished_message: str = "已应用 cherry-pick",
+    bad_message: str = "应用 cherry-pick 失败",
+) -> None:
+    has_stash = stash_worktree_changes(cwd)
     try:
-        run(["git", "config", "user.name", "ci"],cwd=cwd)
-        run(["git", "config", "user.email", "ci@example.com"],cwd=cwd)
-        run(["git", "stash"],cwd=cwd, check=False)
-        run(["git", "cherry-pick", commit_hash, "--no-edit"],cwd=cwd)
-        run(["git", "reset", "--soft", "HEAD~1"],cwd=cwd)
-        run(["git", "stash", "pop"], cwd=cwd, check=False)
-        ok(finished_message)
+        run_command(["git", "config", "user.name", "ci"], cwd=cwd)
+        run_command(["git", "config", "user.email", "ci@example.com"], cwd=cwd)
+        run_command(["git", "cherry-pick", commit_hash, "--no-edit"], cwd=cwd)
     except subprocess.CalledProcessError:
-        warn(bad_message)
-        
-def git_patch(patch_file: str | Path, 
-              cwd: str = None, 
-              notfound_message: str = "patch 不存在，跳过",
-              finished_message: str = "已应用 patch", 
-              bad_message: str = "应用 patch 失败"
-            ):
+        abort_git_sequence("cherry-pick", cwd)
+        log_warning(bad_message)
+    else:
+        run_command(["git", "reset", "--soft", "HEAD~1"], cwd=cwd)
+        log_success(finished_message)
+    finally:
+        restore_stashed_changes(cwd, has_stash)
+
+
+def apply_git_patch(
+    patch_file: str | Path,
+    cwd: str | None = None,
+    notfound_message: str = "patch 不存在，跳过",
+    finished_message: str = "已应用 patch",
+    bad_message: str = "应用 patch 失败",
+) -> None:
     patch_file = Path(patch_file).resolve()
     if not patch_file.exists():
-        warn(notfound_message)
+        log_warning(notfound_message)
         return
     try:
-        run(["git", "apply", str(patch_file), "--ignore-whitespace"], cwd=cwd)
-        ok(finished_message)
+        run_command(["git", "apply", str(patch_file), "--ignore-whitespace"], cwd=cwd)
+        log_success(finished_message)
     except subprocess.CalledProcessError:
-        warn(bad_message)
+        log_warning(bad_message)
 
 # ══════════════════════════════════════════════════════════════════
 #  Flutter patches & pub get
 # ══════════════════════════════════════════════════════════════════
 
 
-def flutter_root():
-    w = shutil.which("flutter")
-    return str(Path(w).parent.parent) if w else None
+def find_flutter_root() -> str | None:
+    flutter_binary = shutil.which("flutter")
+    return str(Path(flutter_binary).parent.parent) if flutter_binary else None
 
 
-def apply_patches(root: str, platform: str = ""):
-    step("应用 Flutter patches")
+def apply_flutter_patches(root: str, platform_name: str = "") -> None:
+    log_step("应用 Flutter patches")
 
     # Android 专属：revert overscroll indicator（https://github.com/flutter/flutter/issues/182281）
-    if platform == "android":
-        REVERT_HASH = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
-        step(f"revert overscroll indicator commit ({REVERT_HASH[:9]}…)")
-        git_revert(REVERT_HASH, 
-                   cwd=root, 
-                   finished_message="overscroll indicator revert 完成", 
-                   bad_message="overscroll indicator revert 失败（已忽略）"
-                   )
+    if platform_name == "android":
+        revert_hash = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
+        log_step(f"revert overscroll indicator commit ({revert_hash[:9]}…)")
+        apply_git_revert(
+            revert_hash,
+            cwd=root,
+            finished_message="overscroll indicator revert 完成",
+            bad_message="overscroll indicator revert 失败（已忽略）",
+        )
     
-    if platform in ["linux","macos","windows"]:
-        CHECKOUT_HASH = "56956c33ef102ac0b5fc46b62bd2dd9f50a86616"
-        step(f"checkout Add RawTooltip.ignorePointer commit ({CHECKOUT_HASH[:9]}…)")
-        git_cherry_pick(CHECKOUT_HASH, 
-                        cwd=root, 
-                        finished_message="Add RawTooltip.ignorePointer 应用完成", 
-                        bad_message="Add RawTooltip.ignorePointer 应用失败（已忽略）"
-                        )
+    if platform_name in ["linux", "macos", "windows"]:
+        checkout_hash = "56956c33ef102ac0b5fc46b62bd2dd9f50a86616"
+        log_step(
+            f"checkout Add RawTooltip.ignorePointer commit ({checkout_hash[:9]}…)"
+        )
+        apply_git_cherry_pick(
+            checkout_hash,
+            cwd=root,
+            finished_message="Add RawTooltip.ignorePointer 应用完成",
+            bad_message="Add RawTooltip.ignorePointer 应用失败（已忽略）",
+        )
 
     for name in [
         "bottom_sheet_patch.diff",
         "modal_barrier_patch.diff",
         "mouse_cursor_patch.diff",
     ]:
-        p = Path("lib/scripts") / name
-        git_patch(p, 
-                    cwd=root, 
-                    notfound_message=f"patch 不存在，跳过: {name}",
-                    finished_message=f"Patch OK: {name}",
-                    bad_message=f"Patch 应用失败（已忽略）: {name}"
-                )
+        patch_path = Path("lib/scripts") / name
+        apply_git_patch(
+            patch_path,
+            cwd=root,
+            notfound_message=f"patch 不存在，跳过: {name}",
+            finished_message=f"Patch OK: {name}",
+            bad_message=f"Patch 应用失败（已忽略）: {name}",
+        )
 
 
-def common_setup(args):
-    root = flutter_root()
-    if args.apply_patches and root:
-        apply_patches(root, platform=args.platform)
+def run_common_setup(args: argparse.Namespace) -> str | None:
+    flutter_root_dir = find_flutter_root()
+    if args.apply_patches and flutter_root_dir:
+        apply_flutter_patches(flutter_root_dir, platform_name=args.platform)
     if not args.no_pub_get:
-        step("flutter pub get")
-        run(["flutter", "pub", "get"])
-    return root
+        log_step("flutter pub get")
+        run_command(["flutter", "pub", "get"])
+    return flutter_root_dir
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -426,19 +560,19 @@ def common_setup(args):
 # ══════════════════════════════════════════════════════════════════
 
 
-def dart_defs(args) -> list:
-    r = []
+def build_dart_define_args(args: argparse.Namespace) -> list[str]:
+    dart_define_args: list[str] = []
     if args.dart_define_from_file and Path(args.dart_define_from_file).exists():
-        r += ["--dart-define-from-file", args.dart_define_from_file]
-    for d in args.dart_define or []:
-        r += ["--dart-define", d]
-    return r
+        dart_define_args += ["--dart-define-from-file", args.dart_define_from_file]
+    for dart_define in args.dart_define or []:
+        dart_define_args += ["--dart-define", dart_define]
+    return dart_define_args
 
 
-def odir(args) -> Path:
-    p = Path(args.output)
-    p.mkdir(parents=True, exist_ok=True)
-    return p
+def ensure_output_dir(args: argparse.Namespace) -> Path:
+    output_dir = Path(args.output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -446,10 +580,10 @@ def odir(args) -> Path:
 # ══════════════════════════════════════════════════════════════════
 
 
-def setup_signing(args) -> bool:
+def configure_android_signing(args: argparse.Namespace) -> bool:
     if not args.sign:
         return False
-    step("配置 Android 签名")
+    log_step("配置 Android 签名")
 
     key_jks = Path("android/app/key.jks")
     key_prop = Path("android/key.properties")
@@ -458,21 +592,21 @@ def setup_signing(args) -> bool:
         import base64
 
         key_jks.write_bytes(base64.b64decode(args.keystore_base64))
-        ok("keystore 已从 base64 写入")
+        log_success("keystore 已从 base64 写入")
     elif args.keystore_file:
         shutil.copy2(args.keystore_file, key_jks)
-        ok(f"keystore 已复制: {args.keystore_file}")
+        log_success(f"keystore 已复制: {args.keystore_file}")
     elif key_jks.exists():
-        ok("使用已有 android/app/key.jks")
+        log_success("使用已有 android/app/key.jks")
     else:
-        warn("--sign 已设置，但无 keystore，将用 debug 签名")
+        log_warning("--sign 已设置，但无 keystore，将用 debug 签名")
         return False
 
     if not args.key_alias:
-        err("签名需要 --key-alias")
+        log_error("签名需要 --key-alias")
         sys.exit(1)
     if not args.key_password:
-        err("签名需要 --key-password")
+        log_error("签名需要 --key-password")
         sys.exit(1)
 
     key_prop.write_text(
@@ -480,15 +614,15 @@ def setup_signing(args) -> bool:
         f"keyAlias={args.key_alias}\nkeyPassword={args.key_password}\n",
         encoding="utf-8",
     )
-    ok("android/key.properties 已写入")
+    log_success("android/key.properties 已写入")
     return True
 
 
-def cleanup_keys():
-    for p in [Path("android/app/key.jks"), Path("android/key.properties")]:
-        if p.exists():
-            p.unlink()
-            info(f"已清理: {p}")
+def cleanup_android_signing_files() -> None:
+    for file_path in [Path("android/app/key.jks"), Path("android/key.properties")]:
+        if file_path.exists():
+            file_path.unlink()
+            log_info(f"已清理: {file_path}")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -496,11 +630,11 @@ def cleanup_keys():
 # ══════════════════════════════════════════════════════════════════
 
 
-def build_android(args, vi: dict):
-    step("构建 Android")
-    signed = setup_signing(args)
+def build_android(args: argparse.Namespace, version_info: VersionInfo) -> None:
+    log_step("构建 Android")
+    signed = configure_android_signing(args)
     try:
-        run(
+        run_command(
             [
                 "flutter",
                 "build",
@@ -508,26 +642,29 @@ def build_android(args, vi: dict):
                 "--release",
                 "--pub",
                 *([] if args.no_split else ["--split-per-abi"]),
-                *dart_defs(args),
+                *build_dart_define_args(args),
                 *(args.extra_build_args or []),
             ]
         )
     finally:
         if signed and args.clean_keys:
-            cleanup_keys()
+            cleanup_android_signing_files()
 
-    step("重命名 APK")
+    log_step("重命名 APK")
     apk_dir = Path("build/app/outputs/flutter-apk")
-    o = odir(args)
+    output_dir = ensure_output_dir(args)
     apks = list(apk_dir.glob("app-*-release.apk")) or list(
         apk_dir.glob("app-release.apk")
     )
     for apk in apks:
-        m = re.search(r"app-(.+)-release\.apk", apk.name)
-        abi = m.group(1) if m else "universal"
-        dst = o / f"{args.output_prefix}_android_{vi['version_full']}_{abi}.apk"
-        shutil.copy2(apk, dst)
-        ok(f"输出: {dst}")
+        match = re.search(r"app-(.+)-release\.apk", apk.name)
+        abi = match.group(1) if match else "universal"
+        destination = (
+            output_dir
+            / f"{args.output_prefix}_android_{version_info.version_full}_{abi}.apk"
+        )
+        shutil.copy2(apk, destination)
+        log_success(f"输出: {destination}")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -535,37 +672,38 @@ def build_android(args, vi: dict):
 # ══════════════════════════════════════════════════════════════════
 
 
-def build_ios(args, vi: dict):
-    if _sys_platform.system() != "Darwin":
-        err("iOS 构建只能在 macOS")
+def build_ios(args: argparse.Namespace, version_info: VersionInfo) -> None:
+    if platform_module.system() != "Darwin":
+        log_error("iOS 构建只能在 macOS")
         sys.exit(1)
-    step("构建 iOS")
-    run(
+    log_step("构建 iOS")
+    run_command(
         [
             "flutter",
             "build",
             "ios",
             "--release",
             "--no-codesign",
-            *dart_defs(args),
+            *build_dart_define_args(args),
             *(args.extra_build_args or []),
         ]
     )
 
-    step("打包 IPA")
-    ipa = f"{args.output_prefix}_ios_{vi['version_full']}.ipa"
+    log_step("打包 IPA")
+    ipa_name = f"{args.output_prefix}_ios_{version_info.version_full}.ipa"
     payload = Path("Payload")
     if payload.is_symlink() or payload.exists():
         payload.unlink() if payload.is_symlink() else shutil.rmtree(payload)
     payload.symlink_to("build/ios/iphoneos")
-    sh(
+    run_shell_command(
         'find Payload/Runner.app/Frameworks -type d -name "*.framework" '
         "-exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \\;",
         check=False,
     )
-    sh(f"zip -r9 {ipa} Payload/Runner.app")
-    shutil.move(ipa, odir(args) / ipa)
-    ok(f"输出: {odir(args) / ipa}")
+    run_shell_command(f"zip -r9 {ipa_name} Payload/Runner.app")
+    output_path = ensure_output_dir(args) / ipa_name
+    shutil.move(ipa_name, output_path)
+    log_success(f"输出: {output_path}")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -573,40 +711,40 @@ def build_ios(args, vi: dict):
 # ══════════════════════════════════════════════════════════════════
 
 
-def build_macos(args, vi: dict):
-    if _sys_platform.system() != "Darwin":
-        err("macOS 构建只能在 macOS")
+def build_macos(args: argparse.Namespace, version_info: VersionInfo) -> None:
+    if platform_module.system() != "Darwin":
+        log_error("macOS 构建只能在 macOS")
         sys.exit(1)
-    step("构建 macOS")
-    run(
+    log_step("构建 macOS")
+    run_command(
         [
             "flutter",
             "build",
             "macos",
             "--release",
-            *dart_defs(args),
+            *build_dart_define_args(args),
             *(args.extra_build_args or []),
         ]
     )
 
     app = next(Path("build/macos/Build/Products/Release").glob("*.app"), None)
     if not app:
-        err("未找到 .app")
+        log_error("未找到 .app")
         sys.exit(1)
 
-    o = odir(args)
+    output_dir = ensure_output_dir(args)
     if shutil.which("create-dmg"):
-        sh(f'create-dmg "{app}" || true', check=False)
+        run_shell_command(f'create-dmg "{app}" || true', check=False)
         dmgs = list(Path(".").glob("*.dmg"))
         if dmgs:
-            dst = o / f"{args.output_prefix}_macos_{vi['version_full']}.dmg"
-            shutil.move(str(dmgs[0]), dst)
-            ok(f"输出: {dst}")
+            destination = output_dir / f"{args.output_prefix}_macos_{version_info.version_full}.dmg"
+            shutil.move(str(dmgs[0]), destination)
+            log_success(f"输出: {destination}")
             return
-    warn("create-dmg 未安装，fallback zip。npm i -g create-dmg")
-    dst = o / f"{args.output_prefix}_macos_{vi['version_full']}.zip"
-    sh(f'zip -r9 "{dst}" "{app}"')
-    ok(f"输出（zip）: {dst}")
+    log_warning("create-dmg 未安装，fallback zip。npm i -g create-dmg")
+    destination = output_dir / f"{args.output_prefix}_macos_{version_info.version_full}.zip"
+    run_shell_command(f'zip -r9 "{destination}" "{app}"')
+    log_success(f"输出（zip）: {destination}")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -614,19 +752,19 @@ def build_macos(args, vi: dict):
 # ══════════════════════════════════════════════════════════════════
 
 
-def build_windows(args, vi: dict):
-    step("构建 Windows")
-    o = odir(args)
+def build_windows(args: argparse.Namespace, version_info: VersionInfo) -> None:
+    log_step("构建 Windows")
+    output_dir = ensure_output_dir(args)
     prefix = args.output_prefix
-    version = vi["version_full"]
+    version = version_info.version_full
 
     if args.installer and shutil.which("fastforge"):
-        dfs = (
+        dart_define_arg = (
             f"dart-define-from-file={args.dart_define_from_file}"
             if args.dart_define_from_file and Path(args.dart_define_from_file).exists()
             else ""
         )
-        run(
+        run_command(
             [
                 "fastforge",
                 "package",
@@ -634,33 +772,33 @@ def build_windows(args, vi: dict):
                 "windows",
                 "--targets",
                 "exe",
-                *(["--flutter-build-args", dfs] if dfs else []),
+                *(["--flutter-build-args", dart_define_arg] if dart_define_arg else []),
                 *(args.extra_build_args or []),
             ]
         )
         for exe in Path("dist").rglob("*.exe"):
-            dst = o / f"{prefix}_windows_{version}_x64_setup.exe"
-            shutil.copy2(exe, dst)
-            ok(f"输出 (installer): {dst}")
+            destination = output_dir / f"{prefix}_windows_{version}_x64_setup.exe"
+            shutil.copy2(exe, destination)
+            log_success(f"输出 (installer): {destination}")
     else:
         if args.installer:
-            warn("fastforge 未找到，跳过 installer")
-        run(
+            log_warning("fastforge 未找到，跳过 installer")
+        run_command(
             [
                 "flutter",
                 "build",
                 "windows",
                 "--release",
-                *dart_defs(args),
+                *build_dart_define_args(args),
                 *(args.extra_build_args or []),
             ]
         )
 
     bundle = Path("build/windows/x64/runner/Release")
     if bundle.exists():
-        base = o / f"{prefix}_windows_{version}_x64_portable"
+        base = output_dir / f"{prefix}_windows_{version}_x64_portable"
         shutil.make_archive(str(base), "zip", bundle)
-        ok(f"输出 (portable): {base}.zip")
+        log_success(f"输出 (portable): {base}.zip")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -668,35 +806,50 @@ def build_windows(args, vi: dict):
 # ══════════════════════════════════════════════════════════════════
 
 
-def _pkg_name(args) -> str:
-    return args.app_name or pubspec_name()
+def resolve_package_name(args: argparse.Namespace) -> str:
+    return args.app_name or get_pubspec_name()
 
 
-def _tar_gz(prefix, version, arch, bundle, o):
-    out = o / f"{prefix}_linux_{version}_{arch}.tar.gz"
-    sh(f"tar -zcf {out} -C {bundle} .")
-    ok(f"输出: {out}")
+def package_tar_gz(prefix: str, version: str, arch: str, bundle: Path, output_dir: Path) -> None:
+    output_file = output_dir / f"{prefix}_linux_{version}_{arch}.tar.gz"
+    run_shell_command(f"tar -zcf {output_file} -C {bundle} .")
+    log_success(f"输出: {output_file}")
 
 
-def _tar_zst(prefix, version, arch, bundle, o):
+def package_tar_zst(
+    prefix: str,
+    version: str,
+    arch: str,
+    bundle: Path,
+    output_dir: Path,
+) -> None:
     """标准 tar.zst，与 pacman 兼容的压缩格式（注意：不含 PKGINFO，不可 pacman -U）"""
-    need("zstd", "sudo pacman -S zstd  /  sudo apt install zstd")
-    out = o / f"{prefix}_linux_{version}_{arch}.tar.zst"
-    sh(f"tar --use-compress-program='zstd -19 -T0' -cf {out} -C {bundle} .")
-    ok(f"输出: {out}")
+    require_command("zstd", "sudo pacman -S zstd  /  sudo apt install zstd")
+    output_file = output_dir / f"{prefix}_linux_{version}_{arch}.tar.zst"
+    run_shell_command(
+        f"tar --use-compress-program='zstd -19 -T0' -cf {output_file} -C {bundle} ."
+    )
+    log_success(f"输出: {output_file}")
 
 
-def _arch_pkg(prefix, version, arch, bundle, o, args):
+def package_arch_package(
+    prefix: str,
+    version: str,
+    arch: str,
+    bundle: Path,
+    output_dir: Path,
+    args: argparse.Namespace,
+) -> None:
     """
     生成正规 Arch Linux .pkg.tar.zst
     含 .PKGINFO / .MTREE，可直接 pacman -U 安装。
     原理：生成 PKGBUILD + 预构建 bundle source tarball，
     用 makepkg 打包（不重新编译 Flutter）。
     """
-    step("打包 Arch Linux .pkg.tar.zst（makepkg）")
-    need("makepkg", "请在 Arch Linux 系统上运行")
+    log_step("打包 Arch Linux .pkg.tar.zst（makepkg）")
+    require_command("makepkg", "请在 Arch Linux 系统上运行")
 
-    app_name = _pkg_name(args)
+    app_name = resolve_package_name(args)
     # pacman 版本号不能含 + -，转成 _
     pkg_ver = re.sub(r"[+\-]", "_", version)
     pkg_arch = "x86_64" if arch == "x64" else arch
@@ -724,8 +877,10 @@ def _arch_pkg(prefix, version, arch, bundle, o, args):
         shutil.copy2(logo, src_dir / f"{app_name}.png")
 
     src_tar = work / f"{src_name}.tar.gz"
-    sh(f"tar -zcf {src_tar} -C {work} {src_name}")
-    sha256 = sh(f"sha256sum {src_tar}", capture=True).stdout.split()[0]
+    run_shell_command(f"tar -zcf {src_tar} -C {work} {src_name}")
+    sha256 = run_shell_command(
+        f"sha256sum {src_tar}", capture_output=True
+    ).stdout.split()[0]
 
     desktop_name = desktop.name if desktop else f"com.example.{app_name}.desktop"
 
@@ -775,26 +930,45 @@ def _arch_pkg(prefix, version, arch, bundle, o, args):
     )
 
     # ── 运行 makepkg ──
-    sh(
+    run_shell_command(
         "makepkg -f --noconfirm",
         cwd=work,
         env={
             **os.environ,
-            "PKGDEST": str(o.resolve()),
+            "PKGDEST": str(output_dir.resolve()),
             "PACKAGER": "build.py <local>",
             "SRCDEST": str(work),
         },
     )
 
     shutil.rmtree(work, ignore_errors=True)
-    for p in o.glob(f"{app_name}-{pkg_ver}*.pkg.tar.zst"):
-        ok(f"输出: {p}")
+    for package_file in output_dir.glob(f"{app_name}-{pkg_ver}*.pkg.tar.zst"):
+        log_success(f"输出: {package_file}")
 
 
-def _deb(prefix, version, arch, bundle, o, args):
-    step("打包 deb")
-    need("dpkg-deb")
-    app_name = _pkg_name(args)
+def map_deb_architecture(arch: str) -> str:
+    return {
+        "x64": "amd64",
+        "amd64": "amd64",
+        "arm64": "arm64",
+        "aarch64": "arm64",
+        "armv7": "armhf",
+        "armhf": "armhf",
+    }.get(arch, arch)
+
+
+def package_deb(
+    prefix: str,
+    version: str,
+    arch: str,
+    bundle: Path,
+    output_dir: Path,
+    args: argparse.Namespace,
+) -> None:
+    log_step("打包 deb")
+    require_command("dpkg-deb")
+    app_name = resolve_package_name(args)
+    deb_arch = map_deb_architecture(arch)
     root = Path(f"/tmp/{prefix}_deb")
     if root.exists():
         shutil.rmtree(root)
@@ -816,6 +990,7 @@ def _deb(prefix, version, arch, bundle, o, args):
         if ctrl.exists():
             txt = ctrl.read_text()
             txt = txt.replace("version_need_change", version)
+            txt = re.sub(r"^Architecture:\s+\S+", f"Architecture: {deb_arch}", txt, flags=re.MULTILINE)
             size_kb = (
                 sum(
                     f.stat().st_size
@@ -833,7 +1008,7 @@ def _deb(prefix, version, arch, bundle, o, args):
                 sp.chmod(0o755)
     else:
         (root / "DEBIAN/control").write_text(
-            f"Package: {app_name}\nVersion: {version}\nArchitecture: amd64\n"
+            f"Package: {app_name}\nVersion: {version}\nArchitecture: {deb_arch}\n"
             f"Maintainer: Unknown\nInstalled-Size: 0\nDescription: Flutter App\n"
         )
 
@@ -850,18 +1025,29 @@ def _deb(prefix, version, arch, bundle, o, args):
             logo, root / f"usr/share/icons/hicolor/512x512/apps/{app_name}.png"
         )
 
-    out = o / f"{prefix}_linux_{version}_{arch}.deb"
-    sh(f"dpkg-deb --build --verbose --root-owner-group {root} {out}")
+    output_file = output_dir / f"{prefix}_linux_{version}_{arch}.deb"
+    run_shell_command(
+        f"dpkg-deb --build --verbose --root-owner-group {root} {output_file}"
+    )
     shutil.rmtree(root, ignore_errors=True)
-    ok(f"输出: {out}")
+    log_success(f"输出: {output_file}")
 
 
-def _rpm(prefix, version, arch, bundle, o, args):
-    step("打包 rpm")
-    need("rpmbuild", "sudo apt install rpm-build  /  sudo dnf install rpm-build")
+def package_rpm(
+    prefix: str,
+    version: str,
+    arch: str,
+    bundle: Path,
+    output_dir: Path,
+    args: argparse.Namespace,
+) -> None:
+    log_step("打包 rpm")
+    require_command(
+        "rpmbuild", "sudo apt install rpm-build  /  sudo dnf install rpm-build"
+    )
     import datetime
 
-    app_name = _pkg_name(args)
+    app_name = resolve_package_name(args)
     rpm_ver = re.sub(r"[+\-]", "_", version)
     rpm_root = Path(f"/tmp/{prefix}_rpm")
     for d in ["BUILD", "RPMS", "SOURCES", "SPECS", "SRPMS"]:
@@ -884,7 +1070,7 @@ def _rpm(prefix, version, arch, bundle, o, args):
     if logo.exists():
         shutil.copy2(logo, src_dir / f"assets/{app_name}.png")
 
-    sh(
+    run_shell_command(
         f"tar -zcf {rpm_root}/SOURCES/{app_name}-{rpm_ver}.tar.gz "
         f"-C {rpm_root} {app_name}-{rpm_ver}"
     )
@@ -944,24 +1130,34 @@ def _rpm(prefix, version, arch, bundle, o, args):
         encoding="utf-8",
     )
 
-    sh(f"rpmbuild --define '_topdir {rpm_root}' -bb {rpm_root}/SPECS/{app_name}.spec")
+    run_shell_command(
+        f"rpmbuild --define '_topdir {rpm_root}' -bb {rpm_root}/SPECS/{app_name}.spec"
+    )
 
     for rpm_file in (rpm_root / "RPMS").rglob("*.rpm"):
-        dst = o / f"{prefix}_linux_{version}_{arch}.rpm"
-        shutil.move(str(rpm_file), dst)
-        ok(f"输出: {dst}")
+        destination = output_dir / f"{prefix}_linux_{version}_{arch}.rpm"
+        shutil.move(str(rpm_file), destination)
+        log_success(f"输出: {destination}")
 
     shutil.rmtree(rpm_root, ignore_errors=True)
 
 
-def _appimage(prefix, version, arch, bundle, o, args):
-    step("打包 AppImage")
-    app_name = _pkg_name(args)
+def package_appimage(
+    prefix: str,
+    version: str,
+    arch: str,
+    bundle: Path,
+    output_dir: Path,
+    args: argparse.Namespace,
+) -> None:
+    log_step("打包 AppImage")
+    app_name = resolve_package_name(args)
     tool = Path("appimagetool-x86_64.AppImage")
     if not tool.exists():
-        sh(
-            "wget -q https://github.com/AppImage/appimagetool/releases/"
-            "download/continuous/appimagetool-x86_64.AppImage"
+        download_file(
+            "https://github.com/AppImage/appimagetool/releases/"
+            "download/continuous/appimagetool-x86_64.AppImage",
+            tool,
         )
         tool.chmod(0o755)
 
@@ -1001,10 +1197,10 @@ def _appimage(prefix, version, arch, bundle, o, args):
     )
     (appdir / "AppRun").chmod(0o755)
 
-    out = o / f"{prefix}_linux_{version}_{arch}.AppImage"
-    sh(f"ARCH=x86_64 ./{tool} {appdir} {out}")
+    output_file = output_dir / f"{prefix}_linux_{version}_{arch}.AppImage"
+    run_shell_command(f"ARCH=x86_64 ./{tool} {appdir} {output_file}")
     shutil.rmtree(appdir, ignore_errors=True)
-    ok(f"输出: {out}")
+    log_success(f"输出: {output_file}")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1012,31 +1208,31 @@ def _appimage(prefix, version, arch, bundle, o, args):
 # ══════════════════════════════════════════════════════════════════
 
 
-def build_linux(args, vi: dict):
-    if _sys_platform.system() != "Linux":
-        err("Linux 构建只能在 Linux")
+def build_linux(args: argparse.Namespace, version_info: VersionInfo) -> None:
+    if platform_module.system() != "Linux":
+        log_error("Linux 构建只能在 Linux")
         sys.exit(1)
-    step("构建 Linux")
+    log_step("构建 Linux")
 
     arch = args.arch or "x64"
     prefix = args.output_prefix
-    version = vi["version_full"]
-    o = odir(args)
+    version = version_info.version_full
+    output_dir = ensure_output_dir(args)
 
-    run(
+    run_command(
         [
             "flutter",
             "build",
             "linux",
             "--release",
-            *dart_defs(args),
+            *build_dart_define_args(args),
             *(args.extra_build_args or []),
         ]
     )
 
     bundle = Path(f"build/linux/{arch}/release/bundle")
     if not bundle.exists():
-        err(f"未找到构建产物: {bundle}")
+        log_error(f"未找到构建产物: {bundle}")
         sys.exit(1)
 
     targets = set(args.linux_targets or ["tar.gz"])
@@ -1044,22 +1240,26 @@ def build_linux(args, vi: dict):
         targets = {"tar.gz", "zst", "arch", "deb", "rpm", "appimage"}
 
     dispatch = {
-        "tar.gz": lambda: _tar_gz(prefix, version, arch, bundle, o),
-        "zst": lambda: _tar_zst(prefix, version, arch, bundle, o),
-        "arch": lambda: _arch_pkg(prefix, version, arch, bundle, o, args),
-        "deb": lambda: _deb(prefix, version, arch, bundle, o, args),
-        "rpm": lambda: _rpm(prefix, version, arch, bundle, o, args),
-        "appimage": lambda: _appimage(prefix, version, arch, bundle, o, args),
+        "tar.gz": lambda: package_tar_gz(prefix, version, arch, bundle, output_dir),
+        "zst": lambda: package_tar_zst(prefix, version, arch, bundle, output_dir),
+        "arch": lambda: package_arch_package(
+            prefix, version, arch, bundle, output_dir, args
+        ),
+        "deb": lambda: package_deb(prefix, version, arch, bundle, output_dir, args),
+        "rpm": lambda: package_rpm(prefix, version, arch, bundle, output_dir, args),
+        "appimage": lambda: package_appimage(
+            prefix, version, arch, bundle, output_dir, args
+        ),
     }
 
-    for t in targets:
-        if t not in dispatch:
-            warn(f"未知打包目标: {t}")
+    for target in targets:
+        if target not in dispatch:
+            log_warning(f"未知打包目标: {target}")
             continue
         try:
-            dispatch[t]()
-        except Exception as e:
-            warn(f"{t} 打包失败: {e}（已跳过）")
+            dispatch[target]()
+        except Exception as exc:
+            log_warning(f"{target} 打包失败: {exc}（已跳过）")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1067,8 +1267,8 @@ def build_linux(args, vi: dict):
 # ══════════════════════════════════════════════════════════════════
 
 
-def parse_args():
-    p = argparse.ArgumentParser(
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
         description="Flutter 多平台构建脚本",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__ + """
@@ -1077,79 +1277,79 @@ def parse_args():
                           python build.py android -- --obfuscate --split-debug-info=./debug
 """,
     )
-    p.add_argument(
+    parser.add_argument(
         "platform", choices=["android", "ios", "macos", "windows", "linux", "all"]
     )
 
-    g = p.add_argument_group("包名替换")
-    g.add_argument(
+    rename_group = parser.add_argument_group("包名替换")
+    rename_group.add_argument(
         "--pkg-id",
         metavar="ID",
         default="com.pili.super",
         help="新 Bundle ID，如 com.myfork.app",
     )
-    g.add_argument(
+    rename_group.add_argument(
         "--original-pkg-id",
         metavar="ID",
         default="com.example.piliplus",
         help="上游 applicationId（默认: com.example.piliplus）",
     )
-    g.add_argument(
+    rename_group.add_argument(
         "--app-name",
         metavar="NAME",
         default="PiliSuper",
         help="新 pubspec name / 显示名",
     )
-    g.add_argument(
+    rename_group.add_argument(
         "--original-app-name",
         metavar="NAME",
         default="PiliPlus",
         help="上游 pubspec name（默认: piliPlus）",
     )
-    g.add_argument("--skip-rename", action="store_true")
-    g.add_argument(
+    rename_group.add_argument("--skip-rename", action="store_true")
+    rename_group.add_argument(
         "--repo",
         metavar="USER/REPO",
         default="FRBLanApps/PiliSuper",
         help="新仓库路径（默认: FRBLanApps/PiliSuper）",
     )
-    g.add_argument(
+    rename_group.add_argument(
         "--original-repo",
         metavar="USER/REPO",
         default="bggRGjQaUbCoE/PiliPlus",
         help="上游仓库路径（默认: bggRGjQaUbCoE/PiliPlus）",
     )
 
-    g = p.add_argument_group("构建参数")
-    g.add_argument(
+    build_group = parser.add_argument_group("构建参数")
+    build_group.add_argument(
         "--dart-define-from-file", default="pili_release.json", metavar="FILE"
     )
-    g.add_argument("--dart-define", action="append", default=[], metavar="K=V")
-    g.add_argument("--arch", default=None)
-    g.add_argument("--version", default=None, help="手动版本号，跳过 prebuild 计算")
-    g.add_argument("--no-prebuild", action="store_true")
+    build_group.add_argument("--dart-define", action="append", default=[], metavar="K=V")
+    build_group.add_argument("--arch", default=None)
+    build_group.add_argument("--version", default=None, help="手动版本号，跳过 prebuild 计算")
+    build_group.add_argument("--no-prebuild", action="store_true")
 
-    g = p.add_argument_group("Android")
-    g.add_argument("--no-split", action="store_true")
+    android_group = parser.add_argument_group("Android")
+    android_group.add_argument("--no-split", action="store_true")
 
-    g = p.add_argument_group("Android 签名")
-    g.add_argument("--sign", action="store_true")
-    g.add_argument("--keystore-file", metavar="PATH")
-    g.add_argument("--keystore-base64", metavar="B64")
-    g.add_argument("--key-alias", metavar="ALIAS")
-    g.add_argument("--key-password", metavar="PASS")
-    g.add_argument("--store-password", metavar="PASS")
-    g.add_argument(
+    android_signing_group = parser.add_argument_group("Android 签名")
+    android_signing_group.add_argument("--sign", action="store_true")
+    android_signing_group.add_argument("--keystore-file", metavar="PATH")
+    android_signing_group.add_argument("--keystore-base64", metavar="B64")
+    android_signing_group.add_argument("--key-alias", metavar="ALIAS")
+    android_signing_group.add_argument("--key-password", metavar="PASS")
+    android_signing_group.add_argument("--store-password", metavar="PASS")
+    android_signing_group.add_argument(
         "--clean-keys",
         action="store_true",
         help="构建后删除 key.jks / key.properties（CI 用）",
     )
 
-    g = p.add_argument_group("Windows")
-    g.add_argument("--installer", action="store_true")
+    windows_group = parser.add_argument_group("Windows")
+    windows_group.add_argument("--installer", action="store_true")
 
-    g = p.add_argument_group("Linux")
-    g.add_argument(
+    linux_group = parser.add_argument_group("Linux")
+    linux_group.add_argument(
         "--linux-targets",
         nargs="+",
         default=["tar.gz"],
@@ -1158,15 +1358,15 @@ def parse_args():
         "zst = 仅压缩的 tar.zst（不可 pacman -U）",
     )
 
-    g = p.add_argument_group("通用")
-    g.add_argument("--output", "-o", default="dist", metavar="DIR")
-    g.add_argument("--output-prefix", default="PiliSuper", metavar="PREFIX")
-    g.add_argument(
+    common_group = parser.add_argument_group("通用")
+    common_group.add_argument("--output", "-o", default="dist", metavar="DIR")
+    common_group.add_argument("--output-prefix", default="PiliSuper", metavar="PREFIX")
+    common_group.add_argument(
         "--no-patches", dest="apply_patches", action="store_false", default=True
     )
-    g.add_argument("--no-pub-get", action="store_true")
+    common_group.add_argument("--no-pub-get", action="store_true")
 
-    args, unknown = p.parse_known_args()
+    args, unknown = parser.parse_known_args()
 
     # 透传给 flutter build 的参数：只收集 -- 之后的内容，其余 unknown 报警
     try:
@@ -1175,10 +1375,10 @@ def parse_args():
     except ValueError:
         args.extra_build_args = []
         if unknown:
-            warn(f"未知参数（已忽略）: {unknown}")
+            log_warning(f"未知参数（已忽略）: {unknown}")
 
     if not args.output_prefix and Path("pubspec.yaml").exists():
-        args.output_prefix = pubspec_name()
+        args.output_prefix = get_pubspec_name()
 
     return args
 
@@ -1188,30 +1388,35 @@ def parse_args():
 # ══════════════════════════════════════════════════════════════════
 
 
-def main():
+def main() -> None:
     if not Path("pubspec.yaml").exists():
-        err("请在 Flutter 项目根目录运行（找不到 pubspec.yaml）")
+        log_error("请在 Flutter 项目根目录运行（找不到 pubspec.yaml）")
         sys.exit(1)
 
-    args = parse_args()
+    args = parse_arguments()
 
     # 1. 包名替换（sed + rename CLI）
-    do_rename(args)
+    apply_project_rename(args)
 
     # 2. Prebuild（版本号 + pili_release.json）
     if args.no_prebuild:
-        v = args.version or pubspec_version_base()
-        vi = {"version_name": v, "version_code": 0, "version_full": v}
+        version = args.version or get_pubspec_version_base()
+        version_info = VersionInfo(
+            version_name=version,
+            version_code=0,
+            version_full=version,
+        )
     else:
-        plat = args.platform if args.platform != "all" else "other"
-        vi = prebuild(plat)
+        platform_name = args.platform if args.platform != "all" else "other"
+        version_info = run_prebuild(platform_name)
         if args.version:
-            vi["version_full"] = args.version
+            version_info.version_full = args.version
 
-    info(f"版本: {vi['version_full']}")
+    log_info(f"版本: {version_info.version_full}")
 
     # 3. pub get + patches
-    common_setup(args)
+    require_command("flutter", "请先安装 Flutter，或把 flutter 加入 PATH")
+    run_common_setup(args)
 
     # 4. 构建
     builders = {
@@ -1223,20 +1428,20 @@ def main():
     }
     platforms = list(builders) if args.platform == "all" else [args.platform]
 
-    for plat in platforms:
+    for platform_name in platforms:
         try:
-            builders[plat](args, vi)
-        except subprocess.CalledProcessError as e:
-            err(f"{plat} 构建失败: {e}")
+            builders[platform_name](args, version_info)
+        except subprocess.CalledProcessError as exc:
+            log_error(f"{platform_name} 构建失败: {exc}")
             if args.platform != "all":
                 sys.exit(1)
         except SystemExit:
             raise
-        except Exception as e:
-            err(f"{plat} 异常: {e}")
+        except Exception as exc:
+            log_error(f"{platform_name} 异常: {exc}")
             raise
 
-    ok(f"完成！输出: {args.output}/")
+    log_success(f"完成！输出: {args.output}/")
 
 
 if __name__ == "__main__":
