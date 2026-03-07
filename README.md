@@ -9,6 +9,10 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper)
 ![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper)
 ![GitHub all releases](https://img.shields.io/github/downloads/FRBLanApps/PiliSuper/total)
+
+[![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/FRBLanApps_Group)
+[![QQ Group](https://img.shields.io/badge/QQ-Join%20Group-green?logo=tencent-qq)](https://qm.qq.com/cgi-bin/qm/qr?k=1047446965)
+
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
 
@@ -19,7 +23,6 @@
 <img src="assets/screenshots/main_screen.png" width="96%" alt="home" />
 <br/>
 </div>
-
 <br/>
 
 ## 登陆凭证与设置的迁移
