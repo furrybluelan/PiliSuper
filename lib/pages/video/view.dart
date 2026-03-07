@@ -162,14 +162,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   // 获取视频资源，初始化播放器
-  Future<void> videoSourceInit() async {
-    videoDetailController.queryVideoUrl();
+  void videoSourceInit() {
+    videoDetailController.queryVideoUrl(autoFullScreenFlag: true);
     if (videoDetailController.autoPlay) {
       plPlayerController = videoDetailController.plPlayerController;
       plPlayerController!
         ..addStatusLister(playerListener)
         ..addPositionListener(positionListener);
-      await plPlayerController!.autoEnterFullscreen();
     }
   }
 
@@ -295,11 +294,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   /// 未开启自动播放时触发播放
-  Future<void> handlePlay() async {
+  Future<void>? handlePlay() {
     if (!videoDetailController.isFileSource) {
       if (videoDetailController.isQuerying) {
         if (kDebugMode) debugPrint('handlePlay: querying');
-        return;
+        return null;
       }
       if (videoDetailController.videoUrl == null ||
           videoDetailController.audioUrl == null) {
@@ -307,7 +306,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           debugPrint('handlePlay: videoUrl/audioUrl not initialized');
         }
         videoDetailController.queryVideoUrl();
-        return;
+        return null;
       }
     }
     plPlayerController = videoDetailController.plPlayerController;
@@ -316,12 +315,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       ..addStatusLister(playerListener)
       ..addPositionListener(positionListener);
     if (videoDetailController.plPlayerController.preInitPlayer) {
-      await plPlayerController!.play();
+      return plPlayerController!.play();
     } else {
-      await videoDetailController.playerInit(autoplay: true);
+      return videoDetailController.playerInit(
+        autoplay: true,
+        autoFullScreenFlag: true,
+      );
     }
-    if (!mounted || !isShowing) return;
-    await plPlayerController!.autoEnterFullscreen();
   }
 
   @override

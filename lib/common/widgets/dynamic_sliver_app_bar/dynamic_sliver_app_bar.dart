@@ -17,7 +17,7 @@
 
 import 'dart:math' as math;
 
-import 'package:PiliPlus/common/widgets/dynamic_sliver_app_bar/redering/sliver_persistent_header.dart';
+import 'package:PiliPlus/common/widgets/dynamic_sliver_app_bar/rendering/sliver_persistent_header.dart';
 import 'package:PiliPlus/common/widgets/dynamic_sliver_app_bar/sliver_persistent_header.dart';
 import 'package:PiliPlus/common/widgets/only_layout_widget.dart'
     show LayoutCallback;
@@ -135,7 +135,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyActions: automaticallyImplyActions,
         flexibleSpace: maxExtent == .infinity
             ? flexibleSpace
-            : FlexibleSpaceBar(background: flexibleSpace),
+            : IgnorePointer(
+                ignoring: isScrolledUnder,
+                child: FlexibleSpaceBar(background: flexibleSpace),
+              ),
         bottom: bottom,
         elevation: isScrolledUnder ? elevation : 0.0,
         scrolledUnderElevation: scrolledUnderElevation,
