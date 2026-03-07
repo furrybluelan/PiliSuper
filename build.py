@@ -531,9 +531,9 @@ def apply_flutter_patches(root: str, platform_name: str = "") -> None:
         )
 
     for name in [
-        "bottom_sheet.diff",
-        "modal_barrier.diff",
-        "mouse_cursor.diff",
+        "bottom_sheet.patch",
+        "modal_barrier.patch",
+        "mouse_cursor.patch",
     ]:
         patch_path = Path("lib/scripts") / name
         apply_git_patch(
