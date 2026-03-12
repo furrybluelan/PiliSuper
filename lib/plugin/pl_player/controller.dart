@@ -1592,6 +1592,9 @@ class PlPlayerController with BlockConfigMixin {
     if (playerStatus.isPlaying) {
       WakelockPlus.disable();
     }
+    if (kDebugMode) {
+      debugPrint('dispose player');
+    }
     _videoPlayerController?.dispose();
     _videoPlayerController = null;
     _videoController = null;
