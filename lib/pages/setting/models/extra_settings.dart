@@ -355,6 +355,13 @@ List<SettingsModel> get extraSettings => [
     defaultVal: false,
   ),
   const SwitchModel(
+    title: '记录评论',
+    leading: Icon(Icons.message_outlined),
+    setKey: SettingBoxKey.saveReply,
+    defaultVal: true,
+    needReboot: true,
+  ),
+  const SwitchModel(
     title: '发评反诈',
     subtitle: '发送评论后检查评论是否可见',
     leading: Stack(
@@ -763,7 +770,7 @@ void _showDownPathDialog(BuildContext context, VoidCallback setState) {
           ListTile(
             onTap: () async {
               Get.back();
-              final path = await FilePicker.platform.getDirectoryPath();
+              final path = await FilePicker.getDirectoryPath();
               if (path == null || path == downloadPath) return;
               downloadPath = path;
               setState();
@@ -1111,7 +1118,7 @@ Future<void> _showReplySortDialog(
     builder: (context) => SelectDialog<ReplySortType>(
       title: '评论展示',
       value: Pref.replySortType,
-      values: ReplySortType.values.map((e) => (e, e.title)).toList(),
+      values: ReplySortType.values.take(2).map((e) => (e, e.title)).toList(),
     ),
   );
   if (res != null) {

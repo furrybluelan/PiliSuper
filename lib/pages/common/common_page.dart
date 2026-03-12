@@ -80,13 +80,13 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
           0.0,
           StyleString.topBarHeight,
         );
-        final offset = newValue - value;
+        final offset = value - newValue;
         if (offset != 0) {
           _barOffset!.value = newValue;
           if (pixel < 0.0 && scrollDelta < 0.0 && value > 0.0) {
             return false;
           }
-          Scrollable.of(notification.context!).position.correctBy(-offset);
+          Scrollable.of(notification.context!).position.correctBy(offset);
         }
       } else {
         _updateOffset(scrollDelta);

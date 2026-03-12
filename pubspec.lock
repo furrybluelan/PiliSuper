@@ -529,11 +529,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v10.3.10"
-      resolved-ref: fd8afd89260436b63b9d41e150b4eb3c806cc8fd
+      ref: mod
+      resolved-ref: "11ef8f872482b31d570787e60c813e565dcfd011"
       url: "https://github.com/bggRGjQaUbCoE/flutter_file_picker.git"
     source: git
-    version: "10.3.10"
+    version: "11.0.0"
   file_selector_linux:
     dependency: transitive
     description:
@@ -740,11 +740,12 @@ packages:
   flutter_smart_dialog:
     dependency: "direct main"
     description:
-      name: flutter_smart_dialog
-      sha256: "0852df132cb03fd8fc5144eb404c31eb7eb50c22aecb1cc2504f2f598090d756"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.9.8+9"
+      path: "."
+      ref: main
+      resolved-ref: c08f651c60f1451feba2ec4895caf12771661809
+      url: "https://github.com/bggRGjQaUbCoE/flutter_smart_dialog.git"
+    source: git
+    version: "5.0.1"
   flutter_sortable_wrap:
     dependency: "direct main"
     description:
@@ -801,7 +802,7 @@ packages:
     description:
       path: "."
       ref: "version_4.7.2"
-      resolved-ref: "4e5dbc40d93c4deca7dfec9457598d9cc68f8f33"
+      resolved-ref: "81b8a71982f89b46fa868b315cd71ff6a6ddf895"
       url: "https://github.com/bggRGjQaUbCoE/getx.git"
     source: git
     version: "4.7.2"
@@ -1685,10 +1686,10 @@ packages:
     dependency: transitive
     description:
       name: sqflite_android
-      sha256: ecd684501ebc2ae9a83536e8b15731642b9570dc8623e0073d227d0ee2bfea88
+      sha256: "881e28efdcc9950fd8e9bb42713dcf1103e62a2e7168f23c9338d82db13dec40"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.2+2"
+    version: "2.4.2+3"
   sqflite_common:
     dependency: transitive
     description:
