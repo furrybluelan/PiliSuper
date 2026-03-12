@@ -1281,7 +1281,7 @@ def parse_arguments() -> argparse.Namespace:
         "platform", choices=["android", "ios", "macos", "windows", "linux", "all"]
     )
 
-    rename_group = parser.add_argument_group("包名替换")
+    """ rename_group = parser.add_argument_group("包名替换")
     rename_group.add_argument(
         "--pkg-id",
         metavar="ID",
@@ -1318,7 +1318,7 @@ def parse_arguments() -> argparse.Namespace:
         metavar="USER/REPO",
         default="bggRGjQaUbCoE/PiliPlus",
         help="上游仓库路径（默认: bggRGjQaUbCoE/PiliPlus）",
-    )
+    ) """
 
     build_group = parser.add_argument_group("构建参数")
     build_group.add_argument(
@@ -1396,7 +1396,7 @@ def main() -> None:
     args = parse_arguments()
 
     # 1. 包名替换（sed + rename CLI）
-    apply_project_rename(args)
+    # apply_project_rename(args) # only for fork
 
     # 2. Prebuild（版本号 + pili_release.json）
     if args.no_prebuild:
