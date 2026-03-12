@@ -1320,11 +1320,10 @@ def parse_arguments() -> argparse.Namespace:
         "platform", choices=["android", "ios", "macos", "windows", "linux", "all"]
     )
 
-    """ rename_group = parser.add_argument_group("包名替换")
+    rename_group = parser.add_argument_group("包名替换")
     rename_group.add_argument(
         "--pkg-id",
         metavar="ID",
-        default="com.pili.super",
         help="新 Bundle ID，如 com.myfork.app",
     )
     rename_group.add_argument(
@@ -1336,7 +1335,6 @@ def parse_arguments() -> argparse.Namespace:
     rename_group.add_argument(
         "--app-name",
         metavar="NAME",
-        default="PiliSuper",
         help="新 pubspec name / 显示名",
     )
     rename_group.add_argument(
@@ -1349,15 +1347,14 @@ def parse_arguments() -> argparse.Namespace:
     rename_group.add_argument(
         "--repo",
         metavar="USER/REPO",
-        default="FRBLanApps/PiliSuper",
-        help="新仓库路径（默认: FRBLanApps/PiliSuper）",
+        help="新仓库路径",
     )
     rename_group.add_argument(
         "--original-repo",
         metavar="USER/REPO",
         default="bggRGjQaUbCoE/PiliPlus",
         help="上游仓库路径（默认: bggRGjQaUbCoE/PiliPlus）",
-    ) """
+    ) 
 
     build_group = parser.add_argument_group("构建参数")
     build_group.add_argument(
