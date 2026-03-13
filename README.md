@@ -2,21 +2,18 @@
     <img width="200" height="200" src="assets/images/logo/logo.png">
 </div>
 
+
+
 <div align="center">
-    <h1>PiliSuper</h1>
+    <h1>PiliPlus</h1>
 <div align="center">
-
-![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper?style=flat&logo=Github)
-![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper?style=flat&logo=Github)
-![GitHub License](https://img.shields.io/github/license/FRBLanApps/PiliSuper?style=flat&logo=GNU&link=https%3A%2F%2Fwww.gnu.org%2Flicenses%2Fgpl-3.0.en.html)
-![GitHub all releases](https://img.shields.io/github/downloads/FRBLanApps/PiliSuper/total?style=flat&logo=Github)
-
-[![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/FRBLanApps_Group)
-[![QQ Group](https://img.shields.io/badge/QQ-Join%20Group-green?logo=QQ)](https://qm.qq.com/cgi-bin/qm/qr?k=1047446965)
-
+    
+![GitHub repo size](https://img.shields.io/github/repo-size/bggRGjQaUbCoE/PiliPlus) 
+![GitHub Repo stars](https://img.shields.io/github/stars/bggRGjQaUbCoE/PiliPlus) 
+![GitHub all releases](https://img.shields.io/github/downloads/bggRGjQaUbCoE/PiliPlus/total) 
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
-
+    
 <img src="assets/screenshots/510shots_so.png" width="32%" alt="home" />
 <img src="assets/screenshots/174shots_so.png" width="32%" alt="home" />
 <img src="assets/screenshots/850shots_so.png" width="32%" alt="home" />
@@ -24,12 +21,9 @@
 <img src="assets/screenshots/main_screen.png" width="96%" alt="home" />
 <br/>
 </div>
+
+
 <br/>
-
-## 登陆凭证与设置的迁移
-
-直接在关于那里找导入/导出登录信息/设置即可。
-产生的文本既适用于本项目，也适用于上游的PiliPlus。
 
 ## 适配平台
 
@@ -38,6 +32,8 @@
 - [x] Pad
 - [x] Windows
 - [x] Linux
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/piliplus.svg)](https://repology.org/project/piliplus/versions)
 
 ## refactor
 
@@ -185,14 +181,14 @@
   - [x] 字幕
   - [x] 记忆播放
   - [x] 视频比例：高度/宽度适应、填充、包含等
-
+     
 - [x] 搜索相关
   - [x] 热搜
   - [x] 搜索历史
   - [x] 默认搜索词
   - [x] 投稿、番剧、直播间、用户搜索
   - [x] 视频搜索排序、按时长筛选
-
+    
 - [x] 视频详情页相关
   - [x] 视频选集(分p)切换
   - [x] 点赞、投币、收藏/取消收藏
@@ -204,7 +200,7 @@
   - [x] 评论笔记图片查看、保存
 
 - [x] 设置相关
-  - [x] 画质、音质、解码方式预设
+  - [x] 画质、音质、解码方式预设      
   - [x] 图片质量设定
   - [x] 主题模式：亮色/暗色/跟随系统
   - [x] 震动反馈(可选)
@@ -215,84 +211,28 @@
 
 <br/>
 
-## 大饼(
+## 下载
 
-请见[TODO.md](TODO.md)
-
-里面列出了很多功能和优化的想法，欢迎查看并提出建议)
-
-<br/>
-
-## 编译
-
-### 首先，克隆仓库到本地
-
-``` Shell
-# 使用https方式克隆仓库
-git clone https://github.com/FRBLanApps/PiliSuper.git
-```
-
-``` Shell
-# 或者，使用ssh方式克隆仓库
-git clone git@github.com:FRBLanApps/PiliSuper.git
-```
-
-``` Shell
-# 又或者，使用gh repo clone命令克隆仓库
-gh repo clone FRBLanApps/PiliSuper
-```
-
-### 然后，按照教程，安装依赖
-
-[安装 Flutter](https://docs.flutter.dev/install/custom)
-[安装多平台构建依赖](https://docs.flutter.dev/platform-integration)
-
-### 然后，安装Python以便运行构建脚本
-
-[安装 Python](https://www.python.org/downloads/)
-
-### 最后，运行构建脚本
-
-首先，切换到项目目录
-
-``` Shell
-cd PiliSuper
-```
-
-然后，运行构建脚本
-
-``` Shell
-python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
-                [--original-app-name NAME] [--skip-rename] [--dart-define-from-file FILE]  
-                [--dart-define K=V] [--arch ARCH] [--version VERSION] [--no-prebuild]      
-                [--no-split] [--sign] [--keystore-file PATH] [--keystore-base64 B64]       
-                [--key-alias ALIAS] [--key-password PASS] [--store-password PASS]
-                [--clean-keys] [--installer]
-                [--linux-targets {tar.gz,zst,arch,deb,rpm,appimage,all} [{tar.gz,zst,arch,deb,rpm,appimage,all} ...]]
-                [--output DIR] [--output-prefix PREFIX] [--no-patches] [--no-pub-get]      
-                {android,ios,macos,windows,linux,all}
-```
+可以通过右侧release进行下载或拉取代码到本地进行编译
 
 <br/>
 
 ## 声明
 
-此项目（PiliSuper）是个人为了兴趣而开发, 仅用于学习和测试，请按照您当地的法律处理此软件。
-
-在此致敬原作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
-在此致敬上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-在此致敬上上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
+所用API皆从官方网站收集，不提供任何破解内容。
+在此致敬原作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
 本仓库做了更激进的修改，感谢原作者的开源精神。
 
 感谢使用
+
 
 <br/>
 
 ## 致谢
 
-- [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
-- [BACNext](https://github.com/BACNext/BACNext)
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
 - [dio](https://pub.dev/packages/dio)
@@ -300,20 +240,14 @@ python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
 
 <br/>
 <br/>
-
-
-## 你们的精神状态还好吗？
-
-[已经疯掉了，下一个问题。](screaming.txt)
-
 <br/>
 
 ## Star History
 
-<a href="https://www.star-history.com/#FRBLanApps/PiliSuper&Date">
+<a href="https://www.star-history.com/#bggRGjQaUbCoE/PiliPlus&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=FRBLanApps/PiliSuper&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
  </picture>
 </a>
