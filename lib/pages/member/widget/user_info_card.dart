@@ -458,7 +458,7 @@ class UserInfoCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         HeaderLayoutWidget(
-          header: imgUrls != null
+          header: imgUrls != null && imgUrls.isNotEmpty
               ? _buildCollectionHeader(context, scheme, isLight, imgUrls, width)
               : _buildHeader(
                   context,
@@ -491,12 +491,15 @@ class UserInfoCard extends StatelessWidget {
     double width,
   ) {
     if (imgUrls.length == 1) {
+      final img = imgUrls.first;
       return _buildHeader(
         context,
         isLight,
         width,
-        imgUrls.single.cover,
+        img.header,
         filter: false,
+        fullCover: img.fullCover,
+        alignment: Alignment(0.0, img.dy),
       );
     }
     final controller = headerControllerBuilder();
@@ -505,7 +508,7 @@ class UserInfoCard extends StatelessWidget {
       behavior: .opaque,
       onTap: () => PageUtils.imageView(
         initialPage: controller.page?.round() ?? 0,
-        imgList: imgUrls.map((e) => SourceModel(url: e.cover)).toList(),
+        imgList: imgUrls.map((e) => SourceModel(url: e.fullCover)).toList(),
         onPageChanged: controller.jumpToPage,
       ),
       child: Stack(
@@ -520,14 +523,14 @@ class UserInfoCard extends StatelessWidget {
               itemBuilder: (context, index) {
                 final img = imgUrls[index];
                 return fromHero(
-                  tag: img.cover,
+                  tag: img.fullCover,
                   child: CachedNetworkImage(
                     fit: .cover,
                     alignment: Alignment(0.0, img.dy),
                     height: kHeaderHeight,
                     width: width,
                     memCacheWidth: memCacheWidth,
-                    imageUrl: ImageUtils.thumbnailUrl(img.cover),
+                    imageUrl: ImageUtils.thumbnailUrl(img.header),
                     fadeInDuration: const Duration(milliseconds: 120),
                     fadeOutDuration: const Duration(milliseconds: 120),
                     placeholder: (_, _) =>
@@ -557,14 +560,18 @@ class UserInfoCard extends StatelessWidget {
     double width,
     String imgUrl, {
     bool filter = true,
+    String? fullCover,
+    Alignment alignment = .center,
   }) {
+    final img = fullCover ?? imgUrl;
     return GestureDetector(
       behavior: .opaque,
-      onTap: () => PageUtils.imageView(imgList: [SourceModel(url: imgUrl)]),
+      onTap: () => PageUtils.imageView(imgList: [SourceModel(url: img)]),
       child: fromHero(
-        tag: imgUrl,
+        tag: img,
         child: CachedNetworkImage(
           fit: .cover,
+          alignment: alignment,
           height: kHeaderHeight,
           width: width,
           memCacheWidth: width.cacheSize(context),

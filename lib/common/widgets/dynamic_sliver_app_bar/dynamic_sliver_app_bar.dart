@@ -358,7 +358,11 @@ class DynamicFlexibleSpaceBar extends StatelessWidget {
 
   final CollapseMode collapseMode;
 
-  double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
+  static double _getCollapsePadding(
+    CollapseMode collapseMode,
+    double t,
+    FlexibleSpaceBarSettings settings,
+  ) {
     switch (collapseMode) {
       case CollapseMode.pin:
         return -(settings.maxExtent - settings.currentExtent);
@@ -382,6 +386,8 @@ class DynamicFlexibleSpaceBar extends StatelessWidget {
       opacity = 1.0;
       topPadding = 0.0;
     } else {
+      height = settings.maxExtent;
+
       final double deltaExtent = settings.maxExtent - settings.minExtent;
 
       // 0.0 -> Expanded
@@ -404,7 +410,7 @@ class DynamicFlexibleSpaceBar extends StatelessWidget {
           ? 1.0
           : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
 
-      topPadding = _getCollapsePadding(t, settings);
+      topPadding = _getCollapsePadding(collapseMode, t, settings);
     }
 
     return ClipRect(
