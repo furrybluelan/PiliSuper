@@ -217,6 +217,58 @@
 
 <br/>
 
+## 编译
+
+### 首先，克隆仓库到本地
+
+``` Shell
+# 使用https方式克隆仓库
+git clone https://github.com/FRBLanApps/PiliSuper.git
+```
+
+``` Shell
+# 或者，使用ssh方式克隆仓库
+git clone git@github.com:FRBLanApps/PiliSuper.git
+```
+
+``` Shell
+# 又或者，使用gh repo clone命令克隆仓库
+gh repo clone FRBLanApps/PiliSuper
+```
+
+### 然后，按照教程，安装依赖
+
+[安装 Flutter](https://docs.flutter.dev/install/custom)
+[安装多平台构建依赖](https://docs.flutter.dev/platform-integration)
+
+### 然后，安装Python以便运行构建脚本
+
+[安装 Python](https://www.python.org/downloads/)
+
+### 最后，运行构建脚本
+
+首先，切换到项目目录
+
+``` Shell
+cd PiliSuper
+```
+
+然后，运行构建脚本
+
+``` Shell
+python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
+                [--original-app-name NAME] [--skip-rename] [--dart-define-from-file FILE]  
+                [--dart-define K=V] [--arch ARCH] [--version VERSION] [--no-prebuild]      
+                [--no-split] [--sign] [--keystore-file PATH] [--keystore-base64 B64]       
+                [--key-alias ALIAS] [--key-password PASS] [--store-password PASS]
+                [--clean-keys] [--installer]
+                [--linux-targets {tar.gz,zst,arch,deb,rpm,appimage,all} [{tar.gz,zst,arch,deb,rpm,appimage,all} ...]]
+                [--output DIR] [--output-prefix PREFIX] [--no-patches] [--no-pub-get]      
+                {android,ios,macos,windows,linux,all}
+```
+
+<br/>
+
 ## 声明
 
 此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
