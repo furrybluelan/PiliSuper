@@ -5,36 +5,46 @@ class Top {
 
   Top({this.imgUrls});
 
+  @pragma('vm:notify-debugger-on-exception')
   Top.fromJson(Map<String, dynamic> json) {
     try {
-      final list = json['result'] as List<dynamic>?;
-      if (list != null && list.isNotEmpty) {
-        imgUrls = list.map((e) => TopImage.fromJson(e)).toList();
-      }
+      imgUrls = (json['result'] as List?)
+          ?.map((e) => TopImage.fromJson(e))
+          .toList();
     } catch (_) {}
   }
 }
 
 class TopImage {
-  late final String cover;
+  String? _defaultImage;
+  late final String fullCover;
+  String get header => _defaultImage ?? fullCover;
   late final double dy;
 
+  @pragma('vm:notify-debugger-on-exception')
   TopImage.fromJson(Map<String, dynamic> json) {
-    cover =
-        noneNullOrEmptyString(json['item']?['image']?['default_image']) ??
-        json['cover'];
+    _defaultImage = noneNullOrEmptyString(
+      json['item']['image']?['default_image'],
+    );
+    fullCover = json['cover'];
+    double dy = 0;
     try {
       final Map image = json['item']['image'] ?? json['item']['animation'];
-      final num halfHeight = (image['height'] as num) / 2;
-      final List<num> location = (image['location'] as String)
-          .split('-')
-          .map(num.parse)
-          .toList();
-      final start = location[1];
-      final end = location[2];
-      dy = (start + (end - start) / 2 - halfHeight) / halfHeight;
-    } catch (_) {
-      dy = 0.0;
-    }
+      if (image['location'] case String locStr when (locStr.isNotEmpty)) {
+        final location = locStr
+            .split('-')
+            .skip(1)
+            .take(2)
+            .map(num.parse)
+            .toList();
+        if (location.length == 2) {
+          final num height = image['height'];
+          final start = location[0];
+          final end = location[1];
+          dy = (start + end) / height - 1;
+        }
+      }
+    } catch (_) {}
+    this.dy = dy;
   }
 }
