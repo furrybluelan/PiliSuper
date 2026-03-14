@@ -221,6 +221,10 @@ abstract final class PageUtils {
           },
         );
       } else {
+        if (item.linkFolded) {
+          pushDynFromId(id: item.idStr);
+          return;
+        }
         toDupNamed(
           '/dynamicDetail',
           arguments: {

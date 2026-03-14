@@ -87,12 +87,13 @@ abstract final class GStorage {
   static Future<void> importAllSettings(String data) =>
       importAllJsonSettings(jsonDecode(data));
 
-  static Future<bool> importAllJsonSettings(Map<String, dynamic> map) async {
-    await Future.wait([
+  static Future<List<void>> importAllJsonSettings(
+    Map<String, dynamic> map,
+  ) {
+    return Future.wait([
       setting.clear().then((_) => setting.putAll(map[setting.name])),
       video.clear().then((_) => video.putAll(map[video.name])),
     ]);
-    return true;
   }
 
   static void regAdapter() {
@@ -107,8 +108,8 @@ abstract final class GStorage {
       ..registerAdapter(RuleFilterAdapter());
   }
 
-  static Future<void> compact() async {
-    await Future.wait([
+  static Future<List<void>> compact() {
+    return Future.wait([
       userInfo.compact(),
       historyWord.compact(),
       localCache.compact(),
@@ -120,8 +121,8 @@ abstract final class GStorage {
     ]);
   }
 
-  static Future<void> close() async {
-    await Future.wait([
+  static Future<List<void>> close() {
+    return Future.wait([
       userInfo.close(),
       historyWord.close(),
       localCache.close(),
@@ -130,6 +131,19 @@ abstract final class GStorage {
       Accounts.account.close(),
       watchProgress.close(),
       ?reply?.close(),
+    ]);
+  }
+
+  static Future<List<void>> clear() {
+    return Future.wait([
+      userInfo.clear(),
+      historyWord.clear(),
+      localCache.clear(),
+      setting.clear(),
+      video.clear(),
+      Accounts.clear(),
+      watchProgress.clear(),
+      ?reply?.clear(),
     ]);
   }
 

@@ -578,10 +578,10 @@ packages:
     dependency: "direct main"
     description:
       name: fl_chart
-      sha256: "7ca9a40f4eb85949190e54087be8b4d6ac09dc4c54238d782a34cf1f7c011de9"
+      sha256: b938f77d042cbcd822936a7a359a7235bad8bd72070de1f827efc2cc297ac888
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.2.0"
   flex_seed_scheme:
     dependency: "direct main"
     description:
@@ -742,10 +742,10 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: c08f651c60f1451feba2ec4895caf12771661809
+      resolved-ref: b87bda5672e1c8494853bb44bbf08515ef748bca
       url: "https://github.com/bggRGjQaUbCoE/flutter_smart_dialog.git"
     source: git
-    version: "5.0.1"
+    version: "5.1.0"
   flutter_sortable_wrap:
     dependency: "direct main"
     description:
@@ -1943,10 +1943,10 @@ packages:
     dependency: "direct main"
     description:
       name: wakelock_plus
-      sha256: e4e125b7c1a2f0e491e5452afdc0e25ab77b2d2775a7caa231fcc1c1f2162c47
+      sha256: "8b12256f616346910c519a35606fb69b1fe0737c06b6a447c6df43888b097f39"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.5.1"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
