@@ -663,7 +663,9 @@ class VideoDetailController extends GetxController
             (isFileSource
                 ? true
                 : videoPlayerKey.currentState?.mounted == true)) {
-      return playerInit(autoFullScreenFlag: autoFullScreenFlag);
+      return playerInit(
+        autoFullScreenFlag: autoFullScreenFlag && _autoPlay.value,
+      );
     }
     return null;
   }
@@ -687,6 +689,7 @@ class VideoDetailController extends GetxController
               dir: args['dirPath'],
               typeTag: entry.typeTag!,
               isMp4: entry.mediaType == 1,
+              hasDashAudio: entry.hasDashAudio,
             )
           : NetworkSource(
               videoSource: video ?? videoUrl!,
