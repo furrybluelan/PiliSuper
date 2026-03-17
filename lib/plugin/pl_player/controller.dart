@@ -205,7 +205,7 @@ class PlPlayerController with BlockConfigMixin {
 
   late final bool autoPiP = Pref.autoPiP;
   bool get isPipMode =>
-      (Platform.isAndroid && Floating().isPipMode) ||
+      ((Platform.isAndroid || Platform.isIOS) && Floating().isPipMode) ||
       (PlatformUtils.isDesktop && isDesktopPip);
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
@@ -519,7 +519,7 @@ class PlPlayerController with BlockConfigMixin {
       enableHeart = false;
     }
 
-    if (Platform.isAndroid && autoPiP) {
+    if ((Platform.isAndroid || Platform.isIOS) && autoPiP) {
       Utils.sdkInt.then((sdkInt) {
         if (sdkInt < 36) {
           Utils.channel.setMethodCallHandler((call) async {
@@ -1684,7 +1684,7 @@ class PlPlayerController with BlockConfigMixin {
 
   bool onPopInvokedWithResult(bool didPop, Object? result) {
     if (didPop) {
-      if (Platform.isAndroid) {
+      if (Platform.isAndroid || Platform.isIOS) {
         _disableAutoEnterPipIfNeeded();
       }
       return true;

@@ -244,7 +244,7 @@ class _MainAppState extends PopScopeState<MainApp>
   }
 
   static void _onBack() {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       Utils.channel.invokeMethod('back');
     }
   }
