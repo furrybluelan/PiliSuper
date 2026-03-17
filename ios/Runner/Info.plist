@@ -128,6 +128,8 @@
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>audio</string>
+			<string>airplay</string>
+			<string>pictureinpicture</string>
 		</array>
 		<key>UIStatusBarHidden</key>
 		<false/>
