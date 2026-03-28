@@ -1162,7 +1162,7 @@ def package_rpm(
         /opt/{app_name}
         /usr/bin/{app_name}
         /usr/share/applications/{desktop_name}
-        /usr/share/icons/hicolor/512x512/apps/{app_name}.png
+        /usr/share/icons/hicolor/512x512/apps/{icon_name}.png
 
         %changelog
         * {date_str} - {rpm_ver}-1
