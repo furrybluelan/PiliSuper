@@ -1,4 +1,4 @@
-import 'package:floating/floating.dart';
+import 'package:fl_pip/fl_pip.dart';
 
 extension RationalExt on Rational {
   /// Checks whether given [Rational] instance fits into Android requirements

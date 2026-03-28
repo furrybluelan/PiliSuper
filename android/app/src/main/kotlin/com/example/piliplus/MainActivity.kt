@@ -5,7 +5,6 @@ import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -166,14 +165,4 @@ class MainActivity : AudioServiceActivity() {
         methodChannel.invokeMethod("onUserLeaveHint", null)
     }
 
-    override fun onPictureInPictureModeChanged(
-        isInPictureInPictureMode: Boolean,
-        newConfig: Configuration?
-    ) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        MethodChannel(
-            flutterEngine!!.dartExecutor.binaryMessenger,
-            "floating"
-        ).invokeMethod("onPipChanged", isInPictureInPictureMode)
-    }
 }

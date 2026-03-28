@@ -57,7 +57,7 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:floating/floating.dart';
+import 'package:fl_pip/fl_pip.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide showBottomSheet;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -1980,7 +1980,7 @@ class HeaderControlState extends State<HeaderControl>
                         plPlayerController.toggleDesktopPip();
                         return;
                       }
-                      if (await Floating().isPipAvailable) {
+                      if (await FlPiP().isAvailable) {
                         if (context.mounted &&
                             !videoPlayerServiceHandler!.enableBackgroundPlay) {
                           final theme = Theme.of(context);

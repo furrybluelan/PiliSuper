@@ -63,7 +63,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
-import 'package:floating/floating.dart';
+import 'package:fl_pip/fl_pip.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
@@ -286,7 +286,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         }
         // 播放完展示控制栏
         if (Platform.isAndroid) {
-          if (await Floating().pipStatus == PiPStatus.disabled) {
+          if ((await FlPiP().isActive)?.status != PiPStatus.enabled) {
             plPlayerController!.onLockControl(false);
           }
         }

@@ -29,7 +29,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/url_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:floating/floating.dart';
+import 'package:fl_pip/fl_pip.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -187,6 +187,9 @@ abstract final class PageUtils {
   }
 
   static void enterPip({int? width, int? height, bool isAuto = false}) {
+    final iosConfig = FlPiPiOSConfig(
+      enabledWhenBackground: isAuto,
+    );
     if (width != null && height != null) {
       Rational aspectRatio = Rational(width, height);
       aspectRatio = aspectRatio.fitsInAndroidRequirements
@@ -194,13 +197,12 @@ abstract final class PageUtils {
           : height > width
           ? const Rational.vertical()
           : const Rational.landscape();
-      Floating().enable(
-        isAuto
-            ? AutoEnable(aspectRatio: aspectRatio)
-            : EnableManual(aspectRatio: aspectRatio),
+      FlPiP().enable(
+        android: FlPiPAndroidConfig(aspectRatio: aspectRatio),
+        ios: iosConfig,
       );
     } else {
-      Floating().enable(isAuto ? const AutoEnable() : const EnableManual());
+      FlPiP().enable(ios: iosConfig);
     }
   }
 

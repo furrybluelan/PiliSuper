@@ -46,7 +46,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:floating/floating.dart';
+import 'package:fl_pip/fl_pip.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
@@ -205,7 +205,8 @@ class PlPlayerController with BlockConfigMixin {
 
   late final bool autoPiP = Pref.autoPiP;
   bool get isPipMode =>
-      ((Platform.isAndroid || Platform.isIOS) && Floating().isPipMode) ||
+      ((Platform.isAndroid || Platform.isIOS) &&
+          FlPiP().status.value?.status == PiPStatus.enabled) ||
       (PlatformUtils.isDesktop && isDesktopPip);
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
