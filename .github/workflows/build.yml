@@ -145,7 +145,7 @@ jobs:
   ios:
     name: iOS
     if: ${{ github.event_name == 'pull_request' || inputs.build_ios == true }}
-    runs-on: macos-latest
+    runs-on: macos-26
     permissions: write-all
     steps:
       - uses: actions/checkout@v6
