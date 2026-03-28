@@ -31,10 +31,6 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Temporary pin: newer TOCropViewController uses UIViewLayoutRegion API
-  # and fails on current GitHub Actions Xcode image.
-  pod 'TOCropViewController', '2.6.1'
-
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
