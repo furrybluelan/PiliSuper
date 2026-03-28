@@ -473,12 +473,12 @@ class UserInfoCard extends StatelessWidget {
     ],
   );
 
-  Widget _buildAvatar(ColorScheme scheme) {
-    final pendant = card.pendant?.image;
-    Widget child = PendantAvatar(
-      card.face,
-      size: kAvatarSize,
-      pendentOffset: 12,
+  Widget _buildAvatar(bool hasPendant) => fromHero(
+    tag: '${card.face}$hashCode',
+    child: PendantAvatar(
+      avatar: card.face,
+      size: hasPendant ? kPendantAvatarSize : kAvatarSize,
+      isMemberAvatar: true,
       badgeSize: 20,
       officialType: card.officialVerify?.type,
       vipStatus: card.vip?.status,

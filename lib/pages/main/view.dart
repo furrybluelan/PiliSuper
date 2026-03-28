@@ -16,7 +16,6 @@ import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
-import 'package:PiliPlus/utils/mobile_observer.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -113,7 +112,7 @@ class _MainAppState extends PopScopeState<MainApp>
       trayManager.removeListener(this);
       windowManager.removeListener(this);
     }
-    removeObserverMobile(this);
+    WidgetsBinding.instance.removeObserver(this);
     PiliScheme.listener?.cancel();
     GStorage.close();
     super.dispose();

@@ -25,14 +25,13 @@ class TopImage {
 
   @pragma('vm:notify-debugger-on-exception')
   TopImage.fromJson(Map<String, dynamic> json) {
-    final item = json['item'];
-    final img = item['image'];
-    title = json['title'] == null ? null : TopTitle.fromJson(json['title']);
-    _defaultImage = noneNullOrEmptyString(img?['default_image']);
+    _defaultImage = noneNullOrEmptyString(
+      json['item']['image']?['default_image'],
+    );
     fullCover = json['cover'];
     double dy = 0;
     try {
-      final Map image = img ?? item['animation'];
+      final Map image = json['item']['image'] ?? json['item']['animation'];
       if (image['location'] case String locStr when (locStr.isNotEmpty)) {
         final location = locStr
             .split('-')

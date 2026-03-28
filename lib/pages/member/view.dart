@@ -409,21 +409,28 @@ class _MemberPageState extends State<MemberPage> {
     }).toList(),
   );
 
-  String? _cacheFollowTime;
-  Future<void> _showFollowTime() async {
-    void onShow() {
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(_userController.username ?? ''),
-          content: Text(_cacheFollowTime!),
-          actions: [
-            TextButton(
-              onPressed: Get.back,
-              child: Text(
-                '关闭',
-                style: TextStyle(color: ColorScheme.of(context).outline),
+  Widget _buildUserInfo(
+    ColorScheme theme,
+    LoadingState<SpaceData?> userState,
+  ) {
+    switch (userState) {
+      case Loading():
+        return const CircularProgressIndicator();
+      case Success<SpaceData?>(:final response):
+        if (response != null) {
+          return DynamicSliverAppBar.medium(
+            actions: _actions(theme),
+            title: Text(_userController.username ?? ''),
+            flexibleSpace: Obx(
+              () => UserInfoCard(
+                isOwner: _userController.mid == _userController.account.mid,
+                relation: _userController.relation.value,
+                card: response.card!,
+                images: response.images!,
+                onFollow: () => _userController.onFollow(context),
+                live: _userController.live,
+                silence: _userController.silence,
+                headerControllerBuilder: getHeaderController,
               ),
             ),
           ],

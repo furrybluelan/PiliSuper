@@ -374,7 +374,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         PlPlayerController.updatePlayCount();
       }
     }
-    removeObserverMobile(this);
+    WidgetsBinding.instance.removeObserver(this);
     if (PlatformUtils.isMobile) {
       showStatusBar();
     }
@@ -420,7 +420,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     isShowing = true;
 
-    addObserverMobile(this);
+    WidgetsBinding.instance.addObserver(this);
 
     plPlayerController?.isLive = false;
     if (videoDetailController.plPlayerController.playerStatus.isPlaying &&
@@ -1789,7 +1789,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(
-                    top: Style.safeSpace,
+                    top: StyleString.safeSpace,
                   ),
                   child: Divider(
                     height: 1,
@@ -1818,7 +1818,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               height:
                   (videoDetailController.isPlayAll && !isPortrait
                       ? 80
-                      : Style.safeSpace) +
+                      : StyleString.safeSpace) +
                   padding.bottom,
             ),
           ),
