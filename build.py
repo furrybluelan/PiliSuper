@@ -530,20 +530,26 @@ def apply_flutter_patches(root: str, platform_name: str = "") -> None:
             bad_message="Add RawTooltip.ignorePointer 应用失败（已忽略）",
         )
 
-    for name in [
-        "bottom_sheet.patch",
-        "modal_barrier.patch",
-        "mouse_cursor.patch",
-    ]:
-        patch_path = Path("lib/scripts") / name
+    # bottom_sheet.patch 仅 Android 适用（upstream patch.ps1 同逻辑）
+    # https://github.com/flutter/flutter/issues/182281
+    if platform_name == "android":
         apply_git_patch(
-            patch_path,
+            Path("lib/scripts/bottom_sheet.patch"),
+            cwd=root,
+            notfound_message="patch 不存在，跳过: bottom_sheet.patch",
+            finished_message="Patch OK: bottom_sheet.patch",
+            bad_message="Patch 应用失败（已忽略）: bottom_sheet.patch",
+        )
+
+    # modal_barrier.patch / mouse_cursor.patch 所有平台通用
+    for name in ["modal_barrier.patch", "mouse_cursor.patch"]:
+        apply_git_patch(
+            Path("lib/scripts") / name,
             cwd=root,
             notfound_message=f"patch 不存在，跳过: {name}",
             finished_message=f"Patch OK: {name}",
             bad_message=f"Patch 应用失败（已忽略）: {name}",
         )
-
 
 def run_common_setup(args: argparse.Namespace) -> str | None:
     flutter_root_dir = find_flutter_root()
