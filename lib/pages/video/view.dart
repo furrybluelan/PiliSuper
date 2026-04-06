@@ -484,6 +484,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       () {
         final isFullScreen = this.isFullScreen;
         return Scaffold(
+          backgroundColor: Colors.black,
           resizeToAvoidBottomInset: false,
           appBar: removeAppBar(isFullScreen)
               ? null
@@ -751,6 +752,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     () {
       final isFullScreen = this.isFullScreen;
       return Scaffold(
+        backgroundColor: Colors.black,
         resizeToAvoidBottomInset: false,
         appBar: removeAppBar(isFullScreen)
             ? null
@@ -986,6 +988,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   Widget get childWhenDisabledAlmostSquare => Obx(() {
     final isFullScreen = this.isFullScreen;
     return Scaffold(
+      backgroundColor: Colors.black,
       resizeToAvoidBottomInset: false,
       appBar: removeAppBar(isFullScreen)
           ? null

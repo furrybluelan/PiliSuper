@@ -37,8 +37,10 @@
 
     <application xmlns:tools="http://schemas.android.com/tools"
         android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:enableOnBackInvokedCallback="true"
         android:allowBackup="false"
-        android:enableOnBackInvokedCallback="false"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
