@@ -504,52 +504,143 @@ def find_flutter_root() -> str | None:
     return str(Path(flutter_binary).parent.parent) if flutter_binary else None
 
 
+@dataclass(frozen=True)
+class FlutterPatchAction:
+    kind: str
+    target: str
+    success_message: str
+    failure_message: str
+    step_message: str = ""
+
+
+def make_flutter_patch_action(name: str) -> FlutterPatchAction:
+    return FlutterPatchAction(
+        kind="patch",
+        target=name,
+        success_message=f"Patch OK: {name}",
+        failure_message=f"Patch 应用失败（已忽略）: {name}",
+    )
+
+
+FLUTTER_PATCH_ACTION_PRIORITY = {"cherry-pick": 0, "revert": 1, "patch": 2}
+FLUTTER_PATCHES_DIR = Path("lib/scripts")
+TOOLTIP_FIX_COMMIT = "56956c33ef102ac0b5fc46b62bd2dd9f50a86616"
+NEW_OVERSCROLL_INDICATOR_COMMIT = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
+
+TOOLTIP_FIX_ACTION = FlutterPatchAction(
+    kind="cherry-pick",
+    target=TOOLTIP_FIX_COMMIT,
+    success_message="Add RawTooltip.ignorePointer 应用完成",
+    failure_message="Add RawTooltip.ignorePointer 应用失败（已忽略）",
+    step_message=(
+        "checkout Add RawTooltip.ignorePointer commit "
+        f"({TOOLTIP_FIX_COMMIT[:9]}…)"
+    ),
+)
+OVERSCROLL_INDICATOR_REVERT_ACTION = FlutterPatchAction(
+    kind="revert",
+    target=NEW_OVERSCROLL_INDICATOR_COMMIT,
+    success_message="overscroll indicator revert 完成",
+    failure_message="overscroll indicator revert 失败（已忽略）",
+    step_message=(
+        "revert overscroll indicator commit "
+        f"({NEW_OVERSCROLL_INDICATOR_COMMIT[:9]}…)"
+    ),
+)
+
+COMMON_FLUTTER_PATCH_ACTIONS = (
+    make_flutter_patch_action("modal_barrier.patch"),
+    make_flutter_patch_action("text_selection.patch"),
+    make_flutter_patch_action("mouse_cursor.patch"),
+)
+PLATFORM_FLUTTER_PATCH_ACTIONS = {
+    "android": (
+        OVERSCROLL_INDICATOR_REVERT_ACTION,
+        make_flutter_patch_action("bottom_sheet.patch"),
+        make_flutter_patch_action("scroll_view.patch"),
+    ),
+    "ios": (make_flutter_patch_action("scroll_view.patch"),),
+    "linux": (TOOLTIP_FIX_ACTION,),
+    "macos": (TOOLTIP_FIX_ACTION,),
+    "windows": (TOOLTIP_FIX_ACTION,),
+}
+
+
+def dedupe_flutter_patch_actions(
+    actions: Sequence[FlutterPatchAction],
+) -> tuple[FlutterPatchAction, ...]:
+    seen: set[tuple[str, str]] = set()
+    unique_actions: list[FlutterPatchAction] = []
+    for action in actions:
+        key = (action.kind, action.target)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_actions.append(action)
+    return tuple(
+        sorted(
+            unique_actions,
+            key=lambda action: FLUTTER_PATCH_ACTION_PRIORITY[action.kind],
+        )
+    )
+
+
+def build_flutter_patch_actions(platform_name: str) -> tuple[FlutterPatchAction, ...]:
+    normalized_platform = platform_name.strip().lower()
+    actions = list(COMMON_FLUTTER_PATCH_ACTIONS)
+
+    if normalized_platform == "all":
+        target_platforms = tuple(PLATFORM_FLUTTER_PATCH_ACTIONS)
+    elif normalized_platform in PLATFORM_FLUTTER_PATCH_ACTIONS:
+        target_platforms = (normalized_platform,)
+    else:
+        target_platforms = ()
+
+    for target_platform in target_platforms:
+        actions.extend(PLATFORM_FLUTTER_PATCH_ACTIONS[target_platform])
+
+    return dedupe_flutter_patch_actions(actions)
+
+
+def apply_flutter_patch_action(root: str, action: FlutterPatchAction) -> None:
+    if action.step_message:
+        log_step(action.step_message)
+
+    if action.kind == "revert":
+        apply_git_revert(
+            action.target,
+            cwd=root,
+            finished_message=action.success_message,
+            bad_message=action.failure_message,
+        )
+        return
+
+    if action.kind == "cherry-pick":
+        apply_git_cherry_pick(
+            action.target,
+            cwd=root,
+            finished_message=action.success_message,
+            bad_message=action.failure_message,
+        )
+        return
+
+    if action.kind == "patch":
+        apply_git_patch(
+            FLUTTER_PATCHES_DIR / action.target,
+            cwd=root,
+            notfound_message=f"patch 不存在，跳过: {action.target}",
+            finished_message=action.success_message,
+            bad_message=action.failure_message,
+        )
+        return
+
+    raise ValueError(f"Unknown Flutter patch action: {action.kind}")
+
+
 def apply_flutter_patches(root: str, platform_name: str = "") -> None:
     log_step("应用 Flutter patches")
-
-    # Android 专属：revert overscroll indicator（https://github.com/flutter/flutter/issues/182281）
-    if platform_name == "android":
-        revert_hash = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
-        log_step(f"revert overscroll indicator commit ({revert_hash[:9]}…)")
-        apply_git_revert(
-            revert_hash,
-            cwd=root,
-            finished_message="overscroll indicator revert 完成",
-            bad_message="overscroll indicator revert 失败（已忽略）",
-        )
-    
-    if platform_name in ["linux", "macos", "windows"]:
-        checkout_hash = "56956c33ef102ac0b5fc46b62bd2dd9f50a86616"
-        log_step(
-            f"checkout Add RawTooltip.ignorePointer commit ({checkout_hash[:9]}…)"
-        )
-        apply_git_cherry_pick(
-            checkout_hash,
-            cwd=root,
-            finished_message="Add RawTooltip.ignorePointer 应用完成",
-            bad_message="Add RawTooltip.ignorePointer 应用失败（已忽略）",
-        )
-
-    # bottom_sheet.patch 仅 Android 适用（upstream patch.ps1 同逻辑）
-    # https://github.com/flutter/flutter/issues/182281
-    if platform_name == "android":
-        apply_git_patch(
-            Path("lib/scripts/bottom_sheet.patch"),
-            cwd=root,
-            notfound_message="patch 不存在，跳过: bottom_sheet.patch",
-            finished_message="Patch OK: bottom_sheet.patch",
-            bad_message="Patch 应用失败（已忽略）: bottom_sheet.patch",
-        )
-
-    # modal_barrier.patch / mouse_cursor.patch 所有平台通用
-    for name in ["modal_barrier.patch", "mouse_cursor.patch"]:
-        apply_git_patch(
-            Path("lib/scripts") / name,
-            cwd=root,
-            notfound_message=f"patch 不存在，跳过: {name}",
-            finished_message=f"Patch OK: {name}",
-            bad_message=f"Patch 应用失败（已忽略）: {name}",
-        )
+    for action in build_flutter_patch_actions(platform_name):
+        apply_flutter_patch_action(root, action)
 
 def run_common_setup(args: argparse.Namespace) -> str | None:
     flutter_root_dir = find_flutter_root()
