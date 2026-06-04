@@ -17,6 +17,8 @@ body:
           required: true
         - label: 设置中未搜索到该功能
           required: true
+        - label: 我并没有详细看这些选项，我只是机械化的选了这些，请关闭本issue。
+          required: false
 
   - type: checkboxes
     id: assign
