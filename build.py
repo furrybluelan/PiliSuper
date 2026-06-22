@@ -1283,7 +1283,7 @@ def package_deb(context: BuildContext, arch: str, bundle: Path) -> None:
 
     ctrl_src = Path("assets/linux/DEBIAN")
     (root / "DEBIAN").mkdir(exist_ok=True)
-    (root / "DEBIAN / control").write_text(f"""\
+    (root / "DEBIAN" / "control").write_text(f"""\
     Package: {context.options.app_name}
     Version: {context.version}
     Maintainer: FRBLanApps Members <frblanapps@disroot.org>
