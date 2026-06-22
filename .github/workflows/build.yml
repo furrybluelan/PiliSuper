@@ -125,7 +125,7 @@ jobs:
           KEY_ALIAS:    ${{ secrets.KEY_ALIAS }}
           KEY_PASS:     ${{ secrets.KEY_PASSWORD }}
           STORE_PASS:   ${{ secrets.KEYSTORE_PASSWORD }}
-        if: ${{ inputs.build_android_dev == true}}
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_dev == true }}
         run: |
           SIGN_ARGS=()
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "$KEYSTORE_B64" ]]; then
@@ -139,25 +139,14 @@ jobs:
             )
           fi
 
-          NAME_ARGS=()
-          if [[ -n "${{ inputs.app_name }}" ]]; then
-            NAME_ARGS+=(
-              --app-name "${{ inputs.app_name }}"
-            )
-          fi
-
-          if [[ -n "${{ inputs.pkg_id }}" ]]; then
-            NAME_ARGS+=(
-              --pkg-id "${{ inputs.pkg_id }}"
-            )
-          fi
-
           python3 build.py android \
             --output-prefix PiliSuper \
             --output dist \
             --dev \
+            --skip_rename \
+            --no-patches \
+            --no-pub-get \
             "${SIGN_ARGS[@]}" \
-            "${NAME_ARGS[@]}" \
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -165,7 +154,10 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
-          files:    dist/PiliSuper_android_*.apk
+          files: |
+            dist/PiliSuper_android_*_arm64-v8a.apk
+            dist/PiliSuper_android_*_armeabi-v7a.apk
+            dist/PiliSuper_android_*_x86_64.apk
 
       - uses: actions/upload-artifact@v7
         with:
@@ -183,6 +175,24 @@ jobs:
         with:
           name: Android_x86_64
           path: dist/PiliSuper_android_*_x86_64.apk
+          archive: false
+      
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Android_arm64-v8a
+          path: dist/PiliSuper_android_*_arm64-v8a_dev.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Android_armeabi-v7a
+          path: dist/PiliSuper_android_*_armeabi-v7a_dev.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Android_x86_64
+          path: dist/PiliSuper_android_*_x86_64_dev.apk
           archive: false
 
   # ───────────── iOS ─────────────
