@@ -1283,33 +1283,53 @@ def package_deb(context: BuildContext, arch: str, bundle: Path) -> None:
 
     ctrl_src = Path("assets/linux/DEBIAN")
     (root / "DEBIAN").mkdir(exist_ok=True)
+    (root / "DEBIAN / control").write_text(f"""\
+    Package: {context.options.app_name}
+    Version: {context.version}
+    Maintainer: FRBLanApps Members <frblanapps@disroot.org>
+    Original-Maintainer: bggRGjQaUbCoE <githubaccount56556@proton.me>
+    Section: x11
+    Priority: optional
+    Architecture: amd64
+    Essential: no
+    Installed-Size: {(
+                    sum(
+                        f.stat().st_size
+                        for f in (root / "opt/app").rglob("*")
+                        if f.is_file()
+                    )
+                    // 1024
+                    + 1
+                    )}
+    Description: third-party Bilibili client developed in Flutter
+    Homepage: https://github.com/bggRGjQaUbCoE/PiliPlus
+    Depends: libgtk-3-0t64,
+            libmpv2,
+            gir1.2-ayatanaappindicator3-0.1,
+            libayatana-appindicator3-1
+    """)
     if ctrl_src.exists():
         shutil.copytree(ctrl_src, root / "DEBIAN", dirs_exist_ok=True)
-        ctrl = root / "DEBIAN/control"
-        if ctrl.exists():
-            txt = ctrl.read_text()
-            txt = txt.replace("version_need_change", context.version)
-            txt = re.sub(r"^Architecture:\s+\S+", f"Architecture: {deb_arch}", txt, flags=re.MULTILINE)
-            size_kb = (
-                sum(
-                    f.stat().st_size
-                    for f in (root / "opt/app").rglob("*")
-                    if f.is_file()
-                )
-                // 1024
-                + 1
-            )
-            txt = txt.replace("size_need_change", str(size_kb))
-            ctrl.write_text(txt, encoding="utf-8")
+        # ctrl = root / "DEBIAN/control"
+        # if ctrl.exists():
+        #     txt = ctrl.read_text()
+        #     txt = txt.replace("version_need_change", context.version)
+        #     txt = re.sub(r"^Architecture:\s+\S+", f"Architecture: {deb_arch}", txt, flags=re.MULTILINE)
+        #     size_kb = (
+        #         sum(
+        #             f.stat().st_size
+        #             for f in (root / "opt/app").rglob("*")
+        #             if f.is_file()
+        #         )
+        #         // 1024
+        #         + 1
+        #     )
+        #     txt = txt.replace("size_need_change", str(size_kb))
+        #     ctrl.write_text(txt, encoding="utf-8")
         for s in ["postinst", "postrm", "prerm"]:
             sp = root / "DEBIAN" / s
             if sp.exists():
                 sp.chmod(0o755)
-    else:
-        (root / "DEBIAN/control").write_text(
-            f"Package: {app_name}\nVersion: {context.version}\nArchitecture: {deb_arch}\n"
-            f"Maintainer: Unknown\nInstalled-Size: 0\nDescription: Flutter App\n"
-        )
 
     if desktop:
         shutil.copy2(desktop, root / "usr/share/applications" / desktop.name)
