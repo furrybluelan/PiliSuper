@@ -472,8 +472,7 @@ def rename_with_search_replace(options: BuildOptions) -> None:
         "windows/runner/*.h",
         "windows/runner/*.cpp",
         "windows/CMakeLists.txt",
-        "assets/linux/com.example.piliplus.desktop",
-        "assets/linux/DEBIAN/*",
+        "assets/linux/**/*"
     ]
 
     if new_name and orig_name and new_name != orig_name:
