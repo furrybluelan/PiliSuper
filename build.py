@@ -1283,31 +1283,38 @@ def package_deb(context: BuildContext, arch: str, bundle: Path) -> None:
 
     ctrl_src = Path("assets/linux/DEBIAN")
     (root / "DEBIAN").mkdir(exist_ok=True)
-    (root / "DEBIAN" / "control").write_text(f"""\
-    Package: {app_name.lower().replace(" ", "-")}
-    Version: {context.version}
-    Maintainer: FRBLanApps Members <frblanapps@disroot.org>
-    Original-Maintainer: bggRGjQaUbCoE <githubaccount56556@proton.me>
-    Section: x11
-    Priority: optional
-    Architecture: amd64
-    Essential: no
-    Installed-Size: {(
-                    sum(
-                        f.stat().st_size
-                        for f in (root / "opt/app").rglob("*")
-                        if f.is_file()
-                    )
-                    // 1024
-                    + 1
-                    )}
-    Description: third-party Bilibili client developed in Flutter
-    Homepage: https://github.com/bggRGjQaUbCoE/PiliPlus
-    Depends: libgtk-3-0t64,
-            libmpv2,
-            gir1.2-ayatanaappindicator3-0.1,
-            libayatana-appindicator3-1
-    """)
+    installed_size_kb = (
+        sum(
+            f.stat().st_size
+            for f in (root / "opt/app").rglob("*")
+            if f.is_file()
+        )
+        // 1024
+        + 1
+    )
+    depends = ", ".join(
+        [
+            "libgtk-3-0t64",
+            "libmpv2",
+            "gir1.2-ayatanaappindicator3-0.1",
+            "libayatana-appindicator3-1",
+        ]
+    )
+    control_content = textwrap.dedent(f"""\
+        Package: {context.options.app_name}
+        Version: {context.version}
+        Maintainer: FRBLanApps Members <frblanapps@disroot.org>
+        Original-Maintainer: bggRGjQaUbCoE <githubaccount56556@proton.me>
+        Section: x11
+        Priority: optional
+        Architecture: {deb_arch}
+        Essential: no
+        Installed-Size: {installed_size_kb}
+        Description: third-party Bilibili client developed in Flutter
+        Homepage: https://github.com/bggRGjQaUbCoE/PiliPlus
+        Depends: {depends}
+        """)
+    (root / "DEBIAN" / "control").write_text(control_content)
     if ctrl_src.exists():
         shutil.copytree(ctrl_src, root / "DEBIAN", dirs_exist_ok=True)
         # ctrl = root / "DEBIAN/control"
