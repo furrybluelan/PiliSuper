@@ -4,6 +4,8 @@ import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
+import 'package:PiliPlus/common/widgets/custom_icon.dart';
+import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
 import 'package:PiliPlus/common/widgets/extra_hit_test_widget.dart';
 import 'package:PiliPlus/common/widgets/flutter/text/text.dart' as custom_text;
@@ -26,6 +28,8 @@ import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/zan_grpc.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
+import 'package:PiliPlus/utils/bili_utils.dart';
+import 'package:PiliPlus/utils/color_utils.dart';
 import 'package:PiliPlus/utils/danmaku_utils.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
@@ -38,10 +42,11 @@ import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/url_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -180,7 +185,7 @@ class ReplyItemGrpc extends StatelessWidget {
                         ),
                       ),
                       Image.asset(
-                        Utils.levelName(
+                        BiliUtils.levelName(
                           member.level,
                           isSeniorMember: member.isSeniorMember == 1,
                         ),
@@ -275,7 +280,7 @@ class ReplyItemGrpc extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 8,
                       fontFamily: Assets.digitalNum,
-                      color: Utils.parseColor(garb.cardFanColor),
+                      color: ColourUtils.parseColor(garb.cardFanColor),
                     ),
                   ),
                 ),
@@ -451,6 +456,27 @@ class ReplyItemGrpc extends StatelessWidget {
       tapTargetSize: .shrinkWrap,
       padding: WidgetStatePropertyAll(.zero),
     );
+
+    Widget? dialogBtn;
+    if (replyLevel == 2 && needDivider && replyItem.id != replyItem.dialog) {
+      dialogBtn = SizedBox(
+        height: 32,
+        child: TextButton(
+          onPressed: showDialogue,
+          style: buttonStyle,
+          child: Text('查看对话', style: textStyle),
+        ),
+      );
+    } else if (replyLevel == 3 && replyItem.parent != replyItem.root) {
+      dialogBtn = SizedBox(
+        height: 32,
+        child: TextButton(
+          onPressed: jumpToDialogue,
+          style: buttonStyle,
+          child: Text('跳转回复', style: textStyle),
+        ),
+      );
+    }
     return Row(
       children: [
         const SizedBox(width: 36),
@@ -487,35 +513,16 @@ class ReplyItemGrpc extends StatelessWidget {
             buttonStyle,
           ),
           const SizedBox(width: 2),
-        ] else if (replyItem.replyControl.cardLabels.isNotEmpty) ...[
+        ] else if (replyControl.cardLabels.isNotEmpty) ...[
           Text(
-            replyItem.replyControl.cardLabels
-                .map((e) => e.textContent)
-                .join('  '),
+            dialogBtn != null
+                ? replyControl.cardLabels.first.textContent
+                : replyControl.cardLabels.map((e) => e.textContent).join('  '),
             style: textStyle.copyWith(color: theme.colorScheme.secondary),
           ),
           const SizedBox(width: 2),
         ],
-        if (replyLevel == 2 && needDivider && replyItem.id != replyItem.dialog)
-          SizedBox(
-            height: 32,
-            child: TextButton(
-              onPressed: showDialogue,
-              style: buttonStyle,
-              child: Text('查看对话', style: textStyle),
-            ),
-          )
-        else if (replyLevel == 3 &&
-            needDivider &&
-            replyItem.parent != replyItem.root)
-          SizedBox(
-            height: 32,
-            child: TextButton(
-              onPressed: jumpToDialogue,
-              style: buttonStyle,
-              child: Text('跳转回复', style: textStyle),
-            ),
-          ),
+        ?dialogBtn,
         const Spacer(),
         ZanButtonGrpc(replyItem: replyItem),
         const SizedBox(width: 5),
@@ -908,16 +915,16 @@ class ReplyItemGrpc extends StatelessWidget {
       },
     );
 
-    if (urlKeys.isNotEmpty) {
-      List<String> unmatchedItems = urlKeys
-          .where((url) => !matchedUrls.contains(url))
-          .toList();
-      if (unmatchedItems.isNotEmpty) {
-        for (final patternStr in unmatchedItems) {
-          addUrl(patternStr, content.urls[patternStr]!);
-        }
-      }
-    }
+    // if (urlKeys.isNotEmpty) {
+    //   List<String> unmatchedItems = urlKeys
+    //       .where((url) => !matchedUrls.contains(url))
+    //       .toList();
+    //   if (unmatchedItems.isNotEmpty) {
+    //     for (final patternStr in unmatchedItems) {
+    //       addUrl(patternStr, content.urls[patternStr]!);
+    //     }
+    //   }
+    // }
 
     if (!hasNote && replyControl.isNote && replyControl.isNoteV2) {
       final Color color;
@@ -1162,6 +1169,8 @@ class ReplyItemGrpc extends StatelessWidget {
                     child: SelectableText(
                       message,
                       style: const TextStyle(fontSize: 15, height: 1.7),
+                      contextMenuBuilder: (_, editableTextState) =>
+                          _filterMenuBuilder(context, editableTextState),
                     ),
                   ),
                 ),
@@ -1187,18 +1196,63 @@ class ReplyItemGrpc extends StatelessWidget {
                 onCheckReply?.call(item);
               },
               minLeadingWidth: 0,
-              leading: const Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Icon(Icons.shield_outlined, size: 19),
-                  Icon(Icons.reply, size: 12),
-                ],
-              ),
+              leading: const Icon(CustomIcons.shield_reply, size: 19),
               title: Text('检查评论', style: style),
             ),
         ],
       ),
+    );
+  }
+
+  static Widget _filterMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final items = editableTextState.contextMenuButtonItems;
+    if (!editableTextState.textEditingValue.selection.isCollapsed) {
+      items.add(
+        ContextMenuButtonItem(
+          onPressed: () {
+            Navigator.of(context).pop();
+            final select = editableTextState.textEditingValue;
+            String text = RegExp.escape(
+              select.selection.textInside(select.text),
+            );
+            if (ReplyGrpc.enableFilter) text = '|$text';
+
+            showConfirmDialog(
+              context: context,
+              title: const Text('是否确认评论过滤的变更：'),
+              content: Text.rich(
+                TextSpan(
+                  text: ReplyGrpc.replyRegExp.pattern,
+                  children: [
+                    TextSpan(
+                      text: text,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: .bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              onConfirm: () {
+                final filter = ReplyGrpc.replyRegExp.pattern + text;
+                ReplyGrpc.replyRegExp = RegExp(filter, caseSensitive: true);
+                ReplyGrpc.enableFilter = true;
+                GStorage.setting.put(SettingBoxKey.banWordForReply, filter);
+                SmartDialog.showToast('已保存');
+              },
+            );
+          },
+          label: '加入过滤',
+        ),
+      );
+    }
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      buttonItems: items,
+      anchors: editableTextState.contextMenuAnchors,
     );
   }
 }

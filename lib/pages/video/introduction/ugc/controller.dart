@@ -24,13 +24,13 @@ import 'package:PiliPlus/models_new/video/video_detail/stat_detail.dart';
 import 'package:PiliPlus/models_new/video/video_detail/ugc_season.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
-import 'package:PiliPlus/pages/video/pay_coins/view.dart';
 import 'package:PiliPlus/pages/video/related/controller.dart';
 import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
+import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/global_data.dart';
@@ -38,6 +38,7 @@ import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:expandable/expandable.dart';
@@ -77,7 +78,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     );
     if (!alwaysExpandIntroPanel && Pref.expandIntroPanelH) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!expandableCtr.expanded && Get.context!.isLandscape) {
+        if (!expandableCtr.expanded && !DeviceUtils.size.isPortrait) {
           expandableCtr.toggle();
         }
       });
@@ -274,31 +275,8 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     }
   }
 
-  // 投币
   @override
-  void actionCoinVideo() {
-    if (!isLogin) {
-      SmartDialog.showToast('账号未登录');
-      return;
-    }
-
-    int copyright = videoDetail.value.copyright ?? 1;
-    if ((copyright != 1 && coinNum.value >= 1) || coinNum.value >= 2) {
-      SmartDialog.showToast('达到投币上限啦~');
-      return;
-    }
-
-    if (GlobalData().coins != null && GlobalData().coins! < 1) {
-      SmartDialog.showToast('硬币不足');
-      // return;
-    }
-
-    PayCoinsPage.toPayCoinsPage(
-      onPayCoin: coinVideo,
-      copyright: copyright,
-      hasCoin: coinNum.value == 1,
-    );
-  }
+  int get copyright => videoDetail.value.copyright ?? 1;
 
   @override
   (Object, int) get getFavRidType => (IdUtils.bv2av(bvid), 2);
@@ -361,7 +339,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
                 ),
                 onTap: () {
                   Get.back();
-                  Utils.shareText(
+                  ShareUtils.shareText(
                     '${videoDetail.title} '
                     'UP主: ${videoDetail.owner!.name!}'
                     ' - $videoUrl',

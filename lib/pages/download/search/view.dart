@@ -57,16 +57,16 @@ class _DownloadSearchPageState
     TextButton(
       style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
       onPressed: () async {
-        final allChecked = controller.allChecked.toSet();
+        final future = controller.allChecked
+            .map(
+              (e) => _downloadService.downloadDanmaku(
+                entry: e,
+                isUpdate: true,
+              ),
+            )
+            .toList();
         controller.handleSelect();
-        final res = await Future.wait(
-          allChecked.map(
-            (e) => _downloadService.downloadDanmaku(
-              entry: e,
-              isUpdate: true,
-            ),
-          ),
-        );
+        final res = await Future.wait(future);
         if (res.every((e) => e)) {
           SmartDialog.showToast('更新成功');
         } else {
@@ -75,7 +75,7 @@ class _DownloadSearchPageState
       },
       child: Text(
         '更新',
-        style: TextStyle(color: Get.theme.colorScheme.onSurface),
+        style: TextStyle(color: ColorScheme.of(context).onSurface),
       ),
     ),
   ];

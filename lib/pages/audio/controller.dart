@@ -19,21 +19,27 @@ import 'package:PiliPlus/pages/common/common_intro_controller.dart'
     show FavMixin;
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/pages/main_reply/view.dart';
+import 'package:PiliPlus/pages/setting/models/play_settings.dart'
+    show kMaxVolume;
 import 'package:PiliPlus/pages/sponsor_block/block_mixin.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/triple_mixin.dart';
-import 'package:PiliPlus/pages/video/pay_coins/view.dart';
+import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
@@ -81,6 +87,7 @@ class AudioController extends GetxController
 
   late final Rx<PlayRepeat> playMode = Pref.audioPlayMode.obs;
 
+  @override
   late final isLogin = Accounts.main.isLogin;
 
   Duration? _start;
@@ -91,6 +98,34 @@ class AudioController extends GetxController
   bool get reachStart => _prev == null;
 
   ListOrder order = ListOrder.ORDER_NORMAL;
+
+  double? _lastVolume;
+  late final RxDouble desktopVolume = RxDouble(Pref.desktopVolume);
+
+  void toggleVolume() {
+    if (_lastVolume == null) {
+      _lastVolume = desktopVolume.value;
+      setVolume(0, clearLastVolme: false);
+    } else {
+      setVolume(_lastVolume!);
+    }
+  }
+
+  void setVolume(double volume, {bool clearLastVolme = true}) {
+    if (clearLastVolme) {
+      _lastVolume = null;
+    }
+    desktopVolume.value = volume;
+    player?.setVolume(volume * 100);
+  }
+
+  void syncVolume([_]) {
+    final volume = desktopVolume.value;
+    PlPlayerController.instance
+      ?..volume.value = volume
+      ..videoPlayerController?.setVolume(volume * 100);
+    GStorage.setting.put(SettingBoxKey.desktopVolume, volume.toPrecision(3));
+  }
 
   @override
   void onInit() {
@@ -121,7 +156,7 @@ class AudioController extends GetxController
       _querySponsorBlock();
       _onOpenMedia(audioUrl, ua: BrowserUa.pc, referer: HttpString.baseUrl);
     }
-    Utils.isWiFi.then((isWiFi) {
+    ConnectivityUtils.isWiFi.then((isWiFi) {
       cacheAudioQa = isWiFi ? Pref.defaultAudioQa : Pref.defaultAudioQaCellular;
       if (!hasAudioUrl) {
         _queryPlayUrl();
@@ -294,7 +329,17 @@ class AudioController extends GetxController
     if (_hasInit) return;
     _hasInit = true;
     assert(player == null, _subscriptions = null);
-    player = await Player.create();
+    player = await Player.create(
+      configuration: PlayerConfiguration(
+        options: {
+          'volume': PlatformUtils.isDesktop
+              ? (desktopVolume.value * 100).toString()
+              : Pref.playerVolume.toString(),
+          'volume-max': kMaxVolume.toString(),
+          ...Pref.initBuffer(),
+        },
+      ),
+    );
     if (isClosed) {
       player!.dispose();
       player = null;
@@ -423,36 +468,11 @@ class AudioController extends GetxController
     }
   }
 
-  void actionCoinVideo() {
-    final audioItem = this.audioItem.value;
-    if (audioItem == null) {
-      return;
-    }
+  @override
+  int get copyright => audioItem.value?.arc.copyright ?? 1;
 
-    if (!isLogin) {
-      SmartDialog.showToast('账号未登录');
-      return;
-    }
-
-    final int copyright = audioItem.arc.copyright;
-    if ((copyright != 1 && coinNum.value >= 1) || coinNum.value >= 2) {
-      SmartDialog.showToast('达到投币上限啦~');
-      return;
-    }
-
-    if (GlobalData().coins != null && GlobalData().coins! < 1) {
-      SmartDialog.showToast('硬币不足');
-      // return;
-    }
-
-    PayCoinsPage.toPayCoinsPage(
-      onPayCoin: _onPayCoin,
-      hasCoin: coinNum.value == 1,
-      copyright: copyright,
-    );
-  }
-
-  Future<void> _onPayCoin(int coin, bool coinWithLike) async {
+  @override
+  Future<void> onPayCoin(int coin, bool coinWithLike) async {
     final res = await AudioGrpc.audioCoinAdd(
       oid: oid,
       subId: subId,
@@ -554,7 +574,7 @@ class AudioController extends GetxController
                     :final arc,
                     :final owner,
                   )) {
-                    Utils.shareText(
+                    ShareUtils.shareText(
                       '${arc.title} '
                       'UP主: ${owner.name}'
                       ' - $audioUrl',

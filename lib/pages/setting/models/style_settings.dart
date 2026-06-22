@@ -7,7 +7,6 @@ import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/stateful_builder.dart';
-import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
@@ -35,6 +34,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:flutter/material.dart' hide StatefulBuilder;
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -142,16 +142,11 @@ List<SettingsModel> get styleSettings => [
     setKey: SettingBoxKey.removeSafeArea,
     defaultVal: false,
   ),
-  SwitchModel(
+  const SwitchModel(
     title: '视频播放页使用深色主题',
-    leading: const Icon(Icons.dark_mode_outlined),
+    leading: Icon(Icons.dark_mode_outlined),
     setKey: SettingBoxKey.darkVideoPage,
     defaultVal: false,
-    onChanged: (value) {
-      if (value && MyApp.darkThemeData == null) {
-        Get.updateMyAppTheme();
-      }
-    },
   ),
   SwitchModel(
     title: '动态页启用瀑布流',
@@ -225,7 +220,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     onTap: (context, setState) => _showQualityDialog(
       context: context,
-      title: '图片质量',
+      title: const Text('图片质量'),
       initValue: Pref.picQuality,
       onChanged: (picQuality) async {
         GlobalData().imgQuality = picQuality;
@@ -244,7 +239,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     onTap: (context, setState) => _showQualityDialog(
       context: context,
-      title: '查看大图质量',
+      title: const Text('查看大图质量'),
       initValue: Pref.previewQ,
       onChanged: (picQuality) async {
         await GStorage.setting.put(SettingBoxKey.previewQuality, picQuality);
@@ -295,7 +290,7 @@ List<SettingsModel> get styleSettings => [
     setKey: SettingBoxKey.isPureBlackTheme,
     defaultVal: false,
     onChanged: (value) {
-      if (Get.isDarkMode || Pref.darkVideoPage) {
+      if (ThemeUtils.isDarkMode || Pref.darkVideoPage) {
         Get.updateMyAppTheme();
       }
     },
@@ -386,7 +381,7 @@ List<SettingsModel> get styleSettings => [
 
 void _showQualityDialog({
   required BuildContext context,
-  required String title,
+  required Widget title,
   required int initValue,
   required ValueChanged<int> onChanged,
 }) {
@@ -447,9 +442,7 @@ void _showUiScaleDialog(
             ),
             TextFormField(
               controller: textController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
+              keyboardType: const .numberWithOptions(decimal: true),
               inputFormatters: [
                 LengthLimitingTextInputFormatter(4),
                 FilteringTextInputFormatter.allow(RegExp(r'[\d.]+')),
@@ -642,7 +635,7 @@ Future<void> _showFontWeightDialog(BuildContext context) async {
   final res = await showDialog<double>(
     context: context,
     builder: (context) => SliderDialog(
-      title: 'App字体字重',
+      title: const Text('App字体字重'),
       value: Pref.appFontWeight.toDouble() + 1,
       min: 1,
       max: FontWeight.values.length.toDouble(),
@@ -668,8 +661,8 @@ Future<void> _showTransitionDialog(
     ),
   );
   if (res != null) {
+    Get.rootController.defaultTransition = res;
     await GStorage.setting.put(SettingBoxKey.pageTransition, res.index);
-    SmartDialog.showToast('重启生效');
     setState();
   }
 }
@@ -681,11 +674,11 @@ Future<void> _showCardWidthDialog(
   final res = await showDialog<(double, double)>(
     context: context,
     builder: (context) => DualSliderDialog(
-      title: '列表最大列宽度（默认240dp）',
+      title: const Text('列表最大列宽度（默认240dp）'),
       value1: Pref.recommendCardWidth,
       value2: Pref.smallCardWidth,
-      description1: '主页推荐流',
-      description2: '其他',
+      description1: const Text('主页推荐流'),
+      description2: const Text('其他'),
       min: 150.0,
       max: 500.0,
       divisions: 35,
@@ -858,7 +851,7 @@ Future<void> _showToastDialog(
   final res = await showDialog<double>(
     context: context,
     builder: (context) => SliderDialog(
-      title: 'Toast不透明度',
+      title: const Text('Toast不透明度'),
       value: CustomToast.toastOpacity,
       min: 0.0,
       max: 1.0,
@@ -890,7 +883,7 @@ Future<void> _showThemeTypeDialog(
       Get.find<MineController>().themeType.value = res;
     } catch (_) {}
     GStorage.setting.put(SettingBoxKey.themeMode, res.index);
-    Get.changeThemeMode(res.toThemeMode);
+    Get.changeThemeMode(ThemeUtils.themeMode = res.toThemeMode);
     setState();
   }
 }

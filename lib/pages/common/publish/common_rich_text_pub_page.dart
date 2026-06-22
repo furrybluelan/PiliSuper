@@ -14,6 +14,7 @@ import 'package:PiliPlus/models_new/emote/emote.dart' as e;
 import 'package:PiliPlus/models_new/live/live_emote/emoticon.dart';
 import 'package:PiliPlus/pages/common/publish/common_publish_page.dart';
 import 'package:PiliPlus/pages/dynamics_mention/view.dart';
+import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
@@ -22,13 +23,13 @@ import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart'
+    hide CacheManager;
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -111,27 +112,23 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
       clipBehavior: Clip.none,
       children: [
         GestureDetector(
-          onTap: () async {
-            controller.keepChatPanel();
-            await PageUtils.imageView(
-              imgList: imageList
-                  .map(
-                    (img) => switch (img) {
-                      FilePicModel e => SourceModel(
-                        url: e.path,
-                        sourceType: .fileImage,
-                      ),
-                      OpusPicModel e => SourceModel(
-                        url: e.url!,
-                        sourceType: .networkImage,
-                      ),
-                    },
-                  )
-                  .toList(),
-              initialPage: index,
-            );
-            controller.restoreChatPanel();
-          },
+          onTap: () => PageUtils.imageView(
+            imgList: imageList
+                .map(
+                  (img) => switch (img) {
+                    FilePicModel e => SourceModel(
+                      url: e.path,
+                      sourceType: .fileImage,
+                    ),
+                    OpusPicModel e => SourceModel(
+                      url: e.url!,
+                      sourceType: .networkImage,
+                    ),
+                  },
+                )
+                .toList(),
+            initialPage: index,
+          ),
           onLongPress: () {
             Feedback.forLongPress(context);
             onClear();
@@ -195,11 +192,10 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         path = e.path;
       case OpusPicModel e:
         SmartDialog.showLoading();
-        final file = (await DefaultCacheManager().getSingleFile(
+        path = (await CacheManager.manager.getSingleFile(
           e.url.http2https,
-        ));
+        )).path;
         await SmartDialog.dismiss();
-        path = file.path;
     }
     if (!mounted || path.isEmpty) return;
     late final colorScheme = ColorScheme.of(context);
@@ -229,9 +225,10 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
       const Duration(milliseconds: 500),
       () async {
         try {
-          List<XFile> pickedFiles = await imagePicker.pickMultiImage(
+          final pickedFiles = await imagePicker.pickMultiImage(
             limit: limit,
             imageQuality: 100,
+            requestFullMetadata: false,
           );
           if (pickedFiles.isNotEmpty) {
             for (int i = 0; i < pickedFiles.length; i++) {
@@ -328,7 +325,6 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
 
   late double _mentionOffset = 0;
   Future<void>? onMention([bool fromClick = false]) async {
-    controller.keepChatPanel();
     final res = await DynMentionPanel.onDynMention(
       context,
       offset: _mentionOffset,
@@ -339,13 +335,12 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         _onInsertUser(res, fromClick);
       } else if (res is Set<MentionItem>) {
         for (final e in res) {
-          e.checked = false;
-          _onInsertUser(e, fromClick);
+          _onInsertUser(e..checked = false, fromClick);
+          fromClick = true;
         }
         res.clear();
       }
     }
-    controller.restoreChatPanel();
   }
 
   void _onInsertUser(MentionItem e, bool fromClick) {
@@ -550,6 +545,6 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         return;
       }
     }
-    onCustomPublish(pictures: pictures);
+    return onCustomPublish(pictures: pictures);
   }
 }

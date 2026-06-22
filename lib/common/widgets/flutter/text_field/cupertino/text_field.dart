@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: prefer_initializing_formals
+
 /// @docImport 'package:flutter/material.dart';
 library;
 
@@ -294,6 +296,7 @@ class CupertinoRichTextField extends StatefulWidget {
     this.stylusHandwritingEnabled =
         EditableText.defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
+    this.enableInlinePrediction,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
@@ -439,6 +442,7 @@ class CupertinoRichTextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.stylusHandwritingEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.enableInlinePrediction,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
@@ -799,6 +803,9 @@ class CupertinoRichTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
+  final bool? enableInlinePrediction;
+
   /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
   final ContentInsertionConfiguration? contentInsertionConfiguration;
 
@@ -1117,6 +1124,13 @@ class CupertinoRichTextField extends StatefulWidget {
         ),
       )
       ..add(
+        DiagnosticsProperty<bool?>(
+          'enableInlinePrediction',
+          enableInlinePrediction,
+          defaultValue: null,
+        ),
+      )
+      ..add(
         DiagnosticsProperty<SpellCheckConfiguration>(
           'spellCheckConfiguration',
           spellCheckConfiguration,
@@ -1229,7 +1243,6 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
   @override
   void didUpdateWidget(CupertinoRichTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (widget.focusNode != oldWidget.focusNode) {
       (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
       (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
@@ -1738,6 +1751,7 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
             scribbleEnabled: widget.scribbleEnabled,
             stylusHandwritingEnabled: widget.stylusHandwritingEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            enableInlinePrediction: widget.enableInlinePrediction,
             contentInsertionConfiguration: widget.contentInsertionConfiguration,
             contextMenuBuilder: widget.contextMenuBuilder,
             spellCheckConfiguration: spellCheckConfiguration,

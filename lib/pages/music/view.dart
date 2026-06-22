@@ -9,7 +9,6 @@ import 'package:PiliPlus/common/widgets/image_viewer/hero.dart';
 import 'package:PiliPlus/common/widgets/marquee.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/music.dart';
-import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/music/bgm_detail.dart';
@@ -17,6 +16,7 @@ import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
 import 'package:PiliPlus/pages/music/controller.dart';
 import 'package:PiliPlus/pages/music/video/view.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/android/android_helper.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
@@ -25,6 +25,7 @@ import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -307,7 +308,8 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
                     child: textIconButton(
                       icon: CustomIcons.share_node,
                       text: '分享',
-                      onPressed: () => Utils.shareText(controller.shareUrl),
+                      onPressed: () =>
+                          ShareUtils.shareText(controller.shareUrl),
                     ),
                   ),
                   Expanded(
@@ -486,35 +488,35 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
                         Wrap(
                           spacing: 16,
                           children: [
-                            if (!item.musicRank.isNullOrEmpty)
-                              PBadge(
-                                text: item.musicRank,
-                                type: PBadgeType.secondary,
-                                isStack: false,
-                                fontSize: 11,
-                              ),
-                            if (item.mvCid != null && item.mvCid != 0)
+                            if (item.achievement.isNotEmpty)
+                              for (var i in item.achievement)
+                                if (i.isNotEmpty)
+                                  PBadge(
+                                    text: i,
+                                    type: .secondary,
+                                    isStack: false,
+                                    fontSize: 11,
+                                  ),
+                            if (item.mvCid != 0)
                               GestureDetector(
                                 onTap: () => PageUtils.toVideoPage(
                                   bvid: item.mvBvid,
-                                  cid: item.mvCid!,
+                                  cid: item.mvCid,
                                   aid: item.mvAid,
                                 ),
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(4),
-                                    ),
+                                    borderRadius: const .all(.circular(4)),
                                     color: theme.colorScheme.secondaryContainer
                                         .withValues(alpha: 0.5),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: const .symmetric(
                                       vertical: 3,
                                       horizontal: 4,
                                     ),
                                     child: Row(
-                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisSize: .min,
                                       children: [
                                         Icon(
                                           Icons.play_circle_outline,
@@ -689,16 +691,13 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
     );
   }
 
-  Future<void> _searchMusic(MusicDetail item) async {
-    final res =
-        Platform.isAndroid &&
-        (await Utils.channel.invokeMethod<bool>('music', {
-              'title': item.musicTitle,
-              'artist': item.originArtist ?? item.originArtistList,
-              'album': item.album,
-            }) ??
-            false);
-    if (!res) {
+  void _searchMusic(MusicDetail item) {
+    if (!Platform.isAndroid ||
+        !PiliAndroidHelper.openMusic(
+          item.musicTitle!,
+          item.originArtist ?? item.originArtistList,
+          item.album,
+        )) {
       Utils.copyText(item.musicTitle!);
     }
   }
