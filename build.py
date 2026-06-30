@@ -454,7 +454,7 @@ def rename_with_search_replace(options: BuildOptions) -> None:
     orig_pkg = options.original_pkg_id
     new_pkg = options.pkg_id
 
-    dart_globs = ["**/*.dart", "pubspec.yaml"]
+    dart_globs = ["**/*.dart", "pubspec.yaml", "**/*.patch"]
     native_globs = [
         "android/**/*.kt",
         "android/**/*.java",
