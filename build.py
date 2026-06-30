@@ -715,10 +715,11 @@ PLATFORM_FLUTTER_PATCH_ACTIONS = {
 }
 
 # 直接作用于项目仓库（而非 Flutter SDK）的 iOS patch，对应 patch.ps1 中
-# `if ($platform.ToLower() -eq "ios")` 分支，须在 Set-Location 到 Flutter SDK 之前应用
+# `if ($platform.ToLower() -eq "ios")` 分支，须在 Set-Location 到 Flutter SDK 之前应用。
+# 保留底部 sheet 的补丁，但跳过极验插件补丁；它会在 iOS 构建链路中引入
+# gt3_flutter_plugin，导致新的 CI/Xcode 环境下构建失败。
 IOS_PROJECT_PATCH_ACTIONS = (
     make_flutter_patch_action("bottom_sheet_ios_piliplus.patch"),
-    make_flutter_patch_action("geetest_ios.patch"),
 )
 
 
