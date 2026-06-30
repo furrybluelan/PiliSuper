@@ -14,9 +14,10 @@ import 'package:PiliPlus/models_new/space/space/setting.dart';
 import 'package:PiliPlus/models_new/space/space/tab2.dart';
 import 'package:PiliPlus/pages/common/common_data_controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/extension/nested_scroll_ext.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     show ExtendedNestedScrollViewState;
 import 'package:flutter/material.dart';
@@ -59,7 +60,7 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
 
   final fromViewAid = Get.parameters['from_view_aid'];
 
-  final key = GlobalKey<ExtendedNestedScrollViewState>();
+  final scrollKey = GlobalKey<ExtendedNestedScrollViewState>();
 
   @override
   void onInit() {
@@ -201,7 +202,7 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
   }
 
   void shareUser() {
-    Utils.shareText('https://space.bilibili.com/$mid');
+    ShareUtils.shareText('https://space.bilibili.com/$mid');
   }
 
   Future<void> _onBlock() async {
@@ -255,13 +256,8 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
   }
 
   void onTapTab(int value) {
-    if (tabController?.indexIsChanging == false &&
-        key.currentState?.outerController.hasClients == true) {
-      key.currentState!.outerController.animateTo(
-        key.currentState!.outerController.offset,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
+    if (tabController?.indexIsChanging == false) {
+      scrollKey.currentState?.animToTop();
     }
   }
 

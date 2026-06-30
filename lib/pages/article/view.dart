@@ -5,6 +5,7 @@ import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
+import 'package:PiliPlus/common/widgets/sliver/sliver_to_box_adapter.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -22,8 +23,9 @@ import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -50,45 +52,32 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
   };
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (scrollController.hasClients) {
-        controller.showTitle.value =
-            scrollController.positions.last.pixels >= 45;
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
+    final child = Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: _buildAppBar(),
       body: Padding(
         padding: EdgeInsets.only(left: padding.left, right: padding.right),
-        child: _buildPage(theme),
+        child: _buildPage(),
       ),
       floatingActionButtonLocation: floatingActionButtonLocation,
       floatingActionButton: SlideTransition(
         position: fabAnimation,
-        child: _buildBottom(theme),
+        child: _buildBottom(),
       ),
     );
+    return fabAnimWrapper(child);
   }
 
-  Widget _buildPage(ThemeData theme) {
+  Widget _buildPage() {
     double padding = max(maxWidth / 2 - Grid.smallCardWidth, 0);
     if (isPortrait) {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: padding),
         child: CustomScrollView(
-          controller: scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             _buildContent(
-              theme,
               maxWidth - this.padding.horizontal - 2 * padding - 24,
             ),
             SliverToBoxAdapter(
@@ -97,8 +86,8 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                 color: theme.dividerColor.withValues(alpha: 0.05),
               ),
             ),
-            buildReplyHeader(theme),
-            Obx(() => replyList(theme, controller.loadingState.value)),
+            buildReplyHeader(),
+            Obx(() => replyList(controller.loadingState.value)),
           ],
         ),
       );
@@ -113,7 +102,6 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
         Expanded(
           flex: flex,
           child: CustomScrollView(
-            controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
@@ -122,7 +110,6 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                   bottom: this.padding.bottom + 100,
                 ),
                 sliver: _buildContent(
-                  theme,
                   (maxWidth - this.padding.horizontal) * flex / (flex + flex1) -
                       padding -
                       32,
@@ -145,11 +132,10 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
               body: refreshIndicator(
                 onRefresh: controller.onRefresh,
                 child: CustomScrollView(
-                  controller: scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
-                    buildReplyHeader(theme),
-                    Obx(() => replyList(theme, controller.loadingState.value)),
+                    buildReplyHeader(),
+                    Obx(() => replyList(controller.loadingState.value)),
                   ],
                 ),
               ),
@@ -160,7 +146,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
     );
   }
 
-  Widget _buildContent(ThemeData theme, double maxWidth) => SliverPadding(
+  Widget _buildContent(double maxWidth) => SliverPadding(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     sliver: Obx(
       () {
@@ -170,6 +156,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
             // if (kDebugMode) debugPrint('json page');
             content = OpusContent(
               opus: controller.opus!,
+              images: controller.images,
               maxWidth: maxWidth,
             );
           } else if (controller.opusData?.modules.moduleBlocked != null) {
@@ -337,7 +324,9 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                   ),
                 ),
               if (controller.summary.title != null)
-                SliverToBoxAdapter(
+                SliverToBoxWithVisibilityAdapter(
+                  onVisibilityChanged: (bool visible) =>
+                      controller.showTitle.value = !visible,
                   child: Text(
                     controller.summary.title!,
                     style: const TextStyle(
@@ -427,7 +416,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
         icon: const Icon(Icons.more_vert, size: 19),
         itemBuilder: (BuildContext context) => <PopupMenuEntry>[
           PopupMenuItem(
-            onTap: () => Utils.shareText(controller.url),
+            onTap: () => ShareUtils.shareText(controller.url),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -493,7 +482,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
     ],
   );
 
-  Widget _buildBottom(ThemeData theme) {
+  Widget _buildBottom() {
     if (!controller.showDynActionBar) {
       return fabButton;
     }
@@ -620,7 +609,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                       text: '分享',
                       icon: CustomIcons.share_node,
                       stat: null,
-                      onPressed: () => Utils.shareText(controller.url),
+                      onPressed: () => ShareUtils.shareText(controller.url),
                     ),
                   ),
                   Expanded(

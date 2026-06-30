@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -13,12 +12,12 @@ import 'package:PiliPlus/models/dynamics/vote_model.dart';
 import 'package:PiliPlus/models_new/followee_votes/vote.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class VotePanel extends StatefulWidget {
@@ -48,7 +47,7 @@ class _VotePanelState extends State<VotePanel> {
   late bool _showPercentage = !_enabled;
   late final _maxCnt = _voteInfo.choiceCnt ?? _voteInfo.options.length;
   final isLogin = Accounts.main.isLogin;
-  late final Rxn<List<FolloweeVote>> followeeVote = Rxn<List<FolloweeVote>>();
+  late final followeeVote = Rxn<List<FolloweeVote>>();
 
   @override
   void initState() {
@@ -160,57 +159,53 @@ class _VotePanelState extends State<VotePanel> {
                     context: context,
                     builder: (context) {
                       final colorScheme = ColorScheme.of(context);
-                      return AlertDialog(
+                      return SimpleDialog(
                         clipBehavior: .hardEdge,
                         title: const Text('关注的人的投票'),
-                        contentPadding: const .only(top: 10, bottom: 12),
-                        content: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: .min,
-                            children: list
-                                .map(
-                                  (e) => ListTile(
-                                    dense: true,
-                                    onTap: () =>
-                                        Get.toNamed('/member?mid=${e.mid}'),
-                                    leading: NetworkImgLayer(
-                                      src: e.face,
-                                      width: 40,
-                                      height: 40,
-                                      type: .avatar,
-                                    ),
-                                    title: Text.rich(
-                                      style: const TextStyle(fontSize: 13),
+                        contentPadding: const .only(bottom: 12),
+                        titlePadding: const .fromLTRB(20, 20, 20, 10),
+                        children: list
+                            .map(
+                              (e) => ListTile(
+                                dense: true,
+                                onTap: () =>
+                                    Get.toNamed('/member?mid=${e.mid}'),
+                                leading: NetworkImgLayer(
+                                  src: e.face,
+                                  width: 40,
+                                  height: 40,
+                                  type: .avatar,
+                                ),
+                                title: Text.rich(
+                                  style: const TextStyle(fontSize: 13),
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(text: e.name),
                                       TextSpan(
-                                        children: [
-                                          TextSpan(text: e.name),
-                                          TextSpan(
-                                            text: ' 投给了',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: colorScheme.outline,
-                                            ),
-                                          ),
-                                        ],
+                                        text: ' 投给了',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: colorScheme.outline,
+                                        ),
                                       ),
-                                    ),
-                                    subtitle: Text(
-                                      style: const TextStyle(fontSize: 13),
-                                      e.votes
-                                          .map(
-                                            (vote) => _voteInfo.options
-                                                .firstWhereOrNull(
-                                                  (e) => e.optIdx == vote,
-                                                )
-                                                ?.optDesc,
-                                          )
-                                          .join('、'),
-                                    ),
+                                    ],
                                   ),
-                                )
-                                .toList(),
-                          ),
-                        ),
+                                ),
+                                subtitle: Text(
+                                  style: const TextStyle(fontSize: 13),
+                                  e.votes
+                                      .map(
+                                        (vote) => _voteInfo.options
+                                            .firstWhereOrNull(
+                                              (e) => e.optIdx == vote,
+                                            )
+                                            ?.optDesc,
+                                      )
+                                      .join('、'),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       );
                     },
                   );
@@ -551,18 +546,15 @@ Future<void> showVoteDialog(
 ]) async {
   final voteInfo = await DynamicsHttp.voteInfo(voteId);
   if (context.mounted) {
-    if (voteInfo.isSuccess) {
+    if (voteInfo case Success(:final response)) {
       showDialog(
         context: context,
         builder: (context) => Dialog(
-          constraints: const BoxConstraints(
-            minWidth: 280,
-            maxWidth: 625,
-          ),
+          constraints: const BoxConstraints(minWidth: 280, maxWidth: 625),
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const .all(24),
             child: VotePanel(
-              voteInfo: voteInfo.data,
+              voteInfo: response,
               onVote: (votes, anonymous) => DynamicsHttp.doVote(
                 voteId: voteId,
                 votes: votes.toList(),

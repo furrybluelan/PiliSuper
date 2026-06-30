@@ -108,7 +108,7 @@ class ShutdownTimerService {
   void _syncProgressAndExit() {
     if (PlPlayerController.instance case final player?) {
       final res = player.makeHeartBeat(
-        player.positionSeconds.value,
+        player.position.value,
         type: .completed,
         isManual: true,
       );
@@ -147,7 +147,7 @@ class ShutdownTimerService {
     }
     PageUtils.showVideoBottomSheet(
       context,
-      isFullScreen: () => isFullScreen,
+      maxWidth: 512,
       child: StatefulBuilder(
         builder: (_, setState) {
           final ThemeData theme = Theme.of(context);
@@ -165,7 +165,7 @@ class ShutdownTimerService {
                     const Center(child: Text('定时关闭', style: titleStyle)),
                     const SizedBox(height: 10),
                     ...{...scheduleTimeMinutes, _durationInMinutes}
-                        .sorted((a, b) => a.compareTo(b))
+                        .sorted(Comparable.compare)
                         .map(
                           (minutes) => ListTile(
                             dense: true,

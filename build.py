@@ -14,7 +14,6 @@ Flutter 多平台构建脚本
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
 import io
 import json
 import logging
@@ -26,6 +25,7 @@ import subprocess
 import sys
 import textwrap
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Sequence
 from urllib.request import urlopen
@@ -71,6 +71,7 @@ class BuildOptions:
     version: str | None
     no_prebuild: bool
     no_split: bool
+    dev: bool
     sign: bool
     keystore_file: Path | None
     keystore_base64: str | None
@@ -115,6 +116,7 @@ class BuildOptions:
             version=namespace.version,
             no_prebuild=namespace.no_prebuild,
             no_split=namespace.no_split,
+            dev=namespace.dev,
             sign=namespace.sign,
             keystore_file=(
                 Path(namespace.keystore_file) if namespace.keystore_file else None
@@ -216,6 +218,7 @@ def configure_logging() -> tuple[logging.Logger, Any | None]:
 LOGGER, RICH_CONSOLE = configure_logging()
 SKIP_RENAME_DIR_NAMES = {".git", ".dart_tool", "build", "Pods", "ephemeral"}
 
+#定义日志格式
 
 def _format_log_message(label: str, message: str, style: str) -> str:
     if RICH_CONSOLE is not None:
@@ -260,11 +263,10 @@ def _resolve_command(command: Sequence[str]) -> list[str]:
     subprocess shell=False 找不到，用 shutil.which 解析完整路径。
     """
     command_parts = [str(part) for part in command]
-    if not IS_WINDOWS:
-        return command_parts
-    resolved = shutil.which(command_parts[0])
-    if resolved:
-        command_parts = [resolved] + command_parts[1:]
+    if IS_WINDOWS:
+        resolved = shutil.which(command_parts[0])
+        if resolved:
+            command_parts = [resolved] + command_parts[1:]
     return command_parts
 
 
@@ -452,7 +454,7 @@ def rename_with_search_replace(options: BuildOptions) -> None:
     orig_pkg = options.original_pkg_id
     new_pkg = options.pkg_id
 
-    dart_globs = ["**/*.dart", "pubspec.yaml"]
+    dart_globs = ["**/*.dart", "pubspec.yaml", "**/*.patch"]
     native_globs = [
         "android/**/*.kt",
         "android/**/*.java",
@@ -470,8 +472,7 @@ def rename_with_search_replace(options: BuildOptions) -> None:
         "windows/runner/*.h",
         "windows/runner/*.cpp",
         "windows/CMakeLists.txt",
-        "assets/linux/com.example.piliplus.desktop",
-        "assets/linux/DEBIAN/*",
+        "assets/linux/**/*"
     ]
 
     if new_name and orig_name and new_name != orig_name:
@@ -673,19 +674,8 @@ def make_flutter_patch_action(name: str) -> FlutterPatchAction:
 
 FLUTTER_PATCH_ACTION_PRIORITY = {"cherry-pick": 0, "revert": 1, "patch": 2}
 FLUTTER_PATCHES_DIR = Path("lib/scripts")
-TOOLTIP_FIX_COMMIT = "56956c33ef102ac0b5fc46b62bd2dd9f50a86616"
 NEW_OVERSCROLL_INDICATOR_COMMIT = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
 
-TOOLTIP_FIX_ACTION = FlutterPatchAction(
-    kind="cherry-pick",
-    target=TOOLTIP_FIX_COMMIT,
-    success_message="Add RawTooltip.ignorePointer 应用完成",
-    failure_message="Add RawTooltip.ignorePointer 应用失败（已忽略）",
-    step_message=(
-        "checkout Add RawTooltip.ignorePointer commit "
-        f"({TOOLTIP_FIX_COMMIT[:9]}…)"
-    ),
-)
 OVERSCROLL_INDICATOR_REVERT_ACTION = FlutterPatchAction(
     kind="revert",
     target=NEW_OVERSCROLL_INDICATOR_COMMIT,
@@ -697,22 +687,39 @@ OVERSCROLL_INDICATOR_REVERT_ACTION = FlutterPatchAction(
     ),
 )
 
+# 对所有平台都生效的 patch（对应 patch.ps1 中的 $patches 基础数组）
 COMMON_FLUTTER_PATCH_ACTIONS = (
     make_flutter_patch_action("modal_barrier.patch"),
     make_flutter_patch_action("text_selection.patch"),
     make_flutter_patch_action("mouse_cursor.patch"),
+    make_flutter_patch_action("image_anim.patch"),
+    make_flutter_patch_action("layout_builder.patch"),
+    make_flutter_patch_action("navigation_drawer.patch"),
 )
+# 按平台追加的 patch（对应 patch.ps1 中 switch ($platform) 各分支）
 PLATFORM_FLUTTER_PATCH_ACTIONS = {
     "android": (
         OVERSCROLL_INDICATOR_REVERT_ACTION,
-        make_flutter_patch_action("bottom_sheet.patch"),
+        make_flutter_patch_action("bottom_sheet_android.patch"),
         make_flutter_patch_action("scroll_view.patch"),
+        make_flutter_patch_action("navigator.patch"),
     ),
-    "ios": (make_flutter_patch_action("scroll_view.patch"),),
-    "linux": (TOOLTIP_FIX_ACTION,),
-    "macos": (TOOLTIP_FIX_ACTION,),
-    "windows": (TOOLTIP_FIX_ACTION,),
+    "ios": (
+        make_flutter_patch_action("scroll_view.patch"),
+        make_flutter_patch_action("bottom_sheet_ios_flutter.patch"),
+        make_flutter_patch_action("navigator.patch"),
+    ),
+    "linux": (),
+    "macos": (),
+    "windows": (),
 }
+
+# 直接作用于项目仓库（而非 Flutter SDK）的 iOS patch，对应 patch.ps1 中
+# `if ($platform.ToLower() -eq "ios")` 分支，须在 Set-Location 到 Flutter SDK 之前应用
+IOS_PROJECT_PATCH_ACTIONS = (
+    make_flutter_patch_action("bottom_sheet_ios_piliplus.patch"),
+    make_flutter_patch_action("geetest_ios.patch"),
+)
 
 
 def dedupe_flutter_patch_actions(
@@ -751,7 +758,7 @@ def build_flutter_patch_actions(platform_name: str) -> tuple[FlutterPatchAction,
     return dedupe_flutter_patch_actions(actions)
 
 
-def apply_flutter_patch_action(root: str, action: FlutterPatchAction) -> None:
+def apply_flutter_patch_action(root: str | None, action: FlutterPatchAction) -> None:
     if action.step_message:
         log_step(action.step_message)
 
@@ -788,10 +795,24 @@ def apply_flutter_patch_action(root: str, action: FlutterPatchAction) -> None:
 
 def apply_flutter_patches(root: str, platform_name: str = "") -> None:
     log_step("应用 Flutter patches")
+    run_command(["git", "reset", "--hard", "HEAD"], cwd=root)
     for action in build_flutter_patch_actions(platform_name):
         apply_flutter_patch_action(root, action)
 
+
+def apply_ios_project_patches() -> None:
+    """对应 patch.ps1 中 `if ($platform -eq "ios")` 分支：
+    在 Set-Location 到 Flutter SDK 之前，直接对当前项目仓库应用的 patch。"""
+    log_step("应用 iOS 项目 patches")
+    for action in IOS_PROJECT_PATCH_ACTIONS:
+        apply_flutter_patch_action(None, action)
+
+
 def run_common_setup(options: BuildOptions) -> str | None:
+    normalized_platform = options.platform.strip().lower()
+    if options.apply_patches and normalized_platform in ("ios", "all"):
+        apply_ios_project_patches()
+
     flutter_root_dir = find_flutter_root()
     if options.apply_patches and flutter_root_dir:
         apply_flutter_patches(flutter_root_dir, platform_name=options.platform)
@@ -921,6 +942,7 @@ def build_android(context: BuildContext) -> None:
                 [
                     "--pub",
                     *([] if options.no_split else ["--split-per-abi"]),
+                    *(["--android-project-arg", "dev=1"] if options.dev else []),
                 ],
             )
         )
@@ -936,7 +958,8 @@ def build_android(context: BuildContext) -> None:
     for apk in apks:
         match = re.search(r"app-(.+)-release\.apk", apk.name)
         abi = match.group(1) if match else "universal"
-        destination = context.platform_output_path("android", abi, suffix=".apk")
+        name_parts = [abi, "dev"] if options.dev else [abi]
+        destination = context.platform_output_path("android", *name_parts, suffix=".apk")
         shutil.copy2(apk, destination)
         log_success(f"输出: {destination}")
 
@@ -1259,33 +1282,60 @@ def package_deb(context: BuildContext, arch: str, bundle: Path) -> None:
 
     ctrl_src = Path("assets/linux/DEBIAN")
     (root / "DEBIAN").mkdir(exist_ok=True)
+    installed_size_kb = (
+        sum(
+            f.stat().st_size
+            for f in (root / "opt/app").rglob("*")
+            if f.is_file()
+        )
+        // 1024
+        + 1
+    )
+    depends = ", ".join(
+        [
+            "libgtk-3-0t64",
+            "libmpv2",
+            "gir1.2-ayatanaappindicator3-0.1",
+            "libayatana-appindicator3-1",
+        ]
+    )
+    control_content = textwrap.dedent(f"""\
+        Package: {context.options.app_name}
+        Version: {context.version}
+        Maintainer: FRBLanApps Members <frblanapps@disroot.org>
+        Original-Maintainer: bggRGjQaUbCoE <githubaccount56556@proton.me>
+        Section: x11
+        Priority: optional
+        Architecture: {deb_arch}
+        Essential: no
+        Installed-Size: {installed_size_kb}
+        Description: third-party Bilibili client developed in Flutter
+        Homepage: https://github.com/bggRGjQaUbCoE/PiliPlus
+        Depends: {depends}
+        """)
+    (root / "DEBIAN" / "control").write_text(control_content)
     if ctrl_src.exists():
         shutil.copytree(ctrl_src, root / "DEBIAN", dirs_exist_ok=True)
-        ctrl = root / "DEBIAN/control"
-        if ctrl.exists():
-            txt = ctrl.read_text()
-            txt = txt.replace("version_need_change", context.version)
-            txt = re.sub(r"^Architecture:\s+\S+", f"Architecture: {deb_arch}", txt, flags=re.MULTILINE)
-            size_kb = (
-                sum(
-                    f.stat().st_size
-                    for f in (root / "opt/app").rglob("*")
-                    if f.is_file()
-                )
-                // 1024
-                + 1
-            )
-            txt = txt.replace("size_need_change", str(size_kb))
-            ctrl.write_text(txt, encoding="utf-8")
+        # ctrl = root / "DEBIAN/control"
+        # if ctrl.exists():
+        #     txt = ctrl.read_text()
+        #     txt = txt.replace("version_need_change", context.version)
+        #     txt = re.sub(r"^Architecture:\s+\S+", f"Architecture: {deb_arch}", txt, flags=re.MULTILINE)
+        #     size_kb = (
+        #         sum(
+        #             f.stat().st_size
+        #             for f in (root / "opt/app").rglob("*")
+        #             if f.is_file()
+        #         )
+        #         // 1024
+        #         + 1
+        #     )
+        #     txt = txt.replace("size_need_change", str(size_kb))
+        #     ctrl.write_text(txt, encoding="utf-8")
         for s in ["postinst", "postrm", "prerm"]:
             sp = root / "DEBIAN" / s
             if sp.exists():
                 sp.chmod(0o755)
-    else:
-        (root / "DEBIAN/control").write_text(
-            f"Package: {app_name}\nVersion: {context.version}\nArchitecture: {deb_arch}\n"
-            f"Maintainer: Unknown\nInstalled-Size: 0\nDescription: Flutter App\n"
-        )
 
     if desktop:
         shutil.copy2(desktop, root / "usr/share/applications" / desktop.name)
@@ -1580,6 +1630,13 @@ def parse_arguments() -> BuildOptions:
 
     android_group = parser.add_argument_group("Android")
     android_group.add_argument("--no-split", action="store_true")
+    android_group.add_argument(
+        "--dev",
+        action="store_true",
+        help="构建 dev APK：附加 --android-project-arg dev=1，"
+        "对应上游 build_android.yml 中 PR 触发的 Dev Apk 步骤；"
+        "输出文件名会额外带 dev 标记，不会覆盖正式 release APK",
+    )
 
     android_signing_group = parser.add_argument_group("Android 签名")
     android_signing_group.add_argument("--sign", action="store_true")

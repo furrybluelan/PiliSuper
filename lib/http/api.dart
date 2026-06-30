@@ -1006,4 +1006,10 @@ abstract final class Api {
       '${HttpString.liveBaseUrl}/xlive/app-ucenter/v1/guard/MainGuardCardAll';
 
   static const String bubble = '/x/tribee/v1/dyn/all';
+
+  static const String sortFollowTag = '/x/relation/tags/update_sort';
+
+  static const String replyReport = '/x/v2/reply/report';
+
+  static const String dynReaction = '/x/polymer/web-dynamic/v1/detail/reaction';
 }

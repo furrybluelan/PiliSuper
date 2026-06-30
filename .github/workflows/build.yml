@@ -26,6 +26,10 @@ on:
         description: "Build Android"
         default: true
         type: boolean
+      build_android_dev:
+        description: "Build Android Dev version"
+        default: true
+        type: boolean
       build_ios:
         description: "Build iOS"
         default: true
@@ -77,7 +81,7 @@ jobs:
         run: |
             dart pub global activate rename
 
-      - name: Build
+      - name: Build Release
         env:
           KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
           KEY_ALIAS:    ${{ secrets.KEY_ALIAS }}
@@ -115,13 +119,45 @@ jobs:
             "${SIGN_ARGS[@]}" \
             "${NAME_ARGS[@]}" \
 
+      - name: Build Dev
+        env:
+          KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
+          KEY_ALIAS:    ${{ secrets.KEY_ALIAS }}
+          KEY_PASS:     ${{ secrets.KEY_PASSWORD }}
+          STORE_PASS:   ${{ secrets.KEYSTORE_PASSWORD }}
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_dev == true }}
+        run: |
+          SIGN_ARGS=()
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "$KEYSTORE_B64" ]]; then
+            SIGN_ARGS+=(
+              --sign
+              --keystore-base64 "$KEYSTORE_B64"
+              --key-alias       "$KEY_ALIAS"
+              --key-password    "$KEY_PASS"
+              --store-password  "$STORE_PASS"
+              --clean-keys
+            )
+          fi
+
+          python3 build.py android \
+            --output-prefix PiliSuper \
+            --output dist \
+            --dev \
+            --skip_rename \
+            --no-patches \
+            --no-pub-get \
+            "${SIGN_ARGS[@]}" \
+
       - name: Release
         if: ${{ inputs.tag != '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
-          files:    dist/PiliSuper_android_*.apk
+          files: |
+            dist/PiliSuper_android_*_arm64-v8a.apk
+            dist/PiliSuper_android_*_armeabi-v7a.apk
+            dist/PiliSuper_android_*_x86_64.apk
 
       - uses: actions/upload-artifact@v7
         with:
@@ -139,6 +175,24 @@ jobs:
         with:
           name: Android_x86_64
           path: dist/PiliSuper_android_*_x86_64.apk
+          archive: false
+      
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Android_arm64-v8a
+          path: dist/PiliSuper_android_*_arm64-v8a_dev.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Android_armeabi-v7a
+          path: dist/PiliSuper_android_*_armeabi-v7a_dev.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Android_x86_64
+          path: dist/PiliSuper_android_*_x86_64_dev.apk
           archive: false
 
   # ───────────── iOS ─────────────

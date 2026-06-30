@@ -11,18 +11,18 @@ body:
       options:
         - label: 搜索了 [历史 issue](https://github.com/FRBLanApps/PiliSuper/issues?q=is%3Aissue) ，并未发现相同问题
           required: true
-        - label: 搜索了 [上游的历史 issue](https://github.com/bggRGjQaUbCoE/PiliPlus/issues?q=is%3Aissue) ，并未发现相同问题
+        - label: 搜索了 [上游的历史 issue](https://github.com/bggRGjQaUbCoE/PiliPlus/issues?q=is%3Aissue) ，404 not found
           required: true
         - label: 正在使用最新版本。
           required: true
         - label: 已排除网络问题
           required: true
+        - label: 我并没有详细看这些选项，我只是机械化的选了这些，请关闭本issue。
+          required: false
         - label: 已排除账号问题
           required: true
         - label: 已排除设置问题
           required: true
-        - label: 我并没有详细看这些选项，我只是机械化的选了这些，请关闭本issue。
-          required: false
   
   - type: checkboxes
     id: assign

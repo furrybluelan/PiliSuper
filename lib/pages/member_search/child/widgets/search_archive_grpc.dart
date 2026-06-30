@@ -1,6 +1,6 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
+import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/stat/stat.dart';
@@ -17,7 +17,7 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:fixnum/fixnum.dart' show Int64;
-import 'package:flutter/material.dart' hide LayoutBuilder;
+import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class SearchArchiveGrpc extends StatelessWidget {
@@ -132,13 +132,7 @@ class SearchArchiveGrpc extends StatelessWidget {
                   child: Row(
                     spacing: 6,
                     children: [
-                      const Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Icon(MdiIcons.identifier, size: 16),
-                          Icon(MdiIcons.circleOutline, size: 16),
-                        ],
-                      ),
+                      const Icon(CustomIcons.identifier_circle, size: 16),
                       Text(bvid, style: const TextStyle(fontSize: 13)),
                     ],
                   ),

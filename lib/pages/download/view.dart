@@ -4,25 +4,25 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
+import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
-import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/models_new/download/download_info.dart';
 import 'package:PiliPlus/pages/download/controller.dart';
 import 'package:PiliPlus/pages/download/detail/view.dart';
 import 'package:PiliPlus/pages/download/detail/widgets/item.dart';
 import 'package:PiliPlus/pages/download/search/view.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart' show IterableExt;
+import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart'
-    hide SliverGridDelegateWithMaxCrossAxisExtent, LayoutBuilder;
+    hide SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
@@ -33,7 +33,7 @@ class DownloadPage extends StatefulWidget {
   State<DownloadPage> createState() => _DownloadPageState();
 }
 
-class _DownloadPageState extends State<DownloadPage> {
+class _DownloadPageState extends State<DownloadPage> with GridMixin {
   final _downloadService = Get.find<DownloadService>();
   final _controller = Get.put(DownloadPageController());
   final _progress = ChangeNotifier();
@@ -67,20 +67,16 @@ class _DownloadPageState extends State<DownloadPage> {
                   visualDensity: VisualDensity.compact,
                 ),
                 onPressed: () async {
-                  final allChecked = _controller.allChecked.toSet();
+                  final future = [
+                    for (final page in _controller.allChecked)
+                      for (final e in page.entries)
+                        _downloadService.downloadDanmaku(
+                          entry: e,
+                          isUpdate: true,
+                        ),
+                  ];
                   _controller.handleSelect();
-                  final list = <BiliDownloadEntryInfo>[];
-                  for (final page in allChecked) {
-                    list.addAll(page.entries);
-                  }
-                  final res = await Future.wait(
-                    list.map(
-                      (e) => _downloadService.downloadDanmaku(
-                        entry: e,
-                        isUpdate: true,
-                      ),
-                    ),
-                  );
+                  final res = await Future.wait(future);
                   if (res.every((e) => e)) {
                     SmartDialog.showToast('更新成功');
                   } else {
@@ -143,7 +139,7 @@ class _DownloadPageState extends State<DownloadPage> {
                         ),
                         SliverToBoxAdapter(
                           child: SizedBox(
-                            height: 100,
+                            height: 110,
                             child: DetailItem(
                               entry: entry,
                               progress: _progress,
@@ -176,12 +172,7 @@ class _DownloadPageState extends State<DownloadPage> {
                           ),
                         ),
                         SliverGrid.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithMaxCrossAxisExtent(
-                                mainAxisSpacing: 2,
-                                mainAxisExtent: 100,
-                                maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                              ),
+                          gridDelegate: gridDelegate,
                           itemBuilder: (context, index) {
                             final item = _controller.pages[index];
                             if (item.entries.length == 1) {
@@ -237,59 +228,48 @@ class _DownloadPageState extends State<DownloadPage> {
         ? null
         : showDialog(
             context: context,
-            builder: (context) => AlertDialog(
+            builder: (context) => SimpleDialog(
               clipBehavior: Clip.hardEdge,
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    onTap: () {
-                      Get.back();
-                      showConfirmDialog(
-                        context: context,
-                        title: const Text('确定删除？'),
-                        onConfirm: () async {
-                          await GStorage.watchProgress.deleteAll(
-                            pageInfo.entries.map((e) => e.cid.toString()),
-                          );
-                          _downloadService.deletePage(
-                            pageDirPath: pageInfo.dirPath,
-                          );
-                        },
-                      );
-                    },
-                    dense: true,
-                    title: const Text(
-                      '删除',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
-                  ListTile(
-                    onTap: () async {
-                      Get.back();
-                      final res = await Future.wait(
-                        pageInfo.entries.map(
-                          (e) => _downloadService.downloadDanmaku(
-                            entry: e,
-                            isUpdate: true,
-                          ),
+              children: [
+                DialogOption(
+                  onPressed: () {
+                    Get.back();
+                    showConfirmDialog(
+                      context: context,
+                      title: const Text('确定删除？'),
+                      onConfirm: () async {
+                        await GStorage.watchProgress.deleteAll(
+                          pageInfo.entries.map((e) => e.cid.toString()),
+                        );
+                        _downloadService.deletePage(
+                          pageDirPath: pageInfo.dirPath,
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('删除', style: TextStyle(fontSize: 14)),
+                ),
+                DialogOption(
+                  onPressed: () async {
+                    Get.back();
+                    final res = await Future.wait(
+                      pageInfo.entries.map(
+                        (e) => _downloadService.downloadDanmaku(
+                          entry: e,
+                          isUpdate: true,
                         ),
-                      );
-                      if (res.every((e) => e)) {
-                        SmartDialog.showToast('更新成功');
-                      } else {
-                        SmartDialog.showToast('更新失败');
-                      }
-                    },
-                    dense: true,
-                    title: const Text(
-                      '更新弹幕',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ],
-              ),
+                      ),
+                    );
+                    if (res.every((e) => e)) {
+                      SmartDialog.showToast('更新成功');
+                    } else {
+                      SmartDialog.showToast('更新失败');
+                    }
+                  },
+                  child: const Text('更新弹幕', style: TextStyle(fontSize: 14)),
+                ),
+              ],
             ),
           );
     final first = pageInfo.entries.first;
@@ -355,7 +335,7 @@ class _DownloadPageState extends State<DownloadPage> {
                       top: 6.0,
                     ),
                   Positioned.fill(
-                    child: selectMask(theme, pageInfo.checked),
+                    child: selectMask(theme.colorScheme, pageInfo.checked),
                   ),
                 ],
               ),
@@ -381,18 +361,15 @@ class _DownloadPageState extends State<DownloadPage> {
                       crossAxisAlignment: .end,
                       mainAxisAlignment: .spaceBetween,
                       children: [
-                        if (first.ownerName case final ownerName?)
-                          Text(
-                            ownerName,
-                            style: TextStyle(
-                              fontSize: 12,
-                              height: 1.6,
-                              color: theme.colorScheme.outline,
-                            ),
-                          )
-                        else
-                          const Spacer(),
-                        pageInfo.entries.first.moreBtn(theme),
+                        Text(
+                          '${CacheManager.formatSize(pageInfo.entries.fold(0, (p, n) => p + n.totalBytes))}  ${first.ownerName ?? ""}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.6,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                        pageInfo.entries.first.moreBtn(theme.colorScheme),
                       ],
                     ),
                   ],
