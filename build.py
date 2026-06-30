@@ -14,7 +14,6 @@ Flutter 多平台构建脚本
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
 import io
 import json
 import logging
@@ -26,6 +25,7 @@ import subprocess
 import sys
 import textwrap
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Sequence
 from urllib.request import urlopen
@@ -218,6 +218,7 @@ def configure_logging() -> tuple[logging.Logger, Any | None]:
 LOGGER, RICH_CONSOLE = configure_logging()
 SKIP_RENAME_DIR_NAMES = {".git", ".dart_tool", "build", "Pods", "ephemeral"}
 
+#定义日志格式
 
 def _format_log_message(label: str, message: str, style: str) -> str:
     if RICH_CONSOLE is not None:
@@ -262,11 +263,10 @@ def _resolve_command(command: Sequence[str]) -> list[str]:
     subprocess shell=False 找不到，用 shutil.which 解析完整路径。
     """
     command_parts = [str(part) for part in command]
-    if not IS_WINDOWS:
-        return command_parts
-    resolved = shutil.which(command_parts[0])
-    if resolved:
-        command_parts = [resolved] + command_parts[1:]
+    if IS_WINDOWS:
+        resolved = shutil.which(command_parts[0])
+        if resolved:
+            command_parts = [resolved] + command_parts[1:]
     return command_parts
 
 
