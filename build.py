@@ -523,11 +523,6 @@ def rename_with_cli(options: BuildOptions) -> None:
         run_command(["rename", "setAppName", "--value", options.app_name])
 
 
-def apply_project_rename(options: BuildOptions) -> None:
-    if options.skip_rename:
-        return
-    rename_with_search_replace(options)
-    rename_with_cli(options)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -661,16 +656,24 @@ class FlutterPatchAction:
     success_message: str
     failure_message: str
     step_message: str = ""
+    apply_to_flutter_root: bool = True
 
 
-def make_flutter_patch_action(name: str) -> FlutterPatchAction:
+def make_flutter_patch_action(
+    name: str,
+    *,
+    apply_to_flutter_root: bool = True,
+) -> FlutterPatchAction:
     return FlutterPatchAction(
         kind="patch",
         target=name,
         success_message=f"Patch OK: {name}",
         failure_message=f"Patch 应用失败（已忽略）: {name}",
+        apply_to_flutter_root=apply_to_flutter_root,
     )
 
+def make_flutter_patch_actions(*names: str) -> tuple[FlutterPatchAction, ...]:
+    return tuple(make_flutter_patch_action(name) for name in names)
 
 FLUTTER_PATCH_ACTION_PRIORITY = {"cherry-pick": 0, "revert": 1, "patch": 2}
 FLUTTER_PATCHES_DIR = Path("lib/scripts")
@@ -688,38 +691,36 @@ OVERSCROLL_INDICATOR_REVERT_ACTION = FlutterPatchAction(
 )
 
 # 对所有平台都生效的 patch（对应 patch.ps1 中的 $patches 基础数组）
-COMMON_FLUTTER_PATCH_ACTIONS = (
-    make_flutter_patch_action("modal_barrier.patch"),
-    make_flutter_patch_action("text_selection.patch"),
-    make_flutter_patch_action("mouse_cursor.patch"),
-    make_flutter_patch_action("image_anim.patch"),
-    make_flutter_patch_action("layout_builder.patch"),
-    make_flutter_patch_action("navigation_drawer.patch"),
+COMMON_FLUTTER_PATCH_ACTIONS = make_flutter_patch_actions(
+    "modal_barrier.patch",
+    "text_selection.patch",
+    "mouse_cursor.patch",
+    "image_anim.patch",
+    "layout_builder.patch",
+    "navigation_drawer.patch",
 )
 # 按平台追加的 patch（对应 patch.ps1 中 switch ($platform) 各分支）
 PLATFORM_FLUTTER_PATCH_ACTIONS = {
     "android": (
         OVERSCROLL_INDICATOR_REVERT_ACTION,
-        make_flutter_patch_action("bottom_sheet_android.patch"),
-        make_flutter_patch_action("scroll_view.patch"),
-        make_flutter_patch_action("navigator.patch"),
+        *make_flutter_patch_actions(
+            "bottom_sheet_android.patch",
+            "scroll_view.patch",
+            "navigator.patch",
+        ),
     ),
-    "ios": (
-        make_flutter_patch_action("scroll_view.patch"),
-        make_flutter_patch_action("bottom_sheet_ios_flutter.patch"),
-        make_flutter_patch_action("navigator.patch"),
-    ),
+    "ios": 
+        make_flutter_patch_actions(
+            "bottom_sheet_ios_piliplus.patch",
+            "geetest_ios.patch",
+            "scroll_view.patch",
+            "bottom_sheet_ios_flutter.patch",
+            "navigator.patch",
+        ),
     "linux": (),
     "macos": (),
     "windows": (),
 }
-
-# 直接作用于项目仓库（而非 Flutter SDK）的 iOS patch，对应 patch.ps1 中
-# `if ($platform.ToLower() -eq "ios")` 分支，须在 Set-Location 到 Flutter SDK 之前应用
-IOS_PROJECT_PATCH_ACTIONS = (
-    make_flutter_patch_action("bottom_sheet_ios_piliplus.patch"),
-    make_flutter_patch_action("geetest_ios.patch"),
-)
 
 
 def dedupe_flutter_patch_actions(
@@ -743,7 +744,6 @@ def dedupe_flutter_patch_actions(
 
 def build_flutter_patch_actions(platform_name: str) -> tuple[FlutterPatchAction, ...]:
     normalized_platform = platform_name.strip().lower()
-    actions = list(COMMON_FLUTTER_PATCH_ACTIONS)
 
     if normalized_platform == "all":
         target_platforms = tuple(PLATFORM_FLUTTER_PATCH_ACTIONS)
@@ -752,6 +752,7 @@ def build_flutter_patch_actions(platform_name: str) -> tuple[FlutterPatchAction,
     else:
         target_platforms = ()
 
+    actions = list(COMMON_FLUTTER_PATCH_ACTIONS)
     for target_platform in target_platforms:
         actions.extend(PLATFORM_FLUTTER_PATCH_ACTIONS[target_platform])
 
@@ -800,19 +801,7 @@ def apply_flutter_patches(root: str, platform_name: str = "") -> None:
         apply_flutter_patch_action(root, action)
 
 
-def apply_ios_project_patches() -> None:
-    """对应 patch.ps1 中 `if ($platform -eq "ios")` 分支：
-    在 Set-Location 到 Flutter SDK 之前，直接对当前项目仓库应用的 patch。"""
-    log_step("应用 iOS 项目 patches")
-    for action in IOS_PROJECT_PATCH_ACTIONS:
-        apply_flutter_patch_action(None, action)
-
-
 def run_common_setup(options: BuildOptions) -> str | None:
-    normalized_platform = options.platform.strip().lower()
-    if options.apply_patches and normalized_platform in ("ios", "all"):
-        apply_ios_project_patches()
-
     flutter_root_dir = find_flutter_root()
     if options.apply_patches and flutter_root_dir:
         apply_flutter_patches(flutter_root_dir, platform_name=options.platform)
@@ -1020,7 +1009,7 @@ def build_macos(context: BuildContext) -> None:
             shutil.move(str(dmgs[0]), destination)
             log_success(f"输出: {destination}")
             return
-    log_warning("create-dmg 未安装，fallback zip。npm i -g create-dmg")
+    log_warning("create-dmg 未安装，将打包成 zip。npm i -g create-dmg")
     destination = context.platform_output_path("macos", suffix=".zip")
     run_shell_command(f'zip -r9 "{destination}" "{app}"')
     log_success(f"输出（zip）: {destination}")
@@ -1061,7 +1050,7 @@ def build_windows(context: BuildContext) -> None:
             log_success(f"输出 (installer): {destination}")
     else:
         if options.installer:
-            log_warning("fastforge 未找到，跳过 installer")
+            log_warning("fastforge 未找到，跳过构建 installer")
         run_command(create_flutter_build_command("windows", options))
 
     bundle = Path("build/windows/x64/runner/Release")
@@ -1693,13 +1682,15 @@ def parse_arguments() -> BuildOptions:
 
 def main() -> None:
     if not Path("pubspec.yaml").exists():
-        log_error("请在 Flutter 项目根目录运行（找不到 pubspec.yaml）")
+        log_error("找不到 pubspec.yaml。请在 Flutter 项目根目录运行，并检查你是否误删除了 pubspec.yaml。")
         sys.exit(1)
 
     options = parse_arguments()
 
     # 1. 包名替换（sed + rename CLI）
-    apply_project_rename(options)
+    if not options.skip_rename:
+        rename_with_search_replace(options)
+        rename_with_cli(options)
 
     # 2. Prebuild（版本号 + pili_release.json）
     version_info = resolve_version_info(options)
