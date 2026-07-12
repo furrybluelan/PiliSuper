@@ -694,10 +694,21 @@ OVERSCROLL_INDICATOR_REVERT_ACTION = FlutterPatchAction(
 COMMON_FLUTTER_PATCH_ACTIONS = make_flutter_patch_actions(
     "modal_barrier.patch",
     "text_selection.patch",
+# TODO: remove
+# https://github.com/flutter/flutter/issues/182466
     "mouse_cursor.patch",
     "image_anim.patch",
     "layout_builder.patch",
     "navigation_drawer.patch",
+    "popup_menu.patch",
+    "fab.patch",
+    "selectable_region.patch",
+# TODO: remove
+# https://github.com/flutter/flutter/issues/90223
+    "modal_barrier.patch",
+# TODO: remove
+# https://github.com/flutter/flutter/pull/183261
+    "null_safety_for_selectable_region.patch"
 )
 # 按平台追加的 patch（对应 patch.ps1 中 switch ($platform) 各分支）
 PLATFORM_FLUTTER_PATCH_ACTIONS = {

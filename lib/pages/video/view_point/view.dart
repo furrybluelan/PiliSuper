@@ -54,8 +54,7 @@ class _ViewPointsPageState extends State<ViewPointsPage>
               scale: 0.8,
               child: Switch(
                 value: videoDetailController.showVP.value,
-                onChanged: (value) =>
-                    videoDetailController.showVP.value = value,
+                onChanged: videoDetailController.showVP.call,
               ),
             ),
           ),
@@ -115,7 +114,7 @@ class _ViewPointsPageState extends State<ViewPointsPage>
     );
     if (_isNested) {
       return ExtendedVisibilityDetector(
-        uniqueKey: const Key('viewpoints'),
+        uniqueKey: const ValueKey(ViewPointsPage),
         child: child,
       );
     }
