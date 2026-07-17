@@ -387,26 +387,42 @@ class VideoDetailController extends GetxController
       initialIndex: Pref.defaultShowComment ? 1 : 0,
     );
 
-    if (!isFileSource) {
-      plPlayerController.onAutoSwitchCdn = tryAutoSwitchCdn;
-    }
+    _bindAutoSwitchCdn();
   }
 
   /// 当前视频/分 P 已自动测速次数，换集时重置
   int _autoCdnAttempts = 0;
   bool _autoCdnLimitToasted = false;
 
+  void _bindAutoSwitchCdn() {
+    if (!isFileSource) {
+      plPlayerController.onAutoSwitchCdn = tryAutoSwitchCdn;
+    }
+  }
+
+  void _stopAutoSwitchCdnForVideo() {
+    if (plPlayerController.onAutoSwitchCdn == tryAutoSwitchCdn) {
+      plPlayerController.onAutoSwitchCdn = null;
+    }
+    plPlayerController.resetStutterDetection();
+  }
+
+  /// 达上限 toast 每个视频只弹一次，并停掉后续检测
+  void _toastAutoCdnLimitOnce() {
+    if (_autoCdnLimitToasted || isClosed) return;
+    _autoCdnLimitToasted = true;
+    _stopAutoSwitchCdnForVideo();
+    SmartDialog.showToast(
+      '本视频 CDN 自动切换已达上限',
+      displayTime: const Duration(seconds: 2),
+    );
+  }
+
   Future<void> tryAutoSwitchCdn() async {
     if (isFileSource || isClosed || currentVideoQa.value == null) return;
 
     if (_autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo) {
-      if (!_autoCdnLimitToasted) {
-        _autoCdnLimitToasted = true;
-        SmartDialog.showToast(
-          '本视频 CDN 自动切换已达上限',
-          displayTime: const Duration(seconds: 2),
-        );
-      }
+      _toastAutoCdnLimitOnce();
       return;
     }
     // 先占全局额度，避免与其它页面/并发回调重复测速
@@ -415,6 +431,13 @@ class VideoDetailController extends GetxController
     }
 
     _autoCdnAttempts++;
+    final isLastAttempt =
+        _autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo;
+    // 立刻解绑，防止测速期间再触发；上限 toast 等结果 toast 之后再弹
+    if (isLastAttempt) {
+      _stopAutoSwitchCdnForVideo();
+    }
+
     SmartDialog.showToast(
       '检测到卡顿，正在测速并切换最佳 CDN…',
       displayTime: const Duration(seconds: 2),
@@ -436,6 +459,14 @@ class VideoDetailController extends GetxController
         SmartDialog.showToast(msg, displayTime: const Duration(seconds: 2));
       },
     );
+
+    if (isLastAttempt && !isClosed) {
+      // 每个视频只弹一次；稍延迟避免盖住切换结果
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (!isClosed) _toastAutoCdnLimitOnce();
+      });
+    }
+
     if (!switched || isClosed || currentVideoQa.value == null) return;
 
     plPlayerController.resetStutterDetection();
@@ -1307,6 +1338,7 @@ class VideoDetailController extends GetxController
     _autoCdnAttempts = 0;
     _autoCdnLimitToasted = false;
     plPlayerController.resetStutterDetection();
+    _bindAutoSwitchCdn();
 
     playedTime = null;
     defaultST = null;
