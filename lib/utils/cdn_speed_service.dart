@@ -1,0 +1,244 @@
+import 'package:PiliPlus/http/browser_ua.dart';
+import 'package:PiliPlus/http/constants.dart';
+import 'package:PiliPlus/http/video.dart';
+import 'package:PiliPlus/models/common/video/cdn_type.dart';
+import 'package:PiliPlus/models/common/video/video_type.dart';
+import 'package:PiliPlus/models/video/play/url.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/video_utils.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
+
+typedef CdnSpeedProgress = void Function(CDNService service, String result);
+
+/// CDN 测速与自动切换
+abstract final class CdnSpeedService {
+  static bool _testing = false;
+  static bool get isTesting => _testing;
+
+  static DateTime? _lastAutoSwitchAt;
+  static const _autoSwitchCooldown = Duration(minutes: 2);
+
+  /// 自动切换时用更轻量的测速，降低流量与耗时
+  static const _autoMaxSize = 2 * 1024 * 1024;
+  static const _autoTimeout = Duration(seconds: 5);
+  static const _manualMaxSize = 8 * 1024 * 1024;
+  static const _manualTimeout = Duration(seconds: 15);
+
+  static Future<BaseItem> getSampleUrl() async {
+    final result = await VideoHttp.videoUrl(
+      cid: 196018899,
+      bvid: 'BV1fK4y1t7hj',
+      tryLook: false,
+      videoType: VideoType.ugc,
+    );
+    final item = result.dataOrNull?.dash?.video?.first;
+    if (item == null) throw Exception('无法获取视频流');
+    return item;
+  }
+
+  /// 对单个 CDN 测速，返回字节/微秒；失败返回 null
+  ///
+  /// [cancelToken] 仅用于外部取消整轮测速；达到 maxSize 时只 cancel 内部 token，
+  /// 不会误取消后续 CDN 的测速。
+  static Future<double?> measureSpeed(
+    String url, {
+    CancelToken? cancelToken,
+    Duration timeout = _manualTimeout,
+    int maxSize = _manualMaxSize,
+  }) async {
+    if (cancelToken?.isCancelled == true) return null;
+
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: timeout,
+        receiveTimeout: timeout,
+        headers: {
+          'user-agent': BrowserUa.pc,
+          'referer': HttpString.baseUrl,
+        },
+      ),
+    );
+
+    // Dio 的 count 为累计已接收字节，不是增量
+    int downloaded = 0;
+    final start = DateTime.now().microsecondsSinceEpoch;
+    // 独立 token：到量/超时只停当前请求，不污染外层 cancelToken
+    final requestToken = CancelToken();
+    if (cancelToken != null) {
+      if (cancelToken.isCancelled) {
+        requestToken.cancel();
+      } else {
+        cancelToken.whenCancel.then((_) {
+          if (!requestToken.isCancelled) {
+            requestToken.cancel();
+          }
+        });
+      }
+    }
+    var finished = false;
+    double? speed;
+
+    void finish() {
+      if (finished) return;
+      finished = true;
+      if (!requestToken.isCancelled) {
+        requestToken.cancel();
+      }
+      final duration = DateTime.now().microsecondsSinceEpoch - start;
+      if (downloaded > 0 && duration > 0) {
+        speed = downloaded / duration;
+      }
+    }
+
+    try {
+      await dio.get(
+        url,
+        cancelToken: requestToken,
+        onReceiveProgress: (count, total) {
+          if (finished || requestToken.isCancelled) return;
+          if (cancelToken?.isCancelled == true) {
+            if (!requestToken.isCancelled) {
+              requestToken.cancel();
+            }
+            return;
+          }
+          downloaded = count;
+          final duration = DateTime.now().microsecondsSinceEpoch - start;
+          if (duration > timeout.inMicroseconds || downloaded >= maxSize) {
+            finish();
+          }
+        },
+      );
+      if (!finished && downloaded > 0) {
+        finish();
+      }
+    } on DioException catch (e) {
+      if (e.type != DioExceptionType.cancel && kDebugMode) {
+        debugPrint('CDN speed test error: $e');
+      }
+      // 外部取消：不记速度
+      if (cancelToken?.isCancelled == true) {
+        return null;
+      }
+      if (!finished && downloaded > 0) {
+        finish();
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('CDN speed test error: $e');
+      if (cancelToken?.isCancelled == true) {
+        return null;
+      }
+      if (!finished && downloaded > 0) {
+        finish();
+      }
+    } finally {
+      dio.close(force: true);
+    }
+
+    return speed;
+  }
+
+  static String formatSpeed(double bytesPerUs) =>
+      '${bytesPerUs.toStringAsPrecision(3)}MB/s';
+
+  static String formatError(Object error) {
+    if (error is DioException) {
+      final statusCode = error.response?.statusCode;
+      if (statusCode != null && 400 <= statusCode && statusCode < 500) {
+        return '此视频可能无法替换为该CDN';
+      }
+      final msg = error.toString();
+      return msg.isEmpty ? '测速失败' : msg;
+    }
+    final msg = error.toString();
+    return msg.isEmpty ? '测速失败' : msg;
+  }
+
+  /// 依次测速所有 CDN，返回按速度降序的 (CDN, 速度) 列表
+  static Future<List<(CDNService, double)>> testAll(
+    BaseItem videoItem, {
+    CdnSpeedProgress? onProgress,
+    CancelToken? cancelToken,
+    Duration timeout = _manualTimeout,
+    int maxSize = _manualMaxSize,
+  }) async {
+    final results = <(CDNService, double)>[];
+    for (final item in CDNService.values) {
+      if (cancelToken?.isCancelled == true) break;
+      try {
+        final cdnUrl = VideoUtils.getCdnUrl(
+          videoItem.playUrls,
+          defaultCDNService: item,
+        );
+        final speed = await measureSpeed(
+          cdnUrl,
+          cancelToken: cancelToken,
+          timeout: timeout,
+          maxSize: maxSize,
+        );
+        if (cancelToken?.isCancelled == true) break;
+        if (speed != null) {
+          results.add((item, speed));
+          onProgress?.call(item, formatSpeed(speed));
+        } else {
+          onProgress?.call(item, '测速失败');
+        }
+      } catch (e) {
+        if (cancelToken?.isCancelled == true) break;
+        onProgress?.call(item, formatError(e));
+      }
+    }
+    results.sort((a, b) => b.$2.compareTo(a.$2));
+    return results;
+  }
+
+  /// 卡顿触发：测速并切换到最快 CDN。
+  /// 返回值：true=已切换；false=未切换（冷却中/已是最佳/失败等）
+  static Future<bool> autoSwitchBestCdn({
+    BaseItem? sample,
+    void Function(CDNService best)? onSwitched,
+    void Function(String message)? onMessage,
+  }) async {
+    if (_testing) return false;
+    final now = DateTime.now();
+    if (_lastAutoSwitchAt != null &&
+        now.difference(_lastAutoSwitchAt!) < _autoSwitchCooldown) {
+      return false;
+    }
+
+    _testing = true;
+    try {
+      final videoItem = sample ?? await getSampleUrl();
+      final results = await testAll(
+        videoItem,
+        timeout: _autoTimeout,
+        maxSize: _autoMaxSize,
+      );
+      if (results.isEmpty) {
+        onMessage?.call('CDN 测速失败，保持当前线路');
+        return false;
+      }
+
+      final best = results.first.$1;
+      // 即使已是最佳也写入冷却，避免反复测速
+      _lastAutoSwitchAt = DateTime.now();
+      if (best == VideoUtils.cdnService) {
+        onMessage?.call('当前已是最佳 CDN');
+        return false;
+      }
+
+      VideoUtils.cdnService = best;
+      await GStorage.setting.put(SettingBoxKey.CDNService, best.name);
+      onSwitched?.call(best);
+      return true;
+    } catch (e) {
+      if (kDebugMode) debugPrint('autoSwitchBestCdn failed: $e');
+      onMessage?.call('CDN 自动切换失败');
+      return false;
+    } finally {
+      _testing = false;
+    }
+  }
+}

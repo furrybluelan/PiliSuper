@@ -87,6 +87,7 @@ abstract final class SettingBoxKey {
       badCertificateCallback = 'badCertificateCallback',
       continuePlayingPart = 'continuePlayingPart',
       cdnSpeedTest = 'cdnSpeedTest',
+      autoSwitchCdn = 'autoSwitchCdn',
       horizontalPreview = 'horizontalPreview',
       banWordForReply = 'banWordForReply',
       banWordForZone = 'banWordForZone',

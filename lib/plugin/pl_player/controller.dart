@@ -44,6 +44,7 @@ import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/cdn_speed_service.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -67,6 +68,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
 typedef PlayCallback = Future<void>? Function();
+typedef AutoSwitchCdnCallback = Future<void> Function();
 
 class PlPlayerController with BlockConfigMixin {
   Player? _videoPlayerController;
@@ -436,6 +438,12 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   static PlayCallback? _playCallBack;
+
+  AutoSwitchCdnCallback? onAutoSwitchCdn;
+
+  final List<DateTime> _stutterTimestamps = [];
+  static const _stutterWindow = Duration(seconds: 10);
+  static const _stutterThreshold = 2;
 
   static Future<void>? playIfExists() {
     return _playCallBack?.call();
@@ -981,6 +989,9 @@ class PlPlayerController with BlockConfigMixin {
           buffering,
           isLive,
         );
+        if (buffering) {
+          _onBufferingStarted();
+        }
       }),
       if (kDebugMode)
         stream.log.listen(((PlayerLog log) {
@@ -1050,6 +1061,45 @@ class PlPlayerController with BlockConfigMixin {
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
     _subscriptions = null;
+  }
+
+  void _onBufferingStarted() {
+    if (isLive ||
+        dataSource is FileSource ||
+        !Pref.autoSwitchCdn ||
+        isSeeking.value ||
+        !playerStatus.isPlaying ||
+        // 跳过开播前几秒的首次缓冲，避免误触发
+        position.value < 3 ||
+        onAutoSwitchCdn == null ||
+        CdnSpeedService.isTesting) {
+      return;
+    }
+
+    final now = DateTime.now();
+    _stutterTimestamps
+      ..removeWhere((t) => now.difference(t) > _stutterWindow)
+      ..add(now);
+
+    if (_stutterTimestamps.length < _stutterThreshold) return;
+
+    // 仅在真正触发时清空；若 throttle 丢弃则保留计数，冷却后可再触发
+    EasyThrottle.throttle(
+      'autoSwitchCdn',
+      const Duration(seconds: 30),
+      () {
+        _stutterTimestamps.clear();
+        SmartDialog.showToast(
+          '检测到卡顿，正在测速并切换最佳 CDN…',
+          displayTime: const Duration(seconds: 2),
+        );
+        onAutoSwitchCdn?.call();
+      },
+    );
+  }
+
+  void resetStutterDetection() {
+    _stutterTimestamps.clear();
   }
 
   void _cancelSubForSeek() {
@@ -1557,6 +1607,8 @@ class PlPlayerController with BlockConfigMixin {
     _stopOrientationListener();
     _disableAutoEnterPip();
     setPlayCallBack(null);
+    onAutoSwitchCdn = null;
+    _stutterTimestamps.clear();
     dmState.clear();
     if (showSeekPreview) {
       _clearPreview();

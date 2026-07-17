@@ -51,6 +51,7 @@ import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/cdn_speed_service.dart';
 import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
@@ -385,6 +386,39 @@ class VideoDetailController extends GetxController
       vsync: this,
       initialIndex: Pref.defaultShowComment ? 1 : 0,
     );
+
+    if (!isFileSource) {
+      plPlayerController.onAutoSwitchCdn = tryAutoSwitchCdn;
+    }
+  }
+
+  Future<void> tryAutoSwitchCdn() async {
+    if (isFileSource || isClosed || currentVideoQa.value == null) return;
+    // durl 兜底会把已 rewrite 的 URL 写进 firstVideo，不能当测速样本
+    final sample = data.dash != null ? firstVideo : null;
+    final switched = await CdnSpeedService.autoSwitchBestCdn(
+      sample: sample,
+      onSwitched: (best) {
+        if (isClosed) return;
+        SmartDialog.showToast(
+          '已自动切换至 ${best.desc}',
+          displayTime: const Duration(seconds: 2),
+        );
+      },
+      onMessage: (msg) {
+        if (isClosed) return;
+        SmartDialog.showToast(msg, displayTime: const Duration(seconds: 2));
+      },
+    );
+    if (!switched || isClosed || currentVideoQa.value == null) return;
+
+    plPlayerController.resetStutterDetection();
+    // updatePlayer 依赖 dash；durl 兜底流走重新拉链
+    if (data.dash != null) {
+      updatePlayer();
+    } else {
+      queryVideoUrl(fromReset: true);
+    }
   }
 
   Future<void> getMediaList({
@@ -1220,6 +1254,9 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
+    if (plPlayerController.onAutoSwitchCdn == tryAutoSwitchCdn) {
+      plPlayerController.onAutoSwitchCdn = null;
+    }
     cid.close();
     if (isFileSource) {
       cacheLocalProgress();
