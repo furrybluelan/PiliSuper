@@ -1,5 +1,5 @@
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
-import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
+import 'package:PiliPlus/common/widgets/local_block_dialog.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
@@ -7,15 +7,11 @@ import 'package:PiliPlus/models/home/rcmd/result.dart';
 import 'package:PiliPlus/models/model_hot_video_item.dart';
 import 'package:PiliPlus/models/model_video.dart';
 import 'package:PiliPlus/models_new/space/space_archive/item.dart';
-import 'package:PiliPlus/pages/local_block/local_block_type.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/pages/video/ai_conclusion/view.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/ban_word_utils.dart';
-import 'package:PiliPlus/utils/global_data.dart';
-import 'package:PiliPlus/utils/recommend_filter.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -44,57 +40,7 @@ class VideoPopupMenu extends StatelessWidget {
     this.menuItemHeight = 45,
   });
 
-  Future<void> _addBlockedUser() async {
-    final mid = videoItem.owner.mid;
-    if (mid == null) {
-      SmartDialog.showToast('无法获取用户ID');
-      return;
-    }
-    final name = videoItem.owner.name ?? 'UID:$mid';
-    final ok = await showConfirmDialog(
-      context: Get.context!,
-      title: const Text('确认本地屏蔽 UP'),
-      content: Text('$name ($mid)'),
-    );
-    if (!ok) return;
-    final blockedMids = Pref.recommendBlockedMids;
-    blockedMids[mid] = name;
-    Pref.recommendBlockedMids = blockedMids;
-    GlobalData().recommendBlockedMids = blockedMids;
-    RecommendFilter.recommendBlockedMids = blockedMids;
-    SmartDialog.showToast('已本地屏蔽 $name($mid)');
-    onRemove?.call();
-  }
-
-  Future<void> _appendKeyword({
-    required LocalBlockType type,
-    required String value,
-    required String successMsg,
-  }) async {
-    final keyword = value.trim();
-    if (keyword.isEmpty) {
-      SmartDialog.showToast('内容为空');
-      return;
-    }
-    final existing = type.loadRules();
-    if (existing.contains(keyword)) {
-      SmartDialog.showToast('已存在该屏蔽规则');
-      onRemove?.call();
-      return;
-    }
-    final ok = await showConfirmDialog(
-      context: Get.context!,
-      title: Text('确认加入${type.label}屏蔽'),
-      content: Text(keyword),
-    );
-    if (!ok) return;
-    type.appendRule(keyword);
-    SmartDialog.showToast(successMsg);
-    onRemove?.call();
-  }
-
   String? _getZoneName() {
-    // 分区 = tname（一级/二级分区名），不是 TAG/话题
     if (videoItem case HotVideoItemModel(:final tname)) {
       return tname;
     }
@@ -112,187 +58,17 @@ class VideoPopupMenu extends StatelessWidget {
     return null;
   }
 
-  Future<void> _showCustomBlockDialog() async {
-    LocalBlockType selected = LocalBlockType.title;
-    final ctr = TextEditingController();
-    final result = await showDialog<(LocalBlockType, String)>(
-      context: Get.context!,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('自定义屏蔽'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButtonFormField<LocalBlockType>(
-                    value: selected,
-                    items: [
-                      for (final t in LocalBlockType.values)
-                        if (!t.isUp)
-                          DropdownMenuItem(value: t, child: Text(t.label)),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) setState(() => selected = v);
-                    },
-                    decoration: const InputDecoration(labelText: '屏蔽类型'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: ctr,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      hintText: selected.addHint,
-                      labelText: '规则（普通文字或 /正则/flags）',
-                    ),
-                    maxLines: 3,
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(onPressed: Get.back, child: const Text('取消')),
-                TextButton(
-                  onPressed: () =>
-                      Get.back(result: (selected, ctr.text.trim())),
-                  child: const Text('下一步'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-    ctr.dispose();
-    if (result == null) return;
-    final (type, text) = result;
-    if (text.isEmpty) {
-      SmartDialog.showToast('内容为空');
-      return;
-    }
-    await _appendKeyword(
-      type: type,
-      value: text,
-      successMsg: '已加入${type.label}屏蔽',
-    );
-  }
-
-  void _showLocalBlockDialog(BuildContext context) {
-    final ownerName = videoItem.owner.name ?? '未知UP';
-    final title = videoItem.title.trim();
-    final zoneName = _getZoneName()?.trim();
-    final desc = _getDesc();
-    final colorScheme = Theme.of(context).colorScheme;
-
-    Widget chip(String label, VoidCallback onTap) {
-      return Material(
-        color: colorScheme.onInverseSurface,
-        borderRadius: const BorderRadius.all(Radius.circular(6)),
-        child: InkWell(
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
-          onTap: onTap,
-          onLongPress: () => Utils.copyText(label),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-            child: Text(
-              label,
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
-            ),
-          ),
-        ),
-      );
-    }
-
-    showDialog(
+  void _showLocalBlock(BuildContext context) {
+    LocalBlockDialog.show(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('本地屏蔽'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '快捷选项（长按复制）',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    chip('UP主:$ownerName', () {
-                      Get.back();
-                      _addBlockedUser();
-                    }),
-                    if (title.isNotEmpty)
-                      chip('标题:$title', () {
-                        Get.back();
-                        _appendKeyword(
-                          type: LocalBlockType.title,
-                          value: title,
-                          successMsg: '已加入标题关键词屏蔽',
-                        );
-                      }),
-                    chip(
-                      zoneName?.isNotEmpty == true
-                          ? '分区:$zoneName'
-                          : '分区:无法获取',
-                      () {
-                        if (zoneName?.isNotEmpty != true) {
-                          SmartDialog.showToast('当前视频无法获取分区信息');
-                          return;
-                        }
-                        Get.back();
-                        _appendKeyword(
-                          type: LocalBlockType.zone,
-                          value: zoneName!,
-                          successMsg: '已加入分区关键词屏蔽',
-                        );
-                      },
-                    ),
-                    if (desc != null)
-                      chip(
-                        '简介:${desc.length > 40 ? '${desc.substring(0, 40)}…' : desc}',
-                        () {
-                          Get.back();
-                          _appendKeyword(
-                            type: LocalBlockType.desc,
-                            value: desc,
-                            successMsg: '已加入简介屏蔽',
-                          );
-                        },
-                      ),
-                    chip('自定义…', () {
-                      Get.back();
-                      _showCustomBlockDialog();
-                    }),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '说明：分区为 tname；TAG/话题需在详情页或自定义中添加（卡片流通常无完整列表）',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.outline,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-                Get.toNamed('/localBlock');
-              },
-              child: const Text('管理'),
-            ),
-            TextButton(onPressed: Get.back, child: const Text('取消')),
-          ],
-        );
-      },
+      bvid: videoItem.bvid,
+      cid: videoItem.cid,
+      ownerName: videoItem.owner.name,
+      ownerMid: videoItem.owner.mid,
+      title: videoItem.title,
+      zoneName: _getZoneName(),
+      desc: _getDesc(),
+      onBlocked: onRemove,
     );
   }
 
@@ -357,7 +133,7 @@ class VideoPopupMenu extends StatelessWidget {
                   _VideoCustomAction(
                     '本地屏蔽',
                     const Icon(MdiIcons.accountOff, size: 16),
-                    () => _showLocalBlockDialog(context),
+                    () => _showLocalBlock(context),
                   ),
                   _VideoCustomAction(
                     '不感兴趣',
