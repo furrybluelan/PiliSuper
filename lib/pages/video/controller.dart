@@ -392,8 +392,34 @@ class VideoDetailController extends GetxController
     }
   }
 
+  /// 当前视频/分 P 已自动测速次数，换集时重置
+  int _autoCdnAttempts = 0;
+  bool _autoCdnLimitToasted = false;
+
   Future<void> tryAutoSwitchCdn() async {
     if (isFileSource || isClosed || currentVideoQa.value == null) return;
+
+    if (_autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo) {
+      if (!_autoCdnLimitToasted) {
+        _autoCdnLimitToasted = true;
+        SmartDialog.showToast(
+          '本视频 CDN 自动切换已达上限',
+          displayTime: const Duration(seconds: 2),
+        );
+      }
+      return;
+    }
+    // 先占全局额度，避免与其它页面/并发回调重复测速
+    if (!CdnSpeedService.tryReserveAttempt()) {
+      return;
+    }
+
+    _autoCdnAttempts++;
+    SmartDialog.showToast(
+      '检测到卡顿，正在测速并切换最佳 CDN…',
+      displayTime: const Duration(seconds: 2),
+    );
+
     // durl 兜底会把已 rewrite 的 URL 写进 firstVideo，不能当测速样本
     final sample = data.dash != null ? firstVideo : null;
     final switched = await CdnSpeedService.autoSwitchBestCdn(
@@ -1277,6 +1303,10 @@ class VideoDetailController extends GetxController
     if (isFileSource) {
       cacheLocalProgress();
     }
+
+    _autoCdnAttempts = 0;
+    _autoCdnLimitToasted = false;
+    plPlayerController.resetStutterDetection();
 
     playedTime = null;
     defaultST = null;

@@ -1092,15 +1092,12 @@ class PlPlayerController with BlockConfigMixin {
     if (_stutterTimestamps.length < _stutterThreshold) return;
 
     // 仅在真正触发时清空；若 throttle 丢弃则保留计数，冷却后可再触发
+    // toast 由 tryAutoSwitchCdn 在通过次数限制后再弹出，避免空提示
     EasyThrottle.throttle(
       'autoSwitchCdn',
       const Duration(seconds: 60),
       () {
         _stutterTimestamps.clear();
-        SmartDialog.showToast(
-          '检测到卡顿，正在测速并切换最佳 CDN…',
-          displayTime: const Duration(seconds: 2),
-        );
         onAutoSwitchCdn?.call();
       },
     );

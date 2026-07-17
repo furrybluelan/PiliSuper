@@ -20,11 +20,45 @@ abstract final class CdnSpeedService {
   static DateTime? _lastAutoSwitchAt;
   static const _autoSwitchCooldown = Duration(minutes: 2);
 
+  /// 全局：滑动时间窗内最多自动测速次数（防弱网连刷烧流量）
+  static const maxAttemptsInWindow = 3;
+  static const attemptWindow = Duration(minutes: 15);
+  static final List<DateTime> _attemptTimestamps = [];
+
+  /// 单视频（含分 P）自动测速上限：弱网下再测也帮不上忙
+  static const maxAttemptsPerVideo = 2;
+
   /// 自动切换时用更轻量的测速，降低流量与耗时
   static const _autoMaxSize = 2 * 1024 * 1024;
   static const _autoTimeout = Duration(seconds: 5);
   static const _manualMaxSize = 8 * 1024 * 1024;
   static const _manualTimeout = Duration(seconds: 15);
+
+  static void _pruneAttempts(DateTime now) {
+    _attemptTimestamps.removeWhere(
+      (t) => now.difference(t) > attemptWindow,
+    );
+  }
+
+  /// 是否允许再发起一轮自动测速（不含单视频计数，由调用方维护）
+  static bool canAutoAttempt({DateTime? now}) {
+    if (_testing) return false;
+    now ??= DateTime.now();
+    if (_lastAutoSwitchAt != null &&
+        now.difference(_lastAutoSwitchAt!) < _autoSwitchCooldown) {
+      return false;
+    }
+    _pruneAttempts(now);
+    return _attemptTimestamps.length < maxAttemptsInWindow;
+  }
+
+  /// 尝试占用一次全局额度；成功返回 true 并已记账
+  static bool tryReserveAttempt() {
+    final now = DateTime.now();
+    if (!canAutoAttempt(now: now)) return false;
+    _attemptTimestamps.add(now);
+    return true;
+  }
 
   static Future<BaseItem> getSampleUrl() async {
     final result = await VideoHttp.videoUrl(
@@ -196,17 +230,14 @@ abstract final class CdnSpeedService {
 
   /// 卡顿触发：测速并切换到最快 CDN。
   /// 返回值：true=已切换；false=未切换（冷却中/已是最佳/失败等）
+  ///
+  /// 调用前应先 [tryReserveAttempt] 占用额度；本方法不再重复记账。
   static Future<bool> autoSwitchBestCdn({
     BaseItem? sample,
     void Function(CDNService best)? onSwitched,
     void Function(String message)? onMessage,
   }) async {
     if (_testing) return false;
-    final now = DateTime.now();
-    if (_lastAutoSwitchAt != null &&
-        now.difference(_lastAutoSwitchAt!) < _autoSwitchCooldown) {
-      return false;
-    }
 
     _testing = true;
     try {
@@ -216,14 +247,14 @@ abstract final class CdnSpeedService {
         timeout: _autoTimeout,
         maxSize: _autoMaxSize,
       );
+      // 无论成败都进入冷却，避免弱网反复测速
+      _lastAutoSwitchAt = DateTime.now();
       if (results.isEmpty) {
         onMessage?.call('CDN 测速失败，保持当前线路');
         return false;
       }
 
       final best = results.first.$1;
-      // 即使已是最佳也写入冷却，避免反复测速
-      _lastAutoSwitchAt = DateTime.now();
       if (best == VideoUtils.cdnService) {
         onMessage?.call('当前已是最佳 CDN');
         return false;
@@ -235,6 +266,7 @@ abstract final class CdnSpeedService {
       return true;
     } catch (e) {
       if (kDebugMode) debugPrint('autoSwitchBestCdn failed: $e');
+      _lastAutoSwitchAt = DateTime.now();
       onMessage?.call('CDN 自动切换失败');
       return false;
     } finally {

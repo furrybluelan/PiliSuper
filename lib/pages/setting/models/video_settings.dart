@@ -78,7 +78,8 @@ List<SettingsModel> get videoSettings => [
   const SwitchModel(
     title: '卡顿自动切换 CDN',
     leading: Icon(Icons.swap_horiz_outlined),
-    subtitle: '播放中 30 秒内自然卡顿 2 次以上时自动测速并切换至最快 CDN（seek 缓冲不计），注意流量消耗',
+    subtitle:
+        '30 秒内自然卡顿 2 次以上时测速切换（seek 不计）；单视频最多 2 次、15 分钟内最多 3 次，注意流量消耗',
     setKey: SettingBoxKey.autoSwitchCdn,
     defaultVal: true,
   ),
