@@ -238,20 +238,6 @@ class _LocalBlockPageState extends State<LocalBlockPage>
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
             child: Row(
               children: [
-                FilledButton.tonal(
-                  style: FilledButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: isBatch
-                        ? theme.colorScheme.errorContainer
-                        : null,
-                    foregroundColor: isBatch
-                        ? theme.colorScheme.onErrorContainer
-                        : null,
-                  ),
-                  onPressed: _toggleBatchMode,
-                  child: Text(isBatch ? '取消批量' : '批量删'),
-                ),
-                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: _searchCtr,
@@ -266,6 +252,23 @@ class _LocalBlockPageState extends State<LocalBlockPage>
                       ),
                     ),
                     onChanged: (v) => setState(() => _query = v.trim()),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  tooltip: isBatch ? '取消批量' : '批量删除',
+                  onPressed: _toggleBatchMode,
+                  style: IconButton.styleFrom(
+                    backgroundColor: isBatch
+                        ? theme.colorScheme.errorContainer
+                        : null,
+                    foregroundColor: isBatch
+                        ? theme.colorScheme.onErrorContainer
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  // 垃圾桶中带 X：批量删除
+                  icon: Icon(
+                    isBatch ? Icons.close : Icons.auto_delete_outlined,
                   ),
                 ),
               ],

@@ -54,19 +54,25 @@ class LocalBlockDialog {
 
     final colorScheme = Theme.of(context).colorScheme;
 
-    Widget chip(String label, VoidCallback onTap) {
+    Widget chip(String label, {VoidCallback? onTap, bool enabled = true}) {
+      final bg = enabled
+          ? colorScheme.onInverseSurface
+          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+      final fg = enabled
+          ? colorScheme.onSurfaceVariant
+          : colorScheme.outline.withValues(alpha: 0.6);
       return Material(
-        color: colorScheme.onInverseSurface,
+        color: bg,
         borderRadius: const BorderRadius.all(Radius.circular(6)),
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(6)),
-          onTap: onTap,
-          onLongPress: () => Utils.copyText(label),
+          onTap: enabled ? onTap : null,
+          onLongPress: enabled ? () => Utils.copyText(label) : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
             child: Text(
               label,
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
+              style: TextStyle(color: fg),
             ),
           ),
         ),
@@ -210,29 +216,34 @@ class LocalBlockDialog {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    if (ownerName != null || ownerMid != null)
-                      chip('UP主:${ownerName ?? ownerMid}', () {
+                    chip(
+                      ownerMid != null
+                          ? 'UP主:${ownerName ?? ownerMid}'
+                          : 'UP主:无法获取',
+                      enabled: ownerMid != null,
+                      onTap: () {
                         Get.back();
                         addUp();
-                      }),
-                    if (titleTrim.isNotEmpty)
-                      chip('标题:$titleTrim', () {
+                      },
+                    ),
+                    chip(
+                      titleTrim.isNotEmpty ? '标题:$titleTrim' : '标题:无法获取',
+                      enabled: titleTrim.isNotEmpty,
+                      onTap: () {
                         Get.back();
                         appendKeyword(
                           type: LocalBlockType.title,
                           value: titleTrim,
                           successMsg: '已加入标题关键词屏蔽',
                         );
-                      }),
+                      },
+                    ),
                     chip(
                       zoneTrim?.isNotEmpty == true
                           ? '分区:$zoneTrim'
                           : '分区:无法获取',
-                      () {
-                        if (zoneTrim?.isNotEmpty != true) {
-                          SmartDialog.showToast('当前视频无法获取分区信息');
-                          return;
-                        }
+                      enabled: zoneTrim?.isNotEmpty == true,
+                      onTap: () {
                         Get.back();
                         appendKeyword(
                           type: LocalBlockType.zone,
@@ -241,53 +252,59 @@ class LocalBlockDialog {
                         );
                       },
                     ),
-                    if (descTrim != null && descTrim.isNotEmpty)
-                      chip(
-                        '简介:${descTrim.length > 40 ? '${descTrim.substring(0, 40)}…' : descTrim}',
-                        () {
-                          Get.back();
-                          appendKeyword(
-                            type: LocalBlockType.desc,
-                            value: descTrim,
-                            successMsg: '已加入简介屏蔽',
-                          );
-                        },
-                      ),
-                    for (final t in tagNames)
-                      chip('TAG:$t', () {
+                    chip(
+                      descTrim != null && descTrim.isNotEmpty
+                          ? '简介:${descTrim.length > 40 ? '${descTrim.substring(0, 40)}…' : descTrim}'
+                          : '简介:无法获取',
+                      enabled: descTrim != null && descTrim.isNotEmpty,
+                      onTap: () {
                         Get.back();
                         appendKeyword(
-                          type: LocalBlockType.tag,
-                          value: t,
-                          successMsg: '已加入 TAG 屏蔽',
+                          type: LocalBlockType.desc,
+                          value: descTrim!,
+                          successMsg: '已加入简介屏蔽',
                         );
-                      }),
-                    for (final t in topicNames)
-                      chip('话题:$t', () {
+                      },
+                    ),
+                    if (tagNames.isEmpty)
+                      chip('TAG:无法获取', enabled: false)
+                    else
+                      for (final t in tagNames)
+                        chip(
+                          'TAG:$t',
+                          onTap: () {
+                            Get.back();
+                            appendKeyword(
+                              type: LocalBlockType.tag,
+                              value: t,
+                              successMsg: '已加入 TAG 屏蔽',
+                            );
+                          },
+                        ),
+                    if (topicNames.isEmpty)
+                      chip('话题:无法获取', enabled: false)
+                    else
+                      for (final t in topicNames)
+                        chip(
+                          '话题:$t',
+                          onTap: () {
+                            Get.back();
+                            appendKeyword(
+                              type: LocalBlockType.topic,
+                              value: t,
+                              successMsg: '已加入话题屏蔽',
+                            );
+                          },
+                        ),
+                    chip(
+                      '自定义…',
+                      onTap: () {
                         Get.back();
-                        appendKeyword(
-                          type: LocalBlockType.topic,
-                          value: t,
-                          successMsg: '已加入话题屏蔽',
-                        );
-                      }),
-                    chip('自定义…', () {
-                      Get.back();
-                      showCustom();
-                    }),
+                        showCustom();
+                      },
+                    ),
                   ],
                 ),
-                if (tagNames.isEmpty && topicNames.isEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    bvid == null
-                        ? '当前无 bvid，无法请求 TAG/话题'
-                        : '未获取到 TAG/话题，可使用自定义添加',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.outline,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
