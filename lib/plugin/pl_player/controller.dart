@@ -1101,6 +1101,14 @@ class PlPlayerController with BlockConfigMixin {
       'autoSwitchCdn',
       const Duration(seconds: 60),
       () {
+        // 二次校验：throttle 回调执行时可能已在稳定期/测速中
+        if (CdnSpeedService.isTesting ||
+            CdnSpeedService.inPostSwitchSettle() ||
+            onAutoSwitchCdn == null) {
+          // 丢弃本次触发，清空计数避免冷却结束后立刻再打满阈值
+          _stutterTimestamps.clear();
+          return;
+        }
         _stutterTimestamps.clear();
         onAutoSwitchCdn?.call();
       },

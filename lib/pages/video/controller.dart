@@ -393,6 +393,9 @@ class VideoDetailController extends GetxController
   /// 当前视频/分 P 已自动测速次数，换集时重置
   int _autoCdnAttempts = 0;
   bool _autoCdnLimitToasted = false;
+  /// 换集时递增，作废尚未触发的延迟 toast
+  int _autoCdnEpoch = 0;
+  bool _autoCdnRunning = false;
 
   void _bindAutoSwitchCdn() {
     if (!isFileSource) {
@@ -407,21 +410,37 @@ class VideoDetailController extends GetxController
     plPlayerController.resetStutterDetection();
   }
 
-  /// 达上限 toast 每个视频只弹一次，并停掉后续检测
+  /// 达上限 toast 每个视频只弹一次
   void _toastAutoCdnLimitOnce() {
     if (_autoCdnLimitToasted || isClosed) return;
     _autoCdnLimitToasted = true;
-    _stopAutoSwitchCdnForVideo();
     SmartDialog.showToast(
       '本视频 CDN 自动切换已达上限',
       displayTime: const Duration(seconds: 2),
     );
   }
 
+  void _reloadPlayerWithCurrentCdn() {
+    if (isClosed || currentVideoQa.value == null) return;
+    plPlayerController.resetStutterDetection();
+    // updatePlayer 依赖 dash；durl 兜底流走重新拉链
+    if (data.dash != null) {
+      updatePlayer();
+    } else {
+      queryVideoUrl(fromReset: true);
+    }
+  }
+
   Future<void> tryAutoSwitchCdn() async {
-    if (isFileSource || isClosed || currentVideoQa.value == null) return;
+    if (isFileSource ||
+        isClosed ||
+        currentVideoQa.value == null ||
+        _autoCdnRunning) {
+      return;
+    }
 
     if (_autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo) {
+      _stopAutoSwitchCdnForVideo();
       _toastAutoCdnLimitOnce();
       return;
     }
@@ -430,51 +449,56 @@ class VideoDetailController extends GetxController
       return;
     }
 
-    _autoCdnAttempts++;
-    final isLastAttempt =
-        _autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo;
-    // 立刻解绑，防止测速期间再触发；上限 toast 等结果 toast 之后再弹
-    if (isLastAttempt) {
-      _stopAutoSwitchCdnForVideo();
-    }
+    _autoCdnRunning = true;
+    try {
+      _autoCdnAttempts++;
+      final isLastAttempt =
+          _autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo;
+      final epoch = _autoCdnEpoch;
+      // 立刻解绑，防止测速期间再触发
+      if (isLastAttempt) {
+        _stopAutoSwitchCdnForVideo();
+      }
 
-    SmartDialog.showToast(
-      '检测到卡顿，正在测速并切换最佳 CDN…',
-      displayTime: const Duration(seconds: 2),
-    );
+      SmartDialog.showToast(
+        '检测到卡顿，正在测速并切换最佳 CDN…',
+        displayTime: const Duration(seconds: 2),
+      );
 
-    // durl 兜底会把已 rewrite 的 URL 写进 firstVideo，不能当测速样本
-    final sample = data.dash != null ? firstVideo : null;
-    final switched = await CdnSpeedService.autoSwitchBestCdn(
-      sample: sample,
-      onSwitched: (best) {
-        if (isClosed) return;
-        SmartDialog.showToast(
-          '已自动切换至 ${best.desc}',
-          displayTime: const Duration(seconds: 2),
-        );
-      },
-      onMessage: (msg) {
-        if (isClosed) return;
-        SmartDialog.showToast(msg, displayTime: const Duration(seconds: 2));
-      },
-    );
+      // durl 兜底会把已 rewrite 的 URL 写进 firstVideo，不能当测速样本
+      // sample 在测速开始时固定；换集后全局 CDN 仍会更新，但样本可能是旧片
+      final sample = data.dash != null ? firstVideo : null;
+      final switched = await CdnSpeedService.autoSwitchBestCdn(
+        sample: sample,
+        onSwitched: (best) {
+          if (isClosed) return;
+          SmartDialog.showToast(
+            '已自动切换至 ${best.desc}',
+            displayTime: const Duration(seconds: 2),
+          );
+        },
+        onMessage: (msg) {
+          // 换集后不再对旧测速结果 toast「已是最佳/失败」
+          if (isClosed || epoch != _autoCdnEpoch) return;
+          SmartDialog.showToast(msg, displayTime: const Duration(seconds: 2));
+        },
+      );
 
-    if (isLastAttempt && !isClosed) {
-      // 每个视频只弹一次；稍延迟避免盖住切换结果
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        if (!isClosed) _toastAutoCdnLimitOnce();
-      });
-    }
+      if (!switched || isClosed) return;
 
-    if (!switched || isClosed || currentVideoQa.value == null) return;
+      // 仍是同一集且已用尽额度：结果 toast 后再提示上限（只弹一次）
+      if (isLastAttempt && epoch == _autoCdnEpoch) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (!isClosed && epoch == _autoCdnEpoch) {
+            _toastAutoCdnLimitOnce();
+          }
+        });
+      }
 
-    plPlayerController.resetStutterDetection();
-    // updatePlayer 依赖 dash；durl 兜底流走重新拉链
-    if (data.dash != null) {
-      updatePlayer();
-    } else {
-      queryVideoUrl(fromReset: true);
+      // 换集后 epoch 已变：仍重载*当前*分 P，应用新全局 CDN，避免只改偏好不改 URL
+      _reloadPlayerWithCurrentCdn();
+    } finally {
+      _autoCdnRunning = false;
     }
   }
 
@@ -1337,6 +1361,7 @@ class VideoDetailController extends GetxController
 
     _autoCdnAttempts = 0;
     _autoCdnLimitToasted = false;
+    _autoCdnEpoch++;
     plPlayerController.resetStutterDetection();
     _bindAutoSwitchCdn();
 

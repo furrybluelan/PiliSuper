@@ -247,15 +247,21 @@ abstract final class CdnSpeedService {
   }
 
   /// 卡顿触发：测速并切换到最快 CDN。
-  /// 返回值：true=已切换；false=未切换（冷却中/已是最佳/失败等）
+  /// 返回值：true=已切换；false=未切换（已是最佳/失败等）
   ///
-  /// 调用前应先 [tryReserveAttempt] 占用额度；本方法不再重复记账。
+  /// 调用前应先 [tryReserveAttempt] 占用额度；本方法假定额度已预留。
+  /// 不应在未预留时直接调用（内部不再二次校验冷却，避免与预留竞态）。
   static Future<bool> autoSwitchBestCdn({
     BaseItem? sample,
     void Function(CDNService best)? onSwitched,
     void Function(String message)? onMessage,
   }) async {
-    if (_testing) return false;
+    // 正常路径：tryReserveAttempt 已通过，且调用方 _autoCdnRunning 防重入。
+    // 若仍撞上 _testing，说明有并发漏洞，直接失败（额度已扣，进入冷却）。
+    if (_testing) {
+      _lastAutoSwitchAt = DateTime.now();
+      return false;
+    }
 
     _testing = true;
     try {
