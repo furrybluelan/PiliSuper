@@ -155,7 +155,8 @@ abstract final class VideoHttp {
             continue;
           }
           RcmdVideoItemAppModel videoItem = RcmdVideoItemAppModel.fromJson(i);
-          if (!RecommendFilter.filter(videoItem)) {
+          if (!RecommendFilter.filter(videoItem) &&
+              !RecommendFilter.filterDesc(videoItem.desc)) {
             list.add(videoItem);
           }
         }
@@ -181,6 +182,7 @@ abstract final class VideoHttp {
         if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
             !RecommendFilter.filterUser(i['owner']['mid'] as int?) &&
             !RecommendFilter.filterTitle(i['title']) &&
+            !RecommendFilter.filterDesc(i['desc'] as String?) &&
             !RecommendFilter.filterLikeRatio(
               i['stat']['like'],
               i['stat']['view'],
@@ -859,6 +861,7 @@ abstract final class VideoHttp {
     if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
         !RecommendFilter.filterUser(i['owner']['mid'] as int?) &&
         !RecommendFilter.filterTitle(i['title']) &&
+        !RecommendFilter.filterDesc(i['desc'] as String?) &&
         !RecommendFilter.filterLikeRatio(
           i['stat']['like'],
           i['stat']['view'],

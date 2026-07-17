@@ -1,10 +1,7 @@
-import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
-import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/recommend_filter.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -50,38 +47,18 @@ List<SettingsModel> get recommendSettings => [
       }
     },
   ),
+  NormalModel(
+    title: '本地屏蔽',
+    leading: const Icon(Icons.block_outlined),
+    subtitle: 'UP / 标题 / 分区 / TAG / 话题 / 简介（多规则，支持普通文字与 /正则/）',
+    onTap: (context, setState) => Get.toNamed('/localBlock'),
+  ),
   getVideoFilterSelectModel(
     title: '点赞率',
     suffix: '%',
     key: SettingBoxKey.minLikeRatioForRecommend,
     values: [0, 1, 2, 3, 4],
     onChanged: (value) => RecommendFilter.minLikeRatioForRecommend = value,
-  ),
-  getBanWordModel(
-    title: '标题关键词过滤',
-    key: SettingBoxKey.banWordForRecommend,
-    onChanged: (value) {
-      RecommendFilter.rcmdRegExp = value;
-      RecommendFilter.enableFilter = value.pattern.isNotEmpty;
-    },
-  ),
-  getBanWordModel(
-    title: 'App推荐/热门/排行榜: 视频分区关键词过滤',
-    key: SettingBoxKey.banWordForZone,
-    onChanged: (value) {
-      VideoHttp.zoneRegExp = value;
-      VideoHttp.enableFilter = value.pattern.isNotEmpty;
-    },
-  ),
-  getListUidWithNameModel(
-    title: '本地屏蔽 UP',
-    getUidsMap: () => Pref.recommendBlockedMids,
-    setUidsMap: (map) {
-      Pref.recommendBlockedMids = map;
-      GlobalData().recommendBlockedMids = map;
-      RecommendFilter.recommendBlockedMids = map;
-    },
-    onUpdate: () {},
   ),
   getVideoFilterSelectModel(
     title: '视频时长',

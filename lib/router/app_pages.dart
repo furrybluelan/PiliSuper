@@ -28,6 +28,7 @@ import 'package:PiliPlus/pages/later/view.dart';
 import 'package:PiliPlus/pages/later_search/view.dart';
 import 'package:PiliPlus/pages/live_dm_block/view.dart';
 import 'package:PiliPlus/pages/live_room/view.dart';
+import 'package:PiliPlus/pages/local_block/view.dart';
 import 'package:PiliPlus/pages/login/view.dart';
 import 'package:PiliPlus/pages/main/view.dart';
 import 'package:PiliPlus/pages/main_reply/view.dart';
@@ -83,6 +84,7 @@ class Routes {
     GetPage(name: '/webview', page: () => const WebviewPage()),
     // 设置
     GetPage(name: '/setting', page: () => const SettingPage()),
+    GetPage(name: '/localBlock', page: () => const LocalBlockPage()),
     //
     GetPage(name: '/fav', page: () => const FavPage()),
     //

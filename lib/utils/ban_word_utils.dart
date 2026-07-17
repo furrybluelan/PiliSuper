@@ -1,42 +1,15 @@
 /// 本地屏蔽关键词解析：支持普通文字与 JavaScript 风格正则。
 ///
-/// 存储格式：每行一条规则（兼容旧版 `|` 分隔的简单关键词）。
+/// 存储格式：每行一条规则。
 /// 规则语法：
 /// - 普通文字：按字面匹配（自动转义）
 /// - JS 正则：`/pattern/flags`，例如 `/foo.*bar/i`
 abstract final class BanWordUtils {
   static final _jsRegex = RegExp(r'^/(.*)/([gimsuy]*)$', dotAll: true);
 
-  /// 将存储字符串解析为规则列表（含旧格式迁移）
+  /// 将存储字符串解析为规则列表（仅换行分隔）
   static List<String> parseItems(String stored) {
     if (stored.isEmpty) return [];
-
-    // 旧格式：无换行但有 | 分隔的简单关键词
-    if (!stored.contains('\n') && stored.contains('|')) {
-      final parts = stored
-          .split('|')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-      if (parts.length > 1) {
-        final hasComplexRegex = parts.any(
-          (p) =>
-              p.startsWith('/') ||
-              p.contains('(') ||
-              p.contains('[') ||
-              p.contains('{') ||
-              p.contains(r'\') ||
-              p.contains('^') ||
-              p.contains(r'$'),
-        );
-        if (!hasComplexRegex) {
-          return parts;
-        }
-      }
-      // 可能是单条含 | 的正则，整段保留
-      return [stored];
-    }
-
     return stored
         .split('\n')
         .map((e) => e.trim())
@@ -47,7 +20,6 @@ abstract final class BanWordUtils {
   static String joinItems(List<String> items) => items.join('\n');
 
   /// 单条规则 → 正则片段（不带首尾 /）
-  /// 普通文字转义；`/pat/flags` 提取 pattern
   static String ruleToPattern(String rule) {
     final trimmed = rule.trim();
     if (trimmed.isEmpty) return '';
@@ -56,12 +28,11 @@ abstract final class BanWordUtils {
     if (m != null) {
       return m.group(1) ?? '';
     }
-    // 普通文字：字面匹配
     return RegExp.escape(trimmed);
   }
 
   /// 存储字符串 → 用于 [RegExp] 的 pattern（多规则用 | 连接）
-  /// 单条非法正则会被跳过，不影响其它规则
+  /// 单条非法正则会被跳过
   static String parseBanWordToRegex(String stored) {
     final items = parseItems(stored);
     if (items.isEmpty) return '';
@@ -74,19 +45,14 @@ abstract final class BanWordUtils {
       try {
         RegExp(candidate, caseSensitive: false);
         patterns.add(candidate);
-      } catch (_) {
-        // 跳过非法规则
-      }
+      } catch (_) {}
     }
     return patterns.join('|');
   }
 
-  /// 构建不区分大小写的 [RegExp]；无有效规则时 pattern 为空
   static RegExp buildRegExp(String stored) {
     final pattern = parseBanWordToRegex(stored);
-    if (pattern.isEmpty) {
-      return RegExp('');
-    }
+    if (pattern.isEmpty) return RegExp('');
     try {
       return RegExp(pattern, caseSensitive: false);
     } catch (_) {
