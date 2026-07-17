@@ -1084,6 +1084,10 @@ class PlPlayerController with BlockConfigMixin {
     if (_lastSeekAt != null && now.difference(_lastSeekAt!) < _seekGrace) {
       return;
     }
+    // 刚切换 CDN 后的重载缓冲 / 运营商 QoS 抖动不计
+    if (CdnSpeedService.inPostSwitchSettle(now: now)) {
+      return;
+    }
 
     _stutterTimestamps
       ..removeWhere((t) => now.difference(t) > _stutterWindow)

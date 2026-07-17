@@ -20,6 +20,10 @@ abstract final class CdnSpeedService {
   static DateTime? _lastAutoSwitchAt;
   static const _autoSwitchCooldown = Duration(minutes: 2);
 
+  /// 成功切换并继续播放后的稳定期：运营商 QoS / 重载缓冲期间不触发
+  static DateTime? _lastSuccessfulSwitchAt;
+  static const postSwitchSettle = Duration(minutes: 1);
+
   /// 全局：滑动时间窗内最多自动测速次数（防弱网连刷烧流量）
   static const maxAttemptsInWindow = 3;
   static const attemptWindow = Duration(minutes: 15);
@@ -40,10 +44,24 @@ abstract final class CdnSpeedService {
     );
   }
 
+  /// 成功切换后 1 分钟内：不计卡顿、不自动测速（等线路稳定）
+  static bool inPostSwitchSettle({DateTime? now}) {
+    now ??= DateTime.now();
+    return _lastSuccessfulSwitchAt != null &&
+        now.difference(_lastSuccessfulSwitchAt!) < postSwitchSettle;
+  }
+
+  static void markSuccessfulSwitch() {
+    _lastSuccessfulSwitchAt = DateTime.now();
+  }
+
   /// 是否允许再发起一轮自动测速（不含单视频计数，由调用方维护）
   static bool canAutoAttempt({DateTime? now}) {
     if (_testing) return false;
     now ??= DateTime.now();
+    if (inPostSwitchSettle(now: now)) {
+      return false;
+    }
     if (_lastAutoSwitchAt != null &&
         now.difference(_lastAutoSwitchAt!) < _autoSwitchCooldown) {
       return false;
@@ -262,6 +280,7 @@ abstract final class CdnSpeedService {
 
       VideoUtils.cdnService = best;
       await GStorage.setting.put(SettingBoxKey.CDNService, best.name);
+      markSuccessfulSwitch();
       onSwitched?.call(best);
       return true;
     } catch (e) {

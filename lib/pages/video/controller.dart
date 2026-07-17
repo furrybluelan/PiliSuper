@@ -469,6 +469,7 @@ class VideoDetailController extends GetxController
 
     if (!switched || isClosed || currentVideoQa.value == null) return;
 
+    // 切换成功后 1min 稳定期：清空卡顿计数，避免重载缓冲再次触发
     plPlayerController.resetStutterDetection();
     // updatePlayer 依赖 dash；durl 兜底流走重新拉链
     if (data.dash != null) {
