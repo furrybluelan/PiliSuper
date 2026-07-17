@@ -442,8 +442,11 @@ class PlPlayerController with BlockConfigMixin {
   AutoSwitchCdnCallback? onAutoSwitchCdn;
 
   final List<DateTime> _stutterTimestamps = [];
-  static const _stutterWindow = Duration(seconds: 10);
+  static const _stutterWindow = Duration(seconds: 30);
   static const _stutterThreshold = 2;
+  /// seek 后缓冲是正常现象，忽略一段时间
+  static const _seekGrace = Duration(seconds: 5);
+  DateTime? _lastSeekAt;
 
   static Future<void>? playIfExists() {
     return _playCallBack?.call();
@@ -1077,6 +1080,11 @@ class PlPlayerController with BlockConfigMixin {
     }
 
     final now = DateTime.now();
+    // 双击快进/进度条 seek 后的缓冲不计为卡顿
+    if (_lastSeekAt != null && now.difference(_lastSeekAt!) < _seekGrace) {
+      return;
+    }
+
     _stutterTimestamps
       ..removeWhere((t) => now.difference(t) > _stutterWindow)
       ..add(now);
@@ -1086,7 +1094,7 @@ class PlPlayerController with BlockConfigMixin {
     // 仅在真正触发时清空；若 throttle 丢弃则保留计数，冷却后可再触发
     EasyThrottle.throttle(
       'autoSwitchCdn',
-      const Duration(seconds: 30),
+      const Duration(seconds: 60),
       () {
         _stutterTimestamps.clear();
         SmartDialog.showToast(
@@ -1099,6 +1107,11 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   void resetStutterDetection() {
+    _stutterTimestamps.clear();
+  }
+
+  void _markSeek() {
+    _lastSeekAt = DateTime.now();
     _stutterTimestamps.clear();
   }
 
@@ -1118,6 +1131,7 @@ class PlPlayerController with BlockConfigMixin {
       position = Duration.zero;
     }
     _heartDuration = position.inSeconds;
+    _markSeek();
 
     Future<void> seek() async {
       if (isSeek) {
@@ -1127,6 +1141,7 @@ class PlPlayerController with BlockConfigMixin {
       danmakuController?.clear();
       try {
         await _videoPlayerController?.seek(position);
+        _markSeek();
       } catch (e) {
         if (kDebugMode) debugPrint('seek failed: $e');
       }
@@ -1335,6 +1350,7 @@ class PlPlayerController with BlockConfigMixin {
   // 双击播放、暂停
   Future<void> onDoubleTapCenter() async {
     if (!isLive && isCompleted) {
+      _markSeek();
       await videoPlayerController!.seek(Duration.zero);
       videoPlayerController!.play();
     } else {
@@ -1362,6 +1378,7 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   void onForwardBackward(Duration duration) {
+    _markSeek();
     seekTo(
       duration.clamp(Duration.zero, videoPlayerController!.state.duration),
       isSeek: false,
@@ -1609,6 +1626,7 @@ class PlPlayerController with BlockConfigMixin {
     setPlayCallBack(null);
     onAutoSwitchCdn = null;
     _stutterTimestamps.clear();
+    _lastSeekAt = null;
     dmState.clear();
     if (showSeekPreview) {
       _clearPreview();
