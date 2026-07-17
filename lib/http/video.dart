@@ -30,6 +30,7 @@ import 'package:PiliPlus/models_new/video/video_relation/data.dart';
 import 'package:PiliPlus/models_new/video/video_shot/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/app_sign.dart';
+import 'package:PiliPlus/utils/ban_word_utils.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -46,7 +47,7 @@ import 'package:protobuf/protobuf.dart';
 
 /// view层根据 status 判断渲染逻辑
 abstract final class VideoHttp {
-  static RegExp zoneRegExp = RegExp(Pref.banWordForZone, caseSensitive: false);
+  static RegExp zoneRegExp = BanWordUtils.buildRegExp(Pref.banWordForZone);
   static bool enableFilter = zoneRegExp.pattern.isNotEmpty;
 
   // 首页推荐视频
@@ -178,6 +179,7 @@ abstract final class VideoHttp {
       List<HotVideoItemModel> list = <HotVideoItemModel>[];
       for (final i in res.data['data']['list']) {
         if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
+            !RecommendFilter.filterUser(i['owner']['mid'] as int?) &&
             !RecommendFilter.filterTitle(i['title']) &&
             !RecommendFilter.filterLikeRatio(
               i['stat']['like'],
@@ -855,6 +857,7 @@ abstract final class VideoHttp {
 
   static bool _canAddRank(Map i) {
     if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
+        !RecommendFilter.filterUser(i['owner']['mid'] as int?) &&
         !RecommendFilter.filterTitle(i['title']) &&
         !RecommendFilter.filterLikeRatio(
           i['stat']['like'],

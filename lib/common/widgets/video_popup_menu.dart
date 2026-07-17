@@ -3,6 +3,7 @@ import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/models/home/rcmd/result.dart';
+import 'package:PiliPlus/models/model_hot_video_item.dart';
 import 'package:PiliPlus/models/model_video.dart';
 import 'package:PiliPlus/models_new/space/space_archive/item.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
@@ -10,6 +11,11 @@ import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/pages/video/ai_conclusion/view.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/ban_word_utils.dart';
+import 'package:PiliPlus/utils/global_data.dart';
+import 'package:PiliPlus/utils/recommend_filter.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +43,153 @@ class VideoPopupMenu extends StatelessWidget {
     this.onRemove,
     this.menuItemHeight = 45,
   });
+
+  void _addBlockedUser() {
+    final mid = videoItem.owner.mid;
+    if (mid == null) {
+      SmartDialog.showToast('无法获取用户ID');
+      return;
+    }
+    final blockedMids = Pref.recommendBlockedMids;
+    final name = videoItem.owner.name ?? 'UID:$mid';
+    blockedMids[mid] = name;
+    Pref.recommendBlockedMids = blockedMids;
+    GlobalData().recommendBlockedMids = blockedMids;
+    RecommendFilter.recommendBlockedMids = blockedMids;
+    SmartDialog.showToast('已本地屏蔽 $name($mid)');
+    onRemove?.call();
+  }
+
+  void _appendKeyword({
+    required String key,
+    required String value,
+    required void Function(RegExp) applyRegex,
+    required String successMsg,
+  }) {
+    final keyword = value.trim();
+    if (keyword.isEmpty) {
+      SmartDialog.showToast('关键词为空');
+      return;
+    }
+    final stored = GStorage.setting.get(key, defaultValue: '') as String;
+    final next = BanWordUtils.appendRule(stored, keyword);
+    if (next == stored) {
+      SmartDialog.showToast('已存在该屏蔽规则');
+      onRemove?.call();
+      return;
+    }
+    GStorage.setting.put(key, next);
+    applyRegex(BanWordUtils.buildRegExp(next));
+    SmartDialog.showToast(successMsg);
+    onRemove?.call();
+  }
+
+  String? _getZoneName() {
+    if (videoItem case HotVideoItemModel(:final tname)) {
+      return tname;
+    }
+    if (videoItem case RcmdVideoItemAppModel(:final tname)) {
+      return tname;
+    }
+    return null;
+  }
+
+  void _showLocalBlockDialog(BuildContext context) {
+    final ownerName = videoItem.owner.name ?? '未知UP';
+    final title = videoItem.title.trim();
+    final zoneName = _getZoneName()?.trim();
+    final colorScheme = Theme.of(context).colorScheme;
+
+    Widget chip(String label, VoidCallback onTap) {
+      return Material(
+        color: colorScheme.onInverseSurface,
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+        child: InkWell(
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+            child: Text(
+              label,
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ),
+      );
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('本地屏蔽'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '屏蔽原因',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    chip('UP主:$ownerName', () {
+                      Get.back();
+                      _addBlockedUser();
+                    }),
+                    if (title.isNotEmpty)
+                      chip('标题:$title', () {
+                        Get.back();
+                        _appendKeyword(
+                          key: SettingBoxKey.banWordForRecommend,
+                          value: title,
+                          applyRegex: (value) {
+                            RecommendFilter.rcmdRegExp = value;
+                            RecommendFilter.enableFilter =
+                                value.pattern.isNotEmpty;
+                          },
+                          successMsg: '已加入标题关键词屏蔽',
+                        );
+                      }),
+                    chip(
+                      zoneName?.isNotEmpty == true
+                          ? '分区:$zoneName'
+                          : '分区:无法获取',
+                      () {
+                        if (zoneName?.isNotEmpty != true) {
+                          SmartDialog.showToast('当前视频无法获取分区信息');
+                          return;
+                        }
+                        Get.back();
+                        _appendKeyword(
+                          key: SettingBoxKey.banWordForZone,
+                          value: zoneName!,
+                          applyRegex: (value) {
+                            VideoHttp.zoneRegExp = value;
+                            VideoHttp.enableFilter = value.pattern.isNotEmpty;
+                          },
+                          successMsg: '已加入分区关键词屏蔽',
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: Get.back, child: const Text('取消')),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +248,11 @@ class VideoPopupMenu extends StatelessWidget {
                     '访问：${videoItem.owner.name}',
                     const Icon(MdiIcons.accountCircleOutline, size: 16),
                     () => Get.toNamed('/member?mid=${videoItem.owner.mid}'),
+                  ),
+                  _VideoCustomAction(
+                    '本地屏蔽',
+                    const Icon(MdiIcons.accountOff, size: 16),
+                    () => _showLocalBlockDialog(context),
                   ),
                   _VideoCustomAction(
                     '不感兴趣',

@@ -84,6 +84,41 @@ abstract final class Pref {
     GlobalData().blackMids..remove(mid),
   );
 
+  /// 本地屏蔽 UP（mid → 显示名），与官方账号黑名单分离
+  static Map<int, String> get recommendBlockedMids {
+    final data = _localCache.get(LocalCacheKey.recommendBlockedMids);
+    if (data is Set) {
+      final map = <int, String>{};
+      for (final mid in data) {
+        if (mid is int) {
+          map[mid] = 'UID:$mid';
+        }
+      }
+      _localCache.put(LocalCacheKey.recommendBlockedMids, map);
+      return map;
+    }
+    if (data is Map) {
+      final map = <int, String>{};
+      for (final entry in data.entries) {
+        final key = entry.key;
+        final value = entry.value;
+        final uid = key is int
+            ? key
+            : key is String
+            ? int.tryParse(key)
+            : null;
+        if (uid != null && value is String) {
+          map[uid] = value;
+        }
+      }
+      return map;
+    }
+    return <int, String>{};
+  }
+
+  static set recommendBlockedMids(Map<int, String> blockedMidsMap) =>
+      _localCache.put(LocalCacheKey.recommendBlockedMids, blockedMidsMap);
+
   static MemberTabType get memberTab =>
       MemberTabType.values[_setting.get(
         SettingBoxKey.memberTab,

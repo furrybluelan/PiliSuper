@@ -1,8 +1,10 @@
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
+import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/recommend_filter.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -70,6 +72,16 @@ List<SettingsModel> get recommendSettings => [
       VideoHttp.zoneRegExp = value;
       VideoHttp.enableFilter = value.pattern.isNotEmpty;
     },
+  ),
+  getListUidWithNameModel(
+    title: '本地屏蔽 UP',
+    getUidsMap: () => Pref.recommendBlockedMids,
+    setUidsMap: (map) {
+      Pref.recommendBlockedMids = map;
+      GlobalData().recommendBlockedMids = map;
+      RecommendFilter.recommendBlockedMids = map;
+    },
+    onUpdate: () {},
   ),
   getVideoFilterSelectModel(
     title: '视频时长',
