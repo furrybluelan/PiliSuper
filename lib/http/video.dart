@@ -155,8 +155,8 @@ abstract final class VideoHttp {
             continue;
           }
           RcmdVideoItemAppModel videoItem = RcmdVideoItemAppModel.fromJson(i);
-          if (!RecommendFilter.filter(videoItem) &&
-              !RecommendFilter.filterDesc(videoItem.desc)) {
+          // filter() 已含 filterAll（标题/简介/时长等）
+          if (!RecommendFilter.filter(videoItem)) {
             list.add(videoItem);
           }
         }

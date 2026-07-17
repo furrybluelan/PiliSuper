@@ -43,7 +43,8 @@ enum LocalBlockType {
     if (isUp) {
       final map = <int, String>{};
       for (final item in items) {
-        final match = RegExp(r'(.+?)\s*\((\d+)\)$').firstMatch(item);
+        // 从右侧解析 mid，避免名称中含括号时被截断
+        final match = RegExp(r'^(.*)\s*\((\d+)\)$').firstMatch(item.trim());
         if (match != null) {
           final name = match.group(1)?.trim() ?? '';
           final uid = int.tryParse(match.group(2) ?? '');
@@ -51,7 +52,7 @@ enum LocalBlockType {
             map[uid] = name.isEmpty ? 'UID:$uid' : name;
           }
         } else {
-          final uid = int.tryParse(item);
+          final uid = int.tryParse(item.trim());
           if (uid != null && uid > 0) {
             map[uid] = 'UID:$uid';
           }

@@ -80,18 +80,27 @@ class LocalBlockDialog {
     }
 
     Future<void> addUp() async {
-      if (ownerMid == null) {
+      // mid==0 多为缺省值，不能当作有效 UP
+      if (ownerMid == null || ownerMid <= 0) {
         SmartDialog.showToast('无法获取用户ID');
         return;
       }
-      final name = ownerName ?? 'UID:$ownerMid';
+      if (!context.mounted) return;
+      final name = (ownerName?.trim().isNotEmpty == true)
+          ? ownerName!.trim()
+          : 'UID:$ownerMid';
       final ok = await showConfirmDialog(
         context: context,
         title: const Text('确认本地屏蔽 UP'),
         content: Text('$name ($ownerMid)'),
       );
       if (!ok) return;
-      final blockedMids = Pref.recommendBlockedMids;
+      final blockedMids = Map<int, String>.from(Pref.recommendBlockedMids);
+      if (blockedMids.containsKey(ownerMid)) {
+        SmartDialog.showToast('该 UP 已在本地屏蔽列表中');
+        onBlocked?.call();
+        return;
+      }
       blockedMids[ownerMid] = name;
       Pref.recommendBlockedMids = blockedMids;
       GlobalData().recommendBlockedMids = blockedMids;
@@ -113,9 +122,11 @@ class LocalBlockDialog {
       final existing = type.loadRules();
       if (existing.contains(keyword)) {
         SmartDialog.showToast('已存在该屏蔽规则');
+        // 已屏蔽：仍回调以便列表移除该卡片，但不重复写入
         onBlocked?.call();
         return;
       }
+      if (!context.mounted) return;
       final ok = await showConfirmDialog(
         context: context,
         title: Text('确认加入${type.label}屏蔽'),
@@ -128,6 +139,7 @@ class LocalBlockDialog {
     }
 
     Future<void> showCustom() async {
+      if (!context.mounted) return;
       LocalBlockType selected = LocalBlockType.title;
       final ctr = TextEditingController();
       final result = await showDialog<(LocalBlockType, String)>(
@@ -217,10 +229,10 @@ class LocalBlockDialog {
                   runSpacing: 8,
                   children: [
                     chip(
-                      ownerMid != null
-                          ? 'UP主:${ownerName ?? ownerMid}'
+                      (ownerMid != null && ownerMid > 0)
+                          ? 'UP主:${(ownerName?.trim().isNotEmpty == true) ? ownerName!.trim() : ownerMid}'
                           : 'UP主:无法获取',
-                      enabled: ownerMid != null,
+                      enabled: ownerMid != null && ownerMid > 0,
                       onTap: () {
                         Get.back();
                         addUp();

@@ -1,5 +1,6 @@
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/pages/local_block/local_block_type.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,10 +29,18 @@ class _LocalBlockPageState extends State<LocalBlockPage>
   bool _batchMode = false;
   final Set<int> _selected = {};
 
-  List<String> get _filtered {
-    if (_query.isEmpty) return _items;
+  /// (rawIndex, display) — 搜索时仍保留在完整列表中的下标，避免 indexOf 撞重
+  List<(int, String)> get _filteredEntries {
+    if (_query.isEmpty) {
+      return [
+        for (var i = 0; i < _items.length; i++) (i, _items[i]),
+      ];
+    }
     final q = _query.toLowerCase();
-    return _items.where((e) => e.toLowerCase().contains(q)).toList();
+    return [
+      for (var i = 0; i < _items.length; i++)
+        if (_items[i].toLowerCase().contains(q)) (i, _items[i]),
+    ];
   }
 
   @override
@@ -90,8 +99,11 @@ class _LocalBlockPageState extends State<LocalBlockPage>
         SmartDialog.showToast('UID 无效');
         return;
       }
+      // 与 loadRules 展示格式一致：「名称 (mid)」
       final display = 'UID:$uid ($uid)';
-      if (_items.any((e) => e.endsWith('($uid)'))) {
+      final exists = Pref.recommendBlockedMids.containsKey(uid) ||
+          _items.any((e) => RegExp(r'\(' + '$uid' + r'\)$').hasMatch(e));
+      if (exists) {
         SmartDialog.showToast('该 UP 已在列表中');
         return;
       }
@@ -181,14 +193,18 @@ class _LocalBlockPageState extends State<LocalBlockPage>
       SmartDialog.showToast('请先选择要删除的项');
       return;
     }
-    final toDelete = _selected.toList()..sort((a, b) => b.compareTo(a));
-    final preview = toDelete
-        .map((i) => _items[i])
-        .take(5)
-        .join('\n');
+    // 只保留仍有效的下标，从大到小删，避免错位
+    final toDelete = _selected.where((i) => i >= 0 && i < _items.length).toList()
+      ..sort((a, b) => b.compareTo(a));
+    if (toDelete.isEmpty) {
+      SmartDialog.showToast('所选项目已失效，请重试');
+      setState(_selected.clear);
+      return;
+    }
+    final preview = toDelete.map((i) => _items[i]).take(5).join('\n');
     final ok = await showConfirmDialog(
       context: context,
-      title: Text('确认删除 ${_selected.length} 项'),
+      title: Text('确认删除 ${toDelete.length} 项'),
       content: Text(
         preview + (toDelete.length > 5 ? '\n…' : ''),
       ),
@@ -209,15 +225,10 @@ class _LocalBlockPageState extends State<LocalBlockPage>
     });
   }
 
-  int? _rawIndexOf(String display) {
-    final i = _items.indexOf(display);
-    return i >= 0 ? i : null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final filtered = _filtered;
+    final filtered = _filteredEntries;
     final isBatch = _batchMode;
 
     return Scaffold(
@@ -288,9 +299,7 @@ class _LocalBlockPageState extends State<LocalBlockPage>
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
-                      final value = filtered[index];
-                      final rawIndex = _rawIndexOf(value);
-                      if (rawIndex == null) return const SizedBox.shrink();
+                      final (rawIndex, value) = filtered[index];
                       final selected = _selected.contains(rawIndex);
                       return Card(
                         margin: const EdgeInsets.symmetric(
