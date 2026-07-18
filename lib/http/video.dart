@@ -186,7 +186,8 @@ abstract final class VideoHttp {
     );
     if (res.data['code'] == 0) {
       List<HotVideoItemModel> list = <HotVideoItemModel>[];
-      for (final i in res.data['data']['list']) {
+      for (final raw in res.data['data']['list']) {
+        final i = Map<String, dynamic>.from(raw as Map);
         if (GlobalData().blackMids.contains(i['owner']['mid'])) continue;
         if (!RecommendFilter.isScopeEnabled(FilterScope.hot)) {
           list.add(HotVideoItemModel.fromJson(i));
@@ -867,14 +868,15 @@ abstract final class VideoHttp {
   }
 
   static bool _canAddRank(Map i) {
-    if (GlobalData().blackMids.contains(i['owner']['mid'])) return false;
+    final map = Map<String, dynamic>.from(i);
+    if (GlobalData().blackMids.contains(map['owner']['mid'])) return false;
     if (!RecommendFilter.isScopeEnabled(FilterScope.rank)) return true;
     if (enableFilter &&
-        i['tname'] != null &&
-        zoneRegExp.hasMatch(i['tname'])) {
+        map['tname'] != null &&
+        zoneRegExp.hasMatch(map['tname'])) {
       return false;
     }
-    final item = HotVideoItemModel.fromJson(i);
+    final item = HotVideoItemModel.fromJson(map);
     return !RecommendFilter.filter(item, scope: FilterScope.rank);
   }
 
