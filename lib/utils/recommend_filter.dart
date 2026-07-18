@@ -142,6 +142,15 @@ abstract final class RecommendFilter {
             videoItem.duration < minDurationForRcmd) ||
         filterLikeRatio(videoItem.stat.like, videoItem.stat.view) ||
         filterTitle(videoItem.title) ||
-        filterDesc(videoItem.desc);
+        filterDesc(videoItem.desc) ||
+        filterTags(videoItem.tagNames) ||
+        filterTopics(videoItem.topicNames);
+  }
+
+  /// 仅 TAG/话题（预加载完成后二次过滤用）
+  static bool filterByMeta(BaseVideoItemModel videoItem) {
+    if (filterUser(videoItem.owner.mid)) return true;
+    if (videoItem.isFollowed && exemptFilterForFollowed) return false;
+    return filterTags(videoItem.tagNames) || filterTopics(videoItem.topicNames);
   }
 }

@@ -24,29 +24,34 @@ class LocalBlockDialog {
     String? zoneName,
     String? desc,
     List<VideoTagItem>? initialTags,
+    List<String>? preloadedTagNames,
+    List<String>? preloadedTopicNames,
     VoidCallback? onBlocked,
   }) async {
-    // 先展示 loading 对话框内容：预取 tags
-    List<VideoTagItem>? tags = initialTags;
-    if ((tags == null || tags.isEmpty) && bvid != null && bvid.isNotEmpty) {
-      SmartDialog.showLoading(msg: '加载标签…');
-      try {
-        final res = await UserHttp.videoTags(bvid: bvid, cid: cid);
-        tags = res.dataOrNull;
-      } catch (_) {}
-      SmartDialog.dismiss();
-    }
-
-    final tagNames = <String>[];
-    final topicNames = <String>[];
-    for (final t in tags ?? const <VideoTagItem>[]) {
-      final name = t.tagName?.trim();
-      if (name == null || name.isEmpty) continue;
-      if (t.tagType == 'topic') {
-        topicNames.add(name);
-      } else if (t.tagType != 'bgm') {
-        // 普通 TAG（排除 BGM）
-        tagNames.add(name);
+    // 优先用调用方传入的预加载 meta；否则请求 API
+    List<String> tagNames = [];
+    List<String> topicNames = [];
+    if (preloadedTagNames != null || preloadedTopicNames != null) {
+      tagNames = List<String>.from(preloadedTagNames ?? const []);
+      topicNames = List<String>.from(preloadedTopicNames ?? const []);
+    } else {
+      List<VideoTagItem>? tags = initialTags;
+      if ((tags == null || tags.isEmpty) && bvid != null && bvid.isNotEmpty) {
+        SmartDialog.showLoading(msg: '加载标签…');
+        try {
+          final res = await UserHttp.videoTags(bvid: bvid, cid: cid);
+          tags = res.dataOrNull;
+        } catch (_) {}
+        SmartDialog.dismiss();
+      }
+      for (final t in tags ?? const <VideoTagItem>[]) {
+        final name = t.tagName?.trim();
+        if (name == null || name.isEmpty) continue;
+        if (t.tagType == 'topic') {
+          topicNames.add(name);
+        } else if (t.tagType != 'bgm') {
+          tagNames.add(name);
+        }
       }
     }
 

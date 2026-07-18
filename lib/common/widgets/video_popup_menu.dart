@@ -59,6 +59,8 @@ class VideoPopupMenu extends StatelessWidget {
   }
 
   void _showLocalBlock(BuildContext context) {
+    final BaseVideoItemModel? full =
+        videoItem is BaseVideoItemModel ? videoItem as BaseVideoItemModel : null;
     LocalBlockDialog.show(
       context: context,
       bvid: videoItem.bvid,
@@ -68,6 +70,8 @@ class VideoPopupMenu extends StatelessWidget {
       title: videoItem.title,
       zoneName: _getZoneName(),
       desc: _getDesc(),
+      preloadedTagNames: full?.tagNames,
+      preloadedTopicNames: full?.topicNames,
       onBlocked: onRemove,
     );
   }
