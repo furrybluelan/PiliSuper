@@ -2,12 +2,33 @@ import 'package:PiliPlus/models/model_video.dart';
 import 'package:PiliPlus/utils/ban_word_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 
+/// 过滤器作用范围
+enum FilterScope {
+  /// 首页推荐（始终应用）
+  rcmd,
+
+  /// 详情相关视频
+  related,
+
+  /// 热门
+  hot,
+
+  /// 分区/排行
+  rank,
+
+  /// 搜索（仅标题 + 屏蔽 UP）
+  search,
+}
+
 abstract final class RecommendFilter {
   static int minDurationForRcmd = Pref.minDurationForRcmd;
   static int minPlayForRcmd = Pref.minPlayForRcmd;
   static int minLikeRatioForRecommend = Pref.minLikeRatioForRecommend;
   static bool exemptFilterForFollowed = Pref.exemptFilterForFollowed;
   static bool applyFilterToRelatedVideos = Pref.applyFilterToRelatedVideos;
+  static bool applyFilterToHotVideos = Pref.applyFilterToHotVideos;
+  static bool applyFilterToRankVideos = Pref.applyFilterToRankVideos;
+  static bool applyFilterToSearch = Pref.applyFilterToSearch;
 
   static RegExp rcmdRegExp = BanWordUtils.buildRegExp(Pref.banWordForRecommend);
   static bool enableFilter = rcmdRegExp.pattern.isNotEmpty;
@@ -22,21 +43,29 @@ abstract final class RecommendFilter {
   static bool enableTopicFilter = topicRegExp.pattern.isNotEmpty;
 
   static Map<int, String> recommendBlockedMids = Pref.recommendBlockedMids;
+  static Set<String> blockedRcmdTypes = Pref.blockedRcmdTypes;
+
+  static bool isScopeEnabled(FilterScope scope) => switch (scope) {
+    FilterScope.rcmd => true,
+    FilterScope.related => applyFilterToRelatedVideos,
+    FilterScope.hot => applyFilterToHotVideos,
+    FilterScope.rank => applyFilterToRankVideos,
+    FilterScope.search => applyFilterToSearch,
+  };
 
   static bool filterUser(int? mid) {
     return recommendBlockedMids.isNotEmpty &&
         mid != null &&
+        mid > 0 &&
         recommendBlockedMids.containsKey(mid);
   }
 
-  static bool filter(BaseVideoItemModel videoItem) {
-    if (filterUser(videoItem.owner.mid)) {
-      return true;
-    }
-    if (videoItem.isFollowed && exemptFilterForFollowed) {
+  /// 推流稿件类型是否应屏蔽（goto / card_goto）
+  static bool filterRcmdType(String? goto) {
+    if (goto == null || goto.isEmpty || blockedRcmdTypes.isEmpty) {
       return false;
     }
-    return filterAll(videoItem);
+    return blockedRcmdTypes.contains(goto);
   }
 
   static bool filterLikeRatio(int? like, int? view) {
@@ -58,7 +87,6 @@ abstract final class RecommendFilter {
     return descRegExp.hasMatch(desc);
   }
 
-  /// tags / topics 为名称列表；任一项命中即屏蔽
   static bool filterTags(Iterable<String>? tags) {
     if (!enableTagFilter || tags == null) return false;
     for (final t in tags) {
@@ -73,6 +101,35 @@ abstract final class RecommendFilter {
       if (t.isNotEmpty && topicRegExp.hasMatch(t)) return true;
     }
     return false;
+  }
+
+  /// 搜索：仅标题 + 本地屏蔽 UP
+  static bool filterForSearch({int? mid, required String title}) {
+    if (!applyFilterToSearch) return false;
+    if (filterUser(mid)) return true;
+    return filterTitle(title);
+  }
+
+  /// 完整过滤（推荐/热门/排行/相关）
+  static bool filter(
+    BaseVideoItemModel videoItem, {
+    FilterScope scope = FilterScope.rcmd,
+  }) {
+    if (!isScopeEnabled(scope)) return false;
+
+    if (filterUser(videoItem.owner.mid)) {
+      return true;
+    }
+
+    // 搜索范围已在 filterForSearch 处理；此处完整规则
+    if (scope == FilterScope.search) {
+      return filterTitle(videoItem.title);
+    }
+
+    if (videoItem.isFollowed && exemptFilterForFollowed) {
+      return false;
+    }
+    return filterAll(videoItem);
   }
 
   static bool filterAll(BaseVideoItemModel videoItem) {

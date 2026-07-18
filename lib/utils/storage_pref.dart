@@ -700,6 +700,36 @@ abstract final class Pref {
     defaultValue: true,
   );
 
+  static bool get applyFilterToHotVideos => _setting.get(
+    SettingBoxKey.applyFilterToHotVideos,
+    defaultValue: true,
+  );
+
+  static bool get applyFilterToRankVideos => _setting.get(
+    SettingBoxKey.applyFilterToRankVideos,
+    defaultValue: true,
+  );
+
+  static bool get applyFilterToSearch => _setting.get(
+    SettingBoxKey.applyFilterToSearch,
+    defaultValue: false,
+  );
+
+  /// 推流屏蔽的稿件类型（goto），如 bangumi / picture / live
+  static Set<String> get blockedRcmdTypes {
+    final raw = _setting.get(SettingBoxKey.blockedRcmdTypes);
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toSet();
+    }
+    if (raw is Set) {
+      return raw.map((e) => e.toString()).toSet();
+    }
+    return <String>{};
+  }
+
+  static set blockedRcmdTypes(Set<String> value) =>
+      _setting.put(SettingBoxKey.blockedRcmdTypes, value.toList());
+
   static bool get enableBackgroundPlay =>
       _setting.get(SettingBoxKey.enableBackgroundPlay, defaultValue: true);
 

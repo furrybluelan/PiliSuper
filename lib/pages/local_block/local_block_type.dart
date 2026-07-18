@@ -6,19 +6,31 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 
-/// 本地屏蔽维度（与官方账号黑名单分离）
+/// 本地屏蔽 / 视频过滤维度
 enum LocalBlockType {
   up('UP'),
-  title('标题关键词'),
-  zone('视频分区'),
-  tag('视频TAG'),
-  topic('视频话题'),
-  desc('简介屏蔽词');
+  title('标题'),
+  zone('分区'),
+  tag('TAG'),
+  topic('话题'),
+  desc('简介'),
+  danmaku('弹幕'),
+  rcmdType('稿件类型'),
+  duration('时长');
 
   final String label;
   const LocalBlockType(this.label);
 
   bool get isUp => this == LocalBlockType.up;
+  bool get isDanmaku => this == LocalBlockType.danmaku;
+  bool get isRcmdType => this == LocalBlockType.rcmdType;
+  bool get isDuration => this == LocalBlockType.duration;
+  bool get isKeywordList =>
+      this == LocalBlockType.title ||
+      this == LocalBlockType.zone ||
+      this == LocalBlockType.tag ||
+      this == LocalBlockType.topic ||
+      this == LocalBlockType.desc;
 
   String get storageKey => switch (this) {
     LocalBlockType.title => SettingBoxKey.banWordForRecommend,
@@ -26,7 +38,7 @@ enum LocalBlockType {
     LocalBlockType.tag => SettingBoxKey.banWordForTag,
     LocalBlockType.topic => SettingBoxKey.banWordForTopic,
     LocalBlockType.desc => SettingBoxKey.banWordForDesc,
-    LocalBlockType.up => '', // 使用 local cache map
+    _ => '',
   };
 
   List<String> loadRules() {
@@ -35,6 +47,7 @@ enum LocalBlockType {
           .map((e) => '${e.value} (${e.key})')
           .toList();
     }
+    if (!isKeywordList) return [];
     final stored = GStorage.setting.get(storageKey, defaultValue: '') as String;
     return BanWordUtils.parseItems(stored);
   }
@@ -43,7 +56,6 @@ enum LocalBlockType {
     if (isUp) {
       final map = <int, String>{};
       for (final item in items) {
-        // 从右侧解析 mid，避免名称中含括号时被截断
         final match = RegExp(r'^(.*)\s*\((\d+)\)$').firstMatch(item.trim());
         if (match != null) {
           final name = match.group(1)?.trim() ?? '';
@@ -63,6 +75,7 @@ enum LocalBlockType {
       RecommendFilter.recommendBlockedMids = map;
       return;
     }
+    if (!isKeywordList) return;
     final stored = BanWordUtils.joinItems(items);
     GStorage.setting.put(storageKey, stored);
     applyRegExp(BanWordUtils.buildRegExp(stored));
@@ -90,14 +103,13 @@ enum LocalBlockType {
         RecommendFilter.descRegExp = re;
         RecommendFilter.enableDescFilter = re.pattern.isNotEmpty;
         break;
-      case LocalBlockType.up:
+      default:
         break;
     }
   }
 
-  /// 将单条规则写入存储并热更新
   void appendRule(String rule) {
-    if (isUp) return;
+    if (!isKeywordList) return;
     final stored = GStorage.setting.get(storageKey, defaultValue: '') as String;
     final next = BanWordUtils.appendRule(stored, rule);
     GStorage.setting.put(storageKey, next);
@@ -111,5 +123,22 @@ enum LocalBlockType {
     LocalBlockType.tag => 'TAG 或 /正则/flags',
     LocalBlockType.topic => '话题名或 /正则/flags',
     LocalBlockType.desc => '简介关键词或 /正则/flags',
+    LocalBlockType.danmaku => '弹幕规则',
+    LocalBlockType.rcmdType => '',
+    LocalBlockType.duration => '',
   };
+}
+
+/// 可选屏蔽的推流稿件类型
+enum RcmdBlockType {
+  bangumi('bangumi', '番剧/影视'),
+  picture('picture', '图文'),
+  live('live', '直播'),
+  liveRoom('live_room', '直播间'),
+  ketang('ketang', '课堂'),
+  special('special_s', '特殊卡片');
+
+  final String goto;
+  final String label;
+  const RcmdBlockType(this.goto, this.label);
 }

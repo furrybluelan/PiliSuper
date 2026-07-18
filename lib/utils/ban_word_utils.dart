@@ -69,4 +69,30 @@ abstract final class BanWordUtils {
     items.add(keyword);
     return joinItems(items);
   }
+
+  /// 弹幕云端正则 → UI 展示（补全 /…/）
+  static String fromCloudDanmakuRegex(String cloud) {
+    final t = cloud.trim();
+    if (t.isEmpty) return t;
+    if (t.startsWith('/') && t.length >= 2) {
+      // 已是 /pat/ 或 /pat/flags
+      return t;
+    }
+    return '/$t/';
+  }
+
+  /// UI 正则 → 弹幕云端裸 pattern（去掉 / 与 flags）
+  static String toCloudDanmakuRegex(String ui) {
+    final t = ui.trim();
+    if (t.isEmpty) return '';
+    final m = _jsRegex.firstMatch(t);
+    if (m != null) {
+      return m.group(1) ?? '';
+    }
+    // 仅包一层 /pat/
+    if (t.startsWith('/') && t.endsWith('/') && t.length > 2) {
+      return t.substring(1, t.length - 1);
+    }
+    return t;
+  }
 }

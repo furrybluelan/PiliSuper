@@ -34,7 +34,8 @@ import 'package:PiliPlus/utils/ban_word_utils.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
-import 'package:PiliPlus/utils/recommend_filter.dart';
+import 'package:PiliPlus/utils/recommend_filter.dart'
+    show FilterScope, RecommendFilter;
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -70,12 +71,12 @@ abstract final class VideoHttp {
     if (res.data['code'] == 0) {
       List<RcmdVideoItemModel> list = <RcmdVideoItemModel>[];
       for (final i in res.data['data']['item']) {
-        //过滤掉live与ad，以及拉黑用户
-        if (i['goto'] == 'av' &&
-            (i['owner'] != null &&
-                !GlobalData().blackMids.contains(i['owner']['mid']))) {
+        // web 推荐仍以 av 为主；非 av 仅在未屏蔽该类型时保留（当前模型仅解析 av）
+        if (i['goto'] != 'av') continue;
+        if (i['owner'] != null &&
+            !GlobalData().blackMids.contains(i['owner']['mid'])) {
           RcmdVideoItemModel videoItem = RcmdVideoItemModel.fromJson(i);
-          if (!RecommendFilter.filter(videoItem)) {
+          if (!RecommendFilter.filter(videoItem, scope: FilterScope.rcmd)) {
             list.add(videoItem);
           }
         }
@@ -143,20 +144,27 @@ abstract final class VideoHttp {
     if (res.data['code'] == 0) {
       List<RcmdVideoItemAppModel> list = <RcmdVideoItemAppModel>[];
       for (final i in res.data['data']['items']) {
+        final cardGoto = i['card_goto'] as String?;
+        final goto = i['goto'] as String?;
         // 屏蔽推广和拉黑用户
-        if (i['card_goto'] != 'ad_av' &&
-            i['card_goto'] != 'ad_web_s' &&
-            i['ad_info'] == null &&
-            (i['args'] != null &&
-                !GlobalData().blackMids.contains(i['args']['up_id']))) {
+        if (cardGoto == 'ad_av' ||
+            cardGoto == 'ad_web_s' ||
+            i['ad_info'] != null) {
+          continue;
+        }
+        if (RecommendFilter.filterRcmdType(cardGoto) ||
+            RecommendFilter.filterRcmdType(goto)) {
+          continue;
+        }
+        if (i['args'] != null &&
+            !GlobalData().blackMids.contains(i['args']['up_id'])) {
           if (enableFilter &&
               i['args']?['tname'] != null &&
               zoneRegExp.hasMatch(i['args']['tname'])) {
             continue;
           }
           RcmdVideoItemAppModel videoItem = RcmdVideoItemAppModel.fromJson(i);
-          // filter() 已含 filterAll（标题/简介/时长等）
-          if (!RecommendFilter.filter(videoItem)) {
+          if (!RecommendFilter.filter(videoItem, scope: FilterScope.rcmd)) {
             list.add(videoItem);
           }
         }
@@ -179,20 +187,19 @@ abstract final class VideoHttp {
     if (res.data['code'] == 0) {
       List<HotVideoItemModel> list = <HotVideoItemModel>[];
       for (final i in res.data['data']['list']) {
-        if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
-            !RecommendFilter.filterUser(i['owner']['mid'] as int?) &&
-            !RecommendFilter.filterTitle(i['title']) &&
-            !RecommendFilter.filterDesc(i['desc'] as String?) &&
-            !RecommendFilter.filterLikeRatio(
-              i['stat']['like'],
-              i['stat']['view'],
-            )) {
-          if (enableFilter &&
-              i['tname'] != null &&
-              zoneRegExp.hasMatch(i['tname'])) {
-            continue;
-          }
+        if (GlobalData().blackMids.contains(i['owner']['mid'])) continue;
+        if (!RecommendFilter.isScopeEnabled(FilterScope.hot)) {
           list.add(HotVideoItemModel.fromJson(i));
+          continue;
+        }
+        final item = HotVideoItemModel.fromJson(i);
+        if (enableFilter &&
+            i['tname'] != null &&
+            zoneRegExp.hasMatch(i['tname'])) {
+          continue;
+        }
+        if (!RecommendFilter.filter(item, scope: FilterScope.hot)) {
+          list.add(item);
         }
       }
       return Success(list);
@@ -331,9 +338,11 @@ abstract final class VideoHttp {
       final items = (res.data['data'] as List?)?.map(
         (i) => HotVideoItemModel.fromJson(i),
       );
-      final list = RecommendFilter.applyFilterToRelatedVideos
-          ? items?.where((i) => !RecommendFilter.filterAll(i)).toList()
-          : items?.toList();
+      final list = items
+          ?.where(
+            (i) => !RecommendFilter.filter(i, scope: FilterScope.related),
+          )
+          .toList();
       return Success(list);
     } else {
       return Error(res.data['message']);
@@ -858,22 +867,15 @@ abstract final class VideoHttp {
   }
 
   static bool _canAddRank(Map i) {
-    if (!GlobalData().blackMids.contains(i['owner']['mid']) &&
-        !RecommendFilter.filterUser(i['owner']['mid'] as int?) &&
-        !RecommendFilter.filterTitle(i['title']) &&
-        !RecommendFilter.filterDesc(i['desc'] as String?) &&
-        !RecommendFilter.filterLikeRatio(
-          i['stat']['like'],
-          i['stat']['view'],
-        )) {
-      if (enableFilter &&
-          i['tname'] != null &&
-          zoneRegExp.hasMatch(i['tname'])) {
-        return false;
-      }
-      return true;
+    if (GlobalData().blackMids.contains(i['owner']['mid'])) return false;
+    if (!RecommendFilter.isScopeEnabled(FilterScope.rank)) return true;
+    if (enableFilter &&
+        i['tname'] != null &&
+        zoneRegExp.hasMatch(i['tname'])) {
+      return false;
     }
-    return false;
+    final item = HotVideoItemModel.fromJson(i);
+    return !RecommendFilter.filter(item, scope: FilterScope.rank);
   }
 
   // 视频排行
