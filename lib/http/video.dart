@@ -75,7 +75,8 @@ abstract final class VideoHttp {
         if (i['goto'] != 'av') continue;
         if (i['owner'] != null &&
             !GlobalData().blackMids.contains(i['owner']['mid'])) {
-          RcmdVideoItemModel videoItem = RcmdVideoItemModel.fromJson(i);
+          final map = Map<String, dynamic>.from(i as Map);
+          RcmdVideoItemModel videoItem = RcmdVideoItemModel.fromJson(map);
           if (!RecommendFilter.filter(videoItem, scope: FilterScope.rcmd)) {
             list.add(videoItem);
           }
@@ -163,7 +164,8 @@ abstract final class VideoHttp {
               zoneRegExp.hasMatch(i['args']['tname'])) {
             continue;
           }
-          RcmdVideoItemAppModel videoItem = RcmdVideoItemAppModel.fromJson(i);
+          final map = Map<String, dynamic>.from(i as Map);
+          RcmdVideoItemAppModel videoItem = RcmdVideoItemAppModel.fromJson(map);
           if (!RecommendFilter.filter(videoItem, scope: FilterScope.rcmd)) {
             list.add(videoItem);
           }
@@ -188,17 +190,16 @@ abstract final class VideoHttp {
       List<HotVideoItemModel> list = <HotVideoItemModel>[];
       for (final raw in res.data['data']['list']) {
         final i = Map<String, dynamic>.from(raw as Map);
-        if (GlobalData().blackMids.contains(i['owner']['mid'])) continue;
-        if (!RecommendFilter.isScopeEnabled(FilterScope.hot)) {
-          list.add(HotVideoItemModel.fromJson(i));
-          continue;
-        }
+        if (GlobalData().blackMids.contains(i['owner']?['mid'])) continue;
         final item = HotVideoItemModel.fromJson(i);
-        if (enableFilter &&
+        // 分区关键词仅在作用域开启时应用
+        if (RecommendFilter.isScopeEnabled(FilterScope.hot) &&
+            enableFilter &&
             i['tname'] != null &&
-            zoneRegExp.hasMatch(i['tname'])) {
+            zoneRegExp.hasMatch(i['tname'] as String)) {
           continue;
         }
+        // filter()：本地 UP 始终；其余规则受作用域控制
         if (!RecommendFilter.filter(item, scope: FilterScope.hot)) {
           list.add(item);
         }
@@ -867,17 +868,20 @@ abstract final class VideoHttp {
     return null;
   }
 
-  static bool _canAddRank(Map i) {
-    final map = Map<String, dynamic>.from(i);
-    if (GlobalData().blackMids.contains(map['owner']['mid'])) return false;
-    if (!RecommendFilter.isScopeEnabled(FilterScope.rank)) return true;
-    if (enableFilter &&
-        map['tname'] != null &&
-        zoneRegExp.hasMatch(map['tname'])) {
-      return false;
-    }
+  /// 返回 null 表示应丢弃；否则返回可加入列表的模型
+  static HotVideoItemModel? _tryRankItem(Map raw) {
+    final map = Map<String, dynamic>.from(raw);
+    if (GlobalData().blackMids.contains(map['owner']?['mid'])) return null;
     final item = HotVideoItemModel.fromJson(map);
-    return !RecommendFilter.filter(item, scope: FilterScope.rank);
+    if (RecommendFilter.isScopeEnabled(FilterScope.rank) &&
+        enableFilter &&
+        map['tname'] != null &&
+        zoneRegExp.hasMatch(map['tname'] as String)) {
+      return null;
+    }
+    // 本地 UP 始终过滤；其余受作用域控制
+    if (RecommendFilter.filter(item, scope: FilterScope.rank)) return null;
+    return item;
   }
 
   // 视频排行
@@ -891,17 +895,8 @@ abstract final class VideoHttp {
     if (res.data['code'] == 0) {
       List<HotVideoItemModel> list = <HotVideoItemModel>[];
       for (final i in res.data['data']['list']) {
-        if (_canAddRank(i)) {
-          list.add(HotVideoItemModel.fromJson(i));
-          // final List? others = i['others'];
-          // if (others != null && others.isNotEmpty) {
-          //   for (final j in others) {
-          //     if (_canAddRank(j)) {
-          //       list.add(HotVideoItemModel.fromJson(j));
-          //     }
-          //   }
-          // }
-        }
+        final item = _tryRankItem(i as Map);
+        if (item != null) list.add(item);
       }
       return Success(list);
     } else {

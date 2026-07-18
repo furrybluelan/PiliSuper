@@ -110,18 +110,22 @@ abstract final class RecommendFilter {
     return filterTitle(title);
   }
 
-  /// 完整过滤（推荐/热门/排行/相关）
+  /// 完整过滤（推荐/热门/排行/相关）。返回 true 表示应丢弃。
+  ///
+  /// 注意：本地屏蔽 UP 始终生效（不受作用域关闭影响），
+  /// 作用域关闭时仅跳过关键词/阈值等规则。
   static bool filter(
     BaseVideoItemModel videoItem, {
     FilterScope scope = FilterScope.rcmd,
   }) {
-    if (!isScopeEnabled(scope)) return false;
-
+    // 本地屏蔽 UP：各作用域均生效
     if (filterUser(videoItem.owner.mid)) {
       return true;
     }
 
-    // 搜索范围已在 filterForSearch 处理；此处完整规则
+    if (!isScopeEnabled(scope)) return false;
+
+    // 搜索：仅标题（UP 已在上方处理）
     if (scope == FilterScope.search) {
       return filterTitle(videoItem.title);
     }
@@ -132,10 +136,8 @@ abstract final class RecommendFilter {
     return filterAll(videoItem);
   }
 
+  /// 不含 mid 重复检查（由 filter 入口统一处理）
   static bool filterAll(BaseVideoItemModel videoItem) {
-    if (filterUser(videoItem.owner.mid)) {
-      return true;
-    }
     return (videoItem.duration > 0 &&
             videoItem.duration < minDurationForRcmd) ||
         filterLikeRatio(videoItem.stat.like, videoItem.stat.view) ||

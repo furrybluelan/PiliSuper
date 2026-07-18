@@ -48,6 +48,7 @@ class _LocalBlockPageState extends State<LocalBlockPage>
   );
   int _dmSubTab = 0;
   bool _dmLoaded = false;
+  bool _dmLoading = false;
 
   // 稿件类型
   late Set<String> _blockedTypes;
@@ -126,9 +127,13 @@ class _LocalBlockPageState extends State<LocalBlockPage>
   }
 
   Future<void> _loadDanmaku() async {
+    if (_dmLoading) return;
+    _dmLoading = true;
     SmartDialog.showLoading(msg: '正在同步弹幕屏蔽规则…');
     final result = await DanmakuFilterHttp.danmakuFilter();
     SmartDialog.dismiss();
+    _dmLoading = false;
+    if (!mounted) return;
     if (result case Success(:final response)) {
       for (final list in _dmRules) {
         list.clear();
@@ -249,6 +254,11 @@ class _LocalBlockPageState extends State<LocalBlockPage>
     SmartDialog.showLoading(msg: '正在添加…');
     var toSend = filter;
     if (_dmSubTab == 2) {
+      final uid = int.tryParse(filter);
+      if (uid == null || uid <= 0) {
+        SmartDialog.showToast('UID 无效');
+        return;
+      }
       toSend = getCrc32(ascii.encode(filter), 0).toRadixString(16);
     }
     final res = await DanmakuFilterHttp.danmakuFilterAdd(
