@@ -250,8 +250,6 @@ flutter pub get
 
 ### 最后，按职责执行构建脚本
 
-构建流程由小脚本组成；每个脚本只做一件事，不存在总控 `build.py`。
-
 | 脚本 | 职责 |
 | --- | --- |
 | `rename.py` | 改 Bundle ID、显示名、Dart 包名和仓库引用 |
@@ -288,7 +286,7 @@ python packaging.py --version "$VERSION" tar.gz deb rpm
 python packaging.py --version "$VERSION" arch
 ```
 
-所有 Flutter 构建脚本都传入 `--no-pub`，因此不会隐式执行 `flutter pub get`。
+所有 Flutter 构建脚本都传入 `--no-pub`，因此请自行执行 `flutter pub get`。
 
 ## 声明
 
