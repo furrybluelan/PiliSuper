@@ -7,7 +7,14 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from build_common import log_step, log_success, log_warning, require_command, run_command
+from build_common import (
+    log_step,
+    log_success,
+    log_warning,
+    require_command,
+    require_project_root,
+    run_command,
+)
 
 # 所有平台都需要的补丁。顺序和原 patch.ps1 保持一致。
 COMMON_PATCHES = [
@@ -31,9 +38,14 @@ ANDROID_PATCHES = [
     "navigator.patch",
 ]
 
-IOS_PATCHES = [
+# 这两项修改的是 PiliSuper 自己的 Dart 源码，必须在项目根目录应用，
+# 不能和其余 Flutter SDK patches 一样传给 Flutter SDK 的 git apply。
+IOS_PROJECT_PATCHES = [
     "bottom_sheet_ios_piliplus.patch",
     "geetest_ios.patch",
+]
+
+IOS_FLUTTER_PATCHES = [
     "scroll_view.patch",
     "bottom_sheet_ios_flutter.patch",
     "navigator.patch",
@@ -54,32 +66,49 @@ def main() -> None:
         help="要应用对应平台补丁的平台；all 会包含 Android 和 iOS 补丁。",
     )
     args = parser.parse_args()
+    require_project_root()
 
-    # 1. 找到 Flutter SDK。Flutter 可执行文件位于 <SDK>/bin/flutter。
+    needs_android_patch = args.platform in ("android", "all")
+    needs_ios_patch = args.platform in ("ios", "all")
+    project_root = Path.cwd()
+    patch_dir = project_root / "lib/scripts"
+
+    # 1. iOS 的两个项目源码补丁必须在项目根目录应用。旧 patch.ps1 在
+    #    Set-Location $FLUTTER_ROOT 前执行它们；此前 Python 脚本遗漏了这条边界。
+    if needs_ios_patch:
+        for patch_name in IOS_PROJECT_PATCHES:
+            patch_file = patch_dir / patch_name
+            log_step(f"Apply project patch {patch_name}")
+            try:
+                run_command(
+                    ["git", "apply", str(patch_file), "--ignore-whitespace"],
+                    cwd=project_root,
+                )
+            except subprocess.CalledProcessError as error:
+                raise SystemExit(f"iOS 项目补丁应用失败: {patch_name}") from error
+            log_success(f"Applied project patch: {patch_name}")
+
+    # 2. 找到 Flutter SDK。Flutter 可执行文件位于 <SDK>/bin/flutter。
     require_command("flutter", "请安装 Flutter，或将其加入 PATH")
     flutter = shutil.which("flutter")
     if flutter is None:  # require_command 已处理；保留这一行供类型检查与防御性处理。
         raise SystemExit(1)
     flutter_root = Path(flutter).resolve().parent.parent
 
-    # 2. 配置临时提交所需身份，并恢复 SDK 到当前提交，避免上次执行留下补丁。
+    # 3. 配置临时提交所需身份，并恢复 SDK 到当前提交，避免上次执行留下补丁。
     run_command(["git", "config", "user.name", "ci"], cwd=flutter_root)
     run_command(["git", "config", "user.email", "ci@example.com"], cwd=flutter_root)
     log_step("Reset Flutter SDK")
     run_command(["git", "reset", "--hard", "HEAD"], cwd=flutter_root)
 
-    # 3. 从公共补丁开始，再按目标平台追加补丁。使用列表而不是动态映射，
-    #    让实际执行顺序可以从上到下直接读出来。
+    # 4. 从公共 Flutter SDK 补丁开始，再按目标平台追加 SDK 补丁。
     patch_names = list(COMMON_PATCHES)
-    needs_android_patch = args.platform in ("android", "all")
-    needs_ios_patch = args.platform in ("ios", "all")
-
     if needs_android_patch:
         patch_names.extend(ANDROID_PATCHES)
     if needs_ios_patch:
-        patch_names.extend(IOS_PATCHES)
+        patch_names.extend(IOS_FLUTTER_PATCHES)
 
-    # 4. 上游新增的文本选择菜单修复是一个 commit，不是 patch 文件。与
+    # 5. 上游新增的文本选择菜单修复是一个 commit，不是 patch 文件。与
     #    patch.ps1 相同：cherry-pick 成功后 soft reset，只留下工作树改动。
     log_step("Cherry-pick text selection menu fix")
     stashed = False
@@ -104,7 +133,7 @@ def main() -> None:
         if stashed:
             run_command(["git", "stash", "pop"], cwd=flutter_root, check=False)
 
-    # 5. Android 所需的 Flutter commit 回退。回退产生的提交仅用于工作树，
+    # 6. Android 所需的 Flutter commit 回退。回退产生的提交仅用于工作树，
     #    随后 soft reset，因此不会改变 Flutter SDK 历史。
     if needs_android_patch:
         log_step("Revert Android overscroll change")
@@ -127,9 +156,8 @@ def main() -> None:
             if stashed:
                 run_command(["git", "stash", "pop"], cwd=flutter_root, check=False)
 
-    # 6. 逐个应用项目内补丁。重复文件只应用一次（Android 与 iOS 共享
-    #    scroll_view.patch / navigator.patch）。单个补丁失败不阻止后续补丁。
-    patch_dir = Path("lib/scripts")
+    # 7. 逐个应用 Flutter SDK 补丁。重复文件只应用一次（Android 与 iOS
+    #    共享 scroll_view.patch / navigator.patch）。单个 SDK 补丁失败不阻止后续补丁。
     applied_names: set[str] = set()
     for patch_name in patch_names:
         if patch_name in applied_names:
