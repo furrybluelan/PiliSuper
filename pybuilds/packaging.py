@@ -152,7 +152,8 @@ def package_deb(bundle: Path, destination: Path, app_name: str, arch: str, versi
             "Section: video\n"
             "Priority: optional\n"
             f"Installed-Size: {installed_size}\n"
-            "Depends: libgtk-3-0, libmpv2, libayatana-appindicator3-1\n"
+            # Debian/Ubuntu: ayatana 为主；部分衍生版仅有 libappindicator3-1
+            "Depends: libgtk-3-0, libmpv2, libayatana-appindicator3-1 | libappindicator3-1\n"
             "Homepage: https://github.com/FRBLanApps/PiliSuper\n"
             f"Description: {app_name}, a third-party Bilibili client\n",
             encoding="utf-8",
@@ -186,6 +187,7 @@ def package_arch(bundle: Path, destination: Path, app_name: str, arch: str, vers
             "url='https://github.com/FRBLanApps/PiliSuper'\n"
             "license=('GPL-3.0-or-later')\n"
             "options=('!debug')\n"
+            # Arch 官方仓有 libayatana-appindicator
             "depends=('gtk3' 'mpv' 'libayatana-appindicator')\n"
             f"source=('{source_archive.name}')\n"
             f"sha256sums=('{checksum}')\n\n"
@@ -239,7 +241,10 @@ def package_rpm(bundle: Path, destination: Path, app_name: str, arch: str, versi
             "URL: https://github.com/FRBLanApps/PiliSuper\n"
             f"Source0: {source_name}.tar.gz\n"
             f"BuildArch: {rpm_arch}\n"
-            "Requires: gtk3, mpv, libayatana-appindicator\n\n"
+            # RHEL/Alma/Rocky 无 ayatana 包；Fedora/EPEL 提供 libappindicator-gtk3
+            # 托盘为桌面可选能力，故用 Recommends（无则仍可装，缺托盘）
+            "Requires: gtk3, mpv\n"
+            "Recommends: libappindicator-gtk3\n\n"
             f"%description\n{app_name}, a third-party Bilibili client.\n\n"
             "%prep\n%setup -q\n\n"
             "%install\n"
