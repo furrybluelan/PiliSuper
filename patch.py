@@ -51,10 +51,12 @@ IOS_FLUTTER_PATCHES = [
     "navigator.patch",
 ]
 
-# TODO: Flutter issue #185052 fixed upstream 后删除。
+# TODO: remove
+# https://github.com/flutter/flutter/issues/185052
 TEXT_SELECTION_MENU_FIX_COMMIT = "beb2ad17004a1b118ff2bd09f55cee23198f6652"
 
-# TODO: Flutter issue #182281 fixed upstream 后删除。
+# TODO: remove
+# https://github.com/flutter/flutter/issues/182281
 OVERSCROLL_COMMIT = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
 
 
@@ -72,9 +74,14 @@ def main() -> None:
     needs_ios_patch = args.platform in ("ios", "all")
     project_root = Path.cwd()
     patch_dir = project_root / "lib/scripts"
-
-    # 1. iOS 的两个项目源码补丁必须在项目根目录应用。旧 patch.ps1 在
-    #    Set-Location $FLUTTER_ROOT 前执行它们；此前 Python 脚本遗漏了这条边界。
+    #创建Flutter SDK补丁列表，先公共补丁，后平台特定补丁
+    patch_names = list(COMMON_PATCHES)
+    if needs_android_patch:
+        patch_names.extend(ANDROID_PATCHES)
+    if needs_ios_patch:
+        patch_names.extend(IOS_FLUTTER_PATCHES)
+    
+    # 1. 按上游 patch.ps1 将 iOS 上的项目源码补丁在找Flutter SDK前在项目根目录应用。
     if needs_ios_patch:
         for patch_name in IOS_PROJECT_PATCHES:
             patch_file = patch_dir / patch_name
@@ -88,7 +95,7 @@ def main() -> None:
                 raise SystemExit(f"iOS 项目补丁应用失败: {patch_name}") from error
             log_success(f"Applied project patch: {patch_name}")
 
-    # 2. 找到 Flutter SDK。Flutter 可执行文件位于 <SDK>/bin/flutter。
+    # 2. 找到位于 <SDK>/bin/flutter 的 Flutter SDK。
     require_command("flutter", "请安装 Flutter，或将其加入 PATH")
     flutter = shutil.which("flutter")
     if flutter is None:  # require_command 已处理；保留这一行供类型检查与防御性处理。
@@ -101,15 +108,7 @@ def main() -> None:
     log_step("Reset Flutter SDK")
     run_command(["git", "reset", "--hard", "HEAD"], cwd=flutter_root)
 
-    # 4. 从公共 Flutter SDK 补丁开始，再按目标平台追加 SDK 补丁。
-    patch_names = list(COMMON_PATCHES)
-    if needs_android_patch:
-        patch_names.extend(ANDROID_PATCHES)
-    if needs_ios_patch:
-        patch_names.extend(IOS_FLUTTER_PATCHES)
-
-    # 5. 上游新增的文本选择菜单修复是一个 commit，不是 patch 文件。与
-    #    patch.ps1 相同：cherry-pick 成功后 soft reset，只留下工作树改动。
+    # 4. 通过revert commit回退文本选择菜单
     log_step("Cherry-pick text selection menu fix")
     stashed = False
     try:
@@ -133,8 +132,7 @@ def main() -> None:
         if stashed:
             run_command(["git", "stash", "pop"], cwd=flutter_root, check=False)
 
-    # 6. Android 所需的 Flutter commit 回退。回退产生的提交仅用于工作树，
-    #    随后 soft reset，因此不会改变 Flutter SDK 历史。
+    # 5. 通过revert commit执行Android 所需的 Flutter commit 回退。
     if needs_android_patch:
         log_step("Revert Android overscroll change")
         stashed = False
@@ -156,7 +154,7 @@ def main() -> None:
             if stashed:
                 run_command(["git", "stash", "pop"], cwd=flutter_root, check=False)
 
-    # 7. 逐个应用 Flutter SDK 补丁。重复文件只应用一次（Android 与 iOS
+    # 6. 应用 Flutter SDK 补丁。重复文件只应用一次（Android 与 iOS
     #    共享 scroll_view.patch / navigator.patch）。单个 SDK 补丁失败不阻止后续补丁。
     applied_names: set[str] = set()
     for patch_name in patch_names:
