@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 
+import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/webview_menu_type.dart';
@@ -268,7 +269,7 @@ class _WebviewPageState extends State<WebviewPage> {
                           '下载文件: $suggestedFilename ?',
                           style: const TextStyle(fontSize: 18),
                         ),
-                        content: SelectableText(request.url.toString()),
+                        content: SelectionText(request.url.toString()),
                         actions: [
                           TextButton(
                             onPressed: Get.back,

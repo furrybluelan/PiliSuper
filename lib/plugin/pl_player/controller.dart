@@ -1608,7 +1608,7 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   void setContinuePlayInBackground() {
-    continuePlayInBackground.value = !continuePlayInBackground.value;
+    continuePlayInBackground.toggle();
     if (!tempPlayerConf) {
       setting.put(
         SettingBoxKey.continuePlayInBackground,
@@ -1618,10 +1618,8 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   void setOnlyPlayAudio() {
-    onlyPlayAudio.value = !onlyPlayAudio.value;
-    videoPlayerController?.setVideoTrack(
-      onlyPlayAudio.value ? VideoTrack.no() : VideoTrack.auto(),
-    );
+    onlyPlayAudio.toggle();
+    videoPlayerController?.setVideoTrack(onlyPlayAudio.value ? .no() : .auto());
   }
 
   late final Map<String, ui.Image?> previewCache = {};
