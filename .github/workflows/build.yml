@@ -113,11 +113,11 @@ jobs:
             )
           fi
 
-          python3 build.py android \
-            --output-prefix PiliSuper \
-            --output dist \
-            "${SIGN_ARGS[@]}" \
-            "${NAME_ARGS[@]}" \
+          python3 rename.py "${NAME_ARGS[@]}"
+          python3 prebuild.py --platform android
+          VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+          python3 patch.py android
+          python3 build_android.py --version "$VERSION" --output-prefix PiliSuper --output dist "${SIGN_ARGS[@]}"
 
       - name: Build Dev
         env:
@@ -139,14 +139,8 @@ jobs:
             )
           fi
 
-          python3 build.py android \
-            --output-prefix PiliSuper \
-            --output dist \
-            --dev \
-            --skip_rename \
-            --no-patches \
-            --no-pub-get \
-            "${SIGN_ARGS[@]}" \
+          VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+          python3 build_android.py --version "$VERSION" --output-prefix PiliSuper --output dist --dev "${SIGN_ARGS[@]}"
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -230,10 +224,11 @@ jobs:
             )
           fi
           
-          python3 build.py ios \
-            "${NAME_ARGS[@]}" \
-            --output-prefix PiliSuper \
-            --output dist
+          python3 rename.py "${NAME_ARGS[@]}"
+          python3 prebuild.py --platform ios
+          VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+          python3 patch.py ios
+          python3 build_ios.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -287,10 +282,11 @@ jobs:
             )
           fi
 
-          python3 build.py macos \
-            "${NAME_ARGS[@]}" \
-            --output-prefix PiliSuper \
-            --output dist
+          python3 rename.py "${NAME_ARGS[@]}"
+          python3 prebuild.py --platform macos
+          VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+          python3 patch.py macos
+          python3 build_macos.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -322,17 +318,6 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
-      - name: Install fastforge & Inno Setup
-        run: |
-          dart pub global activate fastforge
-          choco install innosetup
-
-      - name: Add Inno Setup Chinese language
-        shell: pwsh
-        run: |
-          Copy-Item "windows/packaging/exe/ChineseSimplified.isl" `
-            "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
-      
       - name: Add Rename CLI tool
         run: |
             dart pub global activate rename
@@ -347,10 +332,11 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python build.py windows --installer \
-            "${NAME_ARGS[@]}" \
-            --output-prefix PiliSuper \
-            --output dist
+          python rename.py "${NAME_ARGS[@]}"
+          python prebuild.py --platform windows
+          VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+          python patch.py windows
+          python build_windows.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -360,7 +346,6 @@ jobs:
           name:     ${{ inputs.tag }}
           files: |
             dist/PiliSuper_windows_*_portable.zip
-            dist/PiliSuper_windows_*_setup.exe
 
       - uses: actions/upload-artifact@v7
         with:
@@ -368,11 +353,6 @@ jobs:
           path: dist/PiliSuper_windows_*_portable.zip
           archive: false
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Windows_setup_x64
-          path: dist/PiliSuper_windows_*_setup.exe
-          archive: false
 
   # ───────────── Linux ─────────────
   linux:
@@ -437,11 +417,12 @@ jobs:
             )
           fi
 
-          python3 build.py linux \
-            "${NAME_ARGS[@]}" \
-            --output-prefix PiliSuper \
-            --output dist \
-            --linux-targets tar.gz deb rpm appimage
+          python3 rename.py "${NAME_ARGS[@]}"
+          python3 prebuild.py --platform linux
+          VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+          python3 patch.py linux
+          python3 build_linux.py
+          python3 packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -452,8 +433,6 @@ jobs:
           files: |
             dist/PiliSuper_linux_*.tar.gz
             dist/PiliSuper_linux_*.deb
-            dist/PiliSuper_linux_*.rpm
-            dist/PiliSuper_linux_*.AppImage
 
       - uses: actions/upload-artifact@v7
         with:
@@ -465,16 +444,4 @@ jobs:
         with:
           name: Linux_deb_amd64
           path: dist/PiliSuper_linux_*.deb
-          archive: false
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Linux_rpm_amd64
-          path: dist/PiliSuper_linux_*.rpm
-          archive: false
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Linux_AppImage_amd64
-          path: dist/PiliSuper_linux_*.AppImage
           archive: false
