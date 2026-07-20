@@ -100,7 +100,7 @@ jobs:
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
-      - name: Apply Flutter SDK patches
+      - name: Apply Patches
         run: python3 patch.py android
 
       - name: Resolve Flutter dependencies
@@ -230,7 +230,7 @@ jobs:
           python3 prebuild.py --platform ios
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Apply Flutter SDK patches
+      - name: Apply Patches
         run: python3 patch.py ios
 
       - name: Resolve Flutter dependencies
@@ -292,7 +292,7 @@ jobs:
           python3 prebuild.py --platform macos
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Apply Flutter SDK patches
+      - name: Apply Patches
         run: python3 patch.py macos
 
       - name: Resolve Flutter dependencies
@@ -353,7 +353,7 @@ jobs:
           python prebuild.py --platform windows
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Apply Flutter SDK patches
+      - name: Apply Patches
         shell: bash
         run: python patch.py windows
 
@@ -450,7 +450,7 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Apply Flutter SDK patches
+      - name: Apply Patches
         run: python3 patch.py linux
 
       - name: Resolve Flutter dependencies
@@ -505,7 +505,7 @@ jobs:
     permissions: write-all
     steps:
       - name: Install job dependencies
-        run: pacman -Syu --noconfirm git python zstd
+        run: pacman -Syu --noconfirm git python zstd gtk3 mpv libayatana-appindicator
 
       - uses: actions/checkout@v6
 

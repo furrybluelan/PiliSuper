@@ -250,8 +250,6 @@ flutter pub get
 
 ### 最后，按职责执行构建脚本
 
-构建流程由小脚本组成；每个脚本只做一件事，不存在总控 `build.py`。
-
 | 脚本 | 职责 |
 | --- | --- |
 | `rename.py` | 改 Bundle ID、显示名、Dart 包名和仓库引用 |
@@ -288,15 +286,15 @@ python packaging.py --version "$VERSION" tar.gz deb rpm
 python packaging.py --version "$VERSION" arch
 ```
 
-所有 Flutter 构建脚本都传入 `--no-pub`，因此不会隐式执行 `flutter pub get`。
+所有 Flutter 构建脚本都传入 `--no-pub`，因此请自行执行 `flutter pub get`。
 
 ## 声明
 
 此项目（PiliSuper）是个人为了兴趣而开发, 仅用于学习和测试，请按照您当地的法律处理此软件。
 
 在此致敬原作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
-在此致敬上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-在此致敬上上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+在此致敬上上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
 本仓库做了更激进的修改，感谢原作者的开源精神。
 
 感谢使用
