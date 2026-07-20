@@ -134,6 +134,7 @@ def package_arch(bundle: Path, destination: Path, app_name: str, arch: str, vers
             f"arch=('{package_arch}')\n"
             "url='https://github.com/FRBLanApps/PiliSuper'\n"
             "license=('GPL-3.0-or-later')\n"
+            "options=('!debug')\n"
             "depends=('gtk3' 'mpv' 'libayatana-appindicator')\n"
             f"source=('{source_archive.name}')\n"
             f"sha256sums=('{checksum}')\n\n"
