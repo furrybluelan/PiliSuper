@@ -293,8 +293,8 @@ python packaging.py --version "$VERSION" arch
 此项目（PiliSuper）是个人为了兴趣而开发, 仅用于学习和测试，请按照您当地的法律处理此软件。
 
 在此致敬原作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
-在此致敬上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-在此致敬上上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+在此致敬上上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
 本仓库做了更激进的修改，感谢原作者的开源精神。
 
 感谢使用
