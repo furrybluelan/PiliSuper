@@ -23,13 +23,19 @@ def main() -> None:
     flutter_build("ios", args.dart_define_from_file, ["--no-codesign", *extra])
 
     payload = Path("Payload")
-    if payload.exists() or payload.is_symlink():
+    if payload.is_symlink():
+        payload.unlink()
+    elif payload.exists():
         shutil.rmtree(payload)
+
     payload.symlink_to("build/ios/iphoneos")
-    run_shell_command('find Payload/Runner.app/Frameworks -type d -name "*.framework" -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \\;', check=False)
     destination = output_path(args.output, args.output_prefix, "ios", args.version, suffix=".ipa")
-    run_shell_command(f'zip -r9 "{destination}" Payload/Runner.app')
-    shutil.rmtree(payload)
+    try:
+        run_shell_command('find Payload/Runner.app/Frameworks -type d -name "*.framework" -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \\;', check=False)
+        run_shell_command(f'zip -r9 "{destination}" Payload/Runner.app')
+    finally:
+        # Payload 是指向 build/ios/iphoneos 的符号链接，不能用 rmtree 删除。
+        payload.unlink(missing_ok=True)
     log_success(f"输出: {destination}")
 
 
