@@ -331,6 +331,18 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
+      - name: Install fastforge and Inno Setup
+        shell: bash
+        run: |
+          dart pub global activate fastforge
+          choco install innosetup --no-progress --yes
+
+      - name: Add Inno Setup Chinese language
+        shell: pwsh
+        run: |
+          Copy-Item "windows/packaging/exe/ChineseSimplified.isl" `
+            "C:\\Program Files (x86)\\Inno Setup 6\\Languages\\ChineseSimplified.isl"
+
       - name: Add Rename CLI tool
         run: |
             dart pub global activate rename
@@ -365,6 +377,10 @@ jobs:
         shell: bash
         run: python pybuilds/build_windows.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
+      - name: Build Windows installer
+        shell: bash
+        run: python pybuilds/build_windows.py --installer --version "$VERSION" --output-prefix PiliSuper --output dist
+
       - name: Release
         if: ${{ inputs.tag != '' }}
         uses: softprops/action-gh-release@v2
@@ -373,11 +389,18 @@ jobs:
           name:     ${{ inputs.tag }}
           files: |
             dist/PiliSuper_windows_*_portable.zip
+            dist/PiliSuper_windows_*_setup.exe
 
       - uses: actions/upload-artifact@v7
         with:
           name: Windows_portable_x64
           path: dist/PiliSuper_windows_*_portable.zip
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Windows_setup_x64
+          path: dist/PiliSuper_windows_*_setup.exe
           archive: false
 
 
@@ -460,7 +483,7 @@ jobs:
         run: python3 pybuilds/build_linux.py
 
       - name: Package Linux artifacts
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb rpm
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb rpm appimage
 
       - name: Upload Linux bundle for Arch packaging
         uses: actions/upload-artifact@v7
@@ -478,6 +501,7 @@ jobs:
             dist/PiliSuper_linux_*.tar.gz
             dist/PiliSuper_linux_*.deb
             dist/PiliSuper_linux_*.rpm
+            dist/PiliSuper_linux_*.AppImage
 
       - uses: actions/upload-artifact@v7
         with:
@@ -495,6 +519,12 @@ jobs:
         with:
           name: Linux_rpm_x86_64
           path: dist/PiliSuper_linux_*.rpm
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Linux_AppImage_x86_64
+          path: dist/PiliSuper_linux_*.AppImage
           archive: false
 
   arch:

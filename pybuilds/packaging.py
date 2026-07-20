@@ -9,6 +9,7 @@ import re
 import shutil
 import tempfile
 from pathlib import Path
+from urllib.request import urlopen
 
 from build_common import log_success, require_command, run_command
 
@@ -81,6 +82,56 @@ def package_tar(bundle: Path, destination: Path, zstd: bool) -> None:
         run_command(["tar", "--zstd", "-cf", str(destination), "-C", str(bundle), "."])
     else:
         run_command(["tar", "-zcf", str(destination), "-C", str(bundle), "."])
+    log_success(f"输出: {destination}")
+
+
+def package_appimage(bundle: Path, destination: Path, app_name: str, arch: str) -> None:
+    if arch not in ("x64", "amd64"):
+        raise SystemExit("当前仅支持使用 x86_64 AppImage 工具打包 x64 bundle")
+
+    tool = Path("appimagetool-x86_64.AppImage")
+    if not tool.is_file():
+        url = (
+            "https://github.com/AppImage/appimagetool/releases/"
+            "download/continuous/appimagetool-x86_64.AppImage"
+        )
+        with urlopen(url, timeout=60) as response, tool.open("wb") as output:
+            shutil.copyfileobj(response, output)
+        tool.chmod(0o755)
+
+    binary = find_bundle_binary(bundle)
+    with tempfile.TemporaryDirectory(prefix="pilisuper-appimage-") as temp:
+        appdir = Path(temp) / f"{PACKAGE_NAME}.AppDir"
+        appdir.mkdir()
+        shutil.copytree(bundle, appdir / "usr" / "bin")
+
+        desktop = appdir / f"{PACKAGE_NAME}.desktop"
+        desktop.write_text(
+            "[Desktop Entry]\n"
+            "Type=Application\n"
+            f"Name={app_name}\n"
+            f"Exec={PACKAGE_NAME} %U\n"
+            f"Icon={ICON_NAME}\n"
+            "Categories=AudioVideo;\n"
+            "Terminal=false\n",
+            encoding="utf-8",
+        )
+
+        icon = Path("assets/images/logo/logo.png")
+        if not icon.is_file():
+            raise SystemExit(f"缺少应用图标: {icon}")
+        shutil.copy2(icon, appdir / f"{ICON_NAME}.png")
+
+        app_run = appdir / "AppRun"
+        app_run.write_text(
+            "#!/bin/sh\n"
+            'HERE="$(dirname "$(readlink -f "$0")")"\n'
+            'export LD_LIBRARY_PATH="$HERE/usr/bin/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"\n'
+            f'exec "$HERE/usr/bin/{binary}" "$@"\n',
+            encoding="utf-8",
+        )
+        app_run.chmod(0o755)
+        run_command([str(tool.resolve()), "--appimage-extract-and-run", str(appdir), str(destination)], env={**os.environ, "ARCH": "x86_64"})
     log_success(f"输出: {destination}")
 
 
@@ -217,7 +268,7 @@ def main() -> None:
     parser.add_argument("--output", default="dist")
     parser.add_argument("--output-prefix", default="PiliSuper")
     parser.add_argument("--app-name", default="PiliSuper")
-    parser.add_argument("targets", nargs="+", choices=["tar.gz", "zst", "deb", "rpm", "arch"])
+    parser.add_argument("targets", nargs="+", choices=["tar.gz", "zst", "deb", "rpm", "arch", "appimage"])
     args = parser.parse_args()
 
     bundle = bundle_path(args.arch, args.bundle)
@@ -230,8 +281,10 @@ def main() -> None:
             package_deb(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".deb"), args.app_name, args.arch, args.version)
         elif target == "rpm":
             package_rpm(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".rpm"), args.app_name, args.arch, args.version)
-        else:
+        elif target == "arch":
             package_arch(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".pkg.tar.zst"), args.app_name, args.arch, args.version)
+        else:
+            package_appimage(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".AppImage"), args.app_name, args.arch)
 
 
 if __name__ == "__main__":
