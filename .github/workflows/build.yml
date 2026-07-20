@@ -103,6 +103,9 @@ jobs:
       - name: Apply Flutter SDK patches
         run: python3 patch.py android
 
+      - name: Resolve Flutter dependencies
+        run: flutter pub get
+
       - name: Build release APKs
         env:
           KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
@@ -227,11 +230,11 @@ jobs:
           python3 prebuild.py --platform ios
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Resolve Flutter dependencies
-        run: flutter pub get
-
       - name: Apply Flutter SDK patches
         run: python3 patch.py ios
+
+      - name: Resolve Flutter dependencies
+        run: flutter pub get
 
       - name: Build IPA
         run: python3 build_ios.py --version "$VERSION" --output-prefix PiliSuper --output dist
@@ -289,11 +292,11 @@ jobs:
           python3 prebuild.py --platform macos
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Resolve Flutter dependencies
-        run: flutter pub get
-
       - name: Apply Flutter SDK patches
         run: python3 patch.py macos
+
+      - name: Resolve Flutter dependencies
+        run: flutter pub get
 
       - name: Build macOS archive
         run: python3 build_macos.py --version "$VERSION" --output-prefix PiliSuper --output dist
@@ -350,13 +353,13 @@ jobs:
           python prebuild.py --platform windows
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Resolve Flutter dependencies
-        shell: bash
-        run: flutter pub get
-
       - name: Apply Flutter SDK patches
         shell: bash
         run: python patch.py windows
+
+      - name: Resolve Flutter dependencies
+        shell: bash
+        run: flutter pub get
 
       - name: Build portable Windows archive
         shell: bash
@@ -384,6 +387,8 @@ jobs:
     if: ${{ github.event_name == 'pull_request' || inputs.build_linux == true }}
     runs-on: ubuntu-latest
     permissions: write-all
+    outputs:
+      version: ${{ steps.release_metadata.outputs.version }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -438,21 +443,30 @@ jobs:
           python3 rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
+        id: release_metadata
         run: |
           python3 prebuild.py --platform linux
-          echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
-
-      - name: Resolve Flutter dependencies
-        run: flutter pub get
+          VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Apply Flutter SDK patches
         run: python3 patch.py linux
+
+      - name: Resolve Flutter dependencies
+        run: flutter pub get
 
       - name: Build Linux bundle
         run: python3 build_linux.py
 
       - name: Package Linux artifacts
-        run: python3 packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb
+        run: python3 packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb rpm
+
+      - name: Upload Linux bundle for Arch packaging
+        uses: actions/upload-artifact@v7
+        with:
+          name: Linux_bundle_x64
+          path: dist/PiliSuper_linux_*.tar.gz
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -463,6 +477,7 @@ jobs:
           files: |
             dist/PiliSuper_linux_*.tar.gz
             dist/PiliSuper_linux_*.deb
+            dist/PiliSuper_linux_*.rpm
 
       - uses: actions/upload-artifact@v7
         with:
@@ -474,4 +489,61 @@ jobs:
         with:
           name: Linux_deb_amd64
           path: dist/PiliSuper_linux_*.deb
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Linux_rpm_x86_64
+          path: dist/PiliSuper_linux_*.rpm
+          archive: false
+
+  arch:
+    name: Arch Linux x64
+    needs: linux
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    permissions: write-all
+    steps:
+      - name: Install job dependencies
+        run: pacman -Syu --noconfirm git python zstd
+
+      - uses: actions/checkout@v6
+
+      - name: Download Linux bundle
+        uses: actions/download-artifact@v8
+        with:
+          name: Linux_bundle_x64
+          path: arch-input
+
+      - name: Extract Linux bundle
+        run: |
+          mkdir -p build/linux/x64/release/bundle
+          tar -xzf arch-input/PiliSuper_linux_*.tar.gz \
+            -C build/linux/x64/release/bundle
+
+      - name: Create unprivileged package user
+        run: |
+          useradd --create-home builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build Arch package
+        run: |
+          runuser -u builder -- python3 packaging.py \
+            --version "${{ needs.linux.outputs.version }}" \
+            --output-prefix PiliSuper \
+            --output dist \
+            arch
+
+      - name: Release
+        if: ${{ inputs.tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }}
+          files: dist/PiliSuper_linux_*.pkg.tar.zst
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Linux_arch_x86_64
+          path: dist/PiliSuper_linux_*.pkg.tar.zst
           archive: false
