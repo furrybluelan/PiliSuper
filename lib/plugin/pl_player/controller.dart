@@ -44,6 +44,7 @@ import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/cdn_speed_service.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -67,6 +68,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
 typedef PlayCallback = Future<void>? Function();
+typedef AutoSwitchCdnCallback = Future<void> Function();
 
 class PlPlayerController with BlockConfigMixin {
   Player? _videoPlayerController;
@@ -436,6 +438,15 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   static PlayCallback? _playCallBack;
+
+  AutoSwitchCdnCallback? onAutoSwitchCdn;
+
+  final List<DateTime> _stutterTimestamps = [];
+  static const _stutterWindow = Duration(seconds: 30);
+  static const _stutterThreshold = 2;
+  /// seek 后缓冲是正常现象，忽略一段时间
+  static const _seekGrace = Duration(seconds: 5);
+  DateTime? _lastSeekAt;
 
   static Future<void>? playIfExists() {
     return _playCallBack?.call();
@@ -981,6 +992,9 @@ class PlPlayerController with BlockConfigMixin {
           buffering,
           isLive,
         );
+        if (buffering) {
+          _onBufferingStarted();
+        }
       }),
       if (kDebugMode)
         stream.log.listen(((PlayerLog log) {
@@ -1052,6 +1066,64 @@ class PlPlayerController with BlockConfigMixin {
     _subscriptions = null;
   }
 
+  void _onBufferingStarted() {
+    if (isLive ||
+        dataSource is FileSource ||
+        !Pref.autoSwitchCdn ||
+        isSeeking.value ||
+        !playerStatus.isPlaying ||
+        // 跳过开播前几秒的首次缓冲，避免误触发
+        position.value < 3 ||
+        onAutoSwitchCdn == null ||
+        CdnSpeedService.isTesting) {
+      return;
+    }
+
+    final now = DateTime.now();
+    // 双击快进/进度条 seek 后的缓冲不计为卡顿
+    if (_lastSeekAt != null && now.difference(_lastSeekAt!) < _seekGrace) {
+      return;
+    }
+    // 刚切换 CDN 后的重载缓冲 / 运营商 QoS 抖动不计
+    if (CdnSpeedService.inPostSwitchSettle(now: now)) {
+      return;
+    }
+
+    _stutterTimestamps
+      ..removeWhere((t) => now.difference(t) > _stutterWindow)
+      ..add(now);
+
+    if (_stutterTimestamps.length < _stutterThreshold) return;
+
+    // 仅在真正触发时清空；若 throttle 丢弃则保留计数，冷却后可再触发
+    // toast 由 tryAutoSwitchCdn 在通过次数限制后再弹出，避免空提示
+    EasyThrottle.throttle(
+      'autoSwitchCdn',
+      const Duration(seconds: 60),
+      () {
+        // 二次校验：throttle 回调执行时可能已在稳定期/测速中
+        if (CdnSpeedService.isTesting ||
+            CdnSpeedService.inPostSwitchSettle() ||
+            onAutoSwitchCdn == null) {
+          // 丢弃本次触发，清空计数避免冷却结束后立刻再打满阈值
+          _stutterTimestamps.clear();
+          return;
+        }
+        _stutterTimestamps.clear();
+        onAutoSwitchCdn?.call();
+      },
+    );
+  }
+
+  void resetStutterDetection() {
+    _stutterTimestamps.clear();
+  }
+
+  void _markSeek() {
+    _lastSeekAt = DateTime.now();
+    _stutterTimestamps.clear();
+  }
+
   void _cancelSubForSeek() {
     if (_subForSeek != null) {
       _subForSeek!.cancel();
@@ -1068,6 +1140,7 @@ class PlPlayerController with BlockConfigMixin {
       position = Duration.zero;
     }
     _heartDuration = position.inSeconds;
+    _markSeek();
 
     Future<void> seek() async {
       if (isSeek) {
@@ -1077,6 +1150,7 @@ class PlPlayerController with BlockConfigMixin {
       danmakuController?.clear();
       try {
         await _videoPlayerController?.seek(position);
+        _markSeek();
       } catch (e) {
         if (kDebugMode) debugPrint('seek failed: $e');
       }
@@ -1285,6 +1359,7 @@ class PlPlayerController with BlockConfigMixin {
   // 双击播放、暂停
   Future<void> onDoubleTapCenter() async {
     if (!isLive && isCompleted) {
+      _markSeek();
       await videoPlayerController!.seek(Duration.zero);
       videoPlayerController!.play();
     } else {
@@ -1312,6 +1387,7 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   void onForwardBackward(Duration duration) {
+    _markSeek();
     seekTo(
       duration.clamp(Duration.zero, videoPlayerController!.state.duration),
       isSeek: false,
@@ -1557,6 +1633,9 @@ class PlPlayerController with BlockConfigMixin {
     _stopOrientationListener();
     _disableAutoEnterPip();
     setPlayCallBack(null);
+    onAutoSwitchCdn = null;
+    _stutterTimestamps.clear();
+    _lastSeekAt = null;
     dmState.clear();
     if (showSeekPreview) {
       _clearPreview();
