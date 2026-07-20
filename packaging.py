@@ -147,7 +147,11 @@ def package_arch(bundle: Path, destination: Path, app_name: str, arch: str, vers
         run_command(
             ["makepkg", "--force", "--noconfirm"],
             cwd=work,
-            env={**os.environ, "PKGDEST": str(work), "PACKAGER": "FRBLanApps"},
+            env={
+                **os.environ,
+                "PKGDEST": str(work),
+                "PACKAGER": "FRBLanApps <frblanapps@disroot.org>",
+            },
         )
         packages = list(work.glob(f"{PACKAGE_NAME}-*.pkg.tar.zst"))
         if len(packages) != 1:

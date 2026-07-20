@@ -505,7 +505,7 @@ jobs:
     permissions: write-all
     steps:
       - name: Install job dependencies
-        run: pacman -Syu --noconfirm git python zstd
+        run: pacman -Syu --noconfirm git python zstd gtk3 mpv libayatana-appindicator
 
       - uses: actions/checkout@v6
 
