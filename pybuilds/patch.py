@@ -7,14 +7,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from build_common import (
-    log_step,
-    log_success,
-    log_warning,
-    require_command,
-    require_project_root,
-    run_command,
-)
+from build_common import (log_step, log_success, log_warning, require_command,
+                          require_project_root, run_command)
 
 # 所有平台都需要的补丁。顺序和原 patch.ps1 保持一致。
 COMMON_PATCHES = [

@@ -90,18 +90,18 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 rename.py "${NAME_ARGS[@]}"
+          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         run: |
-          python3 prebuild.py --platform android
+          python3 pybuilds/prebuild.py --platform android
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Apply Patches
-        run: python3 patch.py android
+        run: python3 pybuilds/patch.py android
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
@@ -123,7 +123,7 @@ jobs:
               --clean-keys
             )
           fi
-          python3 build_android.py --version "$VERSION" --output-prefix PiliSuper --output dist "${SIGN_ARGS[@]}"
+          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix PiliSuper --output dist "${SIGN_ARGS[@]}"
 
       - name: Build Dev
         env:
@@ -145,7 +145,7 @@ jobs:
           fi
 
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
-          python3 build_android.py --version "$VERSION" --output-prefix PiliSuper --output dist --dev "${SIGN_ARGS[@]}"
+          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix PiliSuper --output dist --dev "${SIGN_ARGS[@]}"
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -223,21 +223,21 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 rename.py "${NAME_ARGS[@]}"
+          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         run: |
-          python3 prebuild.py --platform ios
+          python3 pybuilds/prebuild.py --platform ios
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Apply Patches
-        run: python3 patch.py ios
+        run: python3 pybuilds/patch.py ios
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Build IPA
-        run: python3 build_ios.py --version "$VERSION" --output-prefix PiliSuper --output dist
+        run: python3 pybuilds/build_ios.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -285,21 +285,21 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 rename.py "${NAME_ARGS[@]}"
+          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         run: |
-          python3 prebuild.py --platform macos
+          python3 pybuilds/prebuild.py --platform macos
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Apply Patches
-        run: python3 patch.py macos
+        run: python3 pybuilds/patch.py macos
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Build macOS archive
-        run: python3 build_macos.py --version "$VERSION" --output-prefix PiliSuper --output dist
+        run: python3 pybuilds/build_macos.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -345,17 +345,17 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python rename.py "${NAME_ARGS[@]}"
+          python pybuilds/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         shell: bash
         run: |
-          python prebuild.py --platform windows
+          python pybuilds/prebuild.py --platform windows
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Apply Patches
         shell: bash
-        run: python patch.py windows
+        run: python pybuilds/patch.py windows
 
       - name: Resolve Flutter dependencies
         shell: bash
@@ -363,7 +363,7 @@ jobs:
 
       - name: Build portable Windows archive
         shell: bash
-        run: python build_windows.py --version "$VERSION" --output-prefix PiliSuper --output dist
+        run: python pybuilds/build_windows.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -440,27 +440,27 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 rename.py "${NAME_ARGS[@]}"
+          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         id: release_metadata
         run: |
-          python3 prebuild.py --platform linux
+          python3 pybuilds/prebuild.py --platform linux
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Apply Patches
-        run: python3 patch.py linux
+        run: python3 pybuilds/patch.py linux
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Build Linux bundle
-        run: python3 build_linux.py
+        run: python3 pybuilds/build_linux.py
 
       - name: Package Linux artifacts
-        run: python3 packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb rpm
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb rpm
 
       - name: Upload Linux bundle for Arch packaging
         uses: actions/upload-artifact@v7
@@ -528,7 +528,7 @@ jobs:
 
       - name: Build Arch package
         run: |
-          runuser -u builder -- python3 packaging.py \
+          runuser -u builder -- python3 pybuilds/packaging.py \
             --version "${{ needs.linux.outputs.version }}" \
             --output-prefix PiliSuper \
             --output dist \

@@ -6,7 +6,8 @@ import argparse
 import re
 from pathlib import Path
 
-from build_common import log_info, log_step, log_success, log_warning, require_command, require_project_root, run_command
+from build_common import (log_info, log_step, log_success, log_warning,
+                          require_command, require_project_root, run_command)
 
 SKIP_DIRECTORIES = {".git", ".dart_tool", "build", "Pods", "ephemeral"}
 

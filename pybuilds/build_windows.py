@@ -6,7 +6,8 @@ import argparse
 import shutil
 from pathlib import Path
 
-from build_common import flutter_build, log_success, output_path, require_project_root
+from build_common import (flutter_build, log_success, output_path,
+                          require_project_root)
 
 
 def main() -> None:

@@ -7,7 +7,8 @@ import platform
 import shutil
 from pathlib import Path
 
-from build_common import flutter_build, log_success, output_path, require_project_root, run_shell_command
+from build_common import (flutter_build, log_success, output_path,
+                          require_project_root, run_shell_command)
 
 
 def main() -> None:

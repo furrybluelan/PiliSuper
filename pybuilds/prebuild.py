@@ -9,7 +9,8 @@ import subprocess
 import time
 from pathlib import Path
 
-from build_common import log_error, log_step, log_success, require_project_root, run_command
+from build_common import (log_error, log_step, log_success,
+                          require_project_root, run_command)
 
 
 def git_output(*args: str) -> str:
