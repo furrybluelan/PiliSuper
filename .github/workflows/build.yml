@@ -115,6 +115,7 @@ jobs:
 
           python3 rename.py "${NAME_ARGS[@]}"
           python3 prebuild.py --platform android
+          flutter pub get
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
           python3 patch.py android
           python3 build_android.py --version "$VERSION" --output-prefix PiliSuper --output dist "${SIGN_ARGS[@]}"
@@ -226,6 +227,7 @@ jobs:
           
           python3 rename.py "${NAME_ARGS[@]}"
           python3 prebuild.py --platform ios
+          flutter pub get
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
           python3 patch.py ios
           python3 build_ios.py --version "$VERSION" --output-prefix PiliSuper --output dist
@@ -284,6 +286,7 @@ jobs:
 
           python3 rename.py "${NAME_ARGS[@]}"
           python3 prebuild.py --platform macos
+          flutter pub get
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
           python3 patch.py macos
           python3 build_macos.py --version "$VERSION" --output-prefix PiliSuper --output dist
@@ -334,6 +337,7 @@ jobs:
           fi
           python rename.py "${NAME_ARGS[@]}"
           python prebuild.py --platform windows
+          flutter pub get
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
           python patch.py windows
           python build_windows.py --version "$VERSION" --output-prefix PiliSuper --output dist
@@ -419,6 +423,7 @@ jobs:
 
           python3 rename.py "${NAME_ARGS[@]}"
           python3 prebuild.py --platform linux
+          flutter pub get
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
           python3 patch.py linux
           python3 build_linux.py

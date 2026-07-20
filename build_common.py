@@ -69,13 +69,15 @@ def run_command(command: Sequence[str], **kwargs: object) -> subprocess.Complete
             command_parts[0] = resolved
     if not kwargs.get("capture_output"):
         log_info("$ " + " ".join(command_parts))
-    return subprocess.run(command_parts, text=True, check=True, **kwargs)
+    check = kwargs.pop("check", True)
+    return subprocess.run(command_parts, text=True, check=check, **kwargs)
 
 
 def run_shell_command(command: str, **kwargs: object) -> subprocess.CompletedProcess[str]:
     if not kwargs.get("capture_output"):
         log_info("$ " + command)
-    return subprocess.run(command, shell=True, text=True, check=True, **kwargs)
+    check = kwargs.pop("check", True)
+    return subprocess.run(command, shell=True, text=True, check=check, **kwargs)
 
 
 def require_command(command: str, hint: str = "") -> None:
