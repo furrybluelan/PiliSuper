@@ -1,5 +1,4 @@
 import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
-import 'package:PiliPlus/common/widgets/selectable_text.dart';
 import 'package:PiliPlus/models_new/video/video_ai_conclusion/model_result.dart';
 import 'package:PiliPlus/pages/common/slide/common_slide_page.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
@@ -35,12 +34,10 @@ class AiConclusionPanel extends CommonSlidePage {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: selectableText(
+              child: SelectableText(
                 res.summary!,
-                style: const TextStyle(
-                  fontSize: 15,
-                  height: 1.5,
-                ),
+                style: const TextStyle(fontSize: 15, height: 1.5),
+                scrollPhysics: const NeverScrollableScrollPhysics(),
               ),
             ),
           ),
