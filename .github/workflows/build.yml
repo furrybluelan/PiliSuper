@@ -237,17 +237,43 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: ${{ github.event_name == 'pull_request' || inputs.build_android_release == true }}
         with:
-          name: Android_release
-          path: |
-            dist/PiliSuper_android_*.apk
-            !dist/PiliSuper_android_*_dev.apk
+          name: Android_release_arm64-v8a
+          path: dist/PiliSuper_android_*_arm64-v8a.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_release == true }}
+        with:
+          name: Android_release_armeabi-v7a
+          path: dist/PiliSuper_android_*_armeabi-v7a.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_release == true }}
+        with:
+          name: Android_release_x86_64
+          path: dist/PiliSuper_android_*_x86_64.apk
           archive: false
 
       - uses: actions/upload-artifact@v7
         if: ${{ github.event_name == 'pull_request' || inputs.build_android_dev == true }}
         with:
-          name: Android_dev
-          path: dist/PiliSuper_android_*_dev.apk
+          name: Android_dev_arm64-v8a
+          path: dist/PiliSuper_android_*_arm64-v8a_dev.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_dev == true }}
+        with:
+          name: Android_dev_armeabi-v7a
+          path: dist/PiliSuper_android_*_armeabi-v7a_dev.apk
+          archive: false
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_dev == true }}
+        with:
+          name: Android_dev_x86_64
+          path: dist/PiliSuper_android_*_x86_64_dev.apk
           archive: false
 
   # ───────────── iOS ─────────────
