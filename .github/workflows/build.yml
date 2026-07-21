@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - "**.md"
+  # 底下那托参数在pr触发的时候是空值，以前没炸是因为硬编码。小心!
   workflow_call:
     inputs:
       tag:
