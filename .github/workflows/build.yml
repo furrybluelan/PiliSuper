@@ -22,28 +22,48 @@ on:
         required: false
         default: "PiliSuper"
         type: string
-      build_android:
-        description: "Build Android"
+      build_android_release:
+        description: "Android：正式 APK（全部 ABI）"
         default: true
         type: boolean
       build_android_dev:
-        description: "Build Android Dev version"
+        description: "Android：开发版 APK（全部 ABI）"
         default: true
         type: boolean
       build_ios:
-        description: "Build iOS"
+        description: "iOS：未签名 IPA"
         default: true
         type: boolean
       build_macos:
-        description: "Build macOS"
+        description: "macOS：DMG"
         default: true
         type: boolean
-      build_windows:
-        description: "Build Windows"
+      build_windows_portable:
+        description: "Windows：便携版 ZIP"
         default: true
         type: boolean
-      build_linux:
-        description: "Build Linux"
+      build_windows_installer:
+        description: "Windows：安装程序 EXE"
+        default: true
+        type: boolean
+      build_linux_tar_gz:
+        description: "Linux：tar.gz"
+        default: true
+        type: boolean
+      build_linux_deb:
+        description: "Linux：Debian DEB"
+        default: true
+        type: boolean
+      build_linux_rpm:
+        description: "Linux：RPM"
+        default: true
+        type: boolean
+      build_linux_appimage:
+        description: "Linux：AppImage"
+        default: true
+        type: boolean
+      build_linux_arch:
+        description: "Linux：Arch PKG（依赖 Linux bundle）"
         default: true
         type: boolean
 
@@ -54,7 +74,7 @@ jobs:
   # ───────────── Android ─────────────
   android:
     name: Android
-    if: ${{ github.event_name == 'pull_request' || inputs.build_android == true }}
+    if: ${{ github.event_name == 'pull_request' || inputs.build_android_release == true || inputs.build_android_dev == true }}
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
@@ -107,6 +127,7 @@ jobs:
         run: flutter pub get
 
       - name: Build release APKs
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_release == true }}
         env:
           KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
           KEY_ALIAS:    ${{ secrets.KEY_ALIAS }}
@@ -153,45 +174,22 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
-          files: |
-            dist/PiliSuper_android_*_arm64-v8a.apk
-            dist/PiliSuper_android_*_armeabi-v7a.apk
-            dist/PiliSuper_android_*_x86_64.apk
+          files: dist/PiliSuper_android_*.apk
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_release == true }}
         with:
-          name: Android_arm64-v8a
-          path: dist/PiliSuper_android_*_arm64-v8a.apk
+          name: Android_release
+          path: |
+            dist/PiliSuper_android_*.apk
+            !dist/PiliSuper_android_*_dev.apk
           archive: false
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_android_dev == true }}
         with:
-          name: Android_armeabi-v7a
-          path: dist/PiliSuper_android_*_armeabi-v7a.apk
-          archive: false
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Android_x86_64
-          path: dist/PiliSuper_android_*_x86_64.apk
-          archive: false
-      
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Android_arm64-v8a
-          path: dist/PiliSuper_android_*_arm64-v8a_dev.apk
-          archive: false
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Android_armeabi-v7a
-          path: dist/PiliSuper_android_*_armeabi-v7a_dev.apk
-          archive: false
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Android_x86_64
-          path: dist/PiliSuper_android_*_x86_64_dev.apk
+          name: Android_dev
+          path: dist/PiliSuper_android_*_dev.apk
           archive: false
 
   # ───────────── iOS ─────────────
@@ -318,7 +316,7 @@ jobs:
   # ───────────── Windows ─────────────
   windows:
     name: Windows x64
-    if: ${{ github.event_name == 'pull_request' || inputs.build_windows == true }}
+    if: ${{ github.event_name == 'pull_request' || inputs.build_windows_portable == true || inputs.build_windows_installer == true }}
     runs-on: windows-latest
     permissions: write-all
     steps:
@@ -332,12 +330,14 @@ jobs:
           flutter-version-file: pubspec.yaml
 
       - name: Install fastforge and Inno Setup
+        if: ${{ github.event_name == 'pull_request' || inputs.build_windows_installer == true }}
         shell: bash
         run: |
           dart pub global activate fastforge
           choco install innosetup --no-progress --yes
 
       - name: Add Inno Setup Chinese language
+        if: ${{ github.event_name == 'pull_request' || inputs.build_windows_installer == true }}
         shell: pwsh
         run: |
           Copy-Item "windows/packaging/exe/ChineseSimplified.isl" `
@@ -374,10 +374,12 @@ jobs:
         run: flutter pub get
 
       - name: Build portable Windows archive
+        if: ${{ github.event_name == 'pull_request' || inputs.build_windows_portable == true }}
         shell: bash
         run: python pybuilds/build_windows.py --version "$VERSION" --output-prefix PiliSuper --output dist
 
       - name: Build Windows installer
+        if: ${{ github.event_name == 'pull_request' || inputs.build_windows_installer == true }}
         shell: bash
         run: python pybuilds/build_windows.py --installer --version "$VERSION" --output-prefix PiliSuper --output dist
 
@@ -392,12 +394,14 @@ jobs:
             dist/PiliSuper_windows_*_setup.exe
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_windows_portable == true }}
         with:
           name: Windows_portable_x64
           path: dist/PiliSuper_windows_*_portable.zip
           archive: false
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_windows_installer == true }}
         with:
           name: Windows_setup_x64
           path: dist/PiliSuper_windows_*_setup.exe
@@ -407,7 +411,7 @@ jobs:
   # ───────────── Linux ─────────────
   linux:
     name: Linux x64
-    if: ${{ github.event_name == 'pull_request' || inputs.build_linux == true }}
+    if: ${{ github.event_name == 'pull_request' || inputs.build_linux_tar_gz == true || inputs.build_linux_deb == true || inputs.build_linux_rpm == true || inputs.build_linux_appimage == true || inputs.build_linux_arch == true }}
     runs-on: ubuntu-latest
     permissions: write-all
     outputs:
@@ -482,10 +486,24 @@ jobs:
       - name: Build Linux bundle
         run: python3 pybuilds/build_linux.py
 
-      - name: Package Linux artifacts
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz deb rpm appimage
+      - name: Package Linux tar.gz
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_tar_gz == true || inputs.build_linux_arch == true }}
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist tar.gz
+
+      - name: Package Linux DEB
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_deb == true }}
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist deb
+
+      - name: Package Linux RPM
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_rpm == true }}
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist rpm
+
+      - name: Package Linux AppImage
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_appimage == true }}
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix PiliSuper --output dist appimage
 
       - name: Upload Linux bundle for Arch packaging
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_arch == true }}
         uses: actions/upload-artifact@v7
         with:
           name: Linux_bundle_x64
@@ -497,31 +515,31 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
-          files: |
-            dist/PiliSuper_linux_*.tar.gz
-            dist/PiliSuper_linux_*.deb
-            dist/PiliSuper_linux_*.rpm
-            dist/PiliSuper_linux_*.AppImage
+          files: dist/PiliSuper_linux_*
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_tar_gz == true }}
         with:
           name: Linux_tar.gz_amd64
           path: dist/PiliSuper_linux_*.tar.gz
           archive: false
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_deb == true }}
         with:
           name: Linux_deb_amd64
           path: dist/PiliSuper_linux_*.deb
           archive: false
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_rpm == true }}
         with:
           name: Linux_rpm_x86_64
           path: dist/PiliSuper_linux_*.rpm
           archive: false
 
       - uses: actions/upload-artifact@v7
+        if: ${{ github.event_name == 'pull_request' || inputs.build_linux_appimage == true }}
         with:
           name: Linux_AppImage_x86_64
           path: dist/PiliSuper_linux_*.AppImage
@@ -529,6 +547,7 @@ jobs:
 
   arch:
     name: Arch Linux x64
+    if: ${{ github.event_name == 'pull_request' || inputs.build_linux_arch == true }}
     needs: linux
     runs-on: ubuntu-latest
     container: archlinux:base-devel
