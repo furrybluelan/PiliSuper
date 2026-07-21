@@ -3,10 +3,14 @@ name: CI Check
 on:
   push:
     branches: [main, dev]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**.md"
 
 concurrency:
-  group: ci-check-${{ github.ref }}
-  cancel-in-progress: false
+  group: ci-check-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
@@ -38,8 +42,30 @@ jobs:
         if: ${{ hashFiles('test/**/*.dart') != '' }}
         run: flutter test
 
+  # PR：每次提交在检查通过后立即跑完整多平台构建
+  pr-full-build:
+    name: PR full build
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: check
+    permissions: write-all
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      build_android_release: true
+      build_android_dev: true
+      build_ios: true
+      build_macos: true
+      build_windows_portable: true
+      build_windows_installer: true
+      build_linux_tar_gz: true
+      build_linux_deb: true
+      build_linux_rpm: true
+      build_linux_appimage: true
+      build_linux_arch: true
+
   schedule-full-build:
     name: Schedule periodic full build
+    if: ${{ github.event_name == 'push' }}
     needs: check
     runs-on: ubuntu-latest
     permissions:
