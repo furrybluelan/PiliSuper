@@ -5,6 +5,64 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - "**.md"
+  workflow_call:
+    inputs:
+      tag:
+        required: false
+        type: string
+        default: ""
+      pkg_id:
+        required: false
+        type: string
+        default: "com.pili.super"
+      app_name:
+        required: false
+        type: string
+        default: "PiliSuper"
+      build_android_release:
+        required: false
+        type: boolean
+        default: true
+      build_android_dev:
+        required: false
+        type: boolean
+        default: true
+      build_ios:
+        required: false
+        type: boolean
+        default: true
+      build_macos:
+        required: false
+        type: boolean
+        default: true
+      build_windows_portable:
+        required: false
+        type: boolean
+        default: true
+      build_windows_installer:
+        required: false
+        type: boolean
+        default: true
+      build_linux_tar_gz:
+        required: false
+        type: boolean
+        default: true
+      build_linux_deb:
+        required: false
+        type: boolean
+        default: true
+      build_linux_rpm:
+        required: false
+        type: boolean
+        default: true
+      build_linux_appimage:
+        required: false
+        type: boolean
+        default: true
+      build_linux_arch:
+        required: false
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       tag:
