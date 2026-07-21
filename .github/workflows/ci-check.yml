@@ -11,6 +11,7 @@ concurrency:
 jobs:
   check:
     name: Flutter checks
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -41,6 +42,7 @@ jobs:
   schedule-full-build:
     name: Schedule periodic full build
     needs: check
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     permissions:
       actions: write
