@@ -202,7 +202,7 @@ jobs:
               --clean-keys
             )
           fi
-          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --output dist "${SIGN_ARGS[@]}"
+          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist "${SIGN_ARGS[@]}"
 
       - name: Build Dev
         env:
@@ -224,7 +224,7 @@ jobs:
           fi
 
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
-          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --output dist --dev "${SIGN_ARGS[@]}"
+          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist --dev "${SIGN_ARGS[@]}"
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -319,7 +319,7 @@ jobs:
         run: flutter pub get
 
       - name: Build IPA
-        run: python3 pybuilds/build_ios.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --output dist
+        run: python3 pybuilds/build_ios.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -381,7 +381,7 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS archive
-        run: python3 pybuilds/build_macos.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --output dist
+        run: python3 pybuilds/build_macos.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -460,12 +460,12 @@ jobs:
       - name: Build portable Windows archive
         if: ${{ github.event_name == 'pull_request' || inputs.build_windows_portable == true }}
         shell: bash
-        run: python pybuilds/build_windows.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --output dist
+        run: python pybuilds/build_windows.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Build Windows installer
         if: ${{ github.event_name == 'pull_request' || inputs.build_windows_installer == true }}
         shell: bash
-        run: python pybuilds/build_windows.py --installer --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --output dist
+        run: python pybuilds/build_windows.py --installer --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -572,19 +572,19 @@ jobs:
 
       - name: Package Linux tar.gz
         if: ${{ github.event_name == 'pull_request' || inputs.build_linux_tar_gz == true || inputs.build_linux_arch == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --app-name "${{ inputs.app_name}}" --output dist tar.gz
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --output dist tar.gz
 
       - name: Package Linux DEB
         if: ${{ github.event_name == 'pull_request' || inputs.build_linux_deb == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --app-name "${{ inputs.app_name}}" --output dist deb
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --output dist deb
 
       - name: Package Linux RPM
         if: ${{ github.event_name == 'pull_request' || inputs.build_linux_rpm == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --app-name "${{ inputs.app_name}}" --output dist rpm
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --output dist rpm
 
       - name: Package Linux AppImage
         if: ${{ github.event_name == 'pull_request' || inputs.build_linux_appimage == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name}}" --app-name "${{ inputs.app_name}}" --output dist appimage
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --output dist appimage
 
       - name: Upload Linux bundle for Arch packaging
         if: ${{ github.event_name == 'pull_request' || inputs.build_linux_arch == true }}
@@ -663,8 +663,8 @@ jobs:
         run: |
           runuser -u builder -- python3 pybuilds/packaging.py \
             --version "${{ needs.linux.outputs.version }}" \
-            --output-prefix "${{ inputs.app_name}}" \
-            --app-name "${{ inputs.app_name}}" \
+            --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" \
+            --app-name "${{ inputs.app_name || 'PiliSuper' }}" \
             --output dist \
             arch
 
