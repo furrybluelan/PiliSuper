@@ -51,6 +51,7 @@ import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/cdn_speed_service.dart';
 import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
@@ -385,6 +386,120 @@ class VideoDetailController extends GetxController
       vsync: this,
       initialIndex: Pref.defaultShowComment ? 1 : 0,
     );
+
+    _bindAutoSwitchCdn();
+  }
+
+  /// 当前视频/分 P 已自动测速次数，换集时重置
+  int _autoCdnAttempts = 0;
+  bool _autoCdnLimitToasted = false;
+  /// 换集时递增，作废尚未触发的延迟 toast
+  int _autoCdnEpoch = 0;
+  bool _autoCdnRunning = false;
+
+  void _bindAutoSwitchCdn() {
+    if (!isFileSource) {
+      plPlayerController.onAutoSwitchCdn = tryAutoSwitchCdn;
+    }
+  }
+
+  void _stopAutoSwitchCdnForVideo() {
+    if (plPlayerController.onAutoSwitchCdn == tryAutoSwitchCdn) {
+      plPlayerController.onAutoSwitchCdn = null;
+    }
+    plPlayerController.resetStutterDetection();
+  }
+
+  /// 达上限 toast 每个视频只弹一次
+  void _toastAutoCdnLimitOnce() {
+    if (_autoCdnLimitToasted || isClosed) return;
+    _autoCdnLimitToasted = true;
+    SmartDialog.showToast(
+      '本视频 CDN 自动切换已达上限',
+      displayTime: const Duration(seconds: 2),
+    );
+  }
+
+  void _reloadPlayerWithCurrentCdn() {
+    if (isClosed || currentVideoQa.value == null) return;
+    plPlayerController.resetStutterDetection();
+    // updatePlayer 依赖 dash；durl 兜底流走重新拉链
+    if (data.dash != null) {
+      updatePlayer();
+    } else {
+      queryVideoUrl(fromReset: true);
+    }
+  }
+
+  Future<void> tryAutoSwitchCdn() async {
+    if (isFileSource ||
+        isClosed ||
+        currentVideoQa.value == null ||
+        _autoCdnRunning) {
+      return;
+    }
+
+    if (_autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo) {
+      _stopAutoSwitchCdnForVideo();
+      _toastAutoCdnLimitOnce();
+      return;
+    }
+    // 先占全局额度，避免与其它页面/并发回调重复测速
+    if (!CdnSpeedService.tryReserveAttempt()) {
+      return;
+    }
+
+    _autoCdnRunning = true;
+    try {
+      _autoCdnAttempts++;
+      final isLastAttempt =
+          _autoCdnAttempts >= CdnSpeedService.maxAttemptsPerVideo;
+      final epoch = _autoCdnEpoch;
+      // 立刻解绑，防止测速期间再触发
+      if (isLastAttempt) {
+        _stopAutoSwitchCdnForVideo();
+      }
+
+      SmartDialog.showToast(
+        '检测到卡顿，正在测速并切换最佳 CDN…',
+        displayTime: const Duration(seconds: 2),
+      );
+
+      // durl 兜底会把已 rewrite 的 URL 写进 firstVideo，不能当测速样本
+      // sample 在测速开始时固定；换集后全局 CDN 仍会更新，但样本可能是旧片
+      final sample = data.dash != null ? firstVideo : null;
+      final switched = await CdnSpeedService.autoSwitchBestCdn(
+        sample: sample,
+        onSwitched: (best) {
+          if (isClosed) return;
+          SmartDialog.showToast(
+            '已自动切换至 ${best.desc}',
+            displayTime: const Duration(seconds: 2),
+          );
+        },
+        onMessage: (msg) {
+          // 换集后不再对旧测速结果 toast「已是最佳/失败」
+          if (isClosed || epoch != _autoCdnEpoch) return;
+          SmartDialog.showToast(msg, displayTime: const Duration(seconds: 2));
+        },
+      );
+
+      if (!switched || isClosed) return;
+
+      // 仍是同一集且已用尽额度：结果 toast 后再提示上限（只弹一次）
+      if (isLastAttempt && epoch == _autoCdnEpoch) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (!isClosed && epoch == _autoCdnEpoch) {
+            _toastAutoCdnLimitOnce();
+          }
+        });
+      }
+
+      // 换集后 epoch 已变：仍重载*当前*分 P，应用新全局 CDN，避免只改偏好不改 URL
+      _reloadPlayerWithCurrentCdn();
+    } finally {
+      _autoCdnRunning = false;
+    }
   }
 
   Future<void> getMediaList({
@@ -1214,6 +1329,9 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
+    if (plPlayerController.onAutoSwitchCdn == tryAutoSwitchCdn) {
+      plPlayerController.onAutoSwitchCdn = null;
+    }
     cid.close();
     if (isFileSource) {
       cacheLocalProgress();
@@ -1234,6 +1352,12 @@ class VideoDetailController extends GetxController
     if (isFileSource) {
       cacheLocalProgress();
     }
+
+    _autoCdnAttempts = 0;
+    _autoCdnLimitToasted = false;
+    _autoCdnEpoch++;
+    plPlayerController.resetStutterDetection();
+    _bindAutoSwitchCdn();
 
     playedTime = null;
     defaultST = null;
