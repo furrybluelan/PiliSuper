@@ -53,6 +53,30 @@ TEXT_SELECTION_MENU_FIX_COMMIT = "beb2ad17004a1b118ff2bd09f55cee23198f6652"
 # https://github.com/flutter/flutter/issues/182281
 OVERSCROLL_COMMIT = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
 
+# 别看着底下的代码生气就直接塞回主函数里，否则隔壁ci不过。
+def apply_project_patch(patch_file: Path, project_root: Path) -> None:
+    try:
+        run_command(
+        ["git", "apply", "--check", str(patch_file), "--ignore-whitespace"],
+        cwd=project_root
+        )
+    except subprocess.CalledProcessError:
+        try:
+            run_command(
+            ["git", "apply", "--reverse", "--check", str(patch_file), "--ignore-whitespace"],
+            cwd=project_root
+            )
+        except subprocess.CalledProcessError:
+            raise SystemExit(f"iOS 项目补丁 {patch_file.name}应用失败，且未能回退。")
+        else:
+            log_warning(f"iOS 项目补丁 {patch_file.name} 应用失败，已忽略")  
+    else:
+        run_command(
+        ["git", "apply", str(patch_file), "--ignore-whitespace"],
+        cwd=project_root
+        )
+        log_success(f"Applied project patch: {patch_file.name}")
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -79,28 +103,7 @@ def main() -> None:
         for patch_name in IOS_PROJECT_PATCHES:
             patch_file = patch_dir / patch_name
             log_step(f"Apply project patch {patch_name}")
-            # apply_project_patch(patch_file, project_root)
-            try:
-                run_command(
-                ["git", "apply", "--check", str(patch_file), "--ignore-whitespace"],
-                cwd=project_root
-                )
-            except subprocess.CalledProcessError:
-                try:
-                    run_command(
-                    ["git", "apply", "--reverse", "--check", str(patch_file), "--ignore-whitespace"],
-                    cwd=project_root
-                    )
-                except subprocess.CalledProcessError:
-                    raise SystemExit(f"iOS 项目补丁应用失败: {patch_file.name}，且未能回退。")
-                else:
-                    log_warning(f"iOS 项目补丁 {patch_name} 应用失败，已忽略")  
-            else:
-                run_command(
-                ["git", "apply", str(patch_file), "--ignore-whitespace"],
-                cwd=project_root
-                )
-                log_success(f"Applied project patch: {patch_name}")
+            apply_project_patch(patch_file, project_root)
 
     # 2. 找到位于 <SDK>/bin/flutter 的 Flutter SDK。
     require_command("flutter", "请安装 Flutter，或将其加入 PATH")
