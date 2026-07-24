@@ -117,6 +117,16 @@ jobs:
           )
 
           commits_since_last_full=0
+          if [[ -z "$last_full_sha" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "reason=未找到成功的完整构建基线，执行首次完整构建" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! git cat-file -e "$last_full_sha^{commit}" 2>/dev/null || ! git merge-base --is-ancestor "$last_full_sha" "$SHA"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "reason=上次完整构建基线不在当前分支历史中，执行完整构建" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [[ -n "$last_full_sha" ]]; then
             commits_since_last_full="$(git rev-list --count "$last_full_sha..$SHA")"
           fi

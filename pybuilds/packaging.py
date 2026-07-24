@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.request import urlopen
 
@@ -16,6 +17,20 @@ from build_common import log_success, require_command, run_command
 PACKAGE_NAME = "pilisuper"
 DESKTOP_FILE_NAME = "com.pili.super.desktop"
 ICON_NAME = "pilisuper"
+
+
+@dataclass(frozen=True)
+class PackageIdentity:
+    package_name: str
+    desktop_file_name: str
+    icon_name: str
+
+
+def package_identity(pkg_id: str) -> PackageIdentity:
+    if pkg_id == "com.pili.super":
+        return PackageIdentity(PACKAGE_NAME, DESKTOP_FILE_NAME, ICON_NAME)
+    normalized = re.sub(r"[^a-z0-9.+-]", "-", pkg_id.lower())
+    return PackageIdentity(normalized, f"{normalized}.desktop", normalized)
 
 
 def bundle_path(arch: str, explicit_path: str | None) -> Path:
@@ -38,30 +53,32 @@ def find_bundle_binary(bundle: Path) -> str:
     return executables[0]
 
 
-def create_install_tree(bundle: Path, root: Path, app_name: str) -> None:
+def create_install_tree(
+    bundle: Path, root: Path, app_name: str, identity: PackageIdentity
+) -> None:
     binary = find_bundle_binary(bundle)
-    app_dir = root / "opt" / PACKAGE_NAME
+    app_dir = root / "opt" / identity.package_name
     shutil.copytree(bundle, app_dir)
 
-    launcher = root / "usr" / "bin" / PACKAGE_NAME
+    launcher = root / "usr" / "bin" / identity.package_name
     launcher.parent.mkdir(parents=True)
     launcher.write_text(
         "#!/bin/sh\n"
-        f"APP_DIR=/opt/{PACKAGE_NAME}\n"
+        f"APP_DIR=/opt/{identity.package_name}\n"
         'export LD_LIBRARY_PATH="$APP_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"\n'
         f'exec "$APP_DIR/{binary}" "$@"\n',
         encoding="utf-8",
     )
     launcher.chmod(0o755)
 
-    desktop_file = root / "usr" / "share" / "applications" / DESKTOP_FILE_NAME
+    desktop_file = root / "usr" / "share" / "applications" / identity.desktop_file_name
     desktop_file.parent.mkdir(parents=True)
     desktop_file.write_text(
         "[Desktop Entry]\n"
         "Type=Application\n"
         f"Name={app_name}\n"
-        f"Exec={PACKAGE_NAME} %U\n"
-        f"Icon={ICON_NAME}\n"
+        f"Exec={identity.package_name} %U\n"
+        f"Icon={identity.icon_name}\n"
         "Categories=AudioVideo;\n"
         "Terminal=false\n"
         "StartupNotify=true\n",
@@ -71,7 +88,7 @@ def create_install_tree(bundle: Path, root: Path, app_name: str) -> None:
     icon = Path("assets/images/logo/logo.png")
     if not icon.is_file():
         raise SystemExit(f"缺少应用图标: {icon}")
-    icon_destination = root / "usr" / "share" / "icons" / "hicolor" / "512x512" / "apps" / f"{ICON_NAME}.png"
+    icon_destination = root / "usr" / "share" / "icons" / "hicolor" / "512x512" / "apps" / f"{identity.icon_name}.png"
     icon_destination.parent.mkdir(parents=True)
     shutil.copy2(icon, icon_destination)
 
@@ -85,7 +102,13 @@ def package_tar(bundle: Path, destination: Path, zstd: bool) -> None:
     log_success(f"输出: {destination}")
 
 
-def package_appimage(bundle: Path, destination: Path, app_name: str, arch: str) -> None:
+def package_appimage(
+    bundle: Path,
+    destination: Path,
+    app_name: str,
+    arch: str,
+    identity: PackageIdentity,
+) -> None:
     if arch not in ("x64", "amd64"):
         raise SystemExit("当前仅支持使用 x86_64 AppImage 工具打包 x64 bundle")
 
@@ -101,17 +124,17 @@ def package_appimage(bundle: Path, destination: Path, app_name: str, arch: str) 
 
     binary = find_bundle_binary(bundle)
     with tempfile.TemporaryDirectory(prefix="pilisuper-appimage-") as temp:
-        appdir = Path(temp) / f"{PACKAGE_NAME}.AppDir"
+        appdir = Path(temp) / f"{identity.package_name}.AppDir"
         appdir.mkdir()
         shutil.copytree(bundle, appdir / "usr" / "bin")
 
-        desktop = appdir / f"{PACKAGE_NAME}.desktop"
+        desktop = appdir / identity.desktop_file_name
         desktop.write_text(
             "[Desktop Entry]\n"
             "Type=Application\n"
             f"Name={app_name}\n"
-            f"Exec={PACKAGE_NAME} %U\n"
-            f"Icon={ICON_NAME}\n"
+            f"Exec={identity.package_name} %U\n"
+            f"Icon={identity.icon_name}\n"
             "Categories=AudioVideo;\n"
             "Terminal=false\n",
             encoding="utf-8",
@@ -120,7 +143,7 @@ def package_appimage(bundle: Path, destination: Path, app_name: str, arch: str) 
         icon = Path("assets/images/logo/logo.png")
         if not icon.is_file():
             raise SystemExit(f"缺少应用图标: {icon}")
-        shutil.copy2(icon, appdir / f"{ICON_NAME}.png")
+        shutil.copy2(icon, appdir / f"{identity.icon_name}.png")
 
         app_run = appdir / "AppRun"
         app_run.write_text(
@@ -135,17 +158,24 @@ def package_appimage(bundle: Path, destination: Path, app_name: str, arch: str) 
     log_success(f"输出: {destination}")
 
 
-def package_deb(bundle: Path, destination: Path, app_name: str, arch: str, version: str) -> None:
+def package_deb(
+    bundle: Path,
+    destination: Path,
+    app_name: str,
+    arch: str,
+    version: str,
+    identity: PackageIdentity,
+) -> None:
     require_command("dpkg-deb")
     deb_arch = {"x64": "amd64", "arm64": "arm64", "armv7": "armhf"}.get(arch, arch)
     with tempfile.TemporaryDirectory(prefix="pilisuper-deb-") as temp:
         root = Path(temp)
-        create_install_tree(bundle, root, app_name)
+        create_install_tree(bundle, root, app_name, identity)
         control = root / "DEBIAN"
         control.mkdir()
         installed_size = sum(path.stat().st_size for path in root.rglob("*") if path.is_file()) // 1024 + 1
         (control / "control").write_text(
-            f"Package: {PACKAGE_NAME}\n"
+            f"Package: {identity.package_name}\n"
             f"Version: {version}\n"
             f"Architecture: {deb_arch}\n"
             "Maintainer: FRBLanApps Members <frblanapps@disroot.org>\n"
@@ -162,16 +192,23 @@ def package_deb(bundle: Path, destination: Path, app_name: str, arch: str, versi
     log_success(f"输出: {destination}")
 
 
-def package_arch(bundle: Path, destination: Path, app_name: str, arch: str, version: str) -> None:
+def package_arch(
+    bundle: Path,
+    destination: Path,
+    app_name: str,
+    arch: str,
+    version: str,
+    identity: PackageIdentity,
+) -> None:
     require_command("makepkg", "请在 Arch Linux 环境中安装 base-devel")
     package_arch = {"x64": "x86_64", "arm64": "aarch64", "armv7": "armv7h"}.get(arch, arch)
     package_version = re.sub(r"[\s/:_-]", ".", version)
 
     with tempfile.TemporaryDirectory(prefix="pilisuper-arch-") as temp:
         work = Path(temp)
-        source_name = f"{PACKAGE_NAME}-{package_version}"
+        source_name = f"{identity.package_name}-{package_version}"
         source_root = work / source_name
-        create_install_tree(bundle, source_root, app_name)
+        create_install_tree(bundle, source_root, app_name, identity)
 
         source_archive = work / f"{source_name}.tar.gz"
         run_command(["tar", "-zcf", str(source_archive), "-C", str(work), source_name])
@@ -179,7 +216,7 @@ def package_arch(bundle: Path, destination: Path, app_name: str, arch: str, vers
 
         pkgbuild = work / "PKGBUILD"
         pkgbuild.write_text(
-            f"pkgname={PACKAGE_NAME}\n"
+            f"pkgname={identity.package_name}\n"
             f"pkgver={package_version}\n"
             "pkgrel=1\n"
             f"pkgdesc='{app_name}, a third-party Bilibili client'\n"
@@ -207,14 +244,21 @@ def package_arch(bundle: Path, destination: Path, app_name: str, arch: str, vers
                 "PACKAGER": "FRBLanApps <frblanapps@disroot.org>",
             },
         )
-        packages = list(work.glob(f"{PACKAGE_NAME}-*.pkg.tar.zst"))
+        packages = list(work.glob(f"{identity.package_name}-*.pkg.tar.zst"))
         if len(packages) != 1:
             raise SystemExit(f"makepkg 产物数量异常: {packages}")
         shutil.copy2(packages[0], destination)
     log_success(f"输出: {destination}")
 
 
-def package_rpm(bundle: Path, destination: Path, app_name: str, arch: str, version: str) -> None:
+def package_rpm(
+    bundle: Path,
+    destination: Path,
+    app_name: str,
+    arch: str,
+    version: str,
+    identity: PackageIdentity,
+) -> None:
     require_command("rpmbuild", "请安装 rpm-build")
     rpm_arch = {"x64": "x86_64", "arm64": "aarch64", "armv7": "armv7hl"}.get(arch, arch)
     rpm_version = re.sub(r"[^A-Za-z0-9._+~]", ".", version)
@@ -224,16 +268,16 @@ def package_rpm(bundle: Path, destination: Path, app_name: str, arch: str, versi
         for name in ("BUILD", "BUILDROOT", "RPMS", "SOURCES", "SPECS", "SRPMS"):
             (top / name).mkdir()
 
-        source_name = f"{PACKAGE_NAME}-{rpm_version}"
+        source_name = f"{identity.package_name}-{rpm_version}"
         source_root = top / source_name
-        create_install_tree(bundle, source_root, app_name)
+        create_install_tree(bundle, source_root, app_name, identity)
         source_archive = top / "SOURCES" / f"{source_name}.tar.gz"
         run_command(["tar", "-zcf", str(source_archive), "-C", str(top), source_name])
         shutil.rmtree(source_root)
 
-        spec = top / "SPECS" / f"{PACKAGE_NAME}.spec"
+        spec = top / "SPECS" / f"{identity.package_name}.spec"
         spec.write_text(
-            f"Name: {PACKAGE_NAME}\n"
+            f"Name: {identity.package_name}\n"
             f"Version: {rpm_version}\n"
             "Release: 1%{?dist}\n"
             f"Summary: {app_name}, a third-party Bilibili client\n"
@@ -251,10 +295,10 @@ def package_rpm(bundle: Path, destination: Path, app_name: str, arch: str, versi
             "mkdir -p %{buildroot}\n"
             "cp -a opt usr %{buildroot}/\n\n"
             "%files\n"
-            f"/opt/{PACKAGE_NAME}\n"
-            f"/usr/bin/{PACKAGE_NAME}\n"
-            f"/usr/share/applications/{DESKTOP_FILE_NAME}\n"
-            f"/usr/share/icons/hicolor/512x512/apps/{ICON_NAME}.png\n",
+            f"/opt/{identity.package_name}\n"
+            f"/usr/bin/{identity.package_name}\n"
+            f"/usr/share/applications/{identity.desktop_file_name}\n"
+            f"/usr/share/icons/hicolor/512x512/apps/{identity.icon_name}.png\n",
             encoding="utf-8",
         )
         run_command(["rpmbuild", "--define", f"_topdir {top}", "-bb", str(spec)])
@@ -273,23 +317,25 @@ def main() -> None:
     parser.add_argument("--output", default="dist")
     parser.add_argument("--output-prefix", default="PiliSuper")
     parser.add_argument("--app-name", default="PiliSuper")
+    parser.add_argument("--pkg-id", default="com.pili.super")
     parser.add_argument("targets", nargs="+", choices=["tar.gz", "zst", "deb", "rpm", "arch", "appimage"])
     args = parser.parse_args()
 
     bundle = bundle_path(args.arch, args.bundle)
+    identity = package_identity(args.pkg_id)
     for target in args.targets:
         if target == "tar.gz":
             package_tar(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".tar.gz"), False)
         elif target == "zst":
             package_tar(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".tar.zst"), True)
         elif target == "deb":
-            package_deb(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".deb"), args.app_name, args.arch, args.version)
+            package_deb(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".deb"), args.app_name, args.arch, args.version, identity)
         elif target == "rpm":
-            package_rpm(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".rpm"), args.app_name, args.arch, args.version)
+            package_rpm(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".rpm"), args.app_name, args.arch, args.version, identity)
         elif target == "arch":
-            package_arch(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".pkg.tar.zst"), args.app_name, args.arch, args.version)
+            package_arch(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".pkg.tar.zst"), args.app_name, args.arch, args.version, identity)
         else:
-            package_appimage(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".AppImage"), args.app_name, args.arch)
+            package_appimage(bundle, output_path(args.output, args.output_prefix, args.version, args.arch, ".AppImage"), args.app_name, args.arch, identity)
 
 
 if __name__ == "__main__":

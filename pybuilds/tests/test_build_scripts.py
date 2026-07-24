@@ -10,6 +10,7 @@ PYBUILDS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PYBUILDS))
 
 build_common = importlib.import_module("build_common")
+build_android = importlib.import_module("build_android")
 packaging = importlib.import_module("packaging")
 patch_script = importlib.import_module("patch")
 prebuild = importlib.import_module("prebuild")
@@ -37,6 +38,27 @@ class BuildCommonTests(unittest.TestCase):
         )
 
 
+class AndroidBuildTests(unittest.TestCase):
+    def test_split_build_requires_all_abis(self):
+        with tempfile.TemporaryDirectory() as temp:
+            apk_dir = Path(temp)
+            for abi in build_android.SPLIT_ABIS[:-1]:
+                (apk_dir / f"app-{abi}-release.apk").write_bytes(b"apk")
+
+            with self.assertRaisesRegex(SystemExit, "x86_64"):
+                build_android.built_apks(apk_dir, no_split=False)
+
+    def test_universal_build_selects_only_universal_apk(self):
+        with tempfile.TemporaryDirectory() as temp:
+            apk_dir = Path(temp)
+            universal = apk_dir / "app-release.apk"
+            universal.write_bytes(b"apk")
+            for abi in build_android.SPLIT_ABIS:
+                (apk_dir / f"app-{abi}-release.apk").write_bytes(b"stale")
+
+            self.assertEqual(build_android.built_apks(apk_dir, no_split=True), [universal])
+
+
 class PackagingTests(unittest.TestCase):
     def test_find_bundle_binary(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -58,11 +80,21 @@ class PackagingTests(unittest.TestCase):
             (bundle / "libPiliSuper.so").write_bytes(b"library")
 
             # The function only prepares files; no external package tool runs.
-            packaging.create_install_tree(bundle, root, "PiliSuper")
+            packaging.create_install_tree(
+                bundle,
+                root,
+                "PiliSuper",
+                packaging.package_identity("com.pili.super"),
+            )
 
             launcher = root / "usr" / "bin" / "pilisuper"
             self.assertTrue(launcher.is_file())
             self.assertIn('exec "$APP_DIR/PiliSuper"', launcher.read_text())
+
+    def test_custom_package_identity_avoids_pilisuper_collision(self):
+        identity = packaging.package_identity("org.example.client")
+        self.assertEqual(identity.package_name, "org.example.client")
+        self.assertEqual(identity.desktop_file_name, "org.example.client.desktop")
 
 
 class PrebuildTests(unittest.TestCase):

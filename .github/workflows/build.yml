@@ -257,6 +257,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
+          target_commitish: ${{ inputs.source_sha || github.sha }}
           files: dist/${{ inputs.app_name || 'PiliSuper' }}_android_*.apk
 
       - uses: actions/upload-artifact@v7
@@ -353,6 +354,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
+          target_commitish: ${{ inputs.source_sha || github.sha }}
           files:    dist/${{ inputs.app_name || 'PiliSuper' }}_ios_*.ipa
 
       - uses: actions/upload-artifact@v7
@@ -416,6 +418,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
+          target_commitish: ${{ inputs.source_sha || github.sha }}
           files: |
             dist/${{ inputs.app_name || 'PiliSuper' }}_macos_*.dmg
             dist/${{ inputs.app_name || 'PiliSuper' }}_macos_*.zip
@@ -505,6 +508,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
+          target_commitish: ${{ inputs.source_sha || github.sha }}
           files: |
             dist/${{ inputs.app_name || 'PiliSuper' }}_windows_*_portable.zip
             dist/${{ inputs.app_name || 'PiliSuper' }}_windows_*_setup.exe
@@ -605,19 +609,19 @@ jobs:
 
       - name: Package Linux tar.gz
         if: ${{ inputs.build_linux_tar_gz == true || inputs.build_linux_arch == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist tar.gz
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist tar.gz
 
       - name: Package Linux DEB
         if: ${{ inputs.build_linux_deb == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist deb
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist deb
 
       - name: Package Linux RPM
         if: ${{ inputs.build_linux_rpm == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist rpm
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist rpm
 
       - name: Package Linux AppImage
         if: ${{ inputs.build_linux_appimage == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist appimage
+        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist appimage
 
       - name: Upload Linux bundle for Arch packaging
         if: ${{ inputs.build_linux_arch == true }}
@@ -632,6 +636,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name:     ${{ inputs.tag }}
+          target_commitish: ${{ inputs.source_sha || github.sha }}
           files: dist/${{ inputs.app_name || 'PiliSuper' }}_linux_*
 
       - uses: actions/upload-artifact@v7
@@ -700,6 +705,7 @@ jobs:
             --version "${{ needs.linux.outputs.version }}" \
             --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" \
             --app-name "${{ inputs.app_name || 'PiliSuper' }}" \
+            --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" \
             --output dist \
             arch
 
@@ -709,6 +715,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name: ${{ inputs.tag }}
+          target_commitish: ${{ inputs.source_sha || github.sha }}
           files: dist/${{ inputs.app_name || 'PiliSuper' }}_linux_*.pkg.tar.zst
 
       - uses: actions/upload-artifact@v7
