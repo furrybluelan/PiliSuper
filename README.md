@@ -260,6 +260,7 @@ flutter pub get
 | `pybuilds/build_macos.py` | 构建 macOS DMG（或 ZIP） |
 | `pybuilds/build_windows.py` | 构建 Windows portable ZIP 或 Inno Setup 安装器 |
 | `pybuilds/build_linux.py` | 仅构建 Linux bundle |
+| `notify_telegram.py` | 受信任 CI 构建的 Telegram 通知推送器 |
 | `pybuilds/packaging.py` | 用系统工具打包已有 Linux bundle（tar、deb、rpm、Arch、AppImage） |
 
 例如，构建 Android release：
@@ -293,7 +294,7 @@ python pybuilds/build_windows.py --installer --version "$VERSION" --output dist
 
 ### Telegram 构建通知
 
-非 PR 的完整 CI 构建完成后，可通过以下 GitHub Actions Secrets 将构建产物发送到 Telegram：
+受信任 CI 构建完成后，可通过以下 GitHub Actions Secrets 将构建产物发送到 Telegram：
 
 | Secret | 用途 |
 | --- | --- |
