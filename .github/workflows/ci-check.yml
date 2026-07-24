@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           if ! flutter analyze; then
-            echo "::warning title=Static analysis::flutter analyze 发现诊断，请查看日志。"
+            echo "::warning title=Static analysis::flutter analyze 发现问题，请查看日志。"
           fi
 
       - name: Test
