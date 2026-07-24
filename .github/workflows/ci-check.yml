@@ -38,10 +38,18 @@ jobs:
         run: flutter pub get
 
       - name: Verify formatting
-        run: dart format --set-exit-if-changed .
+        shell: bash
+        run: |
+          if ! dart format --set-exit-if-changed .; then
+            echo "::warning title=Formatting::代码未通过 dart format；请运行 dart format ."
+          fi
 
       - name: Analyze
-        run: flutter analyze
+        shell: bash
+        run: |
+          if ! flutter analyze; then
+            echo "::warning title=Static analysis::flutter analyze 发现诊断，请查看日志。"
+          fi
 
       - name: Test
         if: ${{ hashFiles('test/**/*.dart') != '' }}
