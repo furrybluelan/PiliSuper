@@ -7,6 +7,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - "**.md"
+      - "local_ci.ps1"
 
 concurrency:
   group: ci-check-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
