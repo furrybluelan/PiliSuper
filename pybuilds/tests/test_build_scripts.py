@@ -1,4 +1,5 @@
 import importlib
+import os
 import sys
 import tempfile
 import unittest
@@ -12,6 +13,7 @@ sys.path.insert(0, str(PYBUILDS))
 build_common = importlib.import_module("build_common")
 build_android = importlib.import_module("build_android")
 packaging = importlib.import_module("packaging")
+notify_telegram = importlib.import_module("notify_telegram")
 patch_script = importlib.import_module("patch")
 prebuild = importlib.import_module("prebuild")
 
@@ -121,6 +123,42 @@ class PatchTests(unittest.TestCase):
             patch_script.apply_project_patch(Path("patch.diff"), Path("."))
 
         self.assertEqual(run.call_count, 2)
+
+
+class TelegramNotifyTests(unittest.TestCase):
+    def test_find_artifacts_filters_and_deduplicates(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)
+            (output / "a").mkdir()
+            (output / "b").mkdir()
+            (output / "a" / "PiliSuper.apk").write_bytes(b"same")
+            (output / "b" / "PiliSuper.apk").write_bytes(b"same")
+            (output / "b" / "notes.txt").write_text("ignored")
+
+            artifacts = notify_telegram.find_artifacts(output)
+
+            self.assertEqual([item.name for item in artifacts], ["PiliSuper.apk"])
+
+    def test_missing_credentials_skip_notification(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(
+            sys, "argv", ["notify_telegram.py"]
+        ):
+            self.assertEqual(notify_telegram.main(), 0)
+
+    def test_message_escapes_commit_and_artifact_names(self):
+        artifact = notify_telegram.Artifact(Path("a.apk"), "a<1>.apk", 1024)
+        message = notify_telegram.build_message(
+            label="Build <ready>",
+            repository="owner/repo",
+            branch="main",
+            commit_sha="abcdef123456",
+            commit_message="fix <tag>",
+            run_url="https://example.test/run",
+            artifacts=[artifact],
+            skipped=[],
+        )
+        self.assertIn("Build &lt;ready&gt;", message)
+        self.assertIn("fix &lt;tag&gt;", message)
 
 
 if __name__ == "__main__":

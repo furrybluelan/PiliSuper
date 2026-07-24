@@ -3,6 +3,16 @@ name: Build
 on:
   # 底下那托参数在pr触发的时候是空值，以前没炸是因为硬编码。小心!
   workflow_call:
+    secrets:
+      TELEGRAM_BOT_TOKEN:
+        description: "Telegram Bot API token（未配置则跳过通知）"
+        required: false
+      TELEGRAM_CHAT_ID:
+        description: "Telegram chat/channel ID（未配置则跳过通知）"
+        required: false
+      TELEGRAM_TOPIC_ID:
+        description: "Telegram forum topic ID（可选）"
+        required: false
     inputs:
       source_sha:
         description: "要构建的 commit SHA（空则使用触发时的 github.sha）"
@@ -723,3 +733,36 @@ jobs:
           name: Linux_arch_x86_64
           path: dist/${{ inputs.app_name || 'PiliSuper' }}_linux_*.pkg.tar.zst
           archive: false
+
+  notify-telegram:
+    name: Notify Telegram
+    if: ${{ always() && github.event_name != 'pull_request' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    needs: [android, ios, macos, windows, linux, arch]
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: notify-output
+
+      - name: Notify Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
+          SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+        shell: bash
+        run: |
+          if ! python3 pybuilds/notify_telegram.py \
+            --output notify-output \
+            --label "PiliSuper CI 构建产物 - ${{ github.ref_name }}"; then
+            echo "::warning title=Telegram notification::构建产物 Telegram 通知发送失败，请查看日志。"
+          fi

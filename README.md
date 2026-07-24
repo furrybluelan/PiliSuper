@@ -291,6 +291,18 @@ python pybuilds/build_windows.py --installer --version "$VERSION" --output dist
 
 所有 Flutter 构建脚本都传入 `--no-pub`，因此请自行执行 `flutter pub get`。
 
+### Telegram 构建通知
+
+非 PR 的完整 CI 构建完成后，可通过以下 GitHub Actions Secrets 将构建产物发送到 Telegram：
+
+| Secret | 用途 |
+| --- | --- |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot API token |
+| `TELEGRAM_CHAT_ID` | 接收通知的群组、频道或私聊 ID |
+| `TELEGRAM_TOPIC_ID` | 可选，论坛群组的话题 ID |
+
+未配置 token 或 chat ID 时会自动跳过通知。超过 Telegram 上传限制的产物不会上传到 Telegram，通知消息会保留对应 GitHub Actions 下载链接。
+
 ## 声明
 
 此项目（PiliSuper）是个人为了兴趣而开发, 仅用于学习和测试，请按照您当地的法律处理此软件。
