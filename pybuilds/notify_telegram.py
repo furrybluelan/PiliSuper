@@ -98,6 +98,7 @@ def build_message(
     run_url: str,
     artifacts: list[Artifact],
     skipped: list[Artifact],
+    release_tag: str,
 ) -> str:
     commit_url = f"https://github.com/{repository}/commit/{commit_sha}"
     artifact_lines = "\n".join(
@@ -112,8 +113,13 @@ def build_message(
             f"{skipped_names}（超过 Telegram 上传限制）"
         )
 
+    release_section = (
+        f"📣 <b>这是一个 Release:</b> <code>{html.escape(release_tag)}</code>\n\n"
+        if release_tag
+        else ""
+    )
     message = (
-        f"📦 <b>{html.escape(label)}</b>\n\n"
+        f"📦 <b>{html.escape(label)}</b>\n\n{release_section}"
         f"🌿 <b>分支:</b> <code>{html.escape(branch)}</code>\n"
         f"📝 <b>提交:</b> <a href=\"{html.escape(commit_url)}\">"
         f"{html.escape(commit_sha[:9])}</a>\n"
@@ -138,12 +144,13 @@ class TelegramClient:
         self.topic_id = topic_id
         self.timeout = timeout
 
-    def _check_response(self, response: bytes) -> None:
+    def _response_result(self, response: bytes) -> object:
         payload = json.loads(response)
         if not payload.get("ok"):
             raise RuntimeError(payload.get("description", "Telegram API request failed"))
+        return payload["result"]
 
-    def send_message(self, text: str) -> None:
+    def send_message(self, text: str) -> int:
         fields = {
             "chat_id": self.chat_id,
             "text": text,
@@ -157,7 +164,23 @@ class TelegramClient:
             data=urllib.parse.urlencode(fields).encode(),
         )
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
-            self._check_response(response.read())
+            result = self._response_result(response.read())
+        if not isinstance(result, dict) or not isinstance(result.get("message_id"), int):
+            raise RuntimeError("Telegram did not return a message ID")
+        return result["message_id"]
+
+    def pin_message(self, message_id: int) -> None:
+        fields = {
+            "chat_id": self.chat_id,
+            "message_id": str(message_id),
+            "disable_notification": "true",
+        }
+        request = urllib.request.Request(
+            f"{self.base_url}/pinChatMessage",
+            data=urllib.parse.urlencode(fields).encode(),
+        )
+        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            self._response_result(response.read())
 
     def send_document(self, artifact: Artifact) -> None:
         boundary = f"PiliSuper-{uuid.uuid4().hex}"
@@ -188,7 +211,7 @@ class TelegramClient:
             headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
         )
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
-            self._check_response(response.read())
+            self._response_result(response.read())
 
 
 def main() -> int:
@@ -196,6 +219,7 @@ def main() -> int:
     parser.add_argument("--output", default="notify-output", type=Path)
     parser.add_argument("--label", default="PiliSuper CI 构建产物")
     parser.add_argument("--topic-id")
+    parser.add_argument("--release-tag", default="")
     parser.add_argument("--max-file-mib", type=int, default=DEFAULT_MAX_FILE_MIB)
     args = parser.parse_args()
 
@@ -235,9 +259,12 @@ def main() -> int:
         run_url=run_url,
         artifacts=artifacts,
         skipped=skipped,
+        release_tag=args.release_tag,
     )
     try:
-        client.send_message(message)
+        message_id = client.send_message(message)
+        if args.release_tag:
+            client.pin_message(message_id)
         for artifact in uploadable:
             print(f"Sending {artifact.name} ({format_size(artifact.size)})")
             client.send_document(artifact)

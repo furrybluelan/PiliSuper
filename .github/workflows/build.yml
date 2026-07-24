@@ -753,10 +753,16 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
           SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+          RELEASE_TAG: ${{ inputs.tag }}
         shell: bash
         run: |
+          NOTIFY_ARGS=()
+          if [[ -n "$RELEASE_TAG" ]]; then
+            NOTIFY_ARGS+=(--release-tag "$RELEASE_TAG")
+          fi
           if ! python3 pybuilds/notify_telegram.py \
             --output notify-output \
-            --label "PiliSuper CI 构建产物 - ${{ github.ref_name }}"; then
+            --label "PiliSuper CI 构建产物 - ${{ github.ref_name }}" \
+            "${NOTIFY_ARGS[@]}"; then
             echo "::warning title=Telegram notification::构建产物 Telegram 通知发送失败，请查看日志。"
           fi

@@ -156,9 +156,25 @@ class TelegramNotifyTests(unittest.TestCase):
             run_url="https://example.test/run",
             artifacts=[artifact],
             skipped=[],
+            release_tag="",
         )
         self.assertIn("Build &lt;ready&gt;", message)
         self.assertIn("fix &lt;tag&gt;", message)
+
+    def test_release_message_is_labeled(self):
+        message = notify_telegram.build_message(
+            label="Build",
+            repository="owner/repo",
+            branch="main",
+            commit_sha="abcdef123456",
+            commit_message="release",
+            run_url="https://example.test/run",
+            artifacts=[],
+            skipped=[],
+            release_tag="v2.1.0",
+        )
+        self.assertIn("这是一个 Release", message)
+        self.assertIn("v2.1.0", message)
 
 
 if __name__ == "__main__":
