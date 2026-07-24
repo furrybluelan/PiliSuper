@@ -55,9 +55,12 @@ jobs:
     name: PR full build
     if: ${{ github.event_name == 'pull_request' }}
     needs: check
+    permissions:
+      contents: read
     uses: ./.github/workflows/build.yml
     with:
       source_sha: ${{ github.sha }}
+      sign_android: false
       build_android_release: true
       build_android_dev: true
       build_ios: true
@@ -76,6 +79,7 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
     outputs:
       run: ${{ steps.threshold.outputs.run }}
@@ -137,6 +141,7 @@ jobs:
     secrets: inherit
     with:
       source_sha: ${{ github.sha }}
+      sign_android: true
       build_android_release: true
       build_android_dev: true
       build_ios: true

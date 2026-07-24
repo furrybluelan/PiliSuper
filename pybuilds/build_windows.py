@@ -34,7 +34,10 @@ def main() -> None:
         require_command("fastforge", "请先运行：dart pub global activate fastforge")
         output_dir = Path(args.output)
         output_dir.mkdir(parents=True, exist_ok=True)
-        existing_installers = set(output_dir.rglob("*.exe"))
+        existing_installers = {
+            path.resolve(): (path.stat().st_mtime_ns, path.stat().st_size)
+            for path in output_dir.rglob("*.exe")
+        }
         fastforge_args = [
             "fastforge",
             "package",
@@ -53,7 +56,12 @@ def main() -> None:
         fastforge_args.extend(extra)
         run_command(fastforge_args)
 
-        installers = [path for path in output_dir.rglob("*.exe") if path not in existing_installers]
+        installers = [
+            path
+            for path in output_dir.rglob("*.exe")
+            if existing_installers.get(path.resolve())
+            != (path.stat().st_mtime_ns, path.stat().st_size)
+        ]
         if not installers:
             parser.error("fastforge 没有生成 .exe 安装程序")
         if len(installers) != 1:

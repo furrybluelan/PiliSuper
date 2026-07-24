@@ -11,6 +11,8 @@ sys.path.insert(0, str(PYBUILDS))
 
 build_common = importlib.import_module("build_common")
 packaging = importlib.import_module("packaging")
+patch_script = importlib.import_module("patch")
+prebuild = importlib.import_module("prebuild")
 
 
 class BuildCommonTests(unittest.TestCase):
@@ -61,6 +63,32 @@ class PackagingTests(unittest.TestCase):
             launcher = root / "usr" / "bin" / "pilisuper"
             self.assertTrue(launcher.is_file())
             self.assertIn('exec "$APP_DIR/PiliSuper"', launcher.read_text())
+
+
+class PrebuildTests(unittest.TestCase):
+    def test_android_display_version_includes_commit(self):
+        self.assertEqual(
+            prebuild.display_version_for("android", "2.1.0", "abcdef123456"),
+            "2.1.0-abcdef123",
+        )
+
+    def test_non_android_display_version_is_unchanged(self):
+        self.assertEqual(
+            prebuild.display_version_for("linux", "2.1.0", "abcdef123456"),
+            "2.1.0",
+        )
+
+
+class PatchTests(unittest.TestCase):
+    def test_already_applied_project_patch_is_accepted(self):
+        completed = type("Completed", (), {"returncode": 0})()
+        with patch.object(patch_script, "run_command", side_effect=[
+            type("Completed", (), {"returncode": 1})(),
+            completed,
+        ]) as run:
+            patch_script.apply_project_patch(Path("patch.diff"), Path("."))
+
+        self.assertEqual(run.call_count, 2)
 
 
 if __name__ == "__main__":

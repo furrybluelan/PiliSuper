@@ -20,6 +20,12 @@ def git_output(*args: str) -> str:
         return ""
 
 
+def display_version_for(platform: str, version_name: str, commit_hash: str) -> str:
+    if platform == "android":
+        return f"{version_name}-{commit_hash[:9]}"
+    return version_name
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", choices=["android", "ios", "macos", "windows", "linux"], default="linux")
@@ -41,7 +47,7 @@ def main() -> None:
     version_code_text = git_output("rev-list", "--count", "HEAD")
     version_code = int(version_code_text) if version_code_text.isdigit() else 0
     commit_hash = git_output("rev-parse", "HEAD") or "unknown"
-    display_version = version_name
+    display_version = display_version_for(args.platform, version_name, commit_hash)
     version = f"{display_version}+{version_code}"
 
     lines[index] = f"version: {version}"
