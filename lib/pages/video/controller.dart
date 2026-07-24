@@ -393,6 +393,7 @@ class VideoDetailController extends GetxController
   /// 当前视频/分 P 已自动测速次数，换集时重置
   int _autoCdnAttempts = 0;
   bool _autoCdnLimitToasted = false;
+
   /// 换集时递增，作废尚未触发的延迟 toast
   int _autoCdnEpoch = 0;
   bool _autoCdnRunning = false;

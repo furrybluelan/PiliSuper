@@ -444,6 +444,7 @@ class PlPlayerController with BlockConfigMixin {
   final List<DateTime> _stutterTimestamps = [];
   static const _stutterWindow = Duration(seconds: 30);
   static const _stutterThreshold = 2;
+
   /// seek 后缓冲是正常现象，忽略一段时间
   static const _seekGrace = Duration(seconds: 5);
   DateTime? _lastSeekAt;
