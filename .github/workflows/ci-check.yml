@@ -12,6 +12,10 @@ concurrency:
   group: ci-check-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# 每累计十个仓库提交触发一次完整构建。
+env:
+  FULL_BUILD_COMMIT_INTERVAL: "10"
+
 jobs:
   check:
     name: Flutter checks
@@ -51,6 +55,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
+      source_sha: ${{ github.sha }}
       build_android_release: true
       build_android_dev: true
       build_ios: true
@@ -63,73 +68,55 @@ jobs:
       build_linux_appimage: true
       build_linux_arch: true
 
-  schedule-full-build:
-    name: Schedule periodic full build
+  commit-threshold:
+    name: Check full-build interval
     if: ${{ github.event_name == 'push' }}
     needs: check
     runs-on: ubuntu-latest
     permissions:
-      actions: write
       contents: read
+    outputs:
+      run: ${{ steps.threshold.outputs.run }}
+      reason: ${{ steps.threshold.outputs.reason }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Check full-build threshold
+      - name: Check commit interval
         id: threshold
         env:
-          GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ github.ref_name }}
           SHA: ${{ github.sha }}
         shell: bash
         run: |
           set -euo pipefail
-          completed_full_runs="repos/${GITHUB_REPOSITORY}/actions/workflows/full-build.yml/runs?branch=${BRANCH}&status=completed&per_page=100"
-          all_full_runs="repos/${GITHUB_REPOSITORY}/actions/workflows/full-build.yml/runs?branch=${BRANCH}&per_page=100"
-          check_runs="repos/${GITHUB_REPOSITORY}/actions/workflows/ci-check.yml/runs?branch=${BRANCH}&event=push&per_page=100"
-          last_full_sha="$(gh api --paginate "$completed_full_runs" --jq '.workflow_runs[] | select(.conclusion == "success") | .head_sha' | head -n 1 || true)"
-          last_full_time="$(gh api --paginate "$completed_full_runs" --jq '.workflow_runs[] | select(.conclusion == "success") | .created_at' | head -n 1 || true)"
-
-          if [[ -n "$last_full_sha" ]]; then
-            base_sha="$last_full_sha"
-            pushes="$(gh api --paginate "$check_runs" --jq --arg after "$last_full_time" '[.workflow_runs[] | select(.created_at > $after)] | length' | awk '{ total += $1 } END { print total + 0 }')"
-          else
-            # 首次启用时从第一轮 CI Check 开始计数，而不是立即构建整个历史。
-            base_sha="$(gh api --paginate "$check_runs" --jq '.workflow_runs[] | .head_sha' | tail -n 1)"
-            pushes="$(gh api --paginate "$check_runs" --jq '.workflow_runs[] | .id' | awk 'NF { total += 1 } END { print total + 0 }')"
-          fi
-
-          commits="$(git rev-list --count "${base_sha}..${SHA}")"
-          active_full="$(gh api --paginate "$all_full_runs" --jq --arg after "$last_full_time" '[.workflow_runs[] | select((.status == "queued" or .status == "in_progress") and ($after == "" or .created_at > $after))] | length' | awk '{ total += $1 } END { print total + 0 }')"
-
-          echo "commits_since_full=${commits}" >> "$GITHUB_OUTPUT"
-          echo "pushes_since_full=${pushes}" >> "$GITHUB_OUTPUT"
-          if (( active_full > 0 )); then
-            echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "reason=已有完整构建正在排队或运行" >> "$GITHUB_OUTPUT"
-          elif (( commits >= 15 || pushes >= 5 )); then
+          commits="$(git rev-list --count "$SHA")"
+          remainder=$((commits % FULL_BUILD_COMMIT_INTERVAL))
+          if (( remainder == 0 )); then
             echo "run=true" >> "$GITHUB_OUTPUT"
-            echo "reason=${commits} 个提交 / ${pushes} 次 push" >> "$GITHUB_OUTPUT"
+            echo "reason=仓库累计 ${commits} 个提交，达到每 ${FULL_BUILD_COMMIT_INTERVAL} 个提交的间隔" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "reason=${commits} 个提交 / ${pushes} 次 push，未达到阈值" >> "$GITHUB_OUTPUT"
+            echo "reason=仓库累计 ${commits} 个提交，距离下次完整构建还差 $((FULL_BUILD_COMMIT_INTERVAL - remainder)) 个提交" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Dispatch full build
-        if: steps.threshold.outputs.run == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ github.ref_name }}
-          SHA: ${{ github.sha }}
-        shell: bash
-        run: |
-          gh api --method POST \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/full-build.yml/dispatches" \
-            -f ref="$BRANCH" \
-            -f "inputs[source_sha]=$SHA"
-          echo "完整构建已排队：${{ steps.threshold.outputs.reason }}"
-
-      - name: Report threshold status
-        run: |
-          echo "${{ steps.threshold.outputs.reason }}"
+  periodic-full-build:
+    name: Periodic full build
+    if: ${{ always() && github.event_name == 'push' && needs.check.result == 'success' && needs.commit-threshold.result == 'success' && needs.commit-threshold.outputs.run == 'true' }}
+    needs: [check, commit-threshold]
+    permissions: write-all
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      source_sha: ${{ github.sha }}
+      build_android_release: true
+      build_android_dev: true
+      build_ios: true
+      build_macos: true
+      build_windows_portable: true
+      build_windows_installer: true
+      build_linux_tar_gz: true
+      build_linux_deb: true
+      build_linux_rpm: true
+      build_linux_appimage: true
+      build_linux_arch: true

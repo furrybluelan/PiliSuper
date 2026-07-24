@@ -4,6 +4,11 @@ on:
   # 底下那托参数在pr触发的时候是空值，以前没炸是因为硬编码。小心!
   workflow_call:
     inputs:
+      source_sha:
+        description: "要构建的 commit SHA（空则使用触发时的 github.sha）"
+        required: false
+        type: string
+        default: ""
       tag:
         required: false
         type: string
@@ -62,6 +67,11 @@ on:
         default: true
   workflow_dispatch:
     inputs:
+      source_sha:
+        description: "要构建的 commit SHA（留空则使用当前分支 HEAD）"
+        required: false
+        default: ""
+        type: string
       tag:
         description: "Release tag（留空则只构建不发布）"
         required: false
@@ -135,6 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
 
       - uses: actions/setup-java@v5
@@ -282,6 +293,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
 
       - uses: subosito/flutter-action@v2
@@ -341,6 +353,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
 
       - uses: subosito/flutter-action@v2
@@ -403,6 +416,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
 
       - uses: subosito/flutter-action@v2
@@ -500,6 +514,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
 
       - name: Install system dependencies
@@ -638,6 +653,8 @@ jobs:
         run: pacman -Syu --noconfirm git python zstd gtk3 mpv libayatana-appindicator
 
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
 
       - name: Download Linux bundle
         uses: actions/download-artifact@v8
