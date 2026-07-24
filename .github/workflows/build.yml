@@ -160,7 +160,6 @@ jobs:
     name: Android
     if: ${{ inputs.build_android_release == true || inputs.build_android_dev == true }}
     runs-on: ubuntu-latest
-    permissions: write-all
     steps:
       - uses: actions/checkout@v6
         with:
@@ -317,7 +316,6 @@ jobs:
     name: iOS
     if: ${{ inputs.build_ios == true }}
     runs-on: macos-26
-    permissions: write-all
     steps:
       - uses: actions/checkout@v6
         with:
@@ -378,7 +376,6 @@ jobs:
     name: macOS
     if: ${{ inputs.build_macos == true }}
     runs-on: macos-26
-    permissions: write-all
     steps:
       - uses: actions/checkout@v6
         with:
@@ -446,7 +443,6 @@ jobs:
     name: Windows x64
     if: ${{ inputs.build_windows_portable == true || inputs.build_windows_installer == true }}
     runs-on: windows-latest
-    permissions: write-all
     steps:
       - uses: actions/checkout@v6
         with:
@@ -543,7 +539,6 @@ jobs:
     name: Linux x64
     if: ${{ inputs.build_linux_tar_gz == true || inputs.build_linux_deb == true || inputs.build_linux_rpm == true || inputs.build_linux_appimage == true || inputs.build_linux_arch == true }}
     runs-on: ubuntu-latest
-    permissions: write-all
     outputs:
       version: ${{ steps.release_metadata.outputs.version }}
     steps:
@@ -683,7 +678,6 @@ jobs:
     needs: linux
     runs-on: ubuntu-latest
     container: archlinux:base-devel
-    permissions: write-all
     steps:
       - name: Install job dependencies
         run: pacman -Syu --noconfirm git python zstd gtk3 mpv libayatana-appindicator
