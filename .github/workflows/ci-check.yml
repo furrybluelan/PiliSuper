@@ -12,9 +12,10 @@ concurrency:
   group: ci-check-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# 每累计十个仓库提交触发一次完整构建。
+# 仓库提交总数到达十的倍数，或距离上一次成功的完整构建至少四个提交时，触发完整构建。
 env:
   FULL_BUILD_COMMIT_INTERVAL: "10"
+  FULL_BUILD_COMMIT_FALLBACK_INTERVAL: "4"
 
 jobs:
   check:
@@ -46,14 +47,15 @@ jobs:
         if: ${{ hashFiles('test/**/*.dart') != '' }}
         run: flutter test
 
+      - name: Test Python build scripts
+        run: python3 -m unittest discover -s pybuilds/tests -v
+
   # PR：每次提交在检查通过后立即跑完整多平台构建
   pr-full-build:
     name: PR full build
     if: ${{ github.event_name == 'pull_request' }}
     needs: check
-    permissions: write-all
     uses: ./.github/workflows/build.yml
-    secrets: inherit
     with:
       source_sha: ${{ github.sha }}
       build_android_release: true
@@ -86,18 +88,44 @@ jobs:
       - name: Check commit interval
         id: threshold
         env:
+          GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.sha }}
         shell: bash
         run: |
           set -euo pipefail
           commits="$(git rev-list --count "$SHA")"
           remainder=$((commits % FULL_BUILD_COMMIT_INTERVAL))
+
+          last_full_sha=""
+          while read -r run_id run_sha; do
+            [[ -z "$run_id" ]] && continue
+            successful_full_build="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/jobs?per_page=100" \
+              --jq '[.jobs[] | select(.name | startswith("Periodic full build")) | select(.conclusion == "success")] | length')"
+            if [[ "$successful_full_build" != "0" ]]; then
+              last_full_sha="$run_sha"
+              break
+            fi
+          done < <(
+            gh api --paginate \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/ci-check.yml/runs?branch=${GITHUB_REF_NAME}&event=push&status=completed&per_page=100" \
+              --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha] | @tsv'
+          )
+
+          commits_since_last_full=0
+          if [[ -n "$last_full_sha" ]]; then
+            commits_since_last_full="$(git rev-list --count "$last_full_sha..$SHA")"
+          fi
+
           if (( remainder == 0 )); then
             echo "run=true" >> "$GITHUB_OUTPUT"
-            echo "reason=仓库累计 ${commits} 个提交，达到每 ${FULL_BUILD_COMMIT_INTERVAL} 个提交的间隔" >> "$GITHUB_OUTPUT"
+            echo "reason=仓库累计 ${commits} 个提交，是 ${FULL_BUILD_COMMIT_INTERVAL} 的倍数" >> "$GITHUB_OUTPUT"
+          elif (( commits_since_last_full >= FULL_BUILD_COMMIT_FALLBACK_INTERVAL )); then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "reason=距离上一次成功完整构建已新增 ${commits_since_last_full} 个提交（阈值: ≥${FULL_BUILD_COMMIT_FALLBACK_INTERVAL}）" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "reason=仓库累计 ${commits} 个提交，距离下次完整构建还差 $((FULL_BUILD_COMMIT_INTERVAL - remainder)) 个提交" >> "$GITHUB_OUTPUT"
+            echo "reason=累计 ${commits} 个提交，距离上次成功完整构建新增 ${commits_since_last_full} 个提交" >> "$GITHUB_OUTPUT"
           fi
 
   periodic-full-build:
