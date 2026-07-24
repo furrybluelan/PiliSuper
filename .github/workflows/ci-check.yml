@@ -64,6 +64,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     needs: check
     permissions:
+      actions: read
       contents: read
     uses: ./.github/workflows/build.yml
     with:
