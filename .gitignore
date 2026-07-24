@@ -151,4 +151,4 @@ dist
 
 test*
 !pybuilds/tests/
-!pybuilds/tests/**
+!pybuilds/tests/test_*.py
