@@ -53,29 +53,6 @@ TEXT_SELECTION_MENU_FIX_COMMIT = "beb2ad17004a1b118ff2bd09f55cee23198f6652"
 # https://github.com/flutter/flutter/issues/182281
 OVERSCROLL_COMMIT = "362b1de29974ffc1ed6faa826e1df870d7bec75f"
 
-
-def apply_project_patch(patch_file: Path, project_root: Path) -> None:
-    forward = run_command(
-        ["git", "apply", "--check", str(patch_file), "--ignore-whitespace"],
-        cwd=project_root,
-        check=False,
-    )
-    if forward.returncode == 0:
-        run_command(
-            ["git", "apply", str(patch_file), "--ignore-whitespace"],
-            cwd=project_root,
-        )
-        return
-
-    reverse = run_command(
-        ["git", "apply", "--reverse", "--check", str(patch_file), "--ignore-whitespace"],
-        cwd=project_root,
-        check=False,
-    )
-    if reverse.returncode != 0:
-        raise SystemExit(f"iOS 项目补丁应用失败: {patch_file.name}")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -102,8 +79,28 @@ def main() -> None:
         for patch_name in IOS_PROJECT_PATCHES:
             patch_file = patch_dir / patch_name
             log_step(f"Apply project patch {patch_name}")
-            apply_project_patch(patch_file, project_root)
-            log_success(f"Applied project patch: {patch_name}")
+            # apply_project_patch(patch_file, project_root)
+            try:
+                run_command(
+                ["git", "apply", "--check", str(patch_file), "--ignore-whitespace"],
+                cwd=project_root
+                )
+            except subprocess.CalledProcessError:
+                try:
+                    run_command(
+                    ["git", "apply", "--reverse", "--check", str(patch_file), "--ignore-whitespace"],
+                    cwd=project_root
+                    )
+                except subprocess.CalledProcessError:
+                    raise SystemExit(f"iOS 项目补丁应用失败: {patch_file.name}，且未能回退。")
+                else:
+                    log_warning(f"iOS 项目补丁 {patch_name} 应用失败，已忽略")  
+            else:
+                run_command(
+                ["git", "apply", str(patch_file), "--ignore-whitespace"],
+                cwd=project_root
+                )
+                log_success(f"Applied project patch: {patch_name}")
 
     # 2. 找到位于 <SDK>/bin/flutter 的 Flutter SDK。
     require_command("flutter", "请安装 Flutter，或将其加入 PATH")
@@ -140,7 +137,10 @@ def main() -> None:
         log_success("text selection menu fix")
     finally:
         if stashed:
-            run_command(["git", "stash", "pop"], cwd=flutter_root, check=False)
+            try:
+                run_command(["git", "stash", "pop"], cwd=flutter_root)
+            except subprocess.CalledProcessError:
+                log_warning("Failed to pop git stash")
 
     # 5. 通过revert commit执行Android 所需的 Flutter commit 回退。
     if needs_android_patch:
@@ -162,7 +162,10 @@ def main() -> None:
             log_success("overscroll indicator revert")
         finally:
             if stashed:
-                run_command(["git", "stash", "pop"], cwd=flutter_root, check=False)
+                try:
+                    run_command(["git", "stash", "pop"], cwd=flutter_root)
+                except subprocess.CalledProcessError:
+                    log_warning("Failed to pop git stash")
 
     # 6. 应用 Flutter SDK 补丁。重复文件只应用一次（Android 与 iOS
     #    共享 scroll_view.patch / navigator.patch）。单个 SDK 补丁失败不阻止后续补丁。
