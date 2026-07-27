@@ -8,7 +8,7 @@ import shutil
 from pathlib import Path
 
 from build_common import (flutter_build, log_success, output_path,
-                          require_project_root, run_shell_command)
+                          require_project_root, run_command, run_shell_command)
 
 
 def main() -> None:
@@ -33,7 +33,7 @@ def main() -> None:
     destination = output_path(args.output, args.output_prefix, "ios", args.version, suffix=".ipa")
     try:
         run_shell_command('find Payload/Runner.app/Frameworks -type d -name "*.framework" -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \\;', check=False)
-        run_shell_command(f'zip -r9 "{destination}" Payload/Runner.app')
+        run_command(["zip", "-r9", str(destination), "Payload/Runner.app"])
     finally:
         # Payload 是指向 build/ios/iphoneos 的符号链接，不能用 rmtree 删除。
         payload.unlink(missing_ok=True)

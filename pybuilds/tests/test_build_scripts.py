@@ -3,8 +3,9 @@ import os
 import sys
 import tempfile
 import unittest
+from contextlib import chdir, nullcontext
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 
 PYBUILDS = Path(__file__).resolve().parents[1]
@@ -12,6 +13,8 @@ sys.path.insert(0, str(PYBUILDS))
 
 build_common = importlib.import_module("build_common")
 build_android = importlib.import_module("build_android")
+build_ios = importlib.import_module("build_ios")
+build_macos = importlib.import_module("build_macos")
 packaging = importlib.import_module("packaging")
 notify_telegram = importlib.import_module("notify_telegram")
 patch_script = importlib.import_module("patch")
@@ -59,6 +62,95 @@ class AndroidBuildTests(unittest.TestCase):
                 (apk_dir / f"app-{abi}-release.apk").write_bytes(b"stale")
 
             self.assertEqual(build_android.built_apks(apk_dir, no_split=True), [universal])
+
+
+class IOSBuildTests(unittest.TestCase):
+    def test_zip_uses_argv_when_output_prefix_contains_shell_metacharacters(self):
+        # Given
+        with tempfile.TemporaryDirectory() as temp:
+            output_prefix = "Pili$(touch-owned)"
+            destination = Path("dist") / f"{output_prefix}_ios_2.1.0.ipa"
+            with chdir(temp), patch.object(
+                sys,
+                "argv",
+                ["build_ios.py", "--version", "2.1.0", "--output-prefix", output_prefix],
+            ), patch.object(build_ios.platform, "system", return_value="Darwin"), patch.object(
+                build_ios, "require_project_root"
+            ), patch.object(build_ios, "flutter_build"), patch.object(
+                build_common.subprocess, "run"
+            ) as run:
+                # When
+                build_ios.main()
+
+            # Then
+            self.assertEqual(
+                run.call_args_list[-1],
+                call(
+                    ["zip", "-r9", str(destination), "Payload/Runner.app"],
+                    text=True,
+                    check=True,
+                ),
+            )
+
+
+class MacOSBuildTests(unittest.TestCase):
+    def test_create_dmg_uses_argv_when_app_name_contains_shell_metacharacters(self):
+        # Given
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            app = root / "build/macos/Build/Products/Release/Pili`touch-owned`.app"
+            app.mkdir(parents=True)
+            dmg_temp = root / "dmg-temp"
+            dmg_temp.mkdir()
+            (dmg_temp / "PiliSuper.dmg").write_bytes(b"dmg")
+            with chdir(root), patch.object(
+                sys, "argv", ["build_macos.py", "--version", "2.1.0"]
+            ), patch.object(build_macos.platform, "system", return_value="Darwin"), patch.object(
+                build_macos, "require_project_root"
+            ), patch.object(build_macos, "flutter_build"), patch.object(
+                build_macos.shutil, "which", return_value="/usr/local/bin/create-dmg"
+            ), patch.object(
+                build_macos.tempfile,
+                "TemporaryDirectory",
+                return_value=nullcontext(str(dmg_temp)),
+            ), patch.object(build_common.subprocess, "run") as run:
+                # When
+                build_macos.main()
+
+            # Then
+            run.assert_called_once_with(
+                ["create-dmg", str(app.resolve())],
+                text=True,
+                check=False,
+                cwd=str(dmg_temp),
+            )
+
+    def test_zip_uses_argv_when_paths_contain_shell_metacharacters(self):
+        # Given
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            app = Path("build/macos/Build/Products/Release/Pili`touch-owned`.app")
+            (root / app).mkdir(parents=True)
+            output_prefix = "Pili$(touch-owned)"
+            destination = Path("dist") / f"{output_prefix}_macos_2.1.0.zip"
+            with chdir(root), patch.object(
+                sys,
+                "argv",
+                ["build_macos.py", "--version", "2.1.0", "--output-prefix", output_prefix],
+            ), patch.object(build_macos.platform, "system", return_value="Darwin"), patch.object(
+                build_macos, "require_project_root"
+            ), patch.object(build_macos, "flutter_build"), patch.object(
+                build_macos.shutil, "which", return_value=None
+            ), patch.object(build_common.subprocess, "run") as run:
+                # When
+                build_macos.main()
+
+            # Then
+            run.assert_called_once_with(
+                ["zip", "-r9", str(destination), str(app)],
+                text=True,
+                check=True,
+            )
 
 
 class PackagingTests(unittest.TestCase):

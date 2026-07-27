@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 from build_common import (flutter_build, log_success, log_warning, output_path,
-                          require_project_root, run_shell_command)
+                          require_project_root, run_command)
 
 
 def main() -> None:
@@ -28,7 +28,7 @@ def main() -> None:
         parser.error("未找到 .app 构建产物")
     if shutil.which("create-dmg"):
         with tempfile.TemporaryDirectory(prefix="pilisuper-dmg-") as temp:
-            run_shell_command(f'create-dmg "{app.resolve()}"', cwd=temp, check=False)
+            run_command(["create-dmg", str(app.resolve())], cwd=temp, check=False)
             dmg = next(Path(temp).glob("*.dmg"), None)
             if dmg:
                 destination = output_path(args.output, args.output_prefix, "macos", args.version, suffix=".dmg")
@@ -37,7 +37,7 @@ def main() -> None:
                 return
     log_warning("create-dmg 未安装，改为 ZIP")
     destination = output_path(args.output, args.output_prefix, "macos", args.version, suffix=".zip")
-    run_shell_command(f'zip -r9 "{destination}" "{app}"')
+    run_command(["zip", "-r9", str(destination), str(app)])
     log_success(f"输出: {destination}")
 
 
