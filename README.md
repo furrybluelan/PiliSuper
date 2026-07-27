@@ -252,42 +252,42 @@ flutter pub get
 
 | 脚本 | 职责 |
 | --- | --- |
-| `pybuilds/rename.py` | 改 Bundle ID、显示名、Dart 包名和仓库引用 |
-| `pybuilds/prebuild.py` | 生成 `pili_release.json` 并写入 Git 版本号 |
-| `pybuilds/patch.py` | 为指定平台应用 Flutter SDK 或项目源码补丁 |
-| `pybuilds/build_android.py` | 构建并导出 Android APK |
-| `pybuilds/build_ios.py` | 构建未签名 IPA |
-| `pybuilds/build_macos.py` | 构建 macOS DMG（或 ZIP） |
-| `pybuilds/build_windows.py` | 构建 Windows portable ZIP 或 Inno Setup 安装器 |
-| `pybuilds/build_linux.py` | 仅构建 Linux bundle |
-| `notify_telegram.py` | 受信任 CI 构建的 Telegram 通知推送器 |
-| `pybuilds/packaging.py` | 用系统工具打包已有 Linux bundle（tar、deb、rpm、Arch、AppImage） |
+| `tool/build/rename.py` | 改 Bundle ID、显示名、Dart 包名和仓库引用 |
+| `tool/build/prebuild.py` | 生成 `pili_release.json` 并写入 Git 版本号 |
+| `tool/build/patch.py` | 为指定平台应用 Flutter SDK 或项目源码补丁 |
+| `tool/build/build_android.py` | 构建并导出 Android APK |
+| `tool/build/build_ios.py` | 构建未签名 IPA |
+| `tool/build/build_macos.py` | 构建 macOS DMG（或 ZIP） |
+| `tool/build/build_windows.py` | 构建 Windows portable ZIP 或 Inno Setup 安装器 |
+| `tool/build/build_linux.py` | 仅构建 Linux bundle |
+| `tool/build/notify_telegram.py` | 受信任 CI 构建的 Telegram 通知推送器 |
+| `tool/build/packaging.py` | 用系统工具打包已有 Linux bundle（tar、deb、rpm、Arch、AppImage） |
 
 例如，构建 Android release：
 
 ```sh
-python pybuilds/rename.py --pkg-id com.pili.super --app-name PiliSuper
-python pybuilds/prebuild.py --platform android
+python tool/build/rename.py --pkg-id com.pili.super --app-name PiliSuper
+python tool/build/prebuild.py --platform android
 flutter pub get
 VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
-python pybuilds/patch.py android
-python pybuilds/build_android.py --version "$VERSION" --output dist
+python tool/build/patch.py android
+python tool/build/build_android.py --version "$VERSION" --output dist
 ```
 
 Linux 构建和打包分开：
 
 ```sh
-python pybuilds/prebuild.py --platform linux
+python tool/build/prebuild.py --platform linux
 flutter pub get
 VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
-python pybuilds/patch.py linux
-python pybuilds/build_linux.py
-python pybuilds/packaging.py --version "$VERSION" tar.gz deb rpm appimage
+python tool/build/patch.py linux
+python tool/build/build_linux.py
+python tool/build/packaging.py --version "$VERSION" tar.gz deb rpm appimage
 # Arch Linux 环境中使用 makepkg：
-python pybuilds/packaging.py --version "$VERSION" arch
+python tool/build/packaging.py --version "$VERSION" arch
 
 # Windows 安装器（需要 fastforge 与 Inno Setup）：
-python pybuilds/build_windows.py --installer --version "$VERSION" --output dist
+python tool/build/build_windows.py --installer --version "$VERSION" --output dist
 ```
 
 所有 Flutter 构建脚本都传入 `--no-pub`，因此请自行执行 `flutter pub get`。

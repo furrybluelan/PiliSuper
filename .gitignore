@@ -150,5 +150,5 @@ pili_release.json
 dist
 
 test*
-!pybuilds/tests/
-!pybuilds/tests/test_*.py
+!tool/build/tests/
+!tool/build/tests/test_*.py

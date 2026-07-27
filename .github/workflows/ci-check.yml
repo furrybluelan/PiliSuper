@@ -57,7 +57,7 @@ jobs:
         run: flutter test
 
       - name: Test Python build scripts
-        run: python3 -m unittest discover -s pybuilds/tests -v
+        run: python3 -m unittest discover -s tool/build/tests -v
 
   # PR：每次提交在检查通过后立即跑完整多平台构建
   pr-full-build:

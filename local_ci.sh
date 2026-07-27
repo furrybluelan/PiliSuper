@@ -22,4 +22,4 @@ if (( ${#dart_tests[@]} > 0 )); then
   flutter test
 fi
 
-python3 -m unittest discover -s pybuilds/tests -v
+python3 -m unittest discover -s tool/build/tests -v

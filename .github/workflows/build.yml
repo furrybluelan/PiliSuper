@@ -194,18 +194,18 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
+          python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         run: |
-          python3 pybuilds/prebuild.py --platform android
+          python3 tool/build/prebuild.py --platform android
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Apply Patches
-        run: python3 pybuilds/patch.py android
+        run: python3 tool/build/patch.py android
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
@@ -232,7 +232,7 @@ jobs:
               --clean-keys
             )
           fi
-          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist "${SIGN_ARGS[@]}"
+          python3 tool/build/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist "${SIGN_ARGS[@]}"
 
       - name: Build Dev
         env:
@@ -258,7 +258,7 @@ jobs:
           fi
 
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
-          python3 pybuilds/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist --dev "${SIGN_ARGS[@]}"
+          python3 tool/build/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist --dev "${SIGN_ARGS[@]}"
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -340,21 +340,21 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
+          python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         run: |
-          python3 pybuilds/prebuild.py --platform ios
+          python3 tool/build/prebuild.py --platform ios
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Apply Patches
-        run: python3 pybuilds/patch.py ios
+        run: python3 tool/build/patch.py ios
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Build IPA
-        run: python3 pybuilds/build_ios.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        run: python3 tool/build/build_ios.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -403,21 +403,21 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
+          python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         run: |
-          python3 pybuilds/prebuild.py --platform macos
+          python3 tool/build/prebuild.py --platform macos
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Apply Patches
-        run: python3 pybuilds/patch.py macos
+        run: python3 tool/build/patch.py macos
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Build macOS archive
-        run: python3 pybuilds/build_macos.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        run: python3 tool/build/build_macos.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -482,17 +482,17 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python pybuilds/rename.py "${NAME_ARGS[@]}"
+          python tool/build/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         shell: bash
         run: |
-          python pybuilds/prebuild.py --platform windows
+          python tool/build/prebuild.py --platform windows
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
       - name: Apply Patches
         shell: bash
-        run: python pybuilds/patch.py windows
+        run: python tool/build/patch.py windows
 
       - name: Resolve Flutter dependencies
         shell: bash
@@ -501,12 +501,12 @@ jobs:
       - name: Build portable Windows archive
         if: ${{ inputs.build_windows_portable == true }}
         shell: bash
-        run: python pybuilds/build_windows.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        run: python tool/build/build_windows.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Build Windows installer
         if: ${{ inputs.build_windows_installer == true }}
         shell: bash
-        run: python pybuilds/build_windows.py --installer --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        run: python tool/build/build_windows.py --installer --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -593,40 +593,40 @@ jobs:
           if [[ -n "${{ inputs.pkg_id }}" ]]; then
             NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
           fi
-          python3 pybuilds/rename.py "${NAME_ARGS[@]}"
+          python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
       - name: Generate release metadata
         id: release_metadata
         run: |
-          python3 pybuilds/prebuild.py --platform linux
+          python3 tool/build/prebuild.py --platform linux
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Apply Patches
-        run: python3 pybuilds/patch.py linux
+        run: python3 tool/build/patch.py linux
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
 
       - name: Build Linux bundle
-        run: python3 pybuilds/build_linux.py
+        run: python3 tool/build/build_linux.py
 
       - name: Package Linux tar.gz
         if: ${{ inputs.build_linux_tar_gz == true || inputs.build_linux_arch == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist tar.gz
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist tar.gz
 
       - name: Package Linux DEB
         if: ${{ inputs.build_linux_deb == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist deb
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist deb
 
       - name: Package Linux RPM
         if: ${{ inputs.build_linux_rpm == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist rpm
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist rpm
 
       - name: Package Linux AppImage
         if: ${{ inputs.build_linux_appimage == true }}
-        run: python3 pybuilds/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist appimage
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist appimage
 
       - name: Upload Linux bundle for Arch packaging
         if: ${{ inputs.build_linux_arch == true }}
@@ -705,7 +705,7 @@ jobs:
 
       - name: Build Arch package
         run: |
-          runuser -u builder -- python3 pybuilds/packaging.py \
+          runuser -u builder -- python3 tool/build/packaging.py \
             --version "${{ needs.linux.outputs.version }}" \
             --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" \
             --app-name "${{ inputs.app_name || 'PiliSuper' }}" \
@@ -760,7 +760,7 @@ jobs:
           if [[ -n "$RELEASE_TAG" ]]; then
             NOTIFY_ARGS+=(--release-tag "$RELEASE_TAG")
           fi
-          if ! python3 pybuilds/notify_telegram.py \
+          if ! python3 tool/build/notify_telegram.py \
             --output notify-output \
             --label "PiliSuper CI 构建产物 - ${{ github.ref_name }}" \
             "${NOTIFY_ARGS[@]}"; then

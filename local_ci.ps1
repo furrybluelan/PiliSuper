@@ -16,5 +16,5 @@ else {
 if (Test-Path -Path "test/**/*.dart" -PathType Leaf) {
     flutter test
 }
-python3 -m unittest discover -s pybuilds/tests -v
+python3 -m unittest discover -s tool/build/tests -v
 Pause
