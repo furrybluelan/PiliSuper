@@ -29,7 +29,7 @@ ARTIFACT_SUFFIXES = (
     ".appimage",
     ".pkg.tar.zst",
 )
-DEFAULT_MAX_FILE_MIB = 49
+DEFAULT_MAX_FILE_MIB = 99
 
 
 @dataclass(frozen=True)
