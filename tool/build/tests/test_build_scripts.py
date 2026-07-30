@@ -314,7 +314,7 @@ class TelegramNotifyTests(unittest.TestCase):
             self.assertIn("PILISUPER.dmg", names)
             self.assertEqual(len(names), 3)
 
-    def test_send_media_group_returns_first_message_id(self):
+    def test_send_media_group_returns_last_message_id(self):
         with tempfile.TemporaryDirectory() as temp:
             file_a = Path(temp) / "a.apk"
             file_a.write_bytes(b"content_a")
@@ -328,7 +328,7 @@ class TelegramNotifyTests(unittest.TestCase):
                 )
                 message_id = client.send_media_group(artifacts, caption="Test caption")
 
-            self.assertEqual(message_id, 123)
+            self.assertEqual(message_id, 124)  # 应该返回最后一条消息的 ID
             call_args = urlopen_mock.call_args
             self.assertIn("sendMediaGroup", call_args[0][0].full_url)
 

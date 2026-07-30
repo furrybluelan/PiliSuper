@@ -290,11 +290,11 @@ class TelegramClient:
         if not isinstance(result, list) or not result:
             raise RuntimeError("Telegram did not return a message array")
 
-        first_message = result[0]
-        if not isinstance(first_message, dict) or not isinstance(first_message.get("message_id"), int):
-            raise RuntimeError("First message in array does not have a message ID")
+        last_message = result[-1]
+        if not isinstance(last_message, dict) or not isinstance(last_message.get("message_id"), int):
+            raise RuntimeError("Last message in array does not have a message ID")
 
-        return first_message["message_id"]
+        return last_message["message_id"]
 
 
 def main() -> int:
