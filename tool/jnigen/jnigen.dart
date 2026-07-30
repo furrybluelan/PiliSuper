@@ -3,7 +3,7 @@ import 'dart:io' show Platform;
 import 'package:jnigen/jnigen.dart';
 
 void main(List<String> args) {
-  final packageRoot = Platform.script.resolve('../');
+  final packageRoot = Platform.script.resolve('../../');
   generateJniBindings(
     Config(
       outputConfig: OutputConfig(
