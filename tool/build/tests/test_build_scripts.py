@@ -268,6 +268,75 @@ class TelegramNotifyTests(unittest.TestCase):
         self.assertIn("这是一个 Release", message)
         self.assertIn("v2.1.0", message)
 
+    def test_find_artifacts_only_matches_pilisuper_prefix(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)
+            (output / "PiliSuper.exe").write_bytes(b"content1")
+            (output / "pilisuper_android.apk").write_bytes(b"content2")
+            (output / "PILISUPER.dmg").write_bytes(b"content3")
+            (output / "piliplus.exe").write_bytes(b"excluded")
+            (output / "other.zip").write_bytes(b"excluded")
+
+            artifacts = notify_telegram.find_artifacts(output)
+
+            names = [item.name for item in artifacts]
+            self.assertIn("PiliSuper.exe", names)
+            self.assertIn("pilisuper_android.apk", names)
+            self.assertIn("PILISUPER.dmg", names)
+            self.assertEqual(len(names), 3)
+
+    def test_send_media_group_calls_telegram_api_with_documents(self):
+        with tempfile.TemporaryDirectory() as temp:
+            file_a = Path(temp) / "a.apk"
+            file_b = Path(temp) / "b.ipa"
+            file_a.write_bytes(b"content_a")
+            file_b.write_bytes(b"content_b")
+
+            client = notify_telegram.TelegramClient("fake_token", "fake_chat", None)
+            artifacts = [
+                notify_telegram.Artifact(file_a, "a.apk", 1024),
+                notify_telegram.Artifact(file_b, "b.ipa", 2048),
+            ]
+
+            with patch("urllib.request.urlopen") as urlopen_mock:
+                urlopen_mock.return_value.__enter__.return_value.read.return_value = (
+                    b'{"ok": true, "result": [{"message_id": 123}]}'
+                )
+                client.send_media_group(artifacts, caption="Test caption")
+
+            call_args = urlopen_mock.call_args
+            self.assertIn("sendMediaGroup", call_args[0][0].full_url)
+
+    def test_main_sends_media_group_with_build_message_caption(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)
+            (output / "PiliSuper.apk").write_bytes(b"x" * 1024)
+
+            with (
+                patch.dict(
+                    os.environ,
+                    {
+                        "TELEGRAM_BOT_TOKEN": "test_token",
+                        "TELEGRAM_CHAT_ID": "test_chat",
+                        "GITHUB_REPOSITORY": "owner/repo",
+                        "GITHUB_SHA": "abc123",
+                    },
+                ),
+                patch.object(
+                    sys, "argv", ["notify_telegram.py", "--output", str(output)]
+                ),
+                patch("urllib.request.urlopen") as urlopen_mock,
+            ):
+                urlopen_mock.return_value.__enter__.return_value.read.return_value = (
+                    b'{"ok": true, "result": [{"message_id": 123}]}'
+                )
+                notify_telegram.main()
+
+                calls = [call[0][0].full_url for call in urlopen_mock.call_args_list]
+                self.assertEqual(len([c for c in calls if "sendMediaGroup" in c]), 1)
+                self.assertEqual(len([c for c in calls if "sendMessage" in c]), 0)
+                self.assertEqual(len([c for c in calls if "sendDocument" in c]), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

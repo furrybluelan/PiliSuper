@@ -56,6 +56,8 @@ def find_artifacts(output_dir: Path) -> list[Artifact]:
     for path in sorted(output_dir.rglob("*"), key=lambda item: item.name.lower()):
         if not path.is_file() or not path.name.lower().endswith(ARTIFACT_SUFFIXES):
             continue
+        if not path.name.lower().startswith("pilisuper"):
+            continue
         size = path.stat().st_size
         identity = (file_digest(path), size)
         if identity in seen:
@@ -213,6 +215,61 @@ class TelegramClient:
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
             self._response_result(response.read())
 
+    def send_media_group(self, artifacts: list[Artifact], caption: str) -> None:
+        if not artifacts:
+            return
+
+        if len(artifacts) > 10:
+            raise ValueError(f"Telegram media groups support max 10 items, got {len(artifacts)}")
+
+        media_items = []
+        for idx, artifact in enumerate(artifacts):
+            media_item = {
+                "type": "document",
+                "media": f"attach://file{idx}",
+            }
+            if idx == 0:
+                media_item["caption"] = truncate(caption, 1024)
+                media_item["parse_mode"] = "HTML"
+            media_items.append(media_item)
+
+        boundary = f"PiliSuper-{uuid.uuid4().hex}"
+        fields = {
+            "chat_id": self.chat_id,
+            "media": json.dumps(media_items),
+        }
+        if self.topic_id:
+            fields["message_thread_id"] = self.topic_id
+
+        body = bytearray()
+        for name, value in fields.items():
+            body.extend(f"--{boundary}\r\n".encode())
+            body.extend(
+                f'Content-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'.encode()
+            )
+
+        for idx, artifact in enumerate(artifacts):
+            content_type = mimetypes.guess_type(artifact.name)[0] or "application/octet-stream"
+            body.extend(f"--{boundary}\r\n".encode())
+            body.extend(
+                (
+                    f'Content-Disposition: form-data; name="file{idx}"; '
+                    f'filename="{artifact.name}"\r\nContent-Type: {content_type}\r\n\r\n'
+                ).encode()
+            )
+            body.extend(artifact.path.read_bytes())
+            body.extend(b"\r\n")
+
+        body.extend(f"--{boundary}--\r\n".encode())
+
+        request = urllib.request.Request(
+            f"{self.base_url}/sendMediaGroup",
+            data=bytes(body),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        )
+        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            self._response_result(response.read())
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -262,12 +319,13 @@ def main() -> int:
         release_tag=args.release_tag,
     )
     try:
-        message_id = client.send_message(message)
-        if args.release_tag:
-            client.pin_message(message_id)
-        for artifact in uploadable:
-            print(f"Sending {artifact.name} ({format_size(artifact.size)})")
-            client.send_document(artifact)
+        if uploadable:
+            print(f"Sending {len(uploadable)} artifact(s) as media group")
+            client.send_media_group(uploadable, message)
+        else:
+            message_id = client.send_message(message)
+            if args.release_tag:
+                client.pin_message(message_id)
     except (OSError, RuntimeError, urllib.error.URLError) as error:
         print(f"Telegram notification failed: {error}", file=sys.stderr)
         return 1
