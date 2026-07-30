@@ -24,6 +24,8 @@ COMMON_PATCHES = [
     "null_safety_for_selectable_region.patch",
     "editable_text.patch",
     "text_field.patch",
+    "scroll_position.patch",
+    "scrollable.patch"
 ]
 
 ANDROID_PATCHES = [
