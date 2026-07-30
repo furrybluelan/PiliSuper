@@ -239,12 +239,13 @@ class TelegramClient:
             raise ValueError(f"Telegram media groups support max 10 items, got {len(artifacts)}")
 
         media_items = []
+        last_index = len(artifacts) - 1
         for idx, artifact in enumerate(artifacts):
             media_item = {
                 "type": "document",
                 "media": f"attach://file{idx}",
             }
-            if idx == 0:
+            if idx == last_index:
                 media_item["caption"] = truncate(caption, 1024)
                 media_item["parse_mode"] = "HTML"
             media_items.append(media_item)
