@@ -167,7 +167,7 @@
   - [x] 观看记录
   - [x] 我的收藏
   - [x] 站内私信
-  
+
 - [x] 动态相关
   - [x] 全部、投稿、番剧分类查看
   - [x] 动态评论查看
@@ -231,61 +231,86 @@
 
 ### 首先，克隆仓库到本地
 
-``` Shell
-# 使用https方式克隆仓库
+```sh
 git clone https://github.com/FRBLanApps/PiliSuper.git
-```
-
-``` Shell
-# 或者，使用ssh方式克隆仓库
-git clone git@github.com:FRBLanApps/PiliSuper.git
-```
-
-``` Shell
-# 又或者，使用gh repo clone命令克隆仓库
-gh repo clone FRBLanApps/PiliSuper
-```
-
-### 然后，按照教程，安装依赖
-
-[安装 Flutter](https://docs.flutter.dev/install/custom)
-[安装多平台构建依赖](https://docs.flutter.dev/platform-integration)
-
-### 然后，安装Python以便运行构建脚本
-
-[安装 Python](https://www.python.org/downloads/)
-
-### 最后，运行构建脚本
-
-首先，切换到项目目录
-
-``` Shell
 cd PiliSuper
 ```
 
-然后，运行构建脚本
+也可以使用 SSH 或 `gh repo clone FRBLanApps/PiliSuper`。
 
-``` Shell
-python build.py [-h] [--pkg-id ID] [--original-pkg-id ID] [--app-name NAME]
-                [--original-app-name NAME] [--skip-rename] [--dart-define-from-file FILE]  
-                [--dart-define K=V] [--arch ARCH] [--version VERSION] [--no-prebuild]      
-                [--no-split] [--sign] [--keystore-file PATH] [--keystore-base64 B64]       
-                [--key-alias ALIAS] [--key-password PASS] [--store-password PASS]
-                [--clean-keys] [--installer]
-                [--linux-targets {tar.gz,zst,arch,deb,rpm,appimage,all} [{tar.gz,zst,arch,deb,rpm,appimage,all} ...]]
-                [--output DIR] [--output-prefix PREFIX] [--no-patches] [--no-pub-get]      
-                {android,ios,macos,windows,linux,all}
+### 然后，安装依赖
+
+安装 [Flutter](https://docs.flutter.dev/install/custom)、[目标平台构建依赖](https://docs.flutter.dev/platform-integration) 和 [Python](https://www.python.org/downloads/)。
+
+依赖解析是显式步骤：首次构建或修改 `pubspec.yaml` 后运行一次：
+
+```sh
+flutter pub get
 ```
 
-<br/>
+### 最后，按职责执行构建脚本
+
+| 脚本 | 职责 |
+| --- | --- |
+| `tool/build/rename.py` | 改 Bundle ID、显示名、Dart 包名和仓库引用 |
+| `tool/build/prebuild.py` | 生成 `pili_release.json` 并写入 Git 版本号 |
+| `tool/build/patch.py` | 为指定平台应用 Flutter SDK 或项目源码补丁 |
+| `tool/build/build_android.py` | 构建并导出 Android APK |
+| `tool/build/build_ios.py` | 构建未签名 IPA |
+| `tool/build/build_macos.py` | 构建 macOS DMG（或 ZIP） |
+| `tool/build/build_windows.py` | 构建 Windows portable ZIP 或 Inno Setup 安装器 |
+| `tool/build/build_linux.py` | 仅构建 Linux bundle |
+| `tool/build/notify_telegram.py` | 受信任 CI 构建的 Telegram 通知推送器 |
+| `tool/build/packaging.py` | 用系统工具打包已有 Linux bundle（tar、deb、rpm、Arch、AppImage） |
+
+例如，构建 Android release：
+
+```sh
+python tool/build/rename.py --pkg-id com.pili.super --app-name PiliSuper
+python tool/build/prebuild.py --platform android
+flutter pub get
+VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+python tool/build/patch.py android
+python tool/build/build_android.py --version "$VERSION" --output dist
+```
+
+Linux 构建和打包分开：
+
+```sh
+python tool/build/prebuild.py --platform linux
+flutter pub get
+VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
+python tool/build/patch.py linux
+python tool/build/build_linux.py
+python tool/build/packaging.py --version "$VERSION" tar.gz deb rpm appimage
+# Arch Linux 环境中使用 makepkg：
+python tool/build/packaging.py --version "$VERSION" arch
+
+# Windows 安装器（需要 fastforge 与 Inno Setup）：
+python tool/build/build_windows.py --installer --version "$VERSION" --output dist
+```
+
+所有 Flutter 构建脚本都传入 `--no-pub`，因此请自行执行 `flutter pub get`。
+
+### Telegram 构建通知
+
+受信任 CI 构建完成后，可通过以下 GitHub Actions Secrets 将构建产物发送到 Telegram：
+
+| Secret | 用途 |
+| --- | --- |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot API token |
+| `TELEGRAM_CHAT_ID` | 接收通知的群组、频道或私聊 ID |
+| `TELEGRAM_TOPIC_ID` | 可选，论坛群组的话题 ID |
+
+未配置 token 或 chat ID 时会自动跳过通知。超过 Telegram 上传限制的产物不会上传到 Telegram，通知消息会保留对应 GitHub Actions 下载链接。
 
 ## 声明
 
 此项目（PiliSuper）是个人为了兴趣而开发, 仅用于学习和测试，请按照您当地的法律处理此软件。
 
 在此致敬原作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
-在此致敬上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-在此致敬上上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+在此致敬上上游作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
 本仓库做了更激进的修改，感谢原作者的开源精神。
 
 感谢使用

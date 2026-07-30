@@ -393,6 +393,7 @@ class VideoDetailController extends GetxController
   /// 当前视频/分 P 已自动测速次数，换集时重置
   int _autoCdnAttempts = 0;
   bool _autoCdnLimitToasted = false;
+
   /// 换集时递增，作废尚未触发的延迟 toast
   int _autoCdnEpoch = 0;
   bool _autoCdnRunning = false;
@@ -664,10 +665,7 @@ class VideoDetailController extends GetxController
       alignment: Alignment.centerLeft,
       child: SlideTransition(
         position: animation.drive(
-          Tween<Offset>(
-            begin: const Offset(-1.0, 0.0),
-            end: Offset.zero,
-          ),
+          Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero),
         ),
         child: Padding(
           padding: const EdgeInsets.only(top: 5),
@@ -843,10 +841,7 @@ class VideoDetailController extends GetxController
               isMp4: entry.mediaType == 1,
               hasDashAudio: entry.hasDashAudio,
             )
-          : NetworkSource(
-              videoSource: videoUrl!,
-              audioSource: audioUrl,
-            ),
+          : NetworkSource(videoSource: videoUrl!, audioSource: audioUrl),
       seekTo: seek,
       duration: data.timeLength == null
           ? null
@@ -1416,10 +1411,7 @@ class VideoDetailController extends GetxController
     try {
       final res = await Request().get(
         'https://bvc.bilivideo.com/pbp/data',
-        queryParameters: {
-          'bvid': bvid,
-          'cid': cid.value,
-        },
+        queryParameters: {'bvid': bvid, 'cid': cid.value},
       );
       PbpData data = PbpData.fromJson(res.data);
       int stepSec = data.stepSec ?? 0;
@@ -1687,13 +1679,7 @@ class VideoDetailController extends GetxController
       if (kDebugMode) {
         debugPrint(title);
       }
-      Get.toNamed(
-        '/dlna',
-        parameters: {
-          'url': url,
-          'title': ?title,
-        },
-      );
+      Get.toNamed('/dlna', parameters: {'url': url, 'title': ?title});
     } else {
       res.toast();
     }

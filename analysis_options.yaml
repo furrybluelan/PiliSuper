@@ -10,9 +10,15 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  errors:
+    # Existing package imports use the historical `PiliPlus` package name.
+    package_names: ignore
   exclude:
     - lib/grpc/bilibili/**
-    # - lib/common/widgets/flutter/**
+    # Vendored Flutter framework sources follow Flutter's own lint policy.
+    - lib/common/widgets/flutter/**
+    # Generated JNI bindings are maintained by jnigen.
+    - lib/utils/android/bindings.g.dart
 
 formatter:
   trailing_commas: preserve

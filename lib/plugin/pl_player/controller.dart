@@ -444,6 +444,7 @@ class PlPlayerController with BlockConfigMixin {
   final List<DateTime> _stutterTimestamps = [];
   static const _stutterWindow = Duration(seconds: 30);
   static const _stutterThreshold = 2;
+
   /// seek 后缓冲是正常现象，忽略一段时间
   static const _seekGrace = Duration(seconds: 5);
   DateTime? _lastSeekAt;
@@ -836,14 +837,10 @@ class PlPlayerController with BlockConfigMixin {
           audioNormalization = _audioNormalizationParam.replaceFirstMapped(
             loudnormRegExp,
             (i) =>
-                'loudnorm=${volume.format(
-                  Map.fromEntries(
-                    i.group(1)!.split(':').map((item) {
-                      final parts = item.split('=');
-                      return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
-                    }),
-                  ),
-                )}',
+                'loudnorm=${volume.format(Map.fromEntries(i.group(1)!.split(':').map((item) {
+                  final parts = item.split('=');
+                  return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
+                })))}',
           );
         } else {
           audioNormalization = _audioNormalizationParam.replaceFirst(
@@ -858,11 +855,7 @@ class PlPlayerController with BlockConfigMixin {
     }
 
     await player.open(
-      Media(
-        video,
-        start: seekTo,
-        extras: extras.isEmpty ? null : extras,
-      ),
+      Media(video, start: seekTo, extras: extras.isEmpty ? null : extras),
       play: false,
     );
   }
