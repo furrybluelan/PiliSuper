@@ -149,6 +149,9 @@ pili_release.json
 
 dist
 
+# Python related
+__pycache__/
+.venv/
 test*
 !tool/build/tests/
 !tool/build/tests/test_*.py

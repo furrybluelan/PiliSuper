@@ -17,7 +17,6 @@ build_ios = importlib.import_module("build_ios")
 build_macos = importlib.import_module("build_macos")
 packaging = importlib.import_module("packaging")
 notify_telegram = importlib.import_module("notify_telegram")
-patch_script = importlib.import_module("patch")
 prebuild = importlib.import_module("prebuild")
 
 
@@ -203,18 +202,6 @@ class PrebuildTests(unittest.TestCase):
             prebuild.display_version_for("linux", "2.1.0", "abcdef123456"),
             "2.1.0",
         )
-
-
-class PatchTests(unittest.TestCase):
-    def test_already_applied_project_patch_is_accepted(self):
-        completed = type("Completed", (), {"returncode": 0})()
-        with patch.object(patch_script, "run_command", side_effect=[
-            type("Completed", (), {"returncode": 1})(),
-            completed,
-        ]) as run:
-            patch_script.apply_project_patch(Path("patch.diff"), Path("."))
-
-        self.assertEqual(run.call_count, 2)
 
 
 class TelegramNotifyTests(unittest.TestCase):

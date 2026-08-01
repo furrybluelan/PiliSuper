@@ -20,12 +20,16 @@ COMMON_PATCHES = [
     "navigation_drawer.patch",
     "popup_menu.patch",
     "fab.patch",
-    "selectable_region.patch",
     "null_safety_for_selectable_region.patch",
+    "selectable_region.patch",
     "editable_text.patch",
     "text_field.patch",
     "scroll_position.patch",
-    "scrollable.patch"
+    "scrollable.patch",
+    "scrollable_gesture.patch",
+    "draggable_scrollable_sheet.patch",
+    "scaffold.patch",
+    "text.patch",
 ]
 
 ANDROID_PATCHES = [
