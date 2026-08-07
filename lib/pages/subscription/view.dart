@@ -38,7 +38,14 @@ class _SubPageState extends State<SubPage> with GridMixin {
       ),
     );
     if (widget.inNavBar) {
-      return body;
+      return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: SimpleScaffold(
+          appBar: AppBar(automaticallyImplyLeading: false),
+          body: body,
+        ),
+      );
     }
     return SimpleScaffold(
       appBar: AppBar(title: const Text('我的订阅')),

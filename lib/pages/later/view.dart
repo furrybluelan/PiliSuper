@@ -65,7 +65,7 @@ class _LaterPageState extends State<LaterPage>
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.viewPaddingOf(context);
-    return Obx(
+    Widget scaffold = Obx(
       () {
         final enableMultiSelect = _baseCtr.enableMultiSelect.value;
         return popScope(
@@ -76,7 +76,7 @@ class _LaterPageState extends State<LaterPage>
             }
           },
           child: SimpleScaffold(
-            appBar: widget.inNavBar ? null : _buildAppbar(enableMultiSelect),
+            appBar: _buildAppbar(enableMultiSelect),
             fab: Padding(
               padding: .only(
                 right: kFloatingActionButtonMargin + padding.right,
@@ -153,6 +153,14 @@ class _LaterPageState extends State<LaterPage>
         );
       },
     );
+    if (widget.inNavBar) {
+      return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: scaffold,
+      );
+    }
+    return scaffold;
   }
 
   PreferredSizeWidget _buildAppbar(bool enableMultiSelect) {
@@ -194,7 +202,8 @@ class _LaterPageState extends State<LaterPage>
         ),
       ],
       child: AppBar(
-        title: const Text('稍后再看'),
+        automaticallyImplyLeading: !widget.inNavBar,
+        title: widget.inNavBar ? null : const Text('稍后再看'),
         actions: [
           IconButton(
             tooltip: '搜索',

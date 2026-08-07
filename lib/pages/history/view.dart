@@ -80,8 +80,94 @@ class _HistoryPageState extends State<HistoryPage>
         ],
       ),
     );
-    if (widget.type != null || widget.inNavBar) {
+    if (widget.type != null) {
       return child;
+    }
+    if (widget.inNavBar) {
+      return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: Obx(
+          () {
+            final enableMultiSelect =
+                _historyController.baseCtr.enableMultiSelect.value;
+            return popScope(
+              canPop: !enableMultiSelect,
+              onPopInvokedWithResult: (didPop, result) {
+                if (enableMultiSelect) {
+                  currCtr().handleSelect();
+                }
+              },
+              child: SimpleScaffold(
+                appBar: MultiSelectAppBarWidget(
+                  visible: enableMultiSelect,
+                  ctr: currCtr(),
+                  child: AppBar(
+                    automaticallyImplyLeading: false,
+                    bottom: _buildPauseTip,
+                    actions: _buildAppBar.actions,
+                  ),
+                ),
+                body: Padding(
+                  padding: EdgeInsets.only(
+                    left: padding.left,
+                    right: padding.right,
+                  ),
+                  child: Obx(() {
+                    final tabs = _historyController.tabs;
+                    if (tabs.isEmpty) {
+                      return child;
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TabBar(
+                          controller: _historyController.tabController,
+                          onTap: (index) {
+                            if (!_historyController
+                                .tabController!
+                                .indexIsChanging) {
+                              currCtr().scrollController.animToTop();
+                            } else {
+                              if (enableMultiSelect) {
+                                currCtr(
+                                  _historyController
+                                      .tabController!
+                                      .previousIndex,
+                                ).handleSelect();
+                              }
+                            }
+                          },
+                          tabs: [
+                            const Tab(text: '全部'),
+                            ...tabs.map((item) => Tab(text: item.name)),
+                          ],
+                        ),
+                        Expanded(
+                          child: TabBarView(
+                            physics: enableMultiSelect
+                                ? const NeverScrollableScrollPhysics()
+                                : tabBarScrollPhysics,
+                            controller: _historyController.tabController,
+                            horizontalDragGestureRecognizer:
+                                CustomHorizontalDragGestureRecognizer.new,
+                            children: [
+                              KeepAliveWrapper(child: child),
+                              ...tabs.map(
+                                (item) => HistoryPage(type: item.type),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            );
+          },
+        ),
+      );
     }
     return Obx(
       () {
