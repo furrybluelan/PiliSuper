@@ -287,9 +287,13 @@ class _MainAppState extends PopScopeState<MainApp>
     // On portrait phones, cap bottom bar to 6 items.
     // Tablets, landscape, and sidebar are unlimited.
     const int _portraitPhoneMaxNavItems = 6;
-    final navBars = (!context.isTablet && context.isPortrait)
+    final isPortraitPhone = !context.isTablet && context.isPortrait;
+    final navBars = isPortraitPhone
         ? _mainController.navigationBars.take(_portraitPhoneMaxNavItems).toList()
         : _mainController.navigationBars;
+    // On portrait phones, shorten '稍后再看' → '待看' to save space.
+    String labelOf(NavigationBarType e) =>
+        (isPortraitPhone && e == NavigationBarType.later) ? '待看' : e.label;
     if (navBars.length > 1) {
       if (_mainController.floatingNavBar) {
         bottomNav = Obx(
@@ -299,7 +303,7 @@ class _MainAppState extends PopScopeState<MainApp>
             destinations: navBars
                 .map(
                   (e) => FloatingNavigationDestination(
-                    label: e.label,
+                    label: labelOf(e),
                     icon: _buildIcon(type: e),
                     selectedIcon: _buildIcon(type: e, selected: true),
                   ),
@@ -316,7 +320,7 @@ class _MainAppState extends PopScopeState<MainApp>
             destinations: navBars
                 .map(
                   (e) => NavigationDestination(
-                    label: e.label,
+                    label: labelOf(e),
                     icon: _buildIcon(type: e),
                     selectedIcon: _buildIcon(type: e, selected: true),
                   ),
@@ -336,7 +340,7 @@ class _MainAppState extends PopScopeState<MainApp>
             items: navBars
                 .map(
                   (e) => BottomNavigationBarItem(
-                    label: e.label,
+                    label: labelOf(e),
                     icon: _buildIcon(type: e),
                     activeIcon: _buildIcon(type: e, selected: true),
                   ),
