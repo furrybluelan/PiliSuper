@@ -67,6 +67,41 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
         child: SimpleScaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
+            toolbarHeight: 50,
+            title: SizedBox(
+              height: 50,
+              child: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                tabs: FavTabType.values
+                    .map((item) => Tab(text: item.title))
+                    .toList(),
+                onTap: (index) {
+                  try {
+                    if (!_tabController.indexIsChanging) {
+                      switch (FavTabType.values[index]) {
+                        case FavTabType.video:
+                          _favController.scrollController.animToTop();
+                        case FavTabType.article:
+                          Get.find<FavArticleController>()
+                              .scrollController
+                              .animToTop();
+                        case FavTabType.topic:
+                          Get.find<FavTopicController>()
+                              .scrollController
+                              .animToTop();
+                        case FavTabType.cheese:
+                          Get.find<FavCheeseController>()
+                              .scrollController
+                              .animToTop();
+                        default:
+                      }
+                    }
+                  } catch (_) {}
+                },
+              ),
+            ),
             actions: [
               Obx(
                 () => _showVideoFavMenu.value
@@ -138,37 +173,6 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
               ),
               const SizedBox(width: 6),
             ],
-            bottom: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: FavTabType.values
-                  .map((item) => Tab(text: item.title))
-                  .toList(),
-              onTap: (index) {
-                try {
-                  if (!_tabController.indexIsChanging) {
-                    switch (FavTabType.values[index]) {
-                      case FavTabType.video:
-                        _favController.scrollController.animToTop();
-                      case FavTabType.article:
-                        Get.find<FavArticleController>()
-                            .scrollController
-                            .animToTop();
-                      case FavTabType.topic:
-                        Get.find<FavTopicController>()
-                            .scrollController
-                            .animToTop();
-                      case FavTabType.cheese:
-                        Get.find<FavCheeseController>()
-                            .scrollController
-                            .animToTop();
-                      default:
-                    }
-                  }
-                } catch (_) {}
-              },
-            ),
           ),
           body: body,
         ),

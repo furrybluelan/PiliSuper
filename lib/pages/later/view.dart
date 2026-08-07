@@ -113,40 +113,16 @@ class _LaterPageState extends State<LaterPage>
               ),
             ),
             body: ViewSafeArea(
-              child: Column(
-                children: [
-                  TabBar(
-                    // isScrollable: true,
-                    // tabAlignment: TabAlignment.start,
-                    controller: _tabController,
-                    tabs: LaterViewType.values.map((item) {
-                      final count = _baseCtr.counts[item.index];
-                      return Tab(
-                        text: '${item.title}${count != -1 ? '($count)' : ''}',
-                      );
-                    }).toList(),
-                    onTap: (_) {
-                      if (!_tabController.indexIsChanging) {
-                        currCtr().scrollController.animToTop();
-                      } else if (enableMultiSelect) {
-                        currCtr(_tabController.previousIndex).handleSelect();
-                      }
-                    },
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      physics: enableMultiSelect
-                          ? const NeverScrollableScrollPhysics()
-                          : tabBarScrollPhysics,
-                      controller: _tabController,
-                      horizontalDragGestureRecognizer:
-                          CustomHorizontalDragGestureRecognizer.new,
-                      children: LaterViewType.values
-                          .map((item) => item.page)
-                          .toList(),
-                    ),
-                  ),
-                ],
+              child: TabBarView(
+                physics: enableMultiSelect
+                    ? const NeverScrollableScrollPhysics()
+                    : tabBarScrollPhysics,
+                controller: _tabController,
+                horizontalDragGestureRecognizer:
+                    CustomHorizontalDragGestureRecognizer.new,
+                children: LaterViewType.values
+                    .map((item) => item.page)
+                    .toList(),
               ),
             ),
           ),
@@ -203,7 +179,28 @@ class _LaterPageState extends State<LaterPage>
       ],
       child: AppBar(
         automaticallyImplyLeading: !widget.inNavBar,
-        title: widget.inNavBar ? null : const Text('稍后再看'),
+        toolbarHeight: widget.inNavBar ? 50 : kToolbarHeight,
+        title: widget.inNavBar
+            ? SizedBox(
+                height: 50,
+                child: TabBar(
+                  controller: _tabController,
+                  tabs: LaterViewType.values.map((item) {
+                    final count = _baseCtr.counts[item.index];
+                    return Tab(
+                      text: '${item.title}${count != -1 ? '($count)' : ''}',
+                    );
+                  }).toList(),
+                  onTap: (_) {
+                    if (!_tabController.indexIsChanging) {
+                      currCtr().scrollController.animToTop();
+                    } else if (_baseCtr.enableMultiSelect.value) {
+                      currCtr(_tabController.previousIndex).handleSelect();
+                    }
+                  },
+                ),
+              )
+            : const Text('稍后再看'),
         actions: [
           IconButton(
             tooltip: '搜索',

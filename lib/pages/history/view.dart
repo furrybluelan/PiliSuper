@@ -98,53 +98,54 @@ class _HistoryPageState extends State<HistoryPage>
                   currCtr().handleSelect();
                 }
               },
-              child: SimpleScaffold(
-                appBar: MultiSelectAppBarWidget(
-                  visible: enableMultiSelect,
-                  ctr: currCtr(),
-                  child: AppBar(
-                    automaticallyImplyLeading: false,
-                    bottom: _buildPauseTip,
-                    actions: _buildAppBar.actions,
-                  ),
-                ),
-                body: Padding(
-                  padding: EdgeInsets.only(
-                    left: padding.left,
-                    right: padding.right,
-                  ),
-                  child: Obx(() {
-                    final tabs = _historyController.tabs;
-                    if (tabs.isEmpty) {
-                      return child;
-                    }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TabBar(
-                          controller: _historyController.tabController,
-                          onTap: (index) {
-                            if (!_historyController
-                                .tabController!
-                                .indexIsChanging) {
-                              currCtr().scrollController.animToTop();
-                            } else {
-                              if (enableMultiSelect) {
-                                currCtr(
-                                  _historyController
+              child: Obx(() {
+                final tabs = _historyController.tabs;
+                return SimpleScaffold(
+                  appBar: MultiSelectAppBarWidget(
+                    visible: enableMultiSelect,
+                    ctr: currCtr(),
+                    child: AppBar(
+                      automaticallyImplyLeading: false,
+                      toolbarHeight: tabs.isEmpty ? kToolbarHeight : 50,
+                      bottom: _buildPauseTip,
+                      title: tabs.isEmpty
+                          ? null
+                          : SizedBox(
+                              height: 50,
+                              child: TabBar(
+                                controller: _historyController.tabController,
+                                onTap: (index) {
+                                  if (!_historyController
                                       .tabController!
-                                      .previousIndex,
-                                ).handleSelect();
-                              }
-                            }
-                          },
-                          tabs: [
-                            const Tab(text: '全部'),
-                            ...tabs.map((item) => Tab(text: item.name)),
-                          ],
-                        ),
-                        Expanded(
-                          child: TabBarView(
+                                      .indexIsChanging) {
+                                    currCtr().scrollController.animToTop();
+                                  } else {
+                                    if (enableMultiSelect) {
+                                      currCtr(
+                                        _historyController
+                                            .tabController!
+                                            .previousIndex,
+                                      ).handleSelect();
+                                    }
+                                  }
+                                },
+                                tabs: [
+                                  const Tab(text: '全部'),
+                                  ...tabs.map((item) => Tab(text: item.name)),
+                                ],
+                              ),
+                            ),
+                      actions: _buildAppBar.actions,
+                    ),
+                  ),
+                  body: Padding(
+                    padding: EdgeInsets.only(
+                      left: padding.left,
+                      right: padding.right,
+                    ),
+                    child: tabs.isEmpty
+                        ? child
+                        : TabBarView(
                             physics: enableMultiSelect
                                 ? const NeverScrollableScrollPhysics()
                                 : tabBarScrollPhysics,
@@ -158,12 +159,9 @@ class _HistoryPageState extends State<HistoryPage>
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-              ),
+                  ),
+                );
+              }),
             );
           },
         ),
