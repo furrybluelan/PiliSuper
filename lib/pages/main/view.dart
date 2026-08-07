@@ -410,9 +410,9 @@ class _MainAppState extends PopScopeState<MainApp>
       }
       return Obx(
         () => NavigationRail(
-          groupAlignment: 0.5,
+          groupAlignment: 0.0,
           labelType: .selected,
-          leading: userAndSearchVertical(),
+          trailing: userAndSearchVertical(),
           backgroundColor: Colors.transparent,
           onDestinationSelected: _mainController.setIndex,
           selectedIndex: _mainController.selectedIndex.value,
