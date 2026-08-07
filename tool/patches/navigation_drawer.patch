@@ -14,22 +14,26 @@ index 8a16764cb0c..031c2267d97 100644
    /// The background color of the [Material] that holds the [NavigationDrawer]'s
    /// contents.
    ///
- @@ -192,6 +195,7 @@ class NavigationDrawer extends StatelessWidget {
-            children: <Widget>[
-              ?header,
-              Expanded(
+@@ -192,7 +195,14 @@ class NavigationDrawer extends StatelessWidget {
+           children: <Widget>[
+             ?header,
+             Expanded(
 +              flex: flex,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: Center(
+               child: Material(
+                 type: MaterialType.transparency,
+-                child: ListView(children: wrappedChildren),
++                child: Center(
 +                  child: SingleChildScrollView(
 +                    child: Column(
 +                      mainAxisSize: MainAxisSize.min,
 +                      children: wrappedChildren,
 +                    ),
 +                  ),
-                ),
-@@ -410,7 +414,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
++                ),
+               ),
+             ),
+             ?footer,
+@@ -410,7 +424,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
        child: _NavigationDestinationSemantics(
          child: SizedBox(
            height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
