@@ -13,9 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SubPage extends StatefulWidget {
-  const SubPage({super.key, this.inNavBar = false});
-
-  final bool inNavBar;
+  const SubPage({super.key});
 
   @override
   State<SubPage> createState() => _SubPageState();
@@ -28,7 +26,7 @@ class _SubPageState extends State<SubPage> with GridMixin {
   Widget build(BuildContext context) {
     return Obx(() {
       final enableMultiSelect = _subController.enableMultiSelect.value;
-      final scaffold = popScope(
+      return popScope(
         canPop: !enableMultiSelect,
         onPopInvokedWithResult: (didPop, result) {
           if (enableMultiSelect) {
@@ -40,8 +38,7 @@ class _SubPageState extends State<SubPage> with GridMixin {
             visible: enableMultiSelect,
             ctr: _subController,
             child: AppBar(
-              automaticallyImplyLeading: !widget.inNavBar,
-              title: widget.inNavBar ? null : const Text('我的订阅'),
+              title: const Text('我的订阅'),
               actions: [
                 IconButton(
                   tooltip: '批量删除',
@@ -69,14 +66,6 @@ class _SubPageState extends State<SubPage> with GridMixin {
           ),
         ),
       );
-      if (widget.inNavBar) {
-        return MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          child: scaffold,
-        );
-      }
-      return scaffold;
     });
   }
 
