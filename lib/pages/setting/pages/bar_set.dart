@@ -108,6 +108,12 @@ class _BarSetPageState extends State<BarSetPage> with ReorderMixin {
                 key: ValueKey(e.hashCode),
                 value: e.second,
                 onChanged: (bool? value) {
+                  if (value == true &&
+                      key == SettingBoxKey.navBarSort &&
+                      list.where((e) => e.second).length >= 6) {
+                    SmartDialog.showToast('底栏最多显示 6 个');
+                    return;
+                  }
                   e.second = value!;
                   setState(() {});
                 },
