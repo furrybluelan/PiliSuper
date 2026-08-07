@@ -42,6 +42,16 @@ class _SubPageState extends State<SubPage> with GridMixin {
             child: AppBar(
               automaticallyImplyLeading: !widget.inNavBar,
               title: widget.inNavBar ? null : const Text('我的订阅'),
+              actions: [
+                IconButton(
+                  tooltip: '批量删除',
+                  onPressed: () {
+                    _subController.enableMultiSelect.value = true;
+                  },
+                  icon: const Icon(Icons.checklist_outlined),
+                ),
+                const SizedBox(width: 6),
+              ],
             ),
           ),
           body: refreshIndicator(
@@ -84,10 +94,7 @@ class _SubPageState extends State<SubPage> with GridMixin {
                   final item = response[index];
                   return SubItem(
                     item: item,
-                    enableMultiSelect:
-                        _subController.enableMultiSelect.value,
-                    onSelect: () => _subController.onSelect(item),
-                    cancelSub: () => _subController.cancelSub(item),
+                    ctr: _subController,
                   );
                 },
                 itemCount: response.length,

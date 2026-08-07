@@ -3,8 +3,8 @@ import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/sub/sub/list.dart';
+import 'package:PiliPlus/pages/subscription/controller.dart';
 import 'package:PiliPlus/pages/subscription_detail/view.dart';
-import 'package:PiliPlus/pages/common/multi_select/base.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -13,15 +13,11 @@ import 'package:get/get.dart';
 
 class SubItem extends StatelessWidget {
   final SubItemModel item;
-  final VoidCallback cancelSub;
-  final bool enableMultiSelect;
-  final VoidCallback? onSelect;
+  final SubController ctr;
   const SubItem({
     super.key,
     required this.item,
-    required this.cancelSub,
-    this.enableMultiSelect = false,
-    this.onSelect,
+    required this.ctr,
   });
 
   @override
@@ -32,44 +28,43 @@ class SubItem extends StatelessWidget {
       21 => '合集',
       _ => '其它(${item.type})',
     };
-    void onLongPress() {
-      if (enableMultiSelect) {
-        imageSaveDialog(title: item.title, cover: item.cover);
-      } else {
-        onSelect?.call();
-      }
-    }
 
-    void onTap() {
-      if (enableMultiSelect) {
-        onSelect?.call();
-        return;
-      }
-      if (item.state == 1) {
-        SmartDialog.showToast('该$type已失效');
-        return;
-      }
-      if (item.type == 11) {
-        Get.toNamed(
-          '/favDetail',
-          parameters: {
-            'mediaId': item.id!.toString(),
-            'heroTag': heroTag,
-          },
-        );
-      } else {
-        SubDetailPage.toSubDetailPage(
-          item.id!,
-          heroTag: heroTag,
-          subInfo: item,
-        );
-      }
-    }
+    final enableMultiSelect = ctr.enableMultiSelect.value;
+
+    // Normal: long-press → enter multi-select + select this item
+    // Multi:  long-press → image save dialog
+    final onLongPress = enableMultiSelect
+        ? () => imageSaveDialog(title: item.title, cover: item.cover)
+        : () => ctr
+            ..enableMultiSelect.value = true
+            ..onSelect(item);
 
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onTap: onTap,
+        onTap: enableMultiSelect
+            ? () => ctr.onSelect(item)
+            : () {
+                if (item.state == 1) {
+                  SmartDialog.showToast('该$type已失效');
+                  return;
+                }
+                if (item.type == 11) {
+                  Get.toNamed(
+                    '/favDetail',
+                    parameters: {
+                      'mediaId': item.id!.toString(),
+                      'heroTag': heroTag,
+                    },
+                  );
+                } else {
+                  SubDetailPage.toSubDetailPage(
+                    item.id!,
+                    heroTag: heroTag,
+                    subInfo: item,
+                  );
+                }
+              },
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
         child: Stack(
@@ -96,18 +91,14 @@ class SubItem extends StatelessWidget {
                                 height: maxHeight,
                               ),
                             ),
-                            PBadge(
-                              right: 6,
-                              top: 6,
-                              text: type,
-                            ),
+                            PBadge(right: 6, top: 6, text: type),
                           ],
                         );
                       },
                     ),
                   ),
                   const SizedBox(width: 10),
-                  content(context),
+                  _content(context, enableMultiSelect),
                 ],
               ),
             ),
@@ -145,12 +136,9 @@ class SubItem extends StatelessWidget {
     );
   }
 
-  Widget content(BuildContext context) {
+  Widget _content(BuildContext context, bool enableMultiSelect) {
     final theme = Theme.of(context);
-    final style = TextStyle(
-      fontSize: 13,
-      color: theme.colorScheme.outline,
-    );
+    final style = TextStyle(fontSize: 13, color: theme.colorScheme.outline);
     return Expanded(
       child: Stack(
         clipBehavior: Clip.none,
@@ -164,9 +152,7 @@ class SubItem extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.start,
-                  style: const TextStyle(
-                    letterSpacing: 0.3,
-                  ),
+                  style: const TextStyle(letterSpacing: 0.3),
                 ),
               ),
               Text(
@@ -191,7 +177,7 @@ class SubItem extends StatelessWidget {
               height: 35,
               width: 35,
               child: IconButton(
-                onPressed: cancelSub,
+                onPressed: () => ctr.cancelSub(item),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.outline,
                   padding: EdgeInsets.zero,
