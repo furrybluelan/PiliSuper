@@ -74,7 +74,8 @@ class _SearchResultPageState extends State<SearchResultPage>
             width: 1,
           ),
         ),
-        title: GestureDetector(
+        // 使用 InkWell 以支持 TV 遥控器方向键聚焦
+        title: InkWell(
           onTap: () {
             if (_isFromSearch) {
               Get.back();
@@ -85,7 +86,6 @@ class _SearchResultPageState extends State<SearchResultPage>
               );
             }
           },
-          behavior: HitTestBehavior.opaque,
           child: SizedBox(
             width: double.infinity,
             child: Text(

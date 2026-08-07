@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -34,19 +35,33 @@ class PlayerFocus extends StatelessWidget {
   final ValueGetter<bool>? onSkipSegment;
   final VoidCallback? onRefresh;
 
-  static bool _shouldHandle(LogicalKeyboardKey logicalKey) {
-    return logicalKey == LogicalKeyboardKey.tab ||
-        logicalKey == LogicalKeyboardKey.arrowLeft ||
+  static bool _isDirectional(LogicalKeyboardKey logicalKey) {
+    return logicalKey == LogicalKeyboardKey.arrowLeft ||
         logicalKey == LogicalKeyboardKey.arrowRight ||
         logicalKey == LogicalKeyboardKey.arrowUp ||
         logicalKey == LogicalKeyboardKey.arrowDown;
   }
 
+  static bool _shouldHandle(LogicalKeyboardKey logicalKey) {
+    return logicalKey == LogicalKeyboardKey.tab ||
+        _isDirectional(logicalKey);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Focus(
-      autofocus: true,
+      // TV 上非全屏时不抢焦点，否则遥控器无法移动到简介/评论等区域。
+      autofocus: !DeviceUtils.isTV,
       onKeyEvent: (node, event) {
+        // 该 widget 包裹的是整个视频页（含简介、评论、播放列表），而非仅播放器
+        // 画面。在 TV 上方向键同时是 D-pad 导航键，若一律吞掉，遥控器将无法移出
+        // 播放器，整页陷入死锁。因此仅在全屏播放时接管方向键 —— 此时没有其他可
+        // 聚焦区域，方向键理应控制进度与音量。
+        if (DeviceUtils.isTV &&
+            !isFullScreen &&
+            _isDirectional(event.logicalKey)) {
+          return KeyEventResult.ignored;
+        }
         final handled = _handleKey(event);
         if (handled || _shouldHandle(event.logicalKey)) {
           return KeyEventResult.handled;
@@ -235,6 +250,28 @@ class PlayerFocus extends StatelessWidget {
             return true;
           }
           onSendDanmaku();
+          return true;
+
+        // 遥控器「确定」键上报为 select 而非 enter。仅在全屏时接管为播放/暂停：
+        // 非全屏时它是 D-pad 的激活键，必须放行给当前聚焦的控件。
+        case LogicalKeyboardKey.select when isFullScreen:
+          if (onSkipSegment?.call() ?? false) {
+            return true;
+          }
+          if (plPlayerController.isLive || canPlay!()) {
+            if (hasPlayer) {
+              plPlayerController.onDoubleTapCenter();
+            }
+          }
+          return true;
+
+        // 遥控器上的独立播放/暂停键，任何时候都应生效。
+        case LogicalKeyboardKey.mediaPlayPause:
+          if (plPlayerController.isLive || canPlay!()) {
+            if (hasPlayer) {
+              plPlayerController.onDoubleTapCenter();
+            }
+          }
           return true;
       }
 

@@ -249,8 +249,8 @@ class _MediaPageState extends CommonPageState<MinePage>
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
-            behavior: .opaque,
+          // InkWell 而非 GestureDetector：需可聚焦以支持 TV 遥控器 D-pad 导航。
+          InkWell(
             onTap: controller.onLogin,
             onLongPress: () {
               Feedback.forLongPress(context);

@@ -1878,47 +1878,53 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               (plPlayerController.isBuffering.value &&
                   plPlayerController.playerStatus.isPlaying)) {
             return Center(
-              child: GestureDetector(
-                onTap: plPlayerController.refreshPlayer,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [Colors.black26, Colors.transparent],
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        Assets.buffering,
-                        height: 25,
-                        cacheHeight: 25.cacheSize(context),
-                        semanticLabel: "加载中",
-                        color: Colors.white,
+              // 使用 InkWell 以支持 TV 遥控器 D-pad 聚焦；播放器树中没有 Material
+              // 祖先，InkWell 需要它才能绘制水波纹，故补一层透明 Material。
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  onTap: plPlayerController.refreshPlayer,
+                  customBorder: const CircleBorder(),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [Colors.black26, Colors.transparent],
                       ),
-                      if (plPlayerController.isBuffering.value)
-                        Obx(() {
-                          final buffered = plPlayerController.buffered.value;
-                          if (buffered == 0) {
-                            return const Text(
-                              '加载中...',
-                              style: TextStyle(
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          Assets.buffering,
+                          height: 25,
+                          cacheHeight: 25.cacheSize(context),
+                          semanticLabel: "加载中",
+                          color: Colors.white,
+                        ),
+                        if (plPlayerController.isBuffering.value)
+                          Obx(() {
+                            final buffered = plPlayerController.buffered.value;
+                            if (buffered == 0) {
+                              return const Text(
+                                '加载中...',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              );
+                            }
+                            return Text(
+                              DurationUtils.formatDuration(buffered),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
                               ),
                             );
-                          }
-                          return Text(
-                            DurationUtils.formatDuration(buffered),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          );
-                        }),
-                    ],
+                          }),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2216,17 +2222,21 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     Widget child, {
     required Future<void>? Function() onTap,
   }) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () async {
-        await onTap();
-        _removeDmAction();
-      },
-      child: SizedBox(
-        width: _actionItemWidth,
-        height: _actionItemHeight,
-        child: Center(
-          child: child,
+    // 使用 InkWell 以支持 TV 遥控器 D-pad 聚焦；弹幕操作浮层挂在 _DanmakuTip
+    // 下，链路中没有 Material 祖先，故补一层透明 Material。
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () async {
+          await onTap();
+          _removeDmAction();
+        },
+        child: SizedBox(
+          width: _actionItemWidth,
+          height: _actionItemHeight,
+          child: Center(
+            child: child,
+          ),
         ),
       ),
     );

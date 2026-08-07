@@ -18,6 +18,7 @@ import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/max_screen_size.dart';
@@ -111,9 +112,17 @@ void main() async {
   HttpOverrides.global = _CustomHttpOverrides();
 
   if (PlatformUtils.isMobile) {
-    if (Platform.isAndroid) MaxScreenSize.init();
+    if (Platform.isAndroid) {
+      MaxScreenSize.init();
+      // 必须在决定屏幕朝向与焦点高亮策略之前完成。
+      await DeviceUtils.initTV();
+    }
     await Future.wait([
-      if (Pref.horizontalScreen) ?fullMode() else ?portraitUpMode(),
+      // TV 恒为横屏设备，不能锁竖屏。
+      if (Pref.horizontalScreen || DeviceUtils.isTV)
+        ?fullMode()
+      else
+        ?portraitUpMode(),
       setupServiceLocator(),
     ]);
   } else if (Platform.isWindows) {
@@ -126,6 +135,13 @@ void main() async {
     }
   } else if (Platform.isMacOS) {
     await setupServiceLocator();
+  }
+
+  if (DeviceUtils.isTV) {
+    // Android 平台的 FocusManager 默认以 `automatic` 策略启动，初始判定为触摸
+    // 模式，此时 InkWell 等组件不会绘制 focusColor —— 表现就是遥控器操作时看不到
+    // 任何选中态。TV 无触摸，直接强制 traditional 策略始终绘制焦点高亮。
+    FocusManager.instance.highlightStrategy = .alwaysTraditional;
   }
 
   Request();

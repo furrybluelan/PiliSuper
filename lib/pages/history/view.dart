@@ -267,8 +267,8 @@ class _HistoryPageState extends State<HistoryPage>
                   ),
                 ),
               ),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
+              // 使用 InkWell 以支持 TV 遥控器方向键聚焦
+              InkWell(
                 onTap: () => _historyController.baseCtr.onPauseHistory(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
