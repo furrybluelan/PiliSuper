@@ -284,13 +284,19 @@ class _MainAppState extends PopScopeState<MainApp>
 
   Widget? get _bottomNav {
     Widget? bottomNav;
-    if (_mainController.navigationBars.length > 1) {
+    // On portrait phones, cap bottom bar to 6 items.
+    // Tablets, landscape, and sidebar are unlimited.
+    const int _portraitPhoneMaxNavItems = 6;
+    final navBars = (!context.isTablet && context.isPortrait)
+        ? _mainController.navigationBars.take(_portraitPhoneMaxNavItems).toList()
+        : _mainController.navigationBars;
+    if (navBars.length > 1) {
       if (_mainController.floatingNavBar) {
         bottomNav = Obx(
           () => FloatingNavigationBar(
             onDestinationSelected: _mainController.setIndex,
             selectedIndex: _mainController.selectedIndex.value,
-            destinations: _mainController.navigationBars
+            destinations: navBars
                 .map(
                   (e) => FloatingNavigationDestination(
                     label: e.label,
@@ -307,7 +313,7 @@ class _MainAppState extends PopScopeState<MainApp>
             maintainBottomViewPadding: true,
             onDestinationSelected: _mainController.setIndex,
             selectedIndex: _mainController.selectedIndex.value,
-            destinations: _mainController.navigationBars
+            destinations: navBars
                 .map(
                   (e) => NavigationDestination(
                     label: e.label,
@@ -327,7 +333,7 @@ class _MainAppState extends PopScopeState<MainApp>
             selectedFontSize: 12,
             unselectedFontSize: 12,
             type: .fixed,
-            items: _mainController.navigationBars
+            items: navBars
                 .map(
                   (e) => BottomNavigationBarItem(
                     label: e.label,
