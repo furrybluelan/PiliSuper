@@ -47,15 +47,16 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
       title: '离线缓存',
       onTap: () => Get.toNamed('/download'),
     ),
-    (
-      icon: CustomIcons.history,
-      title: '观看记录',
-      onTap: () {
-        if (isLogin) {
-          Get.toNamed('/history');
-        }
-      },
-    ),
+    if (!Pref.historyInNav)
+      (
+        icon: CustomIcons.history,
+        title: '观看记录',
+        onTap: () {
+          if (isLogin) {
+            Get.toNamed('/history');
+          }
+        },
+      ),
     (
       icon: CustomIcons.subscriptions_outlined,
       title: '我的订阅',
