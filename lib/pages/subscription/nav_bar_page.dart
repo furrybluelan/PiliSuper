@@ -83,7 +83,12 @@ class _SubNavBarPageState extends State<SubNavBarPage> with GridMixin {
                     _subController.onLoadMore();
                   }
                   final item = response[index];
-                  return SubItem(item: item, ctr: _subController);
+                  return SubItem(
+                    item: item,
+                    cancelSub: () => _subController.cancelSub(item),
+                    enableMultiSelect: _subController.enableMultiSelect.value,
+                    onSelect: () => _subController.onSelect(item),
+                  );
                 },
                 itemCount: response.length,
               )

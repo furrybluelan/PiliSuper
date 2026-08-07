@@ -4,7 +4,6 @@ import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
 import 'package:PiliPlus/models_new/sub/sub/list.dart';
-import 'package:PiliPlus/pages/subscription/controller.dart';
 import 'package:PiliPlus/pages/subscription_detail/view.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -14,11 +13,16 @@ import 'package:get/get.dart';
 
 class SubItem extends StatelessWidget {
   final SubItemModel item;
-  final SubController ctr;
+  final VoidCallback cancelSub;
+  final bool enableMultiSelect;
+  final VoidCallback? onSelect;
+
   const SubItem({
     super.key,
     required this.item,
-    required this.ctr,
+    required this.cancelSub,
+    this.enableMultiSelect = false,
+    this.onSelect,
   });
 
   @override
@@ -30,19 +34,15 @@ class SubItem extends StatelessWidget {
       _ => '其它(${item.type})',
     };
 
-    final enableMultiSelect = ctr.enableMultiSelect.value;
-
     final onLongPress = enableMultiSelect
         ? () => imageSaveDialog(title: item.title, cover: item.cover)
-        : () => ctr
-            ..enableMultiSelect.value = true
-            ..onSelect(item);
+        : onSelect;
 
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
         onTap: enableMultiSelect
-            ? () => ctr.onSelect(item)
+            ? onSelect
             : () {
                 if (item.state == 1) {
                   SmartDialog.showToast('该$type已失效');
@@ -101,7 +101,7 @@ class SubItem extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              _content(context, enableMultiSelect),
+              _content(context),
             ],
           ),
         ),
@@ -109,7 +109,7 @@ class SubItem extends StatelessWidget {
     );
   }
 
-  Widget _content(BuildContext context, bool enableMultiSelect) {
+  Widget _content(BuildContext context) {
     final theme = Theme.of(context);
     final style = TextStyle(fontSize: 13, color: theme.colorScheme.outline);
     return Expanded(
@@ -149,7 +149,7 @@ class SubItem extends StatelessWidget {
             height: 35,
             width: 35,
             child: IconButton(
-              onPressed: () => ctr.cancelSub(item),
+              onPressed: cancelSub,
               style: TextButton.styleFrom(
                 foregroundColor: theme.colorScheme.outline,
                 padding: EdgeInsets.zero,

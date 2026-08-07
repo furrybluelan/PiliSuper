@@ -83,7 +83,9 @@ class _SubPageState extends State<SubPage> with GridMixin {
                   final item = response[index];
                   return SubItem(
                     item: item,
-                    ctr: _subController,
+                    cancelSub: () => _subController.cancelSub(item),
+                    enableMultiSelect: _subController.enableMultiSelect.value,
+                    onSelect: () => _subController.onSelect(item),
                   );
                 },
                 itemCount: response.length,
