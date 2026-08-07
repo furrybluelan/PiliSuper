@@ -29,7 +29,7 @@ enum NavigationBarType implements EnumWithLabel {
     '历史',
     Icon(Icons.history_outlined),
     Icon(Icons.history),
-    HistoryPage(),
+    HistoryPage(inNavBar: true),
   ),
   ;
 

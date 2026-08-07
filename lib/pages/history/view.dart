@@ -18,9 +18,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key, this.type});
+  const HistoryPage({super.key, this.type, this.inNavBar = false});
 
   final String? type;
+  final bool inNavBar;
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -79,7 +80,7 @@ class _HistoryPageState extends State<HistoryPage>
         ],
       ),
     );
-    if (widget.type != null) {
+    if (widget.type != null || widget.inNavBar) {
       return child;
     }
     return Obx(
