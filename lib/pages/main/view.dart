@@ -385,7 +385,7 @@ class _MainAppState extends PopScopeState<MainApp>
                   backgroundColor: Colors.transparent,
                   onDestinationSelected: _mainController.setIndex,
                   selectedIndex: _mainController.selectedIndex.value,
-                  header: Expanded(flex: 4, child: userAndSearchVertical()),
+                  header: userAndSearchVertical(),
                   tilePadding: const .symmetric(vertical: 5, horizontal: 12),
                   indicatorShape: const RoundedRectangleBorder(
                     borderRadius: .all(.circular(16)),
