@@ -143,21 +143,20 @@ class SubItem extends StatelessWidget {
               ),
             ],
           ),
-          if (!enableMultiSelect)
-            Positioned(
-              bottom: 0,
-              right: 0,
-              height: 35,
-              width: 35,
-              child: IconButton(
-                onPressed: () => ctr.cancelSub(item),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.colorScheme.outline,
-                  padding: EdgeInsets.zero,
-                ),
-                icon: const Icon(Icons.delete_outline, size: 18),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            height: 35,
+            width: 35,
+            child: IconButton(
+              onPressed: () => ctr.cancelSub(item),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.outline,
+                padding: EdgeInsets.zero,
               ),
+              icon: const Icon(Icons.delete_outline, size: 18),
             ),
+          ),
         ],
       ),
     );
