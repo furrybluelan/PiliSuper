@@ -1,3 +1,5 @@
+import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
+import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
@@ -24,33 +26,48 @@ class _SubPageState extends State<SubPage> with GridMixin {
 
   @override
   Widget build(BuildContext context) {
-    final body = refreshIndicator(
-      onRefresh: _subController.onRefresh,
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          ViewSliverSafeArea(
-            sliver: Obx(
-              () => _buildBody(_subController.loadingState.value),
+    return Obx(() {
+      final enableMultiSelect = _subController.enableMultiSelect.value;
+      final scaffold = popScope(
+        canPop: !enableMultiSelect,
+        onPopInvokedWithResult: (didPop, result) {
+          if (enableMultiSelect) {
+            _subController.handleSelect();
+          }
+        },
+        child: SimpleScaffold(
+          appBar: MultiSelectAppBarWidget(
+            visible: enableMultiSelect,
+            ctr: _subController,
+            child: AppBar(
+              automaticallyImplyLeading: !widget.inNavBar,
+              title: widget.inNavBar ? null : const Text('我的订阅'),
             ),
           ),
-        ],
-      ),
-    );
-    if (widget.inNavBar) {
-      return MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: SimpleScaffold(
-          appBar: AppBar(automaticallyImplyLeading: false),
-          body: body,
+          body: refreshIndicator(
+            onRefresh: _subController.onRefresh,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                ViewSliverSafeArea(
+                  sliver: Obx(
+                    () => _buildBody(_subController.loadingState.value),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       );
-    }
-    return SimpleScaffold(
-      appBar: AppBar(title: const Text('我的订阅')),
-      body: body,
-    );
+      if (widget.inNavBar) {
+        return MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: scaffold,
+        );
+      }
+      return scaffold;
+    });
   }
 
   Widget _buildBody(LoadingState<List<SubItemModel>?> loadingState) {
@@ -67,6 +84,9 @@ class _SubPageState extends State<SubPage> with GridMixin {
                   final item = response[index];
                   return SubItem(
                     item: item,
+                    enableMultiSelect:
+                        _subController.enableMultiSelect.value,
+                    onSelect: () => _subController.onSelect(item),
                     cancelSub: () => _subController.cancelSub(item),
                   );
                 },

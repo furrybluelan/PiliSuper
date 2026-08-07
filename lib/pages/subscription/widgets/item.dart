@@ -4,6 +4,7 @@ import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/sub/sub/list.dart';
 import 'package:PiliPlus/pages/subscription_detail/view.dart';
+import 'package:PiliPlus/pages/common/multi_select/base.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +14,14 @@ import 'package:get/get.dart';
 class SubItem extends StatelessWidget {
   final SubItemModel item;
   final VoidCallback cancelSub;
+  final bool enableMultiSelect;
+  final VoidCallback? onSelect;
   const SubItem({
     super.key,
     required this.item,
     required this.cancelSub,
+    this.enableMultiSelect = false,
+    this.onSelect,
   });
 
   @override
@@ -27,72 +32,114 @@ class SubItem extends StatelessWidget {
       21 => '合集',
       _ => '其它(${item.type})',
     };
-    void onLongPress() => imageSaveDialog(
-      title: item.title,
-      cover: item.cover,
-    );
+    void onLongPress() {
+      if (enableMultiSelect) {
+        imageSaveDialog(title: item.title, cover: item.cover);
+      } else {
+        onSelect?.call();
+      }
+    }
+
+    void onTap() {
+      if (enableMultiSelect) {
+        onSelect?.call();
+        return;
+      }
+      if (item.state == 1) {
+        SmartDialog.showToast('该$type已失效');
+        return;
+      }
+      if (item.type == 11) {
+        Get.toNamed(
+          '/favDetail',
+          parameters: {
+            'mediaId': item.id!.toString(),
+            'heroTag': heroTag,
+          },
+        );
+      } else {
+        SubDetailPage.toSubDetailPage(
+          item.id!,
+          heroTag: heroTag,
+          subInfo: item,
+        );
+      }
+    }
+
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onTap: () {
-          if (item.state == 1) {
-            SmartDialog.showToast('该$type已失效');
-            return;
-          }
-          if (item.type == 11) {
-            Get.toNamed(
-              '/favDetail',
-              parameters: {
-                'mediaId': item.id!.toString(),
-                'heroTag': heroTag,
-              },
-            );
-          } else {
-            SubDetailPage.toSubDetailPage(
-              item.id!,
-              heroTag: heroTag,
-              subInfo: item,
-            );
-          }
-        },
+        onTap: onTap,
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: Style.aspectRatio,
-                child: LayoutBuilder(
-                  builder: (context, boxConstraints) {
-                    double maxWidth = boxConstraints.maxWidth;
-                    double maxHeight = boxConstraints.maxHeight;
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Hero(
-                          tag: heroTag,
-                          child: NetworkImgLayer(
-                            src: item.cover,
-                            width: maxWidth,
-                            height: maxHeight,
-                          ),
-                        ),
-                        PBadge(
-                          right: 6,
-                          top: 6,
-                          text: type,
-                        ),
-                      ],
-                    );
-                  },
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AspectRatio(
+                    aspectRatio: Style.aspectRatio,
+                    child: LayoutBuilder(
+                      builder: (context, boxConstraints) {
+                        double maxWidth = boxConstraints.maxWidth;
+                        double maxHeight = boxConstraints.maxHeight;
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Hero(
+                              tag: heroTag,
+                              child: NetworkImgLayer(
+                                src: item.cover,
+                                width: maxWidth,
+                                height: maxHeight,
+                              ),
+                            ),
+                            PBadge(
+                              right: 6,
+                              top: 6,
+                              text: type,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  content(context),
+                ],
+              ),
+            ),
+            if (enableMultiSelect)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: IgnorePointer(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: item.checked
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.surface,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                    width: 22,
+                    height: 22,
+                    child: item.checked
+                        ? Icon(
+                            Icons.check,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          )
+                        : null,
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
-              content(context),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -137,20 +184,21 @@ class SubItem extends StatelessWidget {
               ),
             ],
           ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            height: 35,
-            width: 35,
-            child: IconButton(
-              onPressed: cancelSub,
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.outline,
-                padding: EdgeInsets.zero,
+          if (!enableMultiSelect)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              height: 35,
+              width: 35,
+              child: IconButton(
+                onPressed: cancelSub,
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.outline,
+                  padding: EdgeInsets.zero,
+                ),
+                icon: const Icon(Icons.delete_outline, size: 18),
               ),
-              icon: const Icon(Icons.delete_outline, size: 18),
             ),
-          ),
         ],
       ),
     );
