@@ -2,6 +2,7 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/select_mask.dart';
 import 'package:PiliPlus/models_new/sub/sub/list.dart';
 import 'package:PiliPlus/pages/subscription/controller.dart';
 import 'package:PiliPlus/pages/subscription_detail/view.dart';
@@ -22,7 +23,7 @@ class SubItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String heroTag = Utils.makeHeroTag(item.id);
+    final heroTag = Utils.makeHeroTag(item.id);
     final type = switch (item.type) {
       11 => '收藏夹',
       21 => '合集',
@@ -31,8 +32,6 @@ class SubItem extends StatelessWidget {
 
     final enableMultiSelect = ctr.enableMultiSelect.value;
 
-    // Normal: long-press → enter multi-select + select this item
-    // Multi:  long-press → image save dialog
     final onLongPress = enableMultiSelect
         ? () => imageSaveDialog(title: item.title, cover: item.cover)
         : () => ctr
@@ -67,70 +66,44 @@ class SubItem extends StatelessWidget {
               },
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AspectRatio(
-                    aspectRatio: Style.aspectRatio,
-                    child: LayoutBuilder(
-                      builder: (context, boxConstraints) {
-                        double maxWidth = boxConstraints.maxWidth;
-                        double maxHeight = boxConstraints.maxHeight;
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Hero(
-                              tag: heroTag,
-                              child: NetworkImgLayer(
-                                src: item.cover,
-                                width: maxWidth,
-                                height: maxHeight,
-                              ),
-                            ),
-                            PBadge(right: 6, top: 6, text: type),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  _content(context, enableMultiSelect),
-                ],
-              ),
-            ),
-            if (enableMultiSelect)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: IgnorePointer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: item.checked
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                    width: 22,
-                    height: 22,
-                    child: item.checked
-                        ? Icon(
-                            Icons.check,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )
-                        : null,
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AspectRatio(
+                aspectRatio: Style.aspectRatio,
+                child: LayoutBuilder(
+                  builder: (context, boxConstraints) {
+                    final maxWidth = boxConstraints.maxWidth;
+                    final maxHeight = boxConstraints.maxHeight;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Hero(
+                          tag: heroTag,
+                          child: NetworkImgLayer(
+                            src: item.cover,
+                            width: maxWidth,
+                            height: maxHeight,
+                          ),
+                        ),
+                        PBadge(right: 6, top: 6, text: type),
+                        Positioned.fill(
+                          child: selectMask(
+                            Theme.of(context).colorScheme,
+                            item.checked,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
-          ],
+              const SizedBox(width: 10),
+              _content(context, enableMultiSelect),
+            ],
+          ),
         ),
       ),
     );
