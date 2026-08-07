@@ -758,6 +758,12 @@ abstract final class Pref {
   static bool get enableMYBar =>
       _setting.get(SettingBoxKey.enableMYBar, defaultValue: true);
 
+  static bool get historyInNav =>
+      (_setting.get(SettingBoxKey.navBarSort) as List?)?.contains(
+        NavigationBarType.history.index,
+      ) ??
+      false;
+
   static Transition get pageTransition =>
       Transition.values[_setting.get(
         SettingBoxKey.pageTransition,
