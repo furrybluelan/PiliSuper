@@ -225,7 +225,9 @@ class MainController extends GetxController
         (GStorage.setting.get(SettingBoxKey.navBarSort) as List?)?.fromCast();
     late final List<NavigationBarType> navigationBars;
     if (navBarSort == null || navBarSort.isEmpty) {
-      navigationBars = NavigationBarType.values;
+      navigationBars = NavigationBarType.values
+          .where((item) => item != NavigationBarType.history)
+          .toList();
     } else {
       navigationBars = navBarSort
           .map((i) => NavigationBarType.values[i])
@@ -233,7 +235,8 @@ class MainController extends GetxController
     }
     this.navigationBars = navigationBars;
     final defPage = Pref.defaultHomePage;
-    selectedIndex.value = navigationBars.indexOf(defPage);
+    final defIndex = navigationBars.indexOf(defPage);
+    selectedIndex.value = defIndex < 0 ? 0 : defIndex;
   }
 
   void checkDefaultSearch([bool shouldCheck = false]) {

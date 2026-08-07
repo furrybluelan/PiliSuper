@@ -2,7 +2,9 @@ import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/reorder_mixin.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/models/common/enum_with_label.dart';
+import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -28,7 +30,14 @@ class _BarSetPageState extends State<BarSetPage> with ReorderMixin {
     title = args['title'];
     final List? cache = GStorage.setting.get(key);
     list = (args['defaultBars'] as List<EnumWithLabel>)
-        .map((e) => Pair(first: e, second: cache?.contains(e.index) ?? true))
+        .map(
+          (e) => Pair(
+            first: e,
+            second: cache?.contains(e.index) ??
+                !(key == SettingBoxKey.navBarSort &&
+                    e == NavigationBarType.history),
+          ),
+        )
         .toList();
     if (cache != null && cache.isNotEmpty) {
       final cacheIndex = {for (int i = 0; i < cache.length; i++) cache[i]: i};
