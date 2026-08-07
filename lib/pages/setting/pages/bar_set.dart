@@ -35,7 +35,13 @@ class _BarSetPageState extends State<BarSetPage> with ReorderMixin {
             first: e,
             second: cache?.contains(e.index) ??
                 !(key == SettingBoxKey.navBarSort &&
-                    e == NavigationBarType.history),
+                    const {
+                      NavigationBarType.history,
+                      NavigationBarType.fav,
+                      NavigationBarType.download,
+                      NavigationBarType.subscription,
+                      NavigationBarType.later,
+                    }.contains(e)),
           ),
         )
         .toList();

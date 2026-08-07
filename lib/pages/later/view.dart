@@ -18,7 +18,9 @@ import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class LaterPage extends StatefulWidget {
-  const LaterPage({super.key});
+  const LaterPage({super.key, this.inNavBar = false});
+
+  final bool inNavBar;
 
   @override
   State<LaterPage> createState() => _LaterPageState();
@@ -74,7 +76,7 @@ class _LaterPageState extends State<LaterPage>
             }
           },
           child: SimpleScaffold(
-            appBar: _buildAppbar(enableMultiSelect),
+            appBar: widget.inNavBar ? null : _buildAppbar(enableMultiSelect),
             fab: Padding(
               padding: .only(
                 right: kFloatingActionButtonMargin + padding.right,

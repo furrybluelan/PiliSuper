@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SubPage extends StatefulWidget {
-  const SubPage({super.key});
+  const SubPage({super.key, this.inNavBar = false});
+
+  final bool inNavBar;
 
   @override
   State<SubPage> createState() => _SubPageState();
@@ -22,21 +24,25 @@ class _SubPageState extends State<SubPage> with GridMixin {
 
   @override
   Widget build(BuildContext context) {
+    final body = refreshIndicator(
+      onRefresh: _subController.onRefresh,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          ViewSliverSafeArea(
+            sliver: Obx(
+              () => _buildBody(_subController.loadingState.value),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (widget.inNavBar) {
+      return body;
+    }
     return SimpleScaffold(
       appBar: AppBar(title: const Text('我的订阅')),
-      body: refreshIndicator(
-        onRefresh: _subController.onRefresh,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            ViewSliverSafeArea(
-              sliver: Obx(
-                () => _buildBody(_subController.loadingState.value),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: body,
     );
   }
 

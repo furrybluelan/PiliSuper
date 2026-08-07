@@ -14,7 +14,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class FavPage extends StatefulWidget {
-  const FavPage({super.key});
+  const FavPage({super.key, this.inNavBar = false});
+
+  final bool inNavBar;
 
   @override
   State<FavPage> createState() => _FavPageState();
@@ -52,6 +54,49 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final body = ViewSafeArea(
+      child: tabBarView(
+        controller: _tabController,
+        children: FavTabType.values.map((item) => item.page).toList(),
+      ),
+    );
+    if (widget.inNavBar) {
+      return Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs:
+                FavTabType.values.map((item) => Tab(text: item.title)).toList(),
+            onTap: (index) {
+              try {
+                if (!_tabController.indexIsChanging) {
+                  switch (FavTabType.values[index]) {
+                    case FavTabType.video:
+                      _favController.scrollController.animToTop();
+                    case FavTabType.article:
+                      Get.find<FavArticleController>()
+                          .scrollController
+                          .animToTop();
+                    case FavTabType.topic:
+                      Get.find<FavTopicController>()
+                          .scrollController
+                          .animToTop();
+                    case FavTabType.cheese:
+                      Get.find<FavCheeseController>()
+                          .scrollController
+                          .animToTop();
+                    default:
+                  }
+                }
+              } catch (_) {}
+            },
+          ),
+          Expanded(child: body),
+        ],
+      );
+    }
     return SimpleScaffold(
       appBar: AppBar(
         title: const Text('我的收藏'),
@@ -152,12 +197,7 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
           },
         ),
       ),
-      body: ViewSafeArea(
-        child: tabBarView(
-          controller: _tabController,
-          children: FavTabType.values.map((item) => item.page).toList(),
-        ),
-      ),
+      body: body,
     );
   }
 }

@@ -226,7 +226,13 @@ class MainController extends GetxController
     late final List<NavigationBarType> navigationBars;
     if (navBarSort == null || navBarSort.isEmpty) {
       navigationBars = NavigationBarType.values
-          .where((item) => item != NavigationBarType.history)
+          .where((item) => !const {
+            NavigationBarType.history,
+            NavigationBarType.fav,
+            NavigationBarType.download,
+            NavigationBarType.subscription,
+            NavigationBarType.later,
+          }.contains(item))
           .toList();
     } else {
       navigationBars = navBarSort

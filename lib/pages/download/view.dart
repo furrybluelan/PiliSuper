@@ -28,7 +28,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class DownloadPage extends StatefulWidget {
-  const DownloadPage({super.key});
+  const DownloadPage({super.key, this.inNavBar = false});
+
+  final bool inNavBar;
 
   @override
   State<DownloadPage> createState() => _DownloadPageState();
@@ -59,63 +61,65 @@ class _DownloadPageState extends State<DownloadPage> with GridMixin {
           }
         },
         child: SimpleScaffold(
-          appBar: MultiSelectAppBarWidget(
-            ctr: _controller,
-            actions: [
-              TextButton(
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
+          appBar: widget.inNavBar
+              ? null
+              : MultiSelectAppBarWidget(
+                  ctr: _controller,
+                  actions: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () async {
+                        final future = [
+                          for (final page in _controller.allChecked)
+                            for (final e in page.entries)
+                              _downloadService.downloadDanmaku(
+                                entry: e,
+                                isUpdate: true,
+                              ),
+                        ];
+                        _controller.handleSelect();
+                        final res = await Future.wait(future);
+                        if (res.every((e) => e)) {
+                          SmartDialog.showToast('更新成功');
+                        } else {
+                          SmartDialog.showToast('更新失败');
+                        }
+                      },
+                      child: Text(
+                        '更新',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                    ),
+                  ],
+                  child: AppBar(
+                    title: const Text('离线缓存'),
+                    actions: [
+                      IconButton(
+                        tooltip: '搜索',
+                        onPressed: () async {
+                          await _downloadService.waitForInitialization;
+                          if (!mounted) return;
+                          Get.to(DownloadSearchPage(progress: _progress));
+                        },
+                        icon: const Icon(Icons.search),
+                      ),
+                      IconButton(
+                        tooltip: '多选',
+                        onPressed: () {
+                          if (enableMultiSelect) {
+                            _controller.handleSelect();
+                          } else {
+                            _controller.enableMultiSelect.value = true;
+                          }
+                        },
+                        icon: const Icon(Icons.edit_note),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                  ),
                 ),
-                onPressed: () async {
-                  final future = [
-                    for (final page in _controller.allChecked)
-                      for (final e in page.entries)
-                        _downloadService.downloadDanmaku(
-                          entry: e,
-                          isUpdate: true,
-                        ),
-                  ];
-                  _controller.handleSelect();
-                  final res = await Future.wait(future);
-                  if (res.every((e) => e)) {
-                    SmartDialog.showToast('更新成功');
-                  } else {
-                    SmartDialog.showToast('更新失败');
-                  }
-                },
-                child: Text(
-                  '更新',
-                  style: TextStyle(color: theme.colorScheme.onSurface),
-                ),
-              ),
-            ],
-            child: AppBar(
-              title: const Text('离线缓存'),
-              actions: [
-                IconButton(
-                  tooltip: '搜索',
-                  onPressed: () async {
-                    await _downloadService.waitForInitialization;
-                    if (!mounted) return;
-                    Get.to(DownloadSearchPage(progress: _progress));
-                  },
-                  icon: const Icon(Icons.search),
-                ),
-                IconButton(
-                  tooltip: '多选',
-                  onPressed: () {
-                    if (enableMultiSelect) {
-                      _controller.handleSelect();
-                    } else {
-                      _controller.enableMultiSelect.value = true;
-                    }
-                  },
-                  icon: const Icon(Icons.edit_note),
-                ),
-                const SizedBox(width: 6),
-              ],
-            ),
-          ),
           body: Padding(
             padding: EdgeInsets.only(left: padding.left, right: padding.right),
             child: CustomScrollView(
