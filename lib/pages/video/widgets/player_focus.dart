@@ -42,6 +42,11 @@ class PlayerFocus extends StatelessWidget {
         logicalKey == LogicalKeyboardKey.arrowDown;
   }
 
+  static bool _isVertical(LogicalKeyboardKey logicalKey) {
+    return logicalKey == LogicalKeyboardKey.arrowUp ||
+        logicalKey == LogicalKeyboardKey.arrowDown;
+  }
+
   static bool _shouldHandle(LogicalKeyboardKey logicalKey) {
     return logicalKey == LogicalKeyboardKey.tab ||
         _isDirectional(logicalKey);
@@ -69,12 +74,23 @@ class PlayerFocus extends StatelessWidget {
       onKeyEvent: (node, event) {
         // 该 widget 包裹的是整个视频页（含简介、评论、播放列表），而非仅播放器
         // 画面。在 TV 上方向键同时是 D-pad 导航键，若一律吞掉，遥控器将无法移出
-        // 播放器，整页陷入死锁。因此仅在全屏播放时接管方向键 —— 此时没有其他可
-        // 聚焦区域，方向键理应控制进度与音量。
-        if (DeviceUtils.isTV &&
-            !isFullScreen &&
-            _isDirectional(event.logicalKey)) {
-          return KeyEventResult.ignored;
+        // 播放器，整页陷入死锁。
+        if (DeviceUtils.isTV) {
+          final key = event.logicalKey;
+          // 上下键：任何情况（含全屏）都放行给焦点遍历。遥控器有独立音量键，
+          // 上下键专职纵向导航 —— 画面 → 顶栏（返回/主页/听视频）、画面 → 底栏。
+          if (_isVertical(key)) {
+            // 顶/底栏虽始终 mounted，但控件隐藏时被 SlideTransition 滑出屏幕，
+            // 焦点落上去用户看不见。放行前先显示控制栏。
+            if (event is KeyDownEvent) {
+              plPlayerController.controls = true;
+            }
+            return KeyEventResult.ignored;
+          }
+          // 左右键：非全屏时放行给 D-pad 导航；全屏时保留快进/快退。
+          if (!isFullScreen && _isDirectional(key)) {
+            return KeyEventResult.ignored;
+          }
         }
         final handled = _handleKey(event);
         if (handled || _shouldHandle(event.logicalKey)) {

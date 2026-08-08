@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:collection/collection.dart';
@@ -38,6 +39,12 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
     }
   }
 
+  void _applyMode(DisplayMode mode) {
+    FlutterDisplayMode.setPreferredMode(mode).whenComplete(
+      () => Future.delayed(const Duration(milliseconds: 100), fetchAll),
+    );
+  }
+
   // 初始化mode/手动设置
   Future<void> init() async {
     try {
@@ -75,31 +82,47 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
             ),
           ),
           Expanded(
-            child: RadioGroup(
-              onChanged: (DisplayMode? newMode) {
-                FlutterDisplayMode.setPreferredMode(
-                  newMode!,
-                ).whenComplete(
-                  () => Future.delayed(
-                    const Duration(milliseconds: 100),
-                    fetchAll,
+            // TV 上不能用 RadioGroup：它的 W3C radio group 语义会在方向键移动
+            // 焦点时就改变选中值，遥控器只有方向键，等于「路过即切换帧率」。
+            // 改用 ListTile + 单选图标，仅确定键触发的 onTap 才真正应用。
+            child: DeviceUtils.isTV
+                ? ListView.builder(
+                    itemCount: modes.length,
+                    itemBuilder: (context, index) {
+                      final DisplayMode mode = modes[index];
+                      final selected = mode == preferred;
+                      return ListTile(
+                        leading: Icon(
+                          selected
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_off,
+                          color: selected
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
+                        title: mode == DisplayMode.auto
+                            ? const Text('自动')
+                            : Text('$mode${mode == active ? '  [系统]' : ''}'),
+                        onTap: () => _applyMode(mode),
+                      );
+                    },
+                  )
+                : RadioGroup(
+                    onChanged: (DisplayMode? newMode) => _applyMode(newMode!),
+                    groupValue: preferred,
+                    child: ListView.builder(
+                      itemCount: modes.length,
+                      itemBuilder: (context, index) {
+                        final DisplayMode mode = modes[index];
+                        return RadioListTile<DisplayMode>(
+                          value: mode,
+                          title: mode == DisplayMode.auto
+                              ? const Text('自动')
+                              : Text('$mode${mode == active ? '  [系统]' : ''}'),
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
-              groupValue: preferred,
-              child: ListView.builder(
-                itemCount: modes.length,
-                itemBuilder: (context, index) {
-                  final DisplayMode mode = modes[index];
-                  return RadioListTile<DisplayMode>(
-                    value: mode,
-                    title: mode == DisplayMode.auto
-                        ? const Text('自动')
-                        : Text('$mode${mode == active ? '  [系统]' : ''}'),
-                  );
-                },
-              ),
-            ),
           ),
         ],
       ),

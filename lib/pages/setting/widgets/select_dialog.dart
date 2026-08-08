@@ -53,33 +53,62 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
       content: Material(
         type: .transparency,
         child: SingleChildScrollView(
-          child: RadioGroup<T>(
-            onChanged: isTV
-                // TV 模式：方向键移动焦点时仅更新本地预选值，不立即关闭对话框。
-                ? (v) => setState(() => _pendingValue = v ?? widget.value)
-                // 非 TV：焦点即选中，立即关闭。
-                : (v) => Navigator.of(context).pop(v ?? widget.value),
-            groupValue: _pendingValue,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                widget.values.length,
-                (index) {
-                  final item = widget.values[index];
-                  return RadioListTile<T>(
-                    toggleable: widget.toggleable,
-                    dense: true,
-                    value: item.$1,
-                    title: Text(
-                      item.$2,
-                      style: titleMedium,
+          // TV 上不能用 RadioGroup：它实现 W3C radio group 语义，方向键移动焦点
+          // 的同时就会改变选中值，而遥控器只有方向键，导致「焦点到哪就选到哪」。
+          // 改用 ListTile + 单选图标，仅 onTap（确定键的 ActivateAction）才预选。
+          child: isTV
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    widget.values.length,
+                    (index) {
+                      final item = widget.values[index];
+                      final selected = _pendingValue == item.$1;
+                      return ListTile(
+                        dense: true,
+                        leading: Icon(
+                          selected
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_off,
+                          color: selected
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
+                        title: Text(item.$2, style: titleMedium),
+                        subtitle: widget.subtitleBuilder?.call(context, index),
+                        onTap: () => setState(() {
+                          _pendingValue = widget.toggleable && selected
+                              ? null
+                              : item.$1;
+                        }),
+                      );
+                    },
+                  ),
+                )
+              : RadioGroup<T>(
+                  onChanged: (v) =>
+                      Navigator.of(context).pop(v ?? widget.value),
+                  groupValue: _pendingValue,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(
+                      widget.values.length,
+                      (index) {
+                        final item = widget.values[index];
+                        return RadioListTile<T>(
+                          toggleable: widget.toggleable,
+                          dense: true,
+                          value: item.$1,
+                          title: Text(
+                            item.$2,
+                            style: titleMedium,
+                          ),
+                          subtitle: widget.subtitleBuilder?.call(context, index),
+                        );
+                      },
                     ),
-                    subtitle: widget.subtitleBuilder?.call(context, index),
-                  );
-                },
-              ),
-            ),
-          ),
+                  ),
+                ),
         ),
       ),
       // TV 模式下显示「取消/确定」按钮，非 TV 无按钮（点击即关闭）。
@@ -95,8 +124,9 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
                 ),
               ),
               TextButton(
-                onPressed: () =>
-                    Navigator.of(context).pop(_pendingValue ?? widget.value),
+                // toggleable 取消选择时 _pendingValue 为 null，调用方将其视为
+                // 「不做改动」，与取消一致，故直接提交而不回退为原值。
+                onPressed: () => Navigator.of(context).pop(_pendingValue),
                 child: const Text('确定'),
               ),
             ]
