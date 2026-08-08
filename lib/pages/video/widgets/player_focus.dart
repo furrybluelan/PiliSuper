@@ -252,18 +252,44 @@ class PlayerFocus extends StatelessWidget {
           onSendDanmaku();
           return true;
 
-        // 遥控器「确定」键上报为 select 而非 enter。仅在全屏时接管为播放/暂停：
-        // 非全屏时它是 D-pad 的激活键，必须放行给当前聚焦的控件。
-        case LogicalKeyboardKey.select when isFullScreen:
+        // 遥控器「确定」键上报为 select 而非 enter。
+        // 全屏时：直接触发播放/暂停。
+        // 非全屏时：若焦点在播放器内（无其他可激活的 InkWell 获焦），触发播放/暂停；
+        //   否则放行让 Flutter 的 ActivateAction 处理当前聚焦的控件。
+        case LogicalKeyboardKey.select:
           if (onSkipSegment?.call() ?? false) {
             return true;
           }
-          if (plPlayerController.isLive || canPlay!()) {
-            if (hasPlayer) {
-              plPlayerController.onDoubleTapCenter();
+          if (isFullScreen || DeviceUtils.isTV) {
+            // 非全屏 TV 模式：只在焦点在播放器画面区（无 InkWell 获焦）时暂停；
+            // 通过判断 primaryFocus 的祖先是否含有 InkWell 来放行。
+            if (!isFullScreen) {
+              final focused = FocusManager.instance.primaryFocus;
+              // 若当前焦点节点是 InkWell/按钮类型，放行让 ActivateAction 处理。
+              if (focused != null) {
+                bool hasInkWell = false;
+                focused.context?.visitAncestorElements((el) {
+                  if (el.widget is InkWell ||
+                      el.widget is TextButton ||
+                      el.widget is IconButton ||
+                      el.widget is FilledButton ||
+                      el.widget is OutlinedButton) {
+                    hasInkWell = true;
+                    return false;
+                  }
+                  return true;
+                });
+                if (hasInkWell) return false;
+              }
             }
+            if (plPlayerController.isLive || canPlay!()) {
+              if (hasPlayer) {
+                plPlayerController.onDoubleTapCenter();
+              }
+            }
+            return true;
           }
-          return true;
+          return false;
 
         // 遥控器上的独立播放/暂停键，任何时候都应生效。
         case LogicalKeyboardKey.mediaPlayPause:
