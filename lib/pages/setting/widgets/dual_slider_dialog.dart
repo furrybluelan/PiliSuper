@@ -1,5 +1,7 @@
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey, KeyDownEvent;
 
 class DualSliderDialog extends StatefulWidget {
   final double value1;
@@ -34,12 +36,40 @@ class DualSliderDialog extends StatefulWidget {
 class _DualSliderDialogState extends State<DualSliderDialog> {
   late double _tempValue1;
   late double _tempValue2;
+  final _slider2Focus = FocusNode();
+  final _cancelFocus = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _tempValue1 = widget.value1;
     _tempValue2 = widget.value2;
+  }
+
+  @override
+  void dispose() {
+    _slider2Focus.dispose();
+    _cancelFocus.dispose();
+    super.dispose();
+  }
+
+  Widget _wrapSlider(Widget slider, {FocusNode? nextFocus}) {
+    if (!DeviceUtils.isTV || nextFocus == null) return slider;
+    // TV 上 Slider 左右调值，上下键不能移出焦点。捕获上下键跳到下一个节点。
+    return Focus(
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent) {
+          final key = event.logicalKey;
+          if (key == LogicalKeyboardKey.arrowDown ||
+              key == LogicalKeyboardKey.arrowUp) {
+            nextFocus.requestFocus();
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: slider,
+    );
   }
 
   @override
@@ -56,43 +86,51 @@ class _DualSliderDialogState extends State<DualSliderDialog> {
         mainAxisSize: .min,
         children: [
           widget.description1,
-          Builder(
-            builder: (context) {
-              return Slider(
-                value: _tempValue1,
-                min: widget.min,
-                max: widget.max,
-                divisions: widget.divisions,
-                label:
-                    '${_tempValue1.toStringAsFixed(widget.precise)}${widget.suffix}',
-                onChanged: (double value) {
-                  _tempValue1 = value.toPrecision(widget.precise);
-                  (context as Element).markNeedsBuild();
-                },
-              );
-            },
+          _wrapSlider(
+            Builder(
+              builder: (context) {
+                return Slider(
+                  value: _tempValue1,
+                  min: widget.min,
+                  max: widget.max,
+                  divisions: widget.divisions,
+                  label:
+                      '${_tempValue1.toStringAsFixed(widget.precise)}${widget.suffix}',
+                  onChanged: (double value) {
+                    _tempValue1 = value.toPrecision(widget.precise);
+                    (context as Element).markNeedsBuild();
+                  },
+                );
+              },
+            ),
+            nextFocus: _slider2Focus,
           ),
           widget.description2,
-          Builder(
-            builder: (context) {
-              return Slider(
-                value: _tempValue2,
-                min: widget.min,
-                max: widget.max,
-                divisions: widget.divisions,
-                label:
-                    '${_tempValue2.toStringAsFixed(widget.precise)}${widget.suffix}',
-                onChanged: (double value) {
-                  _tempValue2 = value.toPrecision(widget.precise);
-                  (context as Element).markNeedsBuild();
-                },
-              );
-            },
+          _wrapSlider(
+            Builder(
+              builder: (context) {
+                return Slider(
+                  focusNode: _slider2Focus,
+                  value: _tempValue2,
+                  min: widget.min,
+                  max: widget.max,
+                  divisions: widget.divisions,
+                  label:
+                      '${_tempValue2.toStringAsFixed(widget.precise)}${widget.suffix}',
+                  onChanged: (double value) {
+                    _tempValue2 = value.toPrecision(widget.precise);
+                    (context as Element).markNeedsBuild();
+                  },
+                );
+              },
+            ),
+            nextFocus: _cancelFocus,
           ),
         ],
       ),
       actions: [
         TextButton(
+          focusNode: _cancelFocus,
           onPressed: Navigator.of(context).pop,
           child: Text(
             '取消',

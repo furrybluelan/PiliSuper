@@ -20,6 +20,7 @@ import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/mobile_observer.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
@@ -108,6 +109,11 @@ class _MainAppState extends PopScopeState<MainApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Android 系统切回前台时 Flutter 引擎会把 FocusHighlightMode 重置为
+      // 触摸模式，导致 TV 上焦点高亮再次消失。在此重新强制为 traditional 模式。
+      if (DeviceUtils.isTV) {
+        FocusManager.instance.highlightStrategy = .alwaysTraditional;
+      }
       _mainController
         ..checkUnreadDynamic()
         ..checkDefaultSearch(true)

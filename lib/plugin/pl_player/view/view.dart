@@ -54,6 +54,7 @@ import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -1355,7 +1356,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       fit: StackFit.passthrough,
       key: _playerKey,
       children: <Widget>[
-        _videoWidget,
+        // TV 上视频画面不参与焦点遍历：MouseInteractiveViewer 是触摸/鼠标手势层，
+        // 不应被 D-pad 聚焦，否则遥控器一旦焦点落到这里就无法移出（死锁）。
+        ExcludeFocus(excluding: DeviceUtils.isTV, child: _videoWidget),
 
         if (widget.danmuWidget case final danmaku?)
           Positioned.fill(top: 4, child: danmaku),
