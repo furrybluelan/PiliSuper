@@ -316,6 +316,19 @@ class MyApp extends StatelessWidget {
     final uiScale = Pref.uiScale;
     final mediaQuery = MediaQuery.of(context);
     final textScaler = TextScaler.linear(Pref.defaultTextScale);
+    // 遥控器只有方向键，没有指针。directional 模式下 Slider 只把左右键绑到调值
+    // （slider.dart 的 _directionalNavShortcutMap），上下键因 Shortcuts.modal
+    // 默认 false 而向上冒泡到 WidgetsApp 的 DirectionalFocusAction，焦点得以移出。
+    // 同时禁用态控件也可获焦，让用户能停到「发布」上看清为何点不动。
+    //
+    // 注意：本设置对 common/widgets/flutter/vertical_slider.dart 有副作用——它照搬
+    // 上游同一套 switch，directional 下纵向控件反而只能左右键调值（轴错位）。目前
+    // 无实际影响：唯一使用者 VolumeButton 只在 kDebugMode || isDesktop 下构建
+    // （pages/audio/view.dart:821），TV release 不会渲染。若将来 VolumeButton
+    // 上 TV，需给该 fork 补一份纵向的 directional map。
+    final navigationMode = DeviceUtils.isTV
+        ? NavigationMode.directional
+        : mediaQuery.navigationMode;
     if (uiScale != 1.0) {
       child = MediaQuery(
         data: mediaQuery.copyWith(
@@ -325,6 +338,7 @@ class MyApp extends StatelessWidget {
           viewInsets: mediaQuery.viewInsets / uiScale,
           viewPadding: tmpPadding ?? mediaQuery.viewPadding / uiScale,
           devicePixelRatio: mediaQuery.devicePixelRatio * uiScale,
+          navigationMode: navigationMode,
         ),
         child: child!,
       );
@@ -334,19 +348,14 @@ class MyApp extends StatelessWidget {
           textScaler: textScaler,
           padding: tmpPadding,
           viewPadding: tmpPadding,
+          navigationMode: navigationMode,
         ),
         child: child!,
       );
     }
-    if (PlatformUtils.isDesktop) {
-      return BackDetector(
-        onBack: _onBack,
-        child: child,
-      );
-    }
-    // TV 上系统返回键也上报为 escape，通过 BackDetector 拦截：若当前焦点在
-    // 输入框里优先 unfocus，否则正常执行返回。
-    if (DeviceUtils.isTV) {
+    // TV 上系统返回键也上报为 escape，与桌面同样需要 BackDetector 拦截：
+    // 若当前焦点在输入框里优先 unfocus，否则正常执行返回。
+    if (PlatformUtils.isDesktop || DeviceUtils.isTV) {
       return BackDetector(
         onBack: _onBack,
         child: child,

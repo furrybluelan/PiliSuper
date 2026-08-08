@@ -38,23 +38,28 @@ abstract final class TvTextFieldEscape {
 
   /// 取出当前聚焦输入框的 controller，非输入框返回 null。
   ///
+  /// 必须沿祖先链查找，不能直接看 `primaryFocus.context!.widget`：
+  /// `EditableText` 把外部传入的 `focusNode` 交给它内部的一个子级 `Focus`
+  /// (editable_text.dart:5962-5963)，因此焦点节点的 context 指向那个 `Focus`
+  /// 元素，`widget` 是 `Focus` 而非 `EditableText`。
+  ///
   /// 本项目把 framework 的 `EditableText` fork 成了
   /// `common/widgets/flutter/text_field/editable_text.dart`，两者同名但**是不同
   /// 类型**：评论、弹幕、私信等富文本输入走 fork 版，搜索框与各类设置对话框走
-  /// 原版。只认其中一种会漏掉另一半输入框，因此两种都要匹配。
+  /// 原版。只认其中一种会漏掉另一半输入框，因此两种都要各查一次。
   static ({TextEditingController controller, bool isMultiline})? _inputOf(
-    Widget? widget,
-  ) => switch (widget) {
-    EditableText(:final controller, :final maxLines) => (
-      controller: controller,
-      isMultiline: maxLines != 1,
-    ),
-    rich.EditableText(:final controller, :final maxLines) => (
-      controller: controller,
-      isMultiline: maxLines != 1,
-    ),
-    _ => null,
-  };
+    BuildContext? context,
+  ) {
+    if (context == null) return null;
+    if (context.findAncestorWidgetOfExactType<EditableText>() case final e?) {
+      return (controller: e.controller, isMultiline: e.maxLines != 1);
+    }
+    if (context.findAncestorWidgetOfExactType<rich.EditableText>()
+        case final e?) {
+      return (controller: e.controller, isMultiline: e.maxLines != 1);
+    }
+    return null;
+  }
 
   static KeyEventResult _handle(KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
@@ -72,7 +77,7 @@ abstract final class TvTextFieldEscape {
 
     final focused = FocusManager.instance.primaryFocus;
     // 只在焦点确实落在输入框里时介入，其余场景保持 framework 默认行为。
-    final input = _inputOf(focused?.context?.widget);
+    final input = _inputOf(focused?.context);
     if (input == null) return KeyEventResult.ignored;
 
     // 光标还能在文本内移动时不跳出，否则用户无法在已输入的内容里定位。
@@ -82,16 +87,20 @@ abstract final class TvTextFieldEscape {
     final text = input.controller.text;
     if (selection.isCollapsed) {
       final offset = selection.baseOffset;
-      final bool atEdge = switch (direction) {
-        TraversalDirection.left => offset <= 0,
-        TraversalDirection.right => offset >= text.length,
-        TraversalDirection.up =>
-          !input.isMultiline ||
-              offset <= 0 ||
-              text.lastIndexOf('\n', offset - 1) < 0,
-        TraversalDirection.down =>
-          !input.isMultiline || offset < 0 || text.indexOf('\n', offset) < 0,
-      };
+      // 尚未放置过光标时 baseOffset 为 -1，此时任何方向都无处可去，直接跳出。
+      // 不能把它混进下面的边界判断：`offset <= 0` 会让多行框在行首按下键也误跳。
+      final bool atEdge =
+          offset < 0 ||
+          switch (direction) {
+            TraversalDirection.left => offset == 0,
+            TraversalDirection.right => offset >= text.length,
+            TraversalDirection.up =>
+              !input.isMultiline ||
+                  offset == 0 ||
+                  text.lastIndexOf('\n', offset - 1) < 0,
+            TraversalDirection.down =>
+              !input.isMultiline || text.indexOf('\n', offset) < 0,
+          };
       if (!atEdge) return KeyEventResult.ignored;
     } else if (direction == TraversalDirection.left ||
         direction == TraversalDirection.right) {
@@ -99,7 +108,10 @@ abstract final class TvTextFieldEscape {
       return KeyEventResult.ignored;
     }
 
-    focused!.focusInDirection(direction);
-    return KeyEventResult.handled;
+    // 该方向没有邻居时必须交还事件：否则边界处的按键被静默吞掉，用户既没看到
+    // 焦点移动也没看到光标反应。
+    return focused!.focusInDirection(direction)
+        ? KeyEventResult.handled
+        : KeyEventResult.ignored;
   }
 }

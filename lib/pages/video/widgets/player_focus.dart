@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/view/view.dart' show PLVideoPlayer;
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -52,6 +53,17 @@ class PlayerFocus extends StatelessWidget {
         _isDirectional(logicalKey);
   }
 
+  /// 焦点当前是否落在播放器画面子树内。
+  ///
+  /// 本 widget 包裹的是整个视频页（简介、评论、播放列表都在内），所以「收到按键」
+  /// 不等于「焦点在播放器上」。[PLVideoPlayer] 是画面子树的根，且 video 与
+  /// live_room 两个调用点都经由它构建，可作为稳定的边界标记。
+  static bool _focusInPlayer() {
+    final context = FocusManager.instance.primaryFocus?.context;
+    if (context == null) return false;
+    return context.findAncestorWidgetOfExactType<PLVideoPlayer>() != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Focus(
@@ -81,8 +93,11 @@ class PlayerFocus extends StatelessWidget {
           // 上下键专职纵向导航 —— 画面 → 顶栏（返回/主页/听视频）、画面 → 底栏。
           if (_isVertical(key)) {
             // 顶/底栏虽始终 mounted，但控件隐藏时被 SlideTransition 滑出屏幕，
-            // 焦点落上去用户看不见。放行前先显示控制栏。
-            if (event is KeyDownEvent) {
+            // 焦点落上去用户看不见，因此放行前先显示控制栏。
+            //
+            // 但仅限焦点确实在播放器内时：本 widget 包裹整个视频页，若无条件置位，
+            // 在评论区或简介区上下滚动也会不断弹出控制栏。
+            if (event is KeyDownEvent && _focusInPlayer()) {
               plPlayerController.controls = true;
             }
             return KeyEventResult.ignored;
@@ -92,7 +107,7 @@ class PlayerFocus extends StatelessWidget {
             return KeyEventResult.ignored;
           }
         }
-        final handled = _handleKey(event);
+        final handled = _handleKey(node, event);
         if (handled || _shouldHandle(event.logicalKey)) {
           return KeyEventResult.handled;
         }
@@ -131,7 +146,7 @@ class PlayerFocus extends StatelessWidget {
     }
   }
 
-  bool _handleKey(KeyEvent event) {
+  bool _handleKey(FocusNode node, KeyEvent event) {
     final key = event.logicalKey;
 
     final isKeyQ = key == LogicalKeyboardKey.keyQ;
@@ -283,35 +298,23 @@ class PlayerFocus extends StatelessWidget {
           return true;
 
         // 遥控器「确定」键上报为 select 而非 enter。
-        // 全屏时：直接触发播放/暂停。
-        // 非全屏时：若焦点在播放器内（无其他可激活的 InkWell 获焦），触发播放/暂停；
-        //   否则放行让 Flutter 的 ActivateAction 处理当前聚焦的控件。
+        //
+        // 焦点若落在某个具体控件上（字幕、投屏、听视频、播放列表条目……），select
+        // 必须交给该控件的 ActivateAction；只有焦点停在播放器裸画面上时才是播放/暂停。
+        //
+        // 判据用 [FocusNode.hasPrimaryFocus]：本节点自己持有焦点 ⇒ 裸画面；否则一定
+        // 是某个后代控件持有焦点（按键沿焦点链上冒才会到这里）。
+        // 原先靠扫描祖先链匹配 InkWell/*Button 类型列表来判断，既漏掉 ListTile、
+        // Switch、Slider 等可聚焦控件，又在匹配失败时「默认播放/暂停」——这正是
+        // 「按 OK 把视频继续了」的直接原因。
         case LogicalKeyboardKey.select:
           if (onSkipSegment?.call() ?? false) {
             return true;
           }
+          if (!node.hasPrimaryFocus) {
+            return false;
+          }
           if (isFullScreen || DeviceUtils.isTV) {
-            // 非全屏 TV 模式：只在焦点在播放器画面区（无 InkWell 获焦）时暂停；
-            // 通过判断 primaryFocus 的祖先是否含有 InkWell 来放行。
-            if (!isFullScreen) {
-              final focused = FocusManager.instance.primaryFocus;
-              // 若当前焦点节点是 InkWell/按钮类型，放行让 ActivateAction 处理。
-              if (focused != null) {
-                bool hasInkWell = false;
-                focused.context?.visitAncestorElements((el) {
-                  if (el.widget is InkWell ||
-                      el.widget is TextButton ||
-                      el.widget is IconButton ||
-                      el.widget is FilledButton ||
-                      el.widget is OutlinedButton) {
-                    hasInkWell = true;
-                    return false;
-                  }
-                  return true;
-                });
-                if (hasInkWell) return false;
-              }
-            }
             if (plPlayerController.isLive || canPlay!()) {
               if (hasPlayer) {
                 plPlayerController.onDoubleTapCenter();

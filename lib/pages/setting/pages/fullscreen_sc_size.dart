@@ -64,9 +64,15 @@ class _FullScreenScSizeState extends State<FullScreenScSize> {
       bottom: padding.bottom + 25,
     );
     _colorScheme = ColorScheme.of(context);
-    // 拖拽路径的上界由手指离开屏幕自然形成，按键路径没有这个物理约束，需要显式
-    // 取可用宽度作为上限，否则长按右键会把卡片撑出屏幕。
-    _maxWidth = MediaQuery.sizeOf(context).width - _padding.horizontal;
+    // 可用宽度即卡片上限，否则长按右键会把卡片撑出屏幕。
+    //
+    // 必须再套一层下界：[_setWidth] 用 `clamp(_kMinWidth, _maxWidth)`，而
+    // `num.clamp` 要求 lower <= upper，窗口极窄时 `width - padding` 可能小于
+    // _kMinWidth，直接抛 ArgumentError。
+    _maxWidth = math.max(
+      _kMinWidth,
+      MediaQuery.sizeOf(context).width - _padding.horizontal,
+    );
   }
 
   void _onReset() {
@@ -153,16 +159,31 @@ class _FullScreenScSizeState extends State<FullScreenScSize> {
     );
   }
 
+  static const _kMinWidth = 25.0;
+  static const _kStep = 10.0;
+
+  /// 拖拽与按键两条路径唯一的宽度写入口，保证边界一致。
+  ///
+  /// 原先拖拽只有 `math.max(25, ...)` 下界、按键才有 `_maxWidth` 上界，同一个值
+  /// 两套约束：用手指能把卡片拖出屏幕，用遥控器不能。
+  ///
+  /// 不在此处持久化：拖拽每帧都会调用，落盘应留在 [_onHorizontalDragEnd]，
+  /// 按键路径则每次按下即存。
+  void _setWidth(double width) {
+    final clamped = width.clamp(_kMinWidth, _maxWidth);
+    if (clamped == _width) return;
+    setState(() {
+      _width = clamped;
+    });
+  }
+
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
-    _width = math.max(25.0, _width + details.delta.dx);
-    setState(() {});
+    _setWidth(_width + details.delta.dx);
   }
 
   void _onHorizontalDragEnd(DragEndDetails details) {
     GStorage.setting.put(SettingBoxKey.fullScreenSCWidth, _width);
   }
-
-  static const _kStep = 10.0;
 
   KeyEventResult _onHandleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
@@ -171,9 +192,7 @@ class _FullScreenScSizeState extends State<FullScreenScSize> {
     final key = event.logicalKey;
     final isLeft = key == LogicalKeyboardKey.arrowLeft;
     if (isLeft || key == LogicalKeyboardKey.arrowRight) {
-      setState(() {
-        _width = (_width + (isLeft ? -_kStep : _kStep)).clamp(25.0, _maxWidth);
-      });
+      _setWidth(_width + (isLeft ? -_kStep : _kStep));
       GStorage.setting.put(SettingBoxKey.fullScreenSCWidth, _width);
       return KeyEventResult.handled;
     }

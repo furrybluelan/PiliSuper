@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/single_choice_list.dart';
 import 'package:PiliPlus/models/common/video/cdn_type.dart';
 import 'package:PiliPlus/models/video/play/url.dart';
 import 'package:PiliPlus/utils/cdn_speed_service.dart';
@@ -32,11 +33,13 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
   // TV 上用两步流程：方向键只移动焦点（更新 _pendingValue），确定键才提交。
   // 非 TV 保持原来的「焦点即选中立刻 pop」行为。
   late T? _pendingValue;
+  late final List<T> _itemValues;
 
   @override
   void initState() {
     super.initState();
     _pendingValue = widget.value;
+    _itemValues = widget.values.map((e) => e.$1).toList();
   }
 
   @override
@@ -53,62 +56,19 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
       content: Material(
         type: .transparency,
         child: SingleChildScrollView(
-          // TV 上不能用 RadioGroup：它实现 W3C radio group 语义，方向键移动焦点
-          // 的同时就会改变选中值，而遥控器只有方向键，导致「焦点到哪就选到哪」。
-          // 改用 ListTile + 单选图标，仅 onTap（确定键的 ActivateAction）才预选。
-          child: isTV
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(
-                    widget.values.length,
-                    (index) {
-                      final item = widget.values[index];
-                      final selected = _pendingValue == item.$1;
-                      return ListTile(
-                        dense: true,
-                        leading: Icon(
-                          selected
-                              ? Icons.radio_button_checked
-                              : Icons.radio_button_off,
-                          color: selected
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.outline,
-                        ),
-                        title: Text(item.$2, style: titleMedium),
-                        subtitle: widget.subtitleBuilder?.call(context, index),
-                        onTap: () => setState(() {
-                          _pendingValue = widget.toggleable && selected
-                              ? null
-                              : item.$1;
-                        }),
-                      );
-                    },
-                  ),
-                )
-              : RadioGroup<T>(
-                  onChanged: (v) =>
-                      Navigator.of(context).pop(v ?? widget.value),
-                  groupValue: _pendingValue,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(
-                      widget.values.length,
-                      (index) {
-                        final item = widget.values[index];
-                        return RadioListTile<T>(
-                          toggleable: widget.toggleable,
-                          dense: true,
-                          value: item.$1,
-                          title: Text(
-                            item.$2,
-                            style: titleMedium,
-                          ),
-                          subtitle: widget.subtitleBuilder?.call(context, index),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+          child: SingleChoiceList<T>(
+            values: _itemValues,
+            selectedValue: _pendingValue,
+            toggleable: widget.toggleable,
+            dense: true,
+            // TV：只预选，等「确定」按钮提交。非 TV：选中即关闭。
+            onChanged: isTV
+                ? (v) => setState(() => _pendingValue = v)
+                : (v) => Navigator.of(context).pop(v ?? widget.value),
+            titleBuilder: (context, index) =>
+                Text(widget.values[index].$2, style: titleMedium),
+            subtitleBuilder: widget.subtitleBuilder,
+          ),
         ),
       ),
       // TV 模式下显示「取消/确定」按钮，非 TV 无按钮（点击即关闭）。
