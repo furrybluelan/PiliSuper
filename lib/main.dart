@@ -341,6 +341,14 @@ class MyApp extends StatelessWidget {
         child: child,
       );
     }
+    // TV 上系统返回键也上报为 escape，通过 BackDetector 拦截：若当前焦点在
+    // 输入框里优先 unfocus，否则正常执行返回。
+    if (DeviceUtils.isTV) {
+      return BackDetector(
+        onBack: _onBack,
+        child: child,
+      );
+    }
     return child;
   }
 
