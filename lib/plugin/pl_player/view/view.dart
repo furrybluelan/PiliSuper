@@ -1351,11 +1351,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     );
     final isLive = plPlayerController.isLive;
 
-    final child = Stack(
-      fit: StackFit.passthrough,
-      key: _playerKey,
-      children: <Widget>[
-        _videoWidget,
+    final child = Semantics(
+      label: '播放器，点击显示或隐藏控制栏',
+      container: true,
+      child: Stack(
+        fit: StackFit.passthrough,
+        key: _playerKey,
+        children: <Widget>[
+          _videoWidget,
 
         if (widget.danmuWidget case final danmaku?)
           Positioned.fill(top: 4, child: danmaku),
@@ -1986,6 +1989,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 : const SizedBox.shrink();
           }),
       ],
+      ),
     );
     if (PlatformUtils.isDesktop) {
       return Obx(

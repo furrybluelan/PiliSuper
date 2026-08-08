@@ -84,7 +84,16 @@ class ActionItem extends StatelessWidget {
             : child,
       ),
     );
-    return expand ? Expanded(child: child) : child;
+    final semanticLabel = text != null && text != semanticsLabel
+        ? '$semanticsLabel $text'
+        : semanticsLabel;
+    final result = Semantics(
+      label: semanticLabel,
+      button: true,
+      excludeSemantics: true,
+      child: child,
+    );
+    return expand ? Expanded(child: result) : result;
   }
 
   Widget _buildText(ThemeData theme) {

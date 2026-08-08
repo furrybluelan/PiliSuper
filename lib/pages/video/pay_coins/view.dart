@@ -347,16 +347,23 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                           if (_isPaying) {
                             return const SizedBox.shrink();
                           }
-                          return GestureDetector(
-                            onTap: index == 0 ? null : () => _onScroll(0),
-                            behavior: HitTestBehavior.opaque,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 12),
-                              child: Image.asset(
-                                width: 16,
-                                height: 28,
-                                index == 0 ? Assets.leftDisable : Assets.left,
-                                cacheWidth: 16.cacheSize(context),
+                          return Semantics(
+                            label: '投1枚硬币',
+                            button: true,
+                            enabled: index != 0,
+                            child: GestureDetector(
+                              onTap: index == 0 ? null : () => _onScroll(0),
+                              behavior: HitTestBehavior.opaque,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: Image.asset(
+                                  width: 16,
+                                  height: 28,
+                                  index == 0
+                                      ? Assets.leftDisable
+                                      : Assets.left,
+                                  cacheWidth: 16.cacheSize(context),
+                                ),
                               ),
                             ),
                           );
@@ -370,16 +377,23 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                         if (_isPaying) {
                           return const SizedBox.shrink();
                         }
-                        return GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: index == 1 ? null : () => _onScroll(1),
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: Image.asset(
-                              width: 16,
-                              height: 28,
-                              index == 1 ? Assets.rightDisable : Assets.right,
-                              cacheWidth: 16.cacheSize(context),
+                        return Semantics(
+                          label: '投2枚硬币',
+                          button: true,
+                          enabled: index != 1,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: index == 1 ? null : () => _onScroll(1),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: Image.asset(
+                                width: 16,
+                                height: 28,
+                                index == 1
+                                    ? Assets.rightDisable
+                                    : Assets.right,
+                                cacheWidth: 16.cacheSize(context),
+                              ),
                             ),
                           ),
                         );
@@ -423,45 +437,57 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                 clipBehavior: Clip.none,
                 alignment: Alignment.centerLeft,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      final newVal = !_coinWithLike.value;
-                      _coinWithLike.value = newVal;
-                      GStorage.setting.put(SettingBoxKey.coinWithLike, newVal);
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(width: 12),
-                        Obx(
-                          () => Icon(
-                            _coinWithLike.value
-                                ? Icons.check_box_outlined
-                                : Icons.check_box_outline_blank,
-                            size: 20,
-                            color: Colors.white,
-                          ),
+                  Obx(
+                    () => Semantics(
+                      label: _coinWithLike.value ? '同时点赞，已勾选' : '同时点赞，未勾选',
+                      button: true,
+                      excludeSemantics: true,
+                      child: GestureDetector(
+                        onTap: () {
+                          final newVal = !_coinWithLike.value;
+                          _coinWithLike.value = newVal;
+                          GStorage.setting.put(
+                            SettingBoxKey.coinWithLike,
+                            newVal,
+                          );
+                        },
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(width: 12),
+                            Icon(
+                              _coinWithLike.value
+                                  ? Icons.check_box_outlined
+                                  : Icons.check_box_outline_blank,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                            const Text(
+                              ' 同时点赞',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
                         ),
-                        const Text(
-                          ' 同时点赞',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   Center(
-                    child: GestureDetector(
-                      onTap: Get.back,
-                      behavior: HitTestBehavior.opaque,
-                      child: SizedBox(
-                        width: 30,
-                        height: 30,
-                        child: Image.asset(
-                          Assets.panelClose,
+                    child: Semantics(
+                      label: '关闭',
+                      button: true,
+                      child: GestureDetector(
+                        onTap: Get.back,
+                        behavior: HitTestBehavior.opaque,
+                        child: SizedBox(
                           width: 30,
                           height: 30,
-                          cacheWidth: 30.cacheSize(context),
+                          child: Image.asset(
+                            Assets.panelClose,
+                            width: 30,
+                            height: 30,
+                            cacheWidth: 30.cacheSize(context),
+                          ),
                         ),
                       ),
                     ),

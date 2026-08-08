@@ -22,7 +22,7 @@ class ComBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final child = SizedBox(
+    Widget child = SizedBox(
       width: width,
       height: height,
       child: GestureDetector(
@@ -34,7 +34,11 @@ class ComBtn extends StatelessWidget {
       ),
     );
     if (tooltip != null) {
-      return Tooltip(message: tooltip, child: child);
+      child = Semantics(
+        label: tooltip,
+        button: true,
+        child: Tooltip(message: tooltip!, child: child),
+      );
     }
     return child;
   }
