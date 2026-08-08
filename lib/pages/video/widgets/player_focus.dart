@@ -52,6 +52,20 @@ class PlayerFocus extends StatelessWidget {
     return Focus(
       // TV 上非全屏时不抢焦点，否则遥控器无法移动到简介/评论等区域。
       autofocus: !DeviceUtils.isTV,
+      // TV 横屏下简介区和播放器是同一 Row 的兄弟节点，D-pad 可以导航到播放器
+      // 区域。获焦时强制显示控制栏，让遥控器能看到并操作播放/暂停等按钮；
+      // 失焦时若播放中则隐藏控制栏（恢复正常隐藏逻辑）。
+      onFocusChange: DeviceUtils.isTV
+          ? (hasFocus) {
+              if (hasFocus && !isFullScreen) {
+                plPlayerController.controls = true;
+              } else if (!hasFocus &&
+                  !isFullScreen &&
+                  plPlayerController.playerStatus.value.isPlaying) {
+                plPlayerController.controls = false;
+              }
+            }
+          : null,
       onKeyEvent: (node, event) {
         // 该 widget 包裹的是整个视频页（含简介、评论、播放列表），而非仅播放器
         // 画面。在 TV 上方向键同时是 D-pad 导航键，若一律吞掉，遥控器将无法移出
