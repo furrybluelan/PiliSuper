@@ -29,6 +29,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
+import 'package:PiliPlus/utils/tv_text_field_escape.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:collection/collection.dart';
@@ -142,6 +143,8 @@ void main() async {
     // 模式，此时 InkWell 等组件不会绘制 focusColor —— 表现就是遥控器操作时看不到
     // 任何选中态。TV 无触摸，直接强制 traditional 策略始终绘制焦点高亮。
     FocusManager.instance.highlightStrategy = .alwaysTraditional;
+    // 遥控器没有 Tab 键，方向键是唯一导航手段，但输入框会静默吃掉它们。
+    TvTextFieldEscape.install();
   }
 
   Request();

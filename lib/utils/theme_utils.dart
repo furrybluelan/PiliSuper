@@ -195,6 +195,9 @@ abstract final class ThemeUtils {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(overlayColor: overlay),
       ),
+      // Tab 本身可聚焦，但焦点态只通过 overlayColor 呈现，默认值在 TV 上看不出
+      // 差别，表现就像整条类型栏没有焦点。
+      tabBarTheme: TabBarThemeData(overlayColor: overlay),
     );
   }
 

@@ -613,7 +613,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           final fit = plPlayerController.videoFit.value;
           return PopupMenuButton<VideoFitType>(
             tooltip: '画面比例',
-            requestFocus: false,
+            // TV 必须夺焦：菜单不获焦时 primaryFocus 仍留在播放器子树，遥控器
+            // 的 OK 键会被 player_focus.dart 当成播放/暂停，菜单项永远点不到。
+            // 触屏保持 false，避免菜单关闭后按钮上残留焦点框。
+            requestFocus: DeviceUtils.isTV ? null : false,
             initialValue: fit,
             color: Colors.black.withValues(alpha: 0.8),
             itemBuilder: (context) {
@@ -707,7 +710,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             final val = videoDetailController.vttSubtitlesIndex.value;
             return PopupMenuButton<int>(
               tooltip: '字幕',
-              requestFocus: false,
+              // 同画面比例：TV 上菜单必须夺焦，否则 OK 键落回播放器。
+              requestFocus: DeviceUtils.isTV ? null : false,
               initialValue: val,
               color: Colors.black.withValues(alpha: 0.8),
               itemBuilder: (context) {
