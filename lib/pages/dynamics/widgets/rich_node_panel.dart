@@ -13,9 +13,9 @@ import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/vote.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 const _linkFoldedText = '网页链接';
 
@@ -251,6 +251,7 @@ TextSpan? richNode(
                             bvid: i.rid,
                             cid: cid,
                             dimension: res!.dimension,
+                            title: res.title,
                           );
                         }
                       } catch (err) {
