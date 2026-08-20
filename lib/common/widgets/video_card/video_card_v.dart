@@ -199,6 +199,13 @@ class VideoCardV extends StatelessWidget {
                     size: .small,
                     type: .secondary,
                   ),
+                if (videoItem.isPaid)
+                  const PBadge(
+                    text: '付费视频',
+                    isStack: false,
+                    size: .small,
+                    type: .error,
+                  ),
                 Expanded(
                   flex: 1,
                   child: Text(

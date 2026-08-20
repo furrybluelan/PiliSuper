@@ -48,6 +48,7 @@ class RcmdVideoItemAppModel extends BaseRcmdVideoItemModel {
         ? ThreePoint.fromJson(json['three_point_v2'])
         : null;
     desc = json['desc'];
+    chargingPay = json['charging_pay'];
   }
 }
 
