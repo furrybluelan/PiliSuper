@@ -155,3 +155,6 @@ __pycache__/
 test*
 !tool/build/tests/
 !tool/build/tests/test_*.py
+
+# Vibe Coding Tool
+.omo
