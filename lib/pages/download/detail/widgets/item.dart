@@ -12,6 +12,7 @@ import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
+import 'package:PiliPlus/pages/download/detail/widgets/export_sheet.dart';
 import 'package:PiliPlus/pages/download/downloading/view.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
@@ -92,6 +93,14 @@ class DetailItem extends StatelessWidget {
                   },
                   child: const Text('更新弹幕', style: TextStyle(fontSize: 14)),
                 ),
+                if (entry.isCompleted)
+                  DialogOption(
+                    onPressed: () {
+                      Get.back();
+                      showExportSheet(context: context, entry: entry);
+                    },
+                    child: const Text('导出', style: TextStyle(fontSize: 14)),
+                  ),
               ],
             ),
           )

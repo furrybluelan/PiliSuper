@@ -6,8 +6,24 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager.LayoutParams
 import com.ryanheise.audioservice.AudioServiceActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : AudioServiceActivity() {
+    private var exportChannel: ExportChannel? = null
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        val channel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            ExportChannel.CHANNEL,
+        )
+        val handler = ExportChannel(applicationContext)
+        handler.channel = channel
+        channel.setMethodCallHandler(handler)
+        exportChannel = handler
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (AndroidHelper.isFoldable) {
@@ -24,6 +40,8 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
+        exportChannel?.channel = null
+        exportChannel = null
         stopService(Intent(this, com.ryanheise.audioservice.AudioService::class.java))
         super.onDestroy()
     }

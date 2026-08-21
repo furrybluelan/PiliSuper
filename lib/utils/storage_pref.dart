@@ -1022,6 +1022,9 @@ abstract final class Pref {
 
   static String? get downloadPath => _setting.get(SettingBoxKey.downloadPath);
 
+  /// 导出位置。见 `ExportTarget.decode`，为空时使用平台默认值。
+  static String? get exportPath => _setting.get(SettingBoxKey.exportPath);
+
   static String? get liveCdnUrl => _setting.get(SettingBoxKey.liveCdnUrl);
 
   static bool get showBatteryLevel => _setting.get(
