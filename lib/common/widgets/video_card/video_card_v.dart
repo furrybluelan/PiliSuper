@@ -201,7 +201,7 @@ class VideoCardV extends StatelessWidget {
                   ),
                 if (videoItem.isPaid)
                   const PBadge(
-                    text: '付费视频',
+                    text: '充电专属',
                     isStack: false,
                     size: .small,
                     type: .error,
