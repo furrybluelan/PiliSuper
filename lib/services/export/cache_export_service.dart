@@ -70,6 +70,9 @@ class CacheExportService extends GetxService {
       ExportMode.danmaku => File(
         path.join(entry.entryDirPath, PathUtils.danmakuName),
       ).existsSync(),
+      ExportMode.cover => File(
+        path.join(entry.entryDirPath, PathUtils.coverName),
+      ).existsSync(),
       // 没有音轨时与「视频」完全等价，不重复提供。
       ExportMode.videoAudio => hasAudio,
       ExportMode.muxed => true,
@@ -191,6 +194,7 @@ class CacheExportService extends GetxService {
     try {
       return switch (mode) {
         ExportMode.danmaku => await _exportDanmaku(context),
+        ExportMode.cover => await _exportCover(context),
         ExportMode.audio => await _exportAudio(context),
         ExportMode.video => await _exportVideo(context),
         ExportMode.videoAudio => await _exportCombined(
@@ -208,6 +212,30 @@ class CacheExportService extends GetxService {
       };
     } catch (e) {
       return ExportItemResult.failure(mode, e.toString());
+    }
+  }
+
+  Future<ExportItemResult> _exportCover(_ExportContext context) async {
+    stage.value = ExportStage.cover;
+    progress.value = -1;
+    final cover = context.coverFile;
+    if (cover == null) {
+      return const ExportItemResult.failure(ExportMode.cover, '没有缓存封面');
+    }
+    final sink = await exportTarget.openSink(
+      fileName: ExportNameUtils.join(context.stem, '.jpg'),
+      mimeType: 'image/jpeg',
+    );
+    try {
+      await sink.importFrom(cover);
+      await sink.commit();
+      return ExportItemResult.success(
+        ExportMode.cover,
+        await sink.displayLabel(),
+      );
+    } catch (e) {
+      await sink.abort();
+      return ExportItemResult.failure(ExportMode.cover, e.toString());
     }
   }
 
@@ -297,6 +325,9 @@ class CacheExportService extends GetxService {
   ///
   /// 另外，音轨为 FLAC / E-AC-3 时 mp4 无法原生承载，此时「视频+音频」
   /// 也会退回 mkv，避免产出兼容性极差的实验性封装。
+  ///
+  /// 缓存的 cover.jpg 会作为封面写入：mkv 用 Matroska 的附件封面约定，
+  /// mp4 用 `attached_pic` 视频轨。
   Future<ExportItemResult> _exportCombined(
     _ExportContext context, {
     required ExportMode mode,
@@ -314,33 +345,64 @@ class CacheExportService extends GetxService {
     }
     final useMatroska = withDanmaku || context.needsMatroskaAudio;
     final assPath = withDanmaku ? await context.writeTempAss() : null;
+    final cover = context.coverFile;
 
-    final args = <String>['-y', '-i', context.videoPath];
+    final args = <String>['-y'];
+    // 输入序号必须与 -map 的引用严格对应，逐个累加而非写死。
+    var nextInput = 0;
+    final videoInput = nextInput++;
+    args.addAll(['-i', context.videoPath]);
+    int? audioInput;
     if (hasSidecarAudio) {
+      audioInput = nextInput++;
       args.addAll(['-i', context.audioPath!]);
     }
+    int? assInput;
     if (assPath != null) {
+      assInput = nextInput++;
       args.addAll(['-i', assPath]);
     }
+    // mkv 的封面走附件，不占输入；mp4 需要真实的图片输入。
+    int? coverInput;
+    if (cover != null && !useMatroska) {
+      coverInput = nextInput++;
+      args.addAll(['-i', cover.path]);
+    }
 
-    args.addAll(['-map', '0:v:0']);
+    args.addAll(['-map', '$videoInput:v:0']);
     if (context.mediaType == 1) {
       // DURL 单文件里音频与视频同源，可能没有音轨，用 `?` 容错。
-      args.addAll(['-map', '0:a:0?']);
-    } else if (hasSidecarAudio) {
-      args.addAll(['-map', '1:a:0']);
+      args.addAll(['-map', '$videoInput:a:0?']);
+    } else if (audioInput != null) {
+      args.addAll(['-map', '$audioInput:a:0']);
     }
-    if (assPath != null) {
-      final subIndex = hasSidecarAudio ? 2 : 1;
+    if (assInput != null) {
       args.addAll([
         '-map',
-        '$subIndex:s:0',
+        '$assInput:s:0',
         '-metadata:s:s:0',
         'language=chi',
         '-metadata:s:s:0',
         'title=弹幕',
         '-disposition:s:0',
         'default',
+      ]);
+    }
+    if (coverInput != null) {
+      args.addAll([
+        '-map',
+        '$coverInput:v:0',
+        '-disposition:v:1',
+        'attached_pic',
+      ]);
+    } else if (cover != null) {
+      args.addAll([
+        '-attach',
+        cover.path,
+        '-metadata:s:t:0',
+        'mimetype=image/jpeg',
+        '-metadata:s:t:0',
+        'filename=${PathUtils.coverName}',
       ]);
     }
     args.addAll([
@@ -560,6 +622,12 @@ class _ExportContext {
       ? ('.mka', 'matroska', 'audio/x-matroska')
       : ('.m4a', 'ipod', 'audio/mp4');
 
+  /// 缓存的封面，缺失时为 `null`。
+  File? get coverFile {
+    final file = File(path.join(entry.entryDirPath, PathUtils.coverName));
+    return file.existsSync() ? file : null;
+  }
+
   Future<String?> buildAss() async {
     final file = File(path.join(entry.entryDirPath, PathUtils.danmakuName));
     if (!file.existsSync()) return null;
@@ -576,12 +644,16 @@ class _ExportContext {
       options: AssOptions(
         playResX: width,
         playResY: height,
-        fontScale: Pref.danmakuFontScale,
+        // 导出的是整幅画面，对应播放器的全屏形态：弹幕层高度为屏幕短边，
+        // 字号也用全屏那一档，这样导出观感与用户全屏观看时一致。
+        referenceHeight: DeviceUtils.size.shortestSide,
+        fontScale: Pref.danmakuFontScaleFS,
         lineHeight: Pref.danmakuLineHeight,
         scrollDuration: Pref.danmakuDuration,
         staticDuration: Pref.danmakuStaticDuration,
         strokeWidth: Pref.danmakuStrokeWidth,
         opacity: Pref.danmakuOpacity,
+        showArea: Pref.danmakuShowArea,
         blockTypes: Pref.danmakuBlockType,
         weightThreshold: Pref.danmakuWeight,
       ),

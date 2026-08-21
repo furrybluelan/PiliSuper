@@ -11,6 +11,9 @@ enum ExportMode implements EnumWithLabel {
   /// 弹幕转 ASS 字幕文件。
   danmaku('弹幕(ASS)'),
 
+  /// 封面图片。
+  cover('封面'),
+
   /// 音视频合并为单个文件，不含弹幕。
   ///
   /// 通常是 mp4；音轨为 FLAC / E-AC-3 时退回 mkv。
@@ -64,6 +67,7 @@ enum ExportStage {
   danmaku('转换弹幕'),
   audio('导出音频'),
   video('导出视频'),
+  cover('导出封面'),
   merging('合并音视频'),
   muxing('合并封装'),
   finishing('收尾');

@@ -47,6 +47,9 @@ class _ExportDialogState extends State<_ExportDialog> {
       widget.available.first,
   };
 
+  /// 缓存有封面时，合并输出会顺带写入封面。
+  bool get _hasCover => widget.available.contains(ExportMode.cover);
+
   String? _location;
 
   @override
@@ -109,15 +112,23 @@ class _ExportDialogState extends State<_ExportDialog> {
                 dense: true,
                 value: _selected.contains(mode),
                 title: Text(mode.label, style: const TextStyle(fontSize: 14)),
-                subtitle: mode == ExportMode.muxed
-                    ? Text(
-                        '含弹幕软字幕轨',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.outline,
-                        ),
-                      )
-                    : null,
+                subtitle: switch (mode) {
+                  ExportMode.muxed => Text(
+                    _hasCover ? '含弹幕软字幕轨与封面' : '含弹幕软字幕轨',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                  ExportMode.videoAudio when _hasCover => Text(
+                    '含封面',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                  _ => null,
+                },
                 onChanged: (checked) => _toggle(mode, checked ?? false),
               ),
             Padding(

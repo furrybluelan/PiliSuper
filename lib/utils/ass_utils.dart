@@ -4,11 +4,12 @@ import 'package:PiliPlus/grpc/bilibili/community/service/dm/v1.pb.dart'
 /// 弹幕转 ASS 的渲染参数。
 ///
 /// 默认值与 `Pref` 中弹幕设置的默认值保持一致，便于在无 GStorage 的环境
-/// (如单元测试) 中直接使用。生产代码请用 [AssOptions.fromPref]。
+/// (如单元测试) 中直接使用。
 class AssOptions {
   const AssOptions({
     this.playResX = 1920,
     this.playResY = 1080,
+    required this.referenceHeight,
     this.fontName = '黑体',
     this.fontScale = 1.0,
     this.lineHeight = 1.6,
@@ -22,13 +23,24 @@ class AssOptions {
     this.weightThreshold = 0,
   });
 
+  /// 播放器普通弹幕的基准字号，见 `DanmakuOptions.get`。
+  ///
+  /// 播放器对所有普通弹幕使用同一字号，并不理会 `DanmakuElem.fontsize`。
+  static const double playerBaseFontSize = 15;
+
   /// 视频宽高，作为 ASS 的 `PlayResX`/`PlayResY`。
   final int playResX;
   final int playResY;
 
+  /// 播放器渲染弹幕时画面的逻辑高度。
+  ///
+  /// 播放器的字号与描边以逻辑像素为单位，导出以视频像素为单位，靠该高度换算，
+  /// 使导出结果与用户在本机看到的观感一致。由调用方从真实显示尺寸取得。
+  final double referenceHeight;
+
   final String fontName;
 
-  /// 作用在弹幕自身 `fontsize` 上的缩放系数。
+  /// 字号缩放系数。
   final double fontScale;
 
   /// 行高系数，决定弹幕轨道间距。
@@ -40,7 +52,7 @@ class AssOptions {
   /// 顶部/底部弹幕的停留秒数。
   final double staticDuration;
 
-  /// 描边宽度。
+  /// 描边宽度，语义与播放器一致（居中于字形轮廓）。
   final double strokeWidth;
 
   /// 不透明度，0~1。
@@ -56,6 +68,17 @@ class AssOptions {
 
   /// 屏蔽等级低于该值的弹幕。
   final int weightThreshold;
+
+  /// 视频像素相对播放器逻辑像素的缩放。
+  double get _resolutionScale =>
+      referenceHeight > 0 ? playResY / referenceHeight : 1.0;
+
+  /// 实际字号。所有普通弹幕共用，与播放器一致。
+  double get fontSize => playerBaseFontSize * fontScale * _resolutionScale;
+
+  /// ASS 的 `Outline` 是全额向外扩，而播放器的描边居中于字形轮廓，
+  /// 只向外扩一半，故取半值才能观感一致。
+  double get outline => strokeWidth / 2 * _resolutionScale;
 }
 
 /// 弹幕位置类型。
@@ -94,7 +117,7 @@ abstract final class AssUtils {
   static String danmaku2Ass(
     Iterable<DanmakuElem> elems, {
     required String title,
-    AssOptions options = const AssOptions(),
+    required AssOptions options,
   }) {
     final sb = StringBuffer()
       ..writeln('[Script Info]')
@@ -130,11 +153,11 @@ abstract final class AssUtils {
   static String _buildStyle(AssOptions options) {
     // 弹幕自身携带颜色，样式里的主色只提供透明度基准。
     final alpha = _alphaHex(options.opacity);
-    final fontSize = (25 * options.fontScale).round();
-    return 'Style: $_assHeaderStyleName,${options.fontName},$fontSize,'
+    return 'Style: $_assHeaderStyleName,${options.fontName},'
+        '${_num(options.fontSize)},'
         '&H${alpha}FFFFFF,&H${alpha}FFFFFF,&H${alpha}000000,&H${alpha}000000,'
         '${options.bold ? -1 : 0},0,0,0,100,100,0,0,1,'
-        '${_num(options.strokeWidth)},0,7,0,0,0,1';
+        '${_num(options.outline)},0,7,0,0,0,1';
   }
 
   /// 轨道分配，返回 Dialogue 行。
@@ -153,7 +176,7 @@ abstract final class AssUtils {
 
     for (final elem in sorted) {
       final lane = _laneOf(elem.mode);
-      final fontSize = _fontSizeOf(elem, options);
+      final fontSize = options.fontSize;
       final rowHeight = fontSize * options.lineHeight;
       final maxRows = _maxRows(options, rowHeight);
       if (maxRows == 0) continue;
@@ -162,6 +185,9 @@ abstract final class AssUtils {
       final start = elem.progress;
       final text = _escape(elem.content);
       final colorTag = _colorTag(elem.color);
+      // 静态弹幕水平居中。用 ASS 的居中对齐让渲染器按实际字形宽度定位，
+      // 而不是依赖这里的宽度估算，否则会整体偏左。
+      final centerX = _num(options.playResX / 2);
 
       switch (lane) {
         case _Lane.scroll:
@@ -187,7 +213,6 @@ abstract final class AssUtils {
             _dialogue(
               start: start,
               end: leave,
-              fontSize: fontSize,
               options: options,
               tags:
                   '\\move(${options.playResX},$y,${_num(-width)},$y)$colorTag',
@@ -200,15 +225,14 @@ abstract final class AssUtils {
           final row = _findStaticRow(topSlots, maxRows, start);
           if (row == null) continue;
           topSlots[row] = end;
-          final x = _num((options.playResX - width) / 2);
           final y = _num(row * rowHeight);
           events.add(
             _dialogue(
               start: start,
               end: end,
-              fontSize: fontSize,
               options: options,
-              tags: '\\pos($x,$y)$colorTag',
+              // an8：锚点为文字上边中点。
+              tags: '\\an8\\pos($centerX,$y)$colorTag',
               text: text,
             ),
           );
@@ -218,16 +242,15 @@ abstract final class AssUtils {
           final row = _findStaticRow(bottomSlots, maxRows, start);
           if (row == null) continue;
           bottomSlots[row] = end;
-          final x = _num((options.playResX - width) / 2);
-          // 底部弹幕自下往上堆叠，坐标仍为文字左上角。
-          final y = _num(options.playResY - (row + 1) * rowHeight);
+          // 底部弹幕自下往上堆叠。
+          final y = _num(options.playResY - row * rowHeight);
           events.add(
             _dialogue(
               start: start,
               end: end,
-              fontSize: fontSize,
               options: options,
-              tags: '\\pos($x,$y)$colorTag',
+              // an2：锚点为文字下边中点。
+              tags: '\\an2\\pos($centerX,$y)$colorTag',
               text: text,
             ),
           );
@@ -269,11 +292,6 @@ abstract final class AssUtils {
     _ => 2,
   };
 
-  static double _fontSizeOf(DanmakuElem elem, AssOptions options) {
-    final size = elem.fontsize > 0 ? elem.fontsize : 25;
-    return size * options.fontScale;
-  }
-
   static int _maxRows(AssOptions options, double rowHeight) {
     if (rowHeight <= 0) return 0;
     final usable = options.playResY * options.showArea;
@@ -314,15 +332,13 @@ abstract final class AssUtils {
   static String _dialogue({
     required int start,
     required int end,
-    required double fontSize,
     required AssOptions options,
     required String tags,
     required String text,
   }) {
-    // 每条弹幕字号可能不同，样式字号只作基准，这里显式覆盖。
-    final sizeTag = '\\fs${_num(fontSize)}';
+    // 字号统一由样式提供，与播放器一致，无需逐条覆盖。
     return 'Dialogue: 0,${_timecode(start)},${_timecode(end)},'
-        '$_assHeaderStyleName,,0,0,0,,{$sizeTag$tags}$text';
+        '$_assHeaderStyleName,,0,0,0,,{$tags}$text';
   }
 
   /// `H:MM:SS.cc`
