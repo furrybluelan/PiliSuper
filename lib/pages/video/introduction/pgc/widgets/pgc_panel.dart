@@ -79,10 +79,7 @@ class _PgcPanelState extends State<PgcPanel> {
   void scrollToIndex() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       listViewScrollCtr.animateTo(
-        (currentIndex * 150.0).clamp(
-          listViewScrollCtr.position.minScrollExtent,
-          listViewScrollCtr.position.maxScrollExtent,
-        ),
+        currentIndex * 150.0,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );

@@ -150,6 +150,51 @@ class PatchTests(unittest.TestCase):
 
             self.assertEqual(patch_script.material_ui_dir(Path(temp)), latest)
 
+    def test_cupertino_ui_dir_selects_latest_cache_entry(self):
+        with tempfile.TemporaryDirectory() as temp:
+            hosted = Path(temp) / "hosted" / "pub.dev"
+            hosted.mkdir(parents=True)
+            (hosted / "cupertino_ui-1.0.0").mkdir()
+            latest = hosted / "cupertino_ui-1.1.0"
+            latest.mkdir()
+
+            self.assertEqual(patch_script.cupertino_ui_dir(Path(temp)), latest)
+
+    def test_cupertino_ui_patch_sets_are_ios_only(self):
+        self.assertEqual(patch_script.CUPERTINO_COMMON_PATCHES, [])
+        self.assertEqual(
+            patch_script.CUPERTINO_IOS_PATCHES,
+            ["bottom_sheet_ios_flutter.patch"],
+        )
+        self.assertEqual(
+            patch_script.cupertino_patch_names("ios"),
+            ["bottom_sheet_ios_flutter.patch"],
+        )
+        self.assertEqual(
+            patch_script.cupertino_patch_names("all"),
+            ["bottom_sheet_ios_flutter.patch"],
+        )
+        for platform in ("android", "linux", "macos", "windows"):
+            self.assertEqual(patch_script.cupertino_patch_names(platform), [])
+
+    def test_cupertino_patch_payloads_exist(self):
+        cupertino_dir = BUILD_ROOT.parent / "patches" / "cupertino"
+        missing = sorted(
+            name
+            for name in (
+                *patch_script.CUPERTINO_COMMON_PATCHES,
+                *patch_script.CUPERTINO_IOS_PATCHES,
+            )
+            if not (cupertino_dir / name).is_file()
+        )
+
+        self.assertEqual(missing, [])
+
+    def test_cupertino_patches_require_pub_cache_package(self):
+        with patch.object(patch_script, "cupertino_ui_dir", return_value=None):
+            with self.assertRaises(SystemExit):
+                patch_script.apply_cupertino_patches("ios", Path("tool/patches"))
+
     def test_material_patch_line_endings_are_normalized(self):
         with tempfile.TemporaryDirectory() as temp:
             crlf_patch = Path(temp) / "scaffold.patch"

@@ -215,7 +215,7 @@ packages:
     description:
       path: cached_network_image
       ref: develop
-      resolved-ref: "93bfc88496bda6984e565ac834985cb493ee1436"
+      resolved-ref: dacec4de669b4c52c59576509db069e3194408ac
       url: "https://github.com/My-Responsitories/flutter_cached_network_image_ce.git"
     source: git
     version: "4.6.4"
@@ -223,8 +223,8 @@ packages:
     dependency: transitive
     description:
       path: cached_network_image_platform_interface
-      ref: "93bfc88496bda6984e565ac834985cb493ee1436"
-      resolved-ref: "93bfc88496bda6984e565ac834985cb493ee1436"
+      ref: dacec4de669b4c52c59576509db069e3194408ac
+      resolved-ref: dacec4de669b4c52c59576509db069e3194408ac
       url: "https://github.com/My-Responsitories/flutter_cached_network_image_ce.git"
     source: git
     version: "5.2.0"
@@ -233,7 +233,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "697d4516df2fc3ba7417c7ce9aba079d34ba13e5"
+      resolved-ref: "9aaa16da5f9d707b4260d3e5ef6c19893c793a11"
       url: "https://github.com/bggRGjQaUbCoE/canvas_danmaku.git"
     source: git
     version: "0.2.6"
@@ -259,7 +259,7 @@ packages:
     description:
       path: "packages/chat_bottom_container"
       ref: dev
-      resolved-ref: "93026e5aedfc17fcfe55d8e6952212d40aa9f461"
+      resolved-ref: d2f7b8df63126d9f347c1320de10db15deab06db
       url: "https://github.com/bggRGjQaUbCoE/flutter_chat_packages.git"
     source: git
     version: "0.5.2"
@@ -299,10 +299,10 @@ packages:
     dependency: transitive
     description:
       name: code_assets
-      sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
+      sha256: cfd4f5f575a49c5f10ca856e9846073f1e6c3ee94912377eea5f6cefc5272941
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "2.0.0"
   collection:
     dependency: "direct main"
     description:
@@ -387,10 +387,10 @@ packages:
     dependency: transitive
     description:
       name: dbus
-      sha256: "0ce9b0a839e6dee59a37a623d2fc26a35bbbe6404213e419b0d6411023d62645"
+      sha256: a48d5da28e89bd02196e80d81ed8d7954923d00a0f4a68cc20b575038f023383
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.14"
+    version: "0.7.15"
   desktop_webview_window:
     dependency: "direct main"
     description:
@@ -493,7 +493,7 @@ packages:
     description:
       path: "."
       ref: dev
-      resolved-ref: "4d92e81e8b697676f33b7459e7bbd239e88785b0"
+      resolved-ref: "52aed0e43d8443c43ad13aa06e28a3cd64bce158"
       url: "https://github.com/bggRGjQaUbCoE/extended_nested_scroll_view.git"
     source: git
     version: "6.2.1"
@@ -755,7 +755,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "9a8cd4c5a01699be4155d4e328db6e32e84f63de"
+      resolved-ref: ae01ce1d3c6a8f259e6f9e6d54435e2d1517340f
       url: "https://github.com/bggRGjQaUbCoE/flutter_smart_dialog.git"
     source: git
     version: "5.1.1"
@@ -764,7 +764,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: ed2d47c7a8cc0d218bc322ab770fd19c0b56a863
+      resolved-ref: "4c26cbdad3b6efb5625cc5bd5fd0ae2459bf31f7"
       url: "https://github.com/bggRGjQaUbCoE/flutter_sortable_wrap.git"
     source: git
     version: "1.0.6"
@@ -1161,10 +1161,10 @@ packages:
     dependency: "direct main"
     description:
       name: material_ui
-      sha256: d9b4f6c69b80bc83d0a14357c86e4c14c8076e807ae73cf2960c8560f623995f
+      sha256: "4f3f38b9953df0a87d6bf5f21880029f77c47048487d5339410c39936be4683b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   media_kit:
     dependency: "direct main"
     description:
@@ -1289,10 +1289,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: b7fb95a6d9a4f009edd63dc5ac69f07420b23a16161c6dd8660290b59c602e8e
+      sha256: ad56fd53a78ff6b1472fa59ff2a4e8b8ccabafc586fc263a1dfad0b99b5553e3
       url: "https://pub.dev"
     source: hosted
-    version: "9.5.0"
+    version: "9.6.0"
   octo_image:
     dependency: transitive
     description:

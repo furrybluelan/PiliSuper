@@ -69,6 +69,10 @@ MATERIAL_ANDROID_PATCHES = ["bottom_sheet_android.patch"]
 MATERIAL_IOS_PATCHES = ["bottom_sheet_ios_flutter_material.patch"]
 MATERIAL_PATCHES = MATERIAL_COMMON_PATCHES
 
+# cupertino_ui 只有 iOS 需要打补丁，其余平台补丁集为空。
+CUPERTINO_COMMON_PATCHES: list[str] = []
+CUPERTINO_IOS_PATCHES = ["bottom_sheet_ios_flutter.patch"]
+
 # 别看着底下的代码生气就直接塞回主函数里，否则隔壁ci不过。
 def apply_project_patch(patch_file: Path, project_root: Path) -> None:
     try:
@@ -105,9 +109,17 @@ def pub_cache_dir() -> Path:
 
 
 def material_ui_dir(cache_dir: Path) -> Path | None:
+    return _latest_package_dir(cache_dir, "material_ui-*")
+
+
+def cupertino_ui_dir(cache_dir: Path) -> Path | None:
+    return _latest_package_dir(cache_dir, "cupertino_ui-*")
+
+
+def _latest_package_dir(cache_dir: Path, pattern: str) -> Path | None:
     candidates = sorted(
         path
-        for path in (cache_dir / "hosted" / "pub.dev").glob("material_ui-*")
+        for path in (cache_dir / "hosted" / "pub.dev").glob(pattern)
         if path.is_dir()
     )
     return candidates[-1] if candidates else None
@@ -123,6 +135,12 @@ def material_patch_names(platform: str) -> list[str]:
     if platform == "ios":
         return [*MATERIAL_COMMON_PATCHES, *MATERIAL_IOS_PATCHES]
     return list(MATERIAL_COMMON_PATCHES)
+
+
+def cupertino_patch_names(platform: str) -> list[str]:
+    if platform in ("ios", "all"):
+        return [*CUPERTINO_COMMON_PATCHES, *CUPERTINO_IOS_PATCHES]
+    return list(CUPERTINO_COMMON_PATCHES)
 
 
 def apply_sdk_patches(
@@ -174,6 +192,21 @@ def apply_material_patches(platform: str, patch_dir: Path, project_root: Path) -
         run_command(["git", "apply", str(patch_file.resolve())], cwd=package_dir)
         log_success(f"Applied material_ui patch: {patch_name}")
 
+
+def apply_cupertino_patches(platform: str, patch_dir: Path) -> None:
+    package_dir = cupertino_ui_dir(pub_cache_dir())
+    if package_dir is None:
+        raise SystemExit("cupertino_ui package not found in pub cache")
+
+    cupertino_dir = patch_dir / "cupertino"
+    normalize_patch_line_endings(cupertino_dir)
+    for patch_name in cupertino_patch_names(platform):
+        patch_file = cupertino_dir / patch_name
+        log_step(f"Apply cupertino_ui patch {patch_name}")
+        run_command(["git", "apply", str(patch_file.resolve())], cwd=package_dir)
+        log_success(f"Applied cupertino_ui patch: {patch_name}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -220,6 +253,8 @@ def main() -> None:
     apply_sdk_patches(patch_names, patch_dir, flutter_root)
 
     apply_material_patches(args.platform, patch_dir, project_root)
+
+    apply_cupertino_patches(args.platform, patch_dir)
 
 
 if __name__ == "__main__":
