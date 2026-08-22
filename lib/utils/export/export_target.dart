@@ -25,6 +25,20 @@ Future<void> setExportTarget(ExportTarget target) async {
   exportTargetLabel = await target.displayLabel();
 }
 
+/// iOS 沙盒的绝对路径含容器 UUID，对用户毫无可读性，
+/// 转成 `Documents/…` 相对路径；其余平台的绝对路径有定位价值，原样返回。
+Future<String> _prettyFsLabel(String targetPath) async {
+  if (!Platform.isIOS) return targetPath;
+  try {
+    final docDir = (await getApplicationDocumentsDirectory()).path;
+    final relative = path.relative(targetPath, from: docDir);
+    if (!relative.startsWith('..')) {
+      return relative == '.' ? 'Documents' : 'Documents/$relative';
+    }
+  } catch (_) {}
+  return path.basename(targetPath);
+}
+
 /// 导出目标。
 ///
 /// 三种实现覆盖了所有平台：
@@ -70,10 +84,15 @@ sealed class ExportTarget {
       if (DeviceUtils.sdkInt >= 29) {
         return const MediaStoreTarget('Download/$exportSubDir');
       }
-      final publicDir = await ExportChannel.publicDownloadsDir();
-      if (publicDir != null && publicDir.isNotEmpty) {
-        return FsTarget(path.join(publicDir, exportSubDir));
-      }
+      // 通道只在 Activity 里注册；audio_service 的共享引擎可能令 main()
+      // 在无 Activity 的服务进程冷启动中先执行，此时调用会抛
+      // MissingPluginException（并非 PlatformException），静默回退应用内目录。
+      try {
+        final publicDir = await ExportChannel.publicDownloadsDir();
+        if (publicDir != null && publicDir.isNotEmpty) {
+          return FsTarget(path.join(publicDir, exportSubDir));
+        }
+      } catch (_) {}
       return FsTarget(path.join(downloadPath, PathUtils.exportDir));
     }
     if (Platform.isIOS) {
@@ -95,9 +114,9 @@ sealed class ExportTarget {
 
   /// 是否允许用户改变导出位置。
   ///
-  /// iOS 上沙盒外的目录需要 security-scoped bookmark 才能跨启动使用，
-  /// 成本远大于收益，因此固定为 Documents 目录。
-  static bool get configurable => !Platform.isIOS;
+  /// iOS / macOS 沙盒外的目录需要 security-scoped bookmark 才能跨启动
+  /// 使用，成本远大于收益，因此分别固定为 Documents 与系统下载目录。
+  static bool get configurable => !Platform.isIOS && !Platform.isMacOS;
 
   String encode();
 
@@ -106,6 +125,12 @@ sealed class ExportTarget {
 
   /// 目标当前是否可写。SAF 授权被撤销、外置存储被移除时返回 `false`。
   Future<bool> isUsable();
+
+  /// 实际创建并删除一个探针文件，验证目标真正可写。
+  ///
+  /// [isUsable] 只做廉价检查（目录存在 / 授权仍在）；SAF 授权被系统
+  /// 收紧、桌面端目录只读等场景，要真正写一次才会暴露。
+  Future<bool> probeWritable();
 
   /// 创建一个待写入的输出。
   Future<ExportSink> openSink({
@@ -124,10 +149,20 @@ final class FsTarget extends ExportTarget {
   String encode() => '${ExportTarget._fsPrefix}$dirPath';
 
   @override
-  Future<String> displayLabel() async => dirPath;
+  Future<String> displayLabel() => _prettyFsLabel(dirPath);
 
   @override
   Future<bool> isUsable() async {
+    if (Platform.isMacOS) {
+      // 沙盒内自选目录的 Powerbox 授权不跨启动（未实现 bookmark），
+      // 只有 Downloads（entitlement 授权）与应用容器是可靠可写的。
+      try {
+        final downloads = (await getDownloadsDirectory())?.path;
+        return downloads != null && path.isWithin(downloads, dirPath);
+      } catch (_) {
+        return false;
+      }
+    }
     try {
       if (Directory(dirPath).existsSync()) return true;
       // 目录留到真正导出时再建，避免只是打开设置页就凭空多出空文件夹。
@@ -138,6 +173,28 @@ final class FsTarget extends ExportTarget {
         parent = path.dirname(parent);
       }
       return Directory(parent).existsSync();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> probeWritable() async {
+    try {
+      final dir = Directory(dirPath);
+      if (!dir.existsSync()) {
+        await dir.create(recursive: true);
+      }
+      final probe = File(
+        path.join(
+          dirPath,
+          'pilisuper-permission-checker-'
+              '${DateTime.now().microsecondsSinceEpoch.toRadixString(16)}',
+        ),
+      );
+      await probe.writeAsString('');
+      await probe.delete();
+      return true;
     } catch (_) {
       return false;
     }
@@ -187,6 +244,22 @@ final class MediaStoreTarget extends ExportTarget {
       Platform.isAndroid && DeviceUtils.sdkInt >= 29;
 
   @override
+  Future<bool> probeWritable() async {
+    try {
+      final uri = await ExportChannel.createInDownloads(
+        name: 'pilisuper-permission-checker',
+        mime: 'application/octet-stream',
+        relativePath: relativePath,
+      );
+      if (uri == null) return false;
+      await ExportChannel.deleteDocument(uri);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
   Future<ExportSink> openSink({
     required String fileName,
     required String mimeType,
@@ -229,6 +302,22 @@ final class SafTreeTarget extends ExportTarget {
     if (!Platform.isAndroid) return false;
     try {
       return await ExportChannel.isTreeGranted(treeUri);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> probeWritable() async {
+    try {
+      final uri = await ExportChannel.createInTree(
+        treeUri: treeUri,
+        name: 'pilisuper-permission-checker',
+        mime: 'application/octet-stream',
+      );
+      if (uri == null) return false;
+      await ExportChannel.deleteDocument(uri);
+      return true;
     } catch (_) {
       return false;
     }
@@ -302,7 +391,7 @@ final class FsSink implements ExportSink {
   }
 
   @override
-  Future<String> displayLabel() async => file.path;
+  Future<String> displayLabel() => _prettyFsLabel(file.path);
 }
 
 /// 写入 Android `content://` uri。
