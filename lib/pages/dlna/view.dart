@@ -6,6 +6,7 @@ import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/dlna/dlna_args.dart';
+import 'package:PiliPlus/pages/dlna/dlna_utils.dart';
 import 'package:dlna_dart/dlna.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -66,19 +67,52 @@ class _DLNAPageState extends State<DLNAPage> {
     _isSwitchingQa = true;
     SmartDialog.showLoading();
     final res = await _args.switchQuality(qn);
-    SmartDialog.dismiss();
-    _isSwitchingQa = false;
-    if (!mounted) return;
     if (res case Success()) {
+      final device = _lastDevice;
+      // 重推前记录当前播放进度，重推后恢复
+      String? seekTime;
+      if (device != null) {
+        try {
+          seekTime = parseSeekTime(
+            await device.position().timeout(const Duration(seconds: 5)),
+          );
+        } catch (_) {}
+      }
+      SmartDialog.dismiss();
+      if (!mounted) {
+        // 页面已退出，仍完成重推以保持电视端播放
+        await _rePush(device, seekTime);
+        _isSwitchingQa = false;
+        return;
+      }
       setState(() {});
       SmartDialog.showToast('清晰度已切换为：${_args.qnDesc}');
-      final device = _lastDevice;
-      if (device != null) {
-        await device.setUrl(_args.url, title: _args.title ?? '');
-        await device.play();
-      }
+      await _rePush(device, seekTime);
+      _isSwitchingQa = false;
     } else {
+      SmartDialog.dismiss();
+      _isSwitchingQa = false;
+      if (!mounted) return;
       res.toast();
+    }
+  }
+
+  Future<void> _rePush(DLNADevice? device, String? seekTime) async {
+    if (device == null) return;
+    await device.setUrl(_args.url, title: _args.title ?? '');
+    await device.play();
+    if (seekTime != null) {
+      // 部分设备就绪需要时间，seek 失败延时重试一次
+      for (final wait in const [
+        Duration(milliseconds: 500),
+        Duration(milliseconds: 1500),
+      ]) {
+        await Future.delayed(wait);
+        try {
+          await device.seek(seekTime).timeout(const Duration(seconds: 8));
+          break;
+        } catch (_) {}
+      }
     }
   }
 
