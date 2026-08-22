@@ -4,8 +4,11 @@ import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
+import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/pages/dlna/dlna_args.dart';
 import 'package:dlna_dart/dlna.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class DLNAPage extends StatefulWidget {
@@ -18,11 +21,11 @@ class DLNAPage extends StatefulWidget {
 class _DLNAPageState extends State<DLNAPage> {
   final _searcher = DLNAManager();
   final Map<String, DLNADevice> _deviceList = {};
-  late final _url = Get.parameters['url']!;
-  late final _title = Get.parameters['title'];
+  late final _args = Get.arguments as DlnaArgs;
 
   Timer? _timer;
   bool _isSearching = false;
+  bool _isSwitchingQa = false;
   DLNADevice? _lastDevice;
   String? _lastDeviceKey;
 
@@ -58,6 +61,27 @@ class _DLNAPageState extends State<DLNAPage> {
     }
   }
 
+  Future<void> _onSelectQuality(int qn) async {
+    if (_isSwitchingQa || qn == _args.qn) return;
+    _isSwitchingQa = true;
+    SmartDialog.showLoading();
+    final res = await _args.switchQuality(qn);
+    SmartDialog.dismiss();
+    _isSwitchingQa = false;
+    if (!mounted) return;
+    if (res case Success()) {
+      setState(() {});
+      SmartDialog.showToast('清晰度已切换为：${_args.qnDesc}');
+      final device = _lastDevice;
+      if (device != null) {
+        await device.setUrl(_args.url, title: _args.title ?? '');
+        await device.play();
+      }
+    } else {
+      res.toast();
+    }
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -75,6 +99,31 @@ class _DLNAPageState extends State<DLNAPage> {
       appBar: AppBar(
         title: const Text('投屏'),
         actions: [
+          if (_args.qualities.length > 1)
+            PopupMenuButton<int>(
+              tooltip: '清晰度',
+              initialValue: _args.qn,
+              onSelected: _onSelectQuality,
+              itemBuilder: (context) => _args.qualities
+                  .map(
+                    (item) => PopupMenuItem(
+                      value: item.code,
+                      child: Text(item.desc),
+                    ),
+                  )
+                  .toList(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 2,
+                  children: [
+                    Text(_args.qnDesc),
+                    const Icon(Icons.arrow_drop_down, size: 20),
+                  ],
+                ),
+              ),
+            ),
           IconButton(
             tooltip: '搜索',
             onPressed: _onSearch,
@@ -119,7 +168,7 @@ class _DLNAPageState extends State<DLNAPage> {
               _lastDevice = device;
               _lastDeviceKey = key;
               setState(() {});
-              await device.setUrl(_url, title: _title ?? '');
+              await device.setUrl(_args.url, title: _args.title ?? '');
               await device.play();
             },
           );
