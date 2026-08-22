@@ -50,6 +50,14 @@ class _ExportDialogState extends State<_ExportDialog> {
   /// 缓存有封面时，合并输出会顺带写入封面。
   bool get _hasCover => widget.available.contains(ExportMode.cover);
 
+  /// 缓存有弹幕文件时，才能内嵌软字幕轨。
+  bool get _hasDanmaku => widget.available.contains(ExportMode.danmaku);
+
+  /// 选中了会产出弹幕相关内容的模式（单独的 ASS 或内嵌软字幕轨）。
+  bool get _usesDanmaku =>
+      _selected.contains(ExportMode.danmaku) ||
+      _selected.contains(ExportMode.muxed);
+
   String? _location;
 
   @override
@@ -113,8 +121,15 @@ class _ExportDialogState extends State<_ExportDialog> {
                 value: _selected.contains(mode),
                 title: Text(mode.label, style: const TextStyle(fontSize: 14)),
                 subtitle: switch (mode) {
-                  ExportMode.muxed => Text(
+                  ExportMode.muxed when _hasDanmaku => Text(
                     _hasCover ? '含弹幕软字幕轨与封面' : '含弹幕软字幕轨',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                  ExportMode.muxed when _hasCover => Text(
+                    '含封面',
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.outline,
@@ -130,6 +145,17 @@ class _ExportDialogState extends State<_ExportDialog> {
                   _ => null,
                 },
                 onChanged: (checked) => _toggle(mode, checked ?? false),
+              ),
+            if (_usesDanmaku)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                child: Text(
+                  '高级弹幕与 BAS 弹幕暂不支持导出，将自动忽略',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
