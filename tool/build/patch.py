@@ -8,8 +8,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from build_common import (log_step, log_success, log_warning, require_command,
-                          require_project_root, run_command)
+from build_common import (log_info, log_step, log_success, log_warning,
+                          require_command, require_project_root, run_command)
 
 # 所有平台都需要的补丁。顺序和原 patch.ps1 保持一致。
 COMMON_PATCHES = [
@@ -184,6 +184,8 @@ def apply_material_patches(platform: str, patch_dir: Path, project_root: Path) -
     if package_dir is None:
         raise SystemExit("material_ui package not found in pub cache")
 
+    log_info(f"material_ui dir: {package_dir}")
+
     material_dir = patch_dir / "material"
     normalize_patch_line_endings(material_dir)
     for patch_name in material_patch_names(platform):
@@ -197,6 +199,8 @@ def apply_cupertino_patches(platform: str, patch_dir: Path) -> None:
     package_dir = cupertino_ui_dir(pub_cache_dir())
     if package_dir is None:
         raise SystemExit("cupertino_ui package not found in pub cache")
+
+    log_info(f"cupertino_ui dir: {package_dir}")
 
     cupertino_dir = patch_dir / "cupertino"
     normalize_patch_line_endings(cupertino_dir)

@@ -1018,11 +1018,12 @@ class VideoDetailController extends GetxController
       final curHighestVideoQa = videoList.first.quality.code;
       // 预设的画质为null，则当前可用的最高质量
       int targetVideoQa = curHighestVideoQa;
+      final cacheVideoQa = plPlayerController.cacheVideoQa!;
       if (data.acceptQuality?.isNotEmpty == true &&
-          plPlayerController.cacheVideoQa! <= curHighestVideoQa) {
+          cacheVideoQa <= curHighestVideoQa) {
         // 如果预设的画质低于当前最高
         targetVideoQa = data.acceptQuality!.findClosestTarget(
-          (e) => e <= plPlayerController.cacheVideoQa!,
+          (e) => e <= cacheVideoQa,
           (a, b) => a > b ? a : b,
         );
       }
@@ -1156,19 +1157,19 @@ class VideoDetailController extends GetxController
       vttSubtitlesIndex.value = index;
     }
 
-    ({bool isData, String id})? subtitle = vttSubtitles[index - 1];
-    if (subtitle != null) {
-      await setSub(subtitle);
-    } else {
-      final result = await VideoHttp.vttSubtitles(
+    var subtitle = vttSubtitles[index - 1];
+    if (subtitle == null) {
+      final result = await VideoHttp.getSubtitles(
         subtitles[index - 1].subtitleUrl!,
       );
       if (!isClosed && result != null) {
-        final subtitle = (isData: true, id: result);
+        subtitle = (isData: true, id: result);
         vttSubtitles[index - 1] = subtitle;
-        await setSub(subtitle);
+      } else {
+        return;
       }
     }
+    await setSub(subtitle);
   }
 
   // interactive video
