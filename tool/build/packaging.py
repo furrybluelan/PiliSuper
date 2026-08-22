@@ -183,7 +183,9 @@ def package_deb(
             "Priority: optional\n"
             f"Installed-Size: {installed_size}\n"
             # Debian/Ubuntu: ayatana 为主；部分衍生版仅有 libappindicator3-1
-            "Depends: libgtk-3-0, libmpv2, libayatana-appindicator3-1 | libappindicator3-1\n"
+            # json-glib: ffmpeg_kit_flutter 的原生层链接它来构造返回值
+            "Depends: libgtk-3-0, libmpv2, libjson-glib-1.0-0,"
+            " libayatana-appindicator3-1 | libappindicator3-1\n"
             "Homepage: https://github.com/FRBLanApps/PiliSuper\n"
             f"Description: {app_name}, a third-party Bilibili client\n",
             encoding="utf-8",
@@ -225,7 +227,7 @@ def package_arch(
             "license=('GPL-3.0-or-later')\n"
             "options=('!debug')\n"
             # Arch 官方仓有 libayatana-appindicator
-            "depends=('gtk3' 'mpv' 'libayatana-appindicator')\n"
+            "depends=('gtk3' 'mpv' 'json-glib' 'libayatana-appindicator')\n"
             f"source=('{source_archive.name}')\n"
             f"sha256sums=('{checksum}')\n\n"
             "package() {\n"
@@ -287,7 +289,7 @@ def package_rpm(
             f"BuildArch: {rpm_arch}\n"
             # RHEL/Alma/Rocky 无 ayatana 包；Fedora/EPEL 提供 libappindicator-gtk3
             # 托盘为桌面可选能力，故用 Recommends（无则仍可装，缺托盘）
-            "Requires: gtk3, mpv\n"
+            "Requires: gtk3, mpv, json-glib\n"
             "Recommends: libappindicator-gtk3\n\n"
             f"%description\n{app_name}, a third-party Bilibili client.\n\n"
             "%prep\n%setup -q\n\n"

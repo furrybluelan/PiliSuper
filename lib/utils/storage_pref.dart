@@ -33,6 +33,7 @@ import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/hwdec_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
+import 'package:PiliPlus/utils/ass_utils.dart' show defaultAssFontName;
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
@@ -1021,6 +1022,18 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.setSystemBrightness, defaultValue: false);
 
   static String? get downloadPath => _setting.get(SettingBoxKey.downloadPath);
+
+  /// 导出位置。见 `ExportTarget.decode`，为空时使用平台默认值。
+  static String? get exportPath => _setting.get(SettingBoxKey.exportPath);
+
+  /// 导出弹幕 ASS 使用的字体族名。
+  ///
+  /// 导出文件可能拿到其他设备/播放器上播放，字体是否存在取决于那一端，
+  /// 因此允许用户自行指定；留空则用当前平台的默认族名。
+  static String get exportAssFontName {
+    final value = _setting.get(SettingBoxKey.exportAssFontName) as String?;
+    return value == null || value.isEmpty ? defaultAssFontName : value;
+  }
 
   static String? get liveCdnUrl => _setting.get(SettingBoxKey.liveCdnUrl);
 
