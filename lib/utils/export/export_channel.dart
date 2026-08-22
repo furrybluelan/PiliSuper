@@ -64,6 +64,13 @@ abstract final class ExportChannel {
   static Future<bool> deleteDocument(String uri) async =>
       await _invoke<bool>('deleteDocument', {'uri': uri}) ?? false;
 
+  /// 清理中断导出遗留的 pending MediaStore 条目，返回删除数量。
+  ///
+  /// 条目以 pending 状态插入后若进程被杀，对其他应用不可见，
+  /// 却持续占用公共存储空间，需要在启动时回收。
+  static Future<int?> clearPendingDownloads() =>
+      _invoke<int>('clearPendingDownloads');
+
   static Future<void> writeBytes(String uri, Uint8List bytes) =>
       _invoke<void>('writeBytes', {'uri': uri, 'bytes': bytes});
 

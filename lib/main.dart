@@ -105,7 +105,8 @@ void main() async {
   await Future.wait([
     // 导出位置在 Android 旧版本上会回退到 downloadPath，需等其就绪。
     _initDownPath().then((_) => initExportTarget(Pref.exportPath)),
-    _initTmpPath(),
+    // 顺带清理上次进程中断遗留的导出中转文件与 pending 条目。
+    _initTmpPath().then((_) => CacheExportService.purgeStaleExports()),
     CacheManager.ensureInitialized(),
   ]);
   Get

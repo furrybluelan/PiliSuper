@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert' show jsonDecode, utf8;
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:PiliPlus/grpc/bilibili/community/service/dm/v1.pb.dart'
     show DmSegMobileReply;
@@ -38,8 +39,34 @@ class CacheExportService extends GetxService {
   int? _sessionId;
   bool _cancelled = false;
 
-  /// 通知栏进度上次上报的百分比，避免高频跨通道调用。
+  /// 通知栏进度上次上报的百分比与文案，避免高频跨通道调用。
   int _lastNotifiedPercent = -2;
+  String _lastNotifiedMessage = '';
+
+  /// 清理上次进程中断遗留的导出残留。
+  ///
+  /// 中转文件位于系统临时目录，进程被杀时 `finally` 不会执行；
+  /// MediaStore 的 pending 条目同样会滞留公共存储，都需启动时清扫。
+  static Future<void> purgeStaleExports() async {
+    try {
+      final dir = Directory(tmpDirPath);
+      if (dir.existsSync()) {
+        for (final entity in dir.listSync()) {
+          if (entity is File &&
+              path.basename(entity.path).startsWith('export_')) {
+            try {
+              entity.deleteSync();
+            } catch (_) {}
+          }
+        }
+      }
+    } catch (_) {}
+    if (ExportChannel.isSupported && DeviceUtils.sdkInt >= 29) {
+      try {
+        await ExportChannel.clearPendingDownloads();
+      } catch (_) {}
+    }
+  }
 
   @override
   void onInit() {
@@ -101,7 +128,9 @@ class CacheExportService extends GetxService {
       ];
     }
 
-    if (!await exportTarget.isUsable()) {
+    // 真实写探针验证（创建 + 删除），授权被收紧或目录只读时直接整体报错，
+    // 而不是每个导出项都在写入阶段才失败。
+    if (!await exportTarget.probeWritable()) {
       return [
         for (final mode in modes)
           ExportItemResult.failure(mode, '导出位置不可用，请在设置中重新选择'),
@@ -111,6 +140,7 @@ class CacheExportService extends GetxService {
     _cancelled = false;
     isExporting.value = true;
     _lastNotifiedPercent = -2;
+    _lastNotifiedMessage = '';
     await _startNotification();
     final results = <ExportItemResult>[];
     _ExportContext? context;
@@ -168,19 +198,25 @@ class CacheExportService extends GetxService {
     } catch (_) {}
   }
 
-  /// 同步进度到通知栏，百分比无变化时跳过。
+  /// 同步进度到通知栏，百分比与文案均无变化时跳过。
   void _syncNotification() {
     if (!ExportChannel.isSupported) return;
     final value = progress.value;
     final percent = value < 0 ? -1 : (value * 100).round();
-    if (percent == _lastNotifiedPercent) return;
-    _lastNotifiedPercent = percent;
     final label = currentLabel.value;
+    final message = label.isEmpty
+        ? stage.value.message
+        : '${stage.value.message} · $label';
+    // 百分比不变也要对比文案：连续的不确定进度阶段（均为 -1）
+    // 若只看百分比，通知会一直停留在上一次的标签上。
+    if (percent == _lastNotifiedPercent && message == _lastNotifiedMessage) {
+      return;
+    }
+    _lastNotifiedPercent = percent;
+    _lastNotifiedMessage = message;
     ExportChannel.updateForegroundProgress(
       title: '正在导出缓存',
-      message: label.isEmpty
-          ? stage.value.message
-          : '${stage.value.message} · $label',
+      message: message,
       progress: percent,
     ).catchError((_) {});
   }
@@ -631,33 +667,36 @@ class _ExportContext {
   Future<String?> buildAss() async {
     final file = File(path.join(entry.entryDirPath, PathUtils.danmakuName));
     if (!file.existsSync()) return null;
-    final DmSegMobileReply reply;
-    try {
-      reply = DmSegMobileReply.fromBuffer(await file.readAsBytes());
-    } catch (_) {
-      return null;
-    }
-    if (reply.elems.isEmpty) return null;
-    return AssUtils.danmaku2Ass(
-      reply.elems,
-      title: entry.showTitle,
-      options: AssOptions(
-        playResX: width,
-        playResY: height,
-        // 导出的是整幅画面，对应播放器的全屏形态：弹幕层高度为屏幕短边，
-        // 字号也用全屏那一档，这样导出观感与用户全屏观看时一致。
-        referenceHeight: DeviceUtils.size.shortestSide,
-        fontScale: Pref.danmakuFontScaleFS,
-        lineHeight: Pref.danmakuLineHeight,
-        scrollDuration: Pref.danmakuDuration,
-        staticDuration: Pref.danmakuStaticDuration,
-        strokeWidth: Pref.danmakuStrokeWidth,
-        opacity: Pref.danmakuOpacity,
-        showArea: Pref.danmakuShowArea,
-        blockTypes: Pref.danmakuBlockType,
-        weightThreshold: Pref.danmakuWeight,
-      ),
+    final bytes = await file.readAsBytes();
+    final title = entry.showTitle;
+    // 弹幕可能上万条，解析与排版放到后台 isolate，避免转换期间卡住 UI。
+    // DeviceUtils.size / Pref 依赖主 isolate，必须先取值再传入闭包。
+    final options = AssOptions(
+      playResX: width,
+      playResY: height,
+      // 导出的是整幅画面，对应播放器的全屏形态：弹幕层高度为屏幕短边，
+      // 字号也用全屏那一档，这样导出观感与用户全屏观看时一致。
+      referenceHeight: DeviceUtils.size.shortestSide,
+      fontScale: Pref.danmakuFontScaleFS,
+      lineHeight: Pref.danmakuLineHeight,
+      scrollDuration: Pref.danmakuDuration,
+      staticDuration: Pref.danmakuStaticDuration,
+      strokeWidth: Pref.danmakuStrokeWidth,
+      opacity: Pref.danmakuOpacity,
+      showArea: Pref.danmakuShowArea,
+      blockTypes: Pref.danmakuBlockType,
+      weightThreshold: Pref.danmakuWeight,
     );
+    return Isolate.run(() {
+      final DmSegMobileReply reply;
+      try {
+        reply = DmSegMobileReply.fromBuffer(bytes);
+      } catch (_) {
+        return null;
+      }
+      if (reply.elems.isEmpty) return null;
+      return AssUtils.danmaku2Ass(reply.elems, title: title, options: options);
+    });
   }
 
   /// ffmpeg 需要 ASS 作为输入文件，先落到临时目录。
