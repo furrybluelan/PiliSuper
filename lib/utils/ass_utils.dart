@@ -184,7 +184,10 @@ abstract final class AssUtils {
       final width = _textWidth(elem.content, fontSize);
       final start = elem.progress;
       final text = _escape(elem.content);
-      final colorTag = _colorTag(elem.color);
+      // 屏蔽「彩色」时与播放器一致：按默认白色渲染，不输出颜色覆盖。
+      final colorTag = options.blockTypes.contains(6)
+          ? ''
+          : _colorTag(elem.color);
       // 静态弹幕水平居中。用 ASS 的居中对齐让渲染器按实际字形宽度定位，
       // 而不是依赖这里的宽度估算，否则会整体偏左。
       final centerX = _num(options.playResX / 2);
@@ -198,7 +201,7 @@ abstract final class AssUtils {
             scrollSlots,
             maxRows,
             start: start,
-            width: width,
+            playResX: options.playResX,
             speed: speed,
           );
           if (row == null) continue;
@@ -303,7 +306,7 @@ abstract final class AssUtils {
     Map<int, _ScrollSlot> slots,
     int maxRows, {
     required int start,
-    required double width,
+    required int playResX,
     required double speed,
   }) {
     for (var row = 0; row < maxRows; row++) {
@@ -314,8 +317,10 @@ abstract final class AssUtils {
       final elapsed = start - prev.enterMs;
       // 条件一：新弹幕出现时，前一条必须已完整进入画面。
       if (prev.speed * elapsed < prev.width) continue;
-      // 条件二：前一条离开画面前，新弹幕不能追上它。
-      if (speed * (prev.leaveMs - start) > width) continue;
+      // 条件二：前一条离开画面前，新弹幕的左缘不能越过 x=0，
+      // 即它在前一条离场前的行程不得超过画面宽度。两条弹幕的宽度
+      // 在该判定中恰好抵消，与弹幕自身宽度无关。
+      if (speed * (prev.leaveMs - start) > playResX) continue;
       return row;
     }
     return null;
@@ -379,8 +384,17 @@ abstract final class AssUtils {
         : rounded.toString();
   }
 
+  /// 文本里的字面 `\N` / `\n` / `\h` 会被 libass 当作换行/硬空格，
+  /// 在反斜杠后插入零宽空格使其失效。必须在换行转成 `\N` 之前处理，
+  /// 否则会连带破坏真正的换行转换。
+  static final RegExp _literalAssTag = RegExp(r'\\([Nnh])');
+
   /// 花括号会被 libass 当作特效标签起止符，换成全角以免注入。
   static String _escape(String text) => text
+      .replaceAllMapped(
+        _literalAssTag,
+        (m) => '\\\u200B${m[1]}',
+      )
       .replaceAll('{', '｛')
       .replaceAll('}', '｝')
       .replaceAll('\r\n', '\\N')
