@@ -96,6 +96,14 @@ class ExportForegroundService : Service() {
         return START_NOT_STICKY
     }
 
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        // dataSync 服务达到系统时限（Android 15+）。onTimeout 返回后必须
+        // 在数秒内自行停止，否则系统抛 RemoteServiceException 直接崩进程：
+        // 通知 Dart 取消导出，并立即撤下通知结束服务。
+        onCancelRequested?.invoke()
+        stopForegroundAndSelf()
+    }
+
     private fun notify(title: String, message: String, progress: Int) {
         ensureChannel()
         val notification = buildNotification(title, message, progress)

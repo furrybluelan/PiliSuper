@@ -1,10 +1,13 @@
 package com.example.piliplus
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
@@ -12,6 +15,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileInputStream
+import java.util.concurrent.Executors
 
 /**
  * 缓存导出的落盘通道。
@@ -33,6 +37,10 @@ class ExportChannel(private val context: Context) : MethodChannel.MethodCallHand
         private const val ERR_IO = "io_error"
     }
 
+    /** 多 GB 中转文件的拷贝必须离开平台主线程，否则触发 ANR。 */
+    private val ioExecutor = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     /** 通知栏「取消」回传 Dart 用。由 [MainActivity] 注入。 */
     var channel: MethodChannel? = null
         set(value) {
@@ -53,6 +61,7 @@ class ExportChannel(private val context: Context) : MethodChannel.MethodCallHand
                 "treeDisplayPath" -> result.success(treeDisplayPath(call.argStr("treeUri")))
                 "finalizePending" -> finalizePending(call, result)
                 "deleteDocument" -> deleteDocument(call, result)
+                "clearPendingDownloads" -> clearPendingDownloads(result)
                 "writeBytes" -> writeBytes(call, result)
                 "copyFromFile" -> copyFromFile(call, result)
                 "documentDisplayPath" -> result.success(documentDisplayPath(call.argStr("uri")))
@@ -307,19 +316,61 @@ class ExportChannel(private val context: Context) : MethodChannel.MethodCallHand
      * 从本地文件流式拷贝到目标 uri。
      *
      * ffmpeg 无法写入目标时的兜底路径，也用于无需转封装的整文件搬运。
+     * 拷贝量可达数 GB，放到工作线程执行；result 必须回平台线程完成。
      */
     private fun copyFromFile(call: MethodCall, result: MethodChannel.Result) {
         val uri = Uri.parse(call.argStr("uri"))
         val source = File(call.argStr("path"))
         if (!source.isFile) throw IllegalArgumentException("source not found: ${source.path}")
-        var copied = 0L
-        context.contentResolver.openOutputStream(uri, "wt").use { out ->
-            if (out == null) throw IllegalStateException("cannot open output stream")
-            FileInputStream(source).use { input ->
-                copied = input.copyTo(out, DEFAULT_BUFFER_SIZE * 16)
+        ioExecutor.execute {
+            val outcome = runCatching {
+                var copied = 0L
+                context.contentResolver.openOutputStream(uri, "wt").use { out ->
+                    if (out == null) throw IllegalStateException("cannot open output stream")
+                    FileInputStream(source).use { input ->
+                        copied = input.copyTo(out, DEFAULT_BUFFER_SIZE * 16)
+                    }
+                    out.flush()
+                }
+                copied
             }
-            out.flush()
+            mainHandler.post {
+                outcome.fold(
+                    { result.success(it) },
+                    { result.error(ERR_IO, it.message, it.stackTraceToString()) },
+                )
+            }
         }
-        result.success(copied)
+    }
+
+    /** 清理中断导出遗留的 pending MediaStore 条目，返回删除数量。 */
+    private fun clearPendingDownloads(result: MethodChannel.Result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.success(0)
+            return
+        }
+        val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val pending = context.contentResolver.query(
+            collection,
+            arrayOf(MediaStore.MediaColumns._ID),
+            "${MediaStore.MediaColumns.IS_PENDING} = 1",
+            null,
+            null,
+        )?.use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(ContentUris.withAppendedId(collection, cursor.getLong(0)))
+                }
+            }
+        } ?: emptyList()
+        var deleted = 0
+        for (uri in pending) {
+            try {
+                if (context.contentResolver.delete(uri, null, null) > 0) deleted++
+            } catch (_: Exception) {
+                // 单条删除失败不影响其余清理。
+            }
+        }
+        result.success(deleted)
     }
 }

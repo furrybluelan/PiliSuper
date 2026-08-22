@@ -10,7 +10,6 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : AudioServiceActivity() {
-    private var exportChannel: ExportChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -21,7 +20,6 @@ class MainActivity : AudioServiceActivity() {
         val handler = ExportChannel(applicationContext)
         handler.channel = channel
         channel.setMethodCallHandler(handler)
-        exportChannel = handler
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -40,8 +38,9 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
-        exportChannel?.channel = null
-        exportChannel = null
+        // 不置空 ExportChannel 的回调：共享引擎在 Activity 销毁后仍会继续
+        // 后台导出，通知栏的「取消」依赖它回传 Dart。handler 只持有
+        // applicationContext 与引擎 messenger，不会泄漏 Activity。
         stopService(Intent(this, com.ryanheise.audioservice.AudioService::class.java))
         super.onDestroy()
     }
