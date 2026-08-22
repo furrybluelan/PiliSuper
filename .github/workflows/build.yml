@@ -214,9 +214,9 @@ jobs:
         if: ${{ inputs.build_android_release == true }}
         env:
           KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
-          KEY_ALIAS:    ${{ secrets.KEY_ALIAS }}
-          KEY_PASS:     ${{ secrets.KEY_PASSWORD }}
-          STORE_PASS:   ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           SIGN_ARGS=()
           if [[ "${{ inputs.sign_android }}" == "true" || ( "${{ github.event_name }}" == "workflow_dispatch" && -n "$KEYSTORE_B64" ) ]]; then
@@ -232,7 +232,37 @@ jobs:
               --clean-keys
             )
           fi
-          python3 tool/build/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist "${SIGN_ARGS[@]}"
+
+          BUILD_LOG="$(mktemp)"
+
+          set +e
+          python3 tool/build/build_android.py \
+            --version "$VERSION" \
+            --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" \
+            --output dist \
+            "${SIGN_ARGS[@]}" 2>&1 | tee "$BUILD_LOG"
+          BUILD_STATUS=${PIPESTATUS[0]}
+          set -e
+
+          if [[ "$BUILD_STATUS" -eq 0 ]]; then
+            rm -f "$BUILD_LOG"
+            exit 0
+          fi
+
+          if ! grep -Fq "MD5 verification failed for" "$BUILD_LOG"; then
+            rm -f "$BUILD_LOG"
+            exit "$BUILD_STATUS"
+          fi
+
+          echo "::warning::media-kit JAR checksum failure; clearing its build cache and retrying once"
+          rm -rf build/media_kit_libs_android_video
+          rm -f "$BUILD_LOG"
+
+          python3 tool/build/build_android.py \
+            --version "$VERSION" \
+            --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" \
+            --output dist \
+            "${SIGN_ARGS[@]}"
 
       - name: Build Dev
         env:
