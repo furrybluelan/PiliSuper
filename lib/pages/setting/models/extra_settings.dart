@@ -81,6 +81,12 @@ List<SettingsModel> get extraSettings => [
     leading: const Icon(Icons.drive_file_move_outline),
     onTap: _showExportPathDialog,
   ),
+  NormalModel(
+    title: '导出弹幕字体',
+    getSubtitle: () => Pref.exportAssFontName,
+    leading: const Icon(Icons.font_download_outlined),
+    onTap: _showExportFontDialog,
+  ),
   SplitModel(
     normalModel: const NormalModel.split(
       title: '空降助手',
@@ -831,6 +837,70 @@ void _showExportPathDialog(BuildContext context, VoidCallback setState) {
             child: const Text('设置新位置', style: TextStyle(fontSize: 14)),
           ),
         ],
+      ],
+    ),
+  );
+}
+
+void _showExportFontDialog(BuildContext context, VoidCallback setState) {
+  var fontName = Pref.exportAssFontName;
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('导出弹幕字体'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          const Text(
+            'ASS 只能指定一个字体族名，须填写播放端真实存在的名称，'
+            '否则播放器会用默认字体渲染数字与字母、仅汉字走回退，'
+            '导致同一条弹幕字体与大小不一致。\n'
+            '「黑体」属于别名，仅部分桌面环境可解析，不建议使用。\n'
+            'Android/Linux：Noto Sans CJK SC\n'
+            'Windows：Microsoft YaHei\n'
+            'macOS/iOS：PingFang SC',
+            style: TextStyle(fontSize: 13),
+          ),
+          TextFormField(
+            autofocus: true,
+            initialValue: fontName,
+            onChanged: (value) => fontName = value,
+            decoration: const InputDecoration(
+              isDense: true,
+              hintText: '留空则用当前平台默认',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            Get.back();
+            final value = fontName.trim();
+            if (value.isEmpty) {
+              await GStorage.setting.delete(SettingBoxKey.exportAssFontName);
+            } else {
+              await GStorage.setting.put(
+                SettingBoxKey.exportAssFontName,
+                value,
+              );
+            }
+            setState();
+          },
+          child: const Text('确定'),
+        ),
       ],
     ),
   );
