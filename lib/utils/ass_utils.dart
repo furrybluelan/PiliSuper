@@ -1,5 +1,23 @@
+import 'dart:io' show Platform;
+
 import 'package:PiliPlus/grpc/bilibili/community/service/dm/v1.pb.dart'
     show DanmakuElem;
+
+/// 各平台真实存在的中文字体族名。
+///
+/// ASS 的 `Fontname` 只有一个字段，无法给出候选列表，因此必须填真实族名。
+/// 名字匹配不上时 libass 只会逐字形回退：ASCII 由默认拉丁字体供给，
+/// 仅汉字走 CJK 回退，一句弹幕被两个字体拆开渲染；且 CJK 字体里的拉丁
+/// 字形是按汉字方框设计的，明显小于纯拉丁字体，于是数字既变字体又变大。
+///
+/// `黑体` 属于别名而非族名，只在带 CJK 别名规则的桌面发行版上由
+/// fontconfig 映射得到，Android 的 mpv 不带这套规则，必然落空。
+String get defaultAssFontName {
+  if (Platform.isWindows) return 'Microsoft YaHei';
+  if (Platform.isMacOS || Platform.isIOS) return 'PingFang SC';
+  // Android 24+ 与桌面 Linux 均可直接匹配到该族名。
+  return 'Noto Sans CJK SC';
+}
 
 /// 弹幕转 ASS 的渲染参数。
 ///
@@ -10,7 +28,7 @@ class AssOptions {
     this.playResX = 1920,
     this.playResY = 1080,
     required this.referenceHeight,
-    this.fontName = '黑体',
+    required this.fontName,
     this.fontScale = 1.0,
     this.lineHeight = 1.6,
     this.scrollDuration = 7.0,
@@ -38,6 +56,7 @@ class AssOptions {
   /// 使导出结果与用户在本机看到的观感一致。由调用方从真实显示尺寸取得。
   final double referenceHeight;
 
+  /// ASS 样式使用的字体族名，须是目标播放环境真实存在的族名。
   final String fontName;
 
   /// 字号缩放系数。

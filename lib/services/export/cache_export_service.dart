@@ -677,6 +677,7 @@ class _ExportContext {
       // 导出的是整幅画面，对应播放器的全屏形态：弹幕层高度为屏幕短边，
       // 字号也用全屏那一档，这样导出观感与用户全屏观看时一致。
       referenceHeight: DeviceUtils.size.shortestSide,
+      fontName: Pref.exportAssFontName,
       fontScale: Pref.danmakuFontScaleFS,
       lineHeight: Pref.danmakuLineHeight,
       scrollDuration: Pref.danmakuDuration,
