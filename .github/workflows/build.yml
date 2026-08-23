@@ -31,7 +31,7 @@ on:
       pkg_id:
         required: false
         type: string
-        default: "com.pili.super"
+        default: "org.frblanapps.pilisuper"
       app_name:
         required: false
         type: string
@@ -99,7 +99,7 @@ on:
       pkg_id:
         description: "包名（留空则使用默认值）"
         required: false
-        default: "com.pili.super"
+        default: "org.frblanapps.pilisuper"
         type: string
       app_name:
         description: "应用名（留空则使用默认值）"
@@ -671,19 +671,19 @@ jobs:
 
       - name: Package Linux tar.gz
         if: ${{ inputs.build_linux_tar_gz == true || inputs.build_linux_arch == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist tar.gz
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist tar.gz
 
       - name: Package Linux DEB
         if: ${{ inputs.build_linux_deb == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist deb
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist deb
 
       - name: Package Linux RPM
         if: ${{ inputs.build_linux_rpm == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist rpm
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist rpm
 
       - name: Package Linux AppImage
         if: ${{ inputs.build_linux_appimage == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" --output dist appimage
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist appimage
 
       - name: Upload Linux bundle for Arch packaging
         if: ${{ inputs.build_linux_arch == true }}
@@ -766,7 +766,7 @@ jobs:
             --version "${{ needs.linux.outputs.version }}" \
             --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" \
             --app-name "${{ inputs.app_name || 'PiliSuper' }}" \
-            --pkg-id "${{ inputs.pkg_id || 'com.pili.super' }}" \
+            --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" \
             --output dist \
             arch
 

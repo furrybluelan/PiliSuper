@@ -262,7 +262,7 @@ flutter pub get
 例如，构建 Android release：
 
 ```sh
-python tool/build/rename.py --pkg-id com.pili.super --app-name PiliSuper
+python tool/build/rename.py --pkg-id org.frblanapps.pilisuper --app-name PiliSuper
 python tool/build/prebuild.py --platform android
 flutter pub get
 VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
