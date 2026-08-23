@@ -181,10 +181,6 @@ jobs:
           flutter-version-file: pubspec.yaml
           cache: true
 
-      - name: Add Rename CLI tool
-        run: |
-            dart pub global activate rename
-
       - name: Rename project
         run: |
           NAME_ARGS=()
@@ -384,10 +380,6 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
       
-      - name: Add Rename CLI tool
-        run: |
-            dart pub global activate rename
-
       - name: Rename project
         run: |
           NAME_ARGS=()
@@ -446,10 +438,6 @@ jobs:
 
       - name: Install create-dmg
         run: npm install --global create-dmg
-
-      - name: Add Rename CLI tool
-        run: |
-            dart pub global activate rename
 
       - name: Rename project
         run: |
@@ -524,10 +512,6 @@ jobs:
         run: |
           Copy-Item "windows/packaging/exe/ChineseSimplified.isl" `
             "C:\\Program Files (x86)\\Inno Setup 6\\Languages\\ChineseSimplified.isl"
-
-      - name: Add Rename CLI tool
-        run: |
-            dart pub global activate rename
 
       - name: Rename project
         shell: bash
@@ -636,10 +620,6 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
           cache: true
-
-      - name: Add Rename CLI tool
-        run: |
-            dart pub global activate rename
 
       - name: Rename project
         run: |
