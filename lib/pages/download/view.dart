@@ -14,6 +14,7 @@ import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models_new/download/download_info.dart';
 import 'package:PiliPlus/pages/download/controller.dart';
 import 'package:PiliPlus/pages/download/detail/view.dart';
+import 'package:PiliPlus/pages/download/detail/widgets/export_sheet.dart';
 import 'package:PiliPlus/pages/download/detail/widgets/item.dart';
 import 'package:PiliPlus/pages/download/search/view.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
@@ -269,6 +270,15 @@ class _DownloadPageState extends State<DownloadPage> with GridMixin {
                   },
                   child: const Text('更新弹幕', style: TextStyle(fontSize: 14)),
                 ),
+                // 单分P视频无需进入详情页即可导出；多分P需逐集选择。
+                if (pageInfo.entries case [final entry] when entry.isCompleted)
+                  DialogOption(
+                    onPressed: () {
+                      Get.back();
+                      showExportSheet(context: context, entry: entry);
+                    },
+                    child: const Text('导出', style: TextStyle(fontSize: 14)),
+                  ),
               ],
             ),
           );

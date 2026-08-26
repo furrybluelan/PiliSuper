@@ -32,6 +32,9 @@ import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
+import 'package:PiliPlus/utils/export/export_channel.dart';
+import 'package:PiliPlus/utils/export/export_target.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/filtering_text.dart';
@@ -73,6 +76,18 @@ List<SettingsModel> get extraSettings => [
       onTap: _showDownPathDialog,
     ),
   ],
+  NormalModel(
+    title: '导出位置',
+    getSubtitle: () => exportTargetLabel,
+    leading: const Icon(Icons.drive_file_move_outline),
+    onTap: _showExportPathDialog,
+  ),
+  NormalModel(
+    title: '导出弹幕字体',
+    getSubtitle: () => Pref.exportAssFontName,
+    leading: const Icon(Icons.font_download_outlined),
+    onTap: _showExportFontDialog,
+  ),
   SplitModel(
     normalModel: const NormalModel.split(
       title: '空降助手',
@@ -743,6 +758,144 @@ void _showDownPathDialog(BuildContext context, VoidCallback setState) {
             GStorage.setting.put(SettingBoxKey.downloadPath, path);
           },
           child: const Text('设置新路径', style: TextStyle(fontSize: 14)),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showExportPathDialog(BuildContext context, VoidCallback setState) {
+  Future<void> apply(ExportTarget target, {required bool persist}) async {
+    await setExportTarget(target);
+    if (persist) {
+      await GStorage.setting.put(SettingBoxKey.exportPath, target.encode());
+    } else {
+      await GStorage.setting.delete(SettingBoxKey.exportPath);
+    }
+    setState();
+  }
+
+  showDialog(
+    context: context,
+    builder: (context) => SimpleDialog(
+      clipBehavior: Clip.hardEdge,
+      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+      children: [
+        DialogOption(
+          onPressed: () {
+            Get.back();
+            Utils.copyText(exportTargetLabel);
+          },
+          child: const Text('复制', style: TextStyle(fontSize: 14)),
+        ),
+        if (ExportTarget.configurable) ...[
+          DialogOption(
+            onPressed: () async {
+              Get.back();
+              await apply(
+                await ExportTarget.platformDefault(),
+                persist: false,
+              );
+            },
+            child: const Text('重置为默认', style: TextStyle(fontSize: 14)),
+          ),
+          DialogOption(
+            onPressed: () async {
+              Get.back();
+              try {
+                // SAF 仅 API 29+ 可用；更低版本让选择器返回普通路径。
+                final useSaf = Platform.isAndroid && DeviceUtils.sdkInt >= 29;
+                final picked = await FilePicker.getDirectoryPath(
+                  androidSafOptions: useSaf
+                      ? const AndroidSAFOptions(
+                          grant: AndroidSAFGrant.lifetime,
+                          accessMode: AndroidSAFAccessMode.readWrite,
+                        )
+                      : null,
+                );
+                if (picked == null || picked.isEmpty || picked == '/') return;
+                // 带 SAF 选项时返回 tree uri，其余情况返回文件系统路径。
+                final ExportTarget target = picked.startsWith('content://')
+                    ? SafTreeTarget(picked)
+                    : FsTarget(picked);
+                if (target is SafTreeTarget) {
+                  await ExportChannel.persistTree(target.treeUri);
+                }
+                if (!await target.isUsable()) {
+                  SmartDialog.showToast('该位置不可写入');
+                  return;
+                }
+                await apply(target, persist: true);
+              } catch (e) {
+                SmartDialog.showToast(e.toString());
+              }
+            },
+            child: const Text('设置新位置', style: TextStyle(fontSize: 14)),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+void _showExportFontDialog(BuildContext context, VoidCallback setState) {
+  var fontName = Pref.exportAssFontName;
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('导出弹幕字体'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          const Text(
+            'ASS 只能指定一个字体族名，须填写播放端真实存在的名称，'
+            '否则播放器会用默认字体渲染数字与字母、仅汉字走回退，'
+            '导致同一条弹幕字体与大小不一致。\n'
+            '「黑体」属于别名，仅部分桌面环境可解析，不建议使用。\n'
+            'Android/Linux：Noto Sans CJK SC\n'
+            'Windows：Microsoft YaHei\n'
+            'macOS/iOS：PingFang SC',
+            style: TextStyle(fontSize: 13),
+          ),
+          TextFormField(
+            autofocus: true,
+            initialValue: fontName,
+            onChanged: (value) => fontName = value,
+            decoration: const InputDecoration(
+              isDense: true,
+              hintText: '留空则用当前平台默认',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            Get.back();
+            final value = fontName.trim();
+            if (value.isEmpty) {
+              await GStorage.setting.delete(SettingBoxKey.exportAssFontName);
+            } else {
+              await GStorage.setting.put(
+                SettingBoxKey.exportAssFontName,
+                value,
+              );
+            }
+            setState();
+          },
+          child: const Text('确定'),
         ),
       ],
     ),

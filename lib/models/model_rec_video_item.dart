@@ -5,10 +5,13 @@ abstract class BaseRcmdVideoItemModel extends BaseVideoItemModel {
   String? goto;
   String? uri;
   String? rcmdReason;
+  Map<String, dynamic>? chargingPay;
 
   // app推荐专属
   int? param;
   String? pgcBadge;
+
+  bool get isPaid => chargingPay?['level'] != null;
 }
 
 class RcmdVideoItemModel extends BaseRcmdVideoItemModel {

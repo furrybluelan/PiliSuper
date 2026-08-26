@@ -13,11 +13,13 @@ import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
+import 'package:PiliPlus/services/export/cache_export_service.dart';
 import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/export/export_target.dart';
 import 'package:PiliPlus/utils/extension/core_palettes_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
@@ -101,13 +103,17 @@ void main() async {
   }
   ScaledWidgetsFlutterBinding.instance.scaleFactor = Pref.uiScale;
   await Future.wait([
-    _initDownPath(),
-    _initTmpPath(),
+    // 导出位置在 Android 旧版本上会回退到 downloadPath，需等其就绪。
+    _initDownPath().then((_) => initExportTarget(Pref.exportPath)),
+    // 顺带清理上次进程中断遗留的导出中转文件与 pending 条目。
+    _initTmpPath().then((_) => CacheExportService.purgeStaleExports()),
     CacheManager.ensureInitialized(),
   ]);
   Get
     ..lazyPut(AccountService.new)
-    ..lazyPut(DownloadService.new);
+    ..lazyPut(DownloadService.new)
+    // 导出可能跨页面进行，用常驻单例避免页面销毁时任务被回收。
+    ..lazyPut(CacheExportService.new, fenix: true);
   HttpOverrides.global = _CustomHttpOverrides();
 
   if (PlatformUtils.isMobile) {

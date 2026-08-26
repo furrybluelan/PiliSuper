@@ -6,8 +6,22 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager.LayoutParams
 import com.ryanheise.audioservice.AudioServiceActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : AudioServiceActivity() {
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        val channel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            ExportChannel.CHANNEL,
+        )
+        val handler = ExportChannel(applicationContext)
+        handler.channel = channel
+        channel.setMethodCallHandler(handler)
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (AndroidHelper.isFoldable) {
@@ -24,6 +38,9 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
+        // 不置空 ExportChannel 的回调：共享引擎在 Activity 销毁后仍会继续
+        // 后台导出，通知栏的「取消」依赖它回传 Dart。handler 只持有
+        // applicationContext 与引擎 messenger，不会泄漏 Activity。
         stopService(Intent(this, com.ryanheise.audioservice.AudioService::class.java))
         super.onDestroy()
     }

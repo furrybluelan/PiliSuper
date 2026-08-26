@@ -19,6 +19,7 @@ abstract final class PathUtils {
   static const coverName = 'cover.jpg';
   static const danmakuName = 'danmaku.pb';
   static const downloadDir = 'download';
+  static const exportDir = 'export';
 
   static String buildShadersAbsolutePath(
     String baseDirectory,
