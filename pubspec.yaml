@@ -35,6 +35,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  android_file_picker: ^1.0.1
   app_links: ^7.1.1
   archive: ^4.0.0
   audio_service:

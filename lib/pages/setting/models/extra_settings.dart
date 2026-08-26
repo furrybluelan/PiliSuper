@@ -47,6 +47,12 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/update.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:android_file_picker/android_file_picker.dart'
+    show
+        AndroidSAFAccessMode,
+        AndroidSAFGrant,
+        AndroidSAFOptions,
+        FilePickerAndroidOptions;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:material_ui/material_ui.dart' hide RefreshIndicator;
@@ -806,12 +812,14 @@ void _showExportPathDialog(BuildContext context, VoidCallback setState) {
                 // SAF 仅 API 29+ 可用；更低版本让选择器返回普通路径。
                 final useSaf = Platform.isAndroid && DeviceUtils.sdkInt >= 29;
                 final picked = await FilePicker.getDirectoryPath(
-                  androidSafOptions: useSaf
-                      ? const AndroidSAFOptions(
-                          grant: AndroidSAFGrant.lifetime,
-                          accessMode: AndroidSAFAccessMode.readWrite,
+                  androidOptions: useSaf
+                      ? const FilePickerAndroidOptions(
+                          safOptions: AndroidSAFOptions(
+                            grant: AndroidSAFGrant.lifetime,
+                            accessMode: AndroidSAFAccessMode.readWrite,
+                          ),
                         )
-                      : null,
+                      : const AndroidOptions(),
                 );
                 if (picked == null || picked.isEmpty || picked == '/') return;
                 // 带 SAF 选项时返回 tree uri，其余情况返回文件系统路径。
