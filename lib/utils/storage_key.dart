@@ -9,6 +9,7 @@ abstract final class SettingBoxKey {
       autoPlayEnable = 'autoPlayEnable',
       fullScreenMode = 'fullScreenMode',
       preferCodecs = 'preferCodecs',
+      preferCodecsCellular = 'preferCodecsCellular',
       defaultToastOp = 'defaultToastOp',
       defaultPicQa = 'defaultPicQa',
       enableHA = 'enableHA',
@@ -58,6 +59,7 @@ abstract final class SettingBoxKey {
       maxCacheSize = 'maxCacheSize',
       defaultShowComment = 'defaultShowComment',
       replySortType = 'replySortType',
+      reply2SortType = 'reply2SortType',
       defaultDynamicType = 'defaultDynamicType',
       showDynInteraction = 'showDynInteraction',
       enableHotKey = 'enableHotKey',
@@ -127,7 +129,6 @@ abstract final class SettingBoxKey {
       retryDelay = 'retryDelay',
       liveQuality = 'liveQuality',
       liveQualityCellular = 'liveQualityCellular',
-      appFontWeight = 'appFontWeight',
       fastForBackwardDuration = 'fastForBackwardDuration',
       recordSearchHistory = 'recordSearchHistory',
       showPgcTimeline = 'showPgcTimeline',
@@ -155,7 +156,8 @@ abstract final class SettingBoxKey {
       floatingNavBar = 'floatingNavBar',
       removeSafeArea = 'removeSafeArea',
       angleDegrees = 'angleDegrees',
-      liveStream = 'liveStream';
+      liveStream = 'liveStream',
+      enableDocProvider = 'enableDocProvider';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',
@@ -216,6 +218,7 @@ abstract final class SettingBoxKey {
 
   static const String themeMode = 'themeMode',
       defaultTextScale = 'textScale',
+      appFontWeight = 'appFontWeight',
       dynamicColor = 'dynamicColor',
       customColor = 'customColor',
       displayMode = 'displayMode',
@@ -237,7 +240,8 @@ abstract final class SettingBoxKey {
       tempPlayerConf = 'tempPlayerConf',
       reduceLuxColor = 'reduceLuxColor',
       liveCdnUrl = 'liveCdnUrl',
-      saveReply = 'saveReply';
+      saveReply = 'saveReply',
+      appFont = 'appFont';
 }
 
 abstract final class LocalCacheKey {

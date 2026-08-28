@@ -253,6 +253,8 @@ class HeaderControl extends StatefulWidget {
       return autoWrapReportDialog(
         context,
         ReportOptions.danmakuReport,
+        withContent: ReportOptions.danmakuReportCheck,
+        contentRequired: ReportOptions.danmakuReportCheck,
         (reasonType, reasonDesc, banUid) {
           if (banUid) {
             final filter = ctr.filters;
@@ -269,10 +271,10 @@ class HeaderControl extends StatefulWidget {
             );
           }
           return DanmakuHttp.danmakuReport(
-            reason: reasonType == 0 ? 11 : reasonType,
+            reason: reasonType,
             cid: ctr.cid!,
             id: extra.id,
-            content: reasonType == 0 ? reasonDesc : null,
+            content: reasonDesc,
           );
         },
       );
@@ -292,6 +294,8 @@ class HeaderControl extends StatefulWidget {
         context,
         ban: false,
         ReportOptions.liveDanmakuReport,
+        withContent: ReportOptions.liveDanmakuReportCheck,
+        contentRequired: ReportOptions.liveDanmakuReportCheck,
         (reasonType, reasonDesc, banUid) {
           // if (banUid) {
           //   final filter = ctr.filters;
@@ -463,7 +467,8 @@ class HeaderControlState extends State<HeaderControl>
                     Icons.stay_current_landscape_outlined,
                     size: 20,
                   ),
-                  title: const Text('超分辨率'),
+                  title: const Text('超分辨率', style: titleStyle),
+                  titleStyle: theme.textTheme.bodyLarge,
                   value: () {
                     final value = plPlayerController.superResolutionType.value;
                     return (value, value.label);
@@ -475,8 +480,8 @@ class HeaderControlState extends State<HeaderControl>
                     plPlayerController.setShader(value);
                     setState();
                   },
-                  descFontSize: 12,
                   descPosType: .subtitle,
+                  descStyle: subTitleStyle,
                 ),
                 if (PlatformUtils.isMobile)
                   if (plPlayerController.videoPlayerController
@@ -649,7 +654,8 @@ class HeaderControlState extends State<HeaderControl>
                 PopupListTile(
                   dense: true,
                   leading: const Icon(Icons.repeat, size: 20),
-                  title: const Text('播放顺序'),
+                  title: const Text('播放顺序', style: titleStyle),
+                  titleStyle: theme.textTheme.bodyLarge,
                   value: () {
                     final value = plPlayerController.playRepeat;
                     return (value, value.label);
@@ -660,7 +666,7 @@ class HeaderControlState extends State<HeaderControl>
                     setState();
                   },
                   descPosType: .subtitle,
-                  descFontSize: 12,
+                  descStyle: subTitleStyle,
                 ),
                 ListTile(
                   dense: true,
@@ -696,14 +702,20 @@ class HeaderControlState extends State<HeaderControl>
                     try {
                       final result = await FilePicker.pickFile(
                         type: .custom,
-                        allowedExtensions: const ['json', 'vtt', 'srt', 'ass'],
+                        allowedExtensions: const [
+                          'json',
+                          'vtt',
+                          'srt',
+                          'ass',
+                          'bcc',
+                        ],
                       );
                       if (result != null) {
                         final file = result.xFile;
                         final path = file.path;
                         final name = file.name;
                         final length = videoDetailCtr.subtitles.length;
-                        if (name.endsWith('.json')) {
+                        if (name.endsWith('.json') || name.endsWith('.bcc')) {
                           final file = File(path);
                           final stream = file.openRead().transform(
                             utf8.decoder,
