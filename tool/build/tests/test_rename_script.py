@@ -109,19 +109,31 @@ def make_upstream_project() -> None:
           "PRODUCT_BUNDLE_IDENTIFIER = com.example.piliplus.RunnerTests;\n")
     write("macos/Runner/Configs/AppInfo.xcconfig",
           "PRODUCT_NAME = PiliPlus\n"
-          "PRODUCT_BUNDLE_IDENTIFIER = com.example.piliplus\n")
+          "PRODUCT_BUNDLE_IDENTIFIER = com.example.piliplus\n"
+          "PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.\n")
     write("macos/Runner.xcodeproj/project.pbxproj", "path = piliplus.app;\n")
     write("linux/CMakeLists.txt",
           'set(BINARY_NAME "piliplus")\nset(APPLICATION_ID "com.example.piliplus")\n')
     write("linux/runner/my_application.cc",
+          'gtk_header_bar_set_title(header_bar, "piliplus");\n'
+          'gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));\n'
           'gtk_window_set_title(window, "piliplus");\n'
-          'g_settings_new("com.example.piliplus");\n')
+          'g_settings_new("com.example.piliplus");\n'
+          'g_build_filename(g_get_user_data_dir(), "com.example.piliplus", NULL);\n')
     write("windows/CMakeLists.txt",
           'project(piliplus LANGUAGES CXX)\nset(BINARY_NAME "piliplus")\n')
     write("windows/runner/main.cpp",
-          'if (!window.Create(L"piliplus", origin, size)) {\n')
+          '  HWND hwnd = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"piliplus");\n'
+          '  flutter::DartProject project(L"data");\n'
+          '  if (!window.Create(L"piliplus", origin, size)) {\n')
     write("windows/runner/Runner.rc",
-          'VALUE "OriginalFilename", "piliplus.exe" "\\0"\n')
+          '            VALUE "CompanyName", "com.example" "\\0"\n'
+          '            VALUE "FileDescription", "piliplus" "\\0"\n'
+          '            VALUE "InternalName", "piliplus" "\\0"\n'
+          '            VALUE "LegalCopyright", '
+          '"Copyright (C) 2023 com.example. All rights reserved." "\\0"\n'
+          '            VALUE "OriginalFilename", "piliplus.exe" "\\0"\n'
+          '            VALUE "ProductName", "piliplus" "\\0"\n')
     write("windows/packaging/exe/make_config.yaml",
           "display_name: PiliPlus\n"
           "publisher_url: https://github.com/bggRGjQaUbCoE/PiliPlus\n")
@@ -222,6 +234,7 @@ class FullRenameTests(RenameSandbox):
         xcconfig = read("macos/Runner/Configs/AppInfo.xcconfig")
         self.assertIn("PRODUCT_NAME = PiliSuper", xcconfig)
         self.assertIn(f"PRODUCT_BUNDLE_IDENTIFIER = {PKG_ID}", xcconfig)
+        self.assertIn("PRODUCT_COPYRIGHT = Copyright © 2023 FRBLanApps.", xcconfig)
         self.assertIn("path = pilisuper.app;",
                       read("macos/Runner.xcodeproj/project.pbxproj"))
 
@@ -229,14 +242,29 @@ class FullRenameTests(RenameSandbox):
         self.assertIn('set(BINARY_NAME "pilisuper")', linux_cmake)
         self.assertIn(f'set(APPLICATION_ID "{PKG_ID}")', linux_cmake)
         cc = read("linux/runner/my_application.cc")
-        self.assertIn('gtk_window_set_title(window, "pilisuper")', cc)
+        self.assertIn('gtk_window_set_title(window, "PiliSuper")', cc)
+        self.assertIn('gtk_header_bar_set_title(header_bar, "PiliSuper")', cc)
+        self.assertIn("gtk_window_set_titlebar(window, GTK_WIDGET(header_bar))", cc)
         self.assertIn(f'g_settings_new("{PKG_ID}")', cc)
+        self.assertIn(f'g_get_user_data_dir(), "{PKG_ID}"', cc)
 
         windows_cmake = read("windows/CMakeLists.txt")
         self.assertIn("project(pilisuper LANGUAGES CXX)", windows_cmake)
         self.assertIn('set(BINARY_NAME "pilisuper")', windows_cmake)
-        self.assertIn('L"pilisuper"', read("windows/runner/main.cpp"))
-        self.assertIn('"pilisuper.exe"', read("windows/runner/Runner.rc"))
+
+        main_cpp = read("windows/runner/main.cpp")
+        self.assertIn('::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"PiliSuper")',
+                      main_cpp)
+        self.assertIn('window.Create(L"PiliSuper", origin, size)', main_cpp)
+        self.assertIn('flutter::DartProject project(L"data")', main_cpp)
+
+        rc = read("windows/runner/Runner.rc")
+        self.assertIn('VALUE "FileDescription", "PiliSuper"', rc)
+        self.assertIn('VALUE "ProductName", "PiliSuper"', rc)
+        self.assertIn('VALUE "InternalName", "pilisuper"', rc)
+        self.assertIn('VALUE "OriginalFilename", "pilisuper.exe"', rc)
+        self.assertIn('VALUE "CompanyName", "FRBLanApps"', rc)
+        self.assertIn('VALUE "LegalCopyright", "Copyright (C) 2023 FRBLanApps.', rc)
 
         config = read("windows/packaging/exe/make_config.yaml")
         self.assertIn("display_name: PiliSuper", config)
@@ -329,6 +357,25 @@ class DisplayNameOnlyTests(RenameSandbox):
             "android/app/src/main/java/com/example/piliplus/AndroidHelper.java").is_file())
         self.assertTrue(Path("assets/linux/com.example.piliplus.desktop").is_file())
         self.assertIn("FRBLanApps/PiliSuper/releases", read("lib/http/api.dart"))
+
+        # 发行者与 bundle id 各自独立：署名换掉，包名保持原样。
+        rc = read("windows/runner/Runner.rc")
+        self.assertIn('VALUE "CompanyName", "FRBLanApps"', rc)
+        self.assertIn('VALUE "FileDescription", "PiliSuper"', rc)
+        self.assertIn('VALUE "OriginalFilename", "pilisuper.exe"', rc)
+        self.assertIn("Copyright © 2023 FRBLanApps.",
+                      read("macos/Runner/Configs/AppInfo.xcconfig"))
+
+
+class PublisherTests(RenameSandbox):
+    def test_publisher_untouched_when_unchanged(self):
+        run_rename("--publisher", "com.example")
+
+        rc = read("windows/runner/Runner.rc")
+        self.assertIn('VALUE "CompanyName", "com.example"', rc)
+        self.assertIn("Copyright (C) 2023 com.example.", rc)
+        self.assertIn("Copyright © 2023 com.example.",
+                      read("macos/Runner/Configs/AppInfo.xcconfig"))
 
 
 class ValidationTests(RenameSandbox):

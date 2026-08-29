@@ -3,13 +3,14 @@
 
 The working tree deliberately keeps the upstream identifiers so that merges
 from upstream stay conflict-free. This script is the build step that swaps
-them for the fork identity across every platform, in five passes:
+them for the fork identity across every platform, in six passes:
 
     dart package   package:PiliPlus/...     ->  package:PiliSuper/...
     display name   "PiliPlus" labels        ->  "PiliSuper"
     binary name    piliplus executables     ->  pilisuper
     bundle id      com.example.piliplus     ->  org.frblanapps.pilisuper
     repository     bggRGjQaUbCoE/PiliPlus   ->  FRBLanApps/PiliSuper
+    publisher      com.example copyright    ->  FRBLanApps
 
 Upstream attribution survives on purpose: license headers, credit lines and
 git dependency URLs keep naming PiliPlus and bggRGjQaUbCoE.
@@ -54,6 +55,26 @@ RESERVED_WORDS = {
     "synchronized", "this", "throw", "throws", "transient", "try", "typealias",
     "val", "var", "vararg", "void", "volatile", "when", "where", "while",
 }
+
+# Runner fields that hold a user-visible label which `flutter create` seeded
+# from the lowercase project name instead of the display name. Pass 2 matches
+# the display name case-sensitively and so walks past `piliplus`, after which
+# pass 3 would demote these labels to the executable name.
+DISPLAY_NAME_FIELDS = (
+    re.compile(r'VALUE\s+"(?:FileDescription|ProductName)"'),
+    re.compile(r'::FindWindow\(|window\.Create\(L"'),
+    re.compile(r"gtk_(?:window|header_bar)_set_title\("),
+)
+
+# Runner fields that name the vendor rather than the app; upstream leaves the
+# `flutter create` sample value there.
+PUBLISHER_FIELDS = (
+    re.compile(r'VALUE\s+"(?:CompanyName|LegalCopyright)"'),
+    re.compile(r"^\s*PRODUCT_COPYRIGHT\s*="),
+)
+
+# Platform runners carry both kinds of field.
+RUNNER_TREES = {"windows", "linux", "macos"}
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +126,24 @@ def rewrite(files, rewriter):
         if after != before:
             write_text(path, after)
             log_info(f"updated: {path}")
+
+
+def on_field_lines(fields, substitute):
+    """A rewriter that runs `substitute` only on lines holding one of `fields`.
+
+    Keeps the edit off neighbouring lines, so `InternalName` and
+    `OriginalFilename` keep the executable name while the label fields beside
+    them take the display name.
+    """
+    def rewriter(text):
+        lines = []
+        for line in text.splitlines(keepends=True):
+            if any(field.search(line) for field in fields):
+                line = substitute(line)
+            lines.append(line)
+        return "".join(lines)
+
+    return rewriter
 
 
 def spans_to_keep(text, *phrases):
@@ -184,6 +223,7 @@ def rename_display_name(old_app_name, new_app_name, old_pkg_id, old_repo, files)
     old_pkg_path = old_pkg_id.replace(".", "/")
     word = re.compile(rf"\b{re.escape(old_app_name)}\b")
     quoted = re.compile(rf"(['\"]){re.escape(old_app_name)}\1")
+    any_case = re.compile(rf"\b{re.escape(old_app_name)}\b", re.IGNORECASE)
 
     def replace_words(text):
         kept = spans_to_keep(text, old_pkg_id, old_pkg_path, old_repo)
@@ -196,8 +236,18 @@ def rename_display_name(old_app_name, new_app_name, old_pkg_id, old_repo, files)
             text,
         )
 
+    def replace_any_case(line):
+        kept = spans_to_keep(line, old_pkg_id, old_pkg_path, old_repo)
+        return any_case.sub(
+            lambda m: m[0] if overlaps(m.span(), kept) else new_app_name, line
+        )
+
     rewrite([p for p in files if declares_display_label(p)], replace_words)
     rewrite([p for p in files if p.parts[0] in {"lib", "test"}], replace_string_literals)
+    rewrite(
+        [p for p in files if p.parts[0] in RUNNER_TREES],
+        on_field_lines(DISPLAY_NAME_FIELDS, replace_any_case),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -275,6 +325,22 @@ def rename_repository(old_repo, new_repo, files):
 
 
 # ---------------------------------------------------------------------------
+# Pass 6 —— 发行者：runner 里 flutter create 留下的 com.example 署名
+# ---------------------------------------------------------------------------
+
+def rename_publisher(old_publisher, new_publisher, files):
+    """`CompanyName`, `LegalCopyright` and `PRODUCT_COPYRIGHT` still credit the
+    `flutter create` sample vendor. Pass 4 walks past them because they carry
+    the vendor prefix alone, not the whole bundle id."""
+    vendor = re.compile(rf"{re.escape(old_publisher)}(?!\.\w)")
+
+    rewrite(
+        [p for p in files if p.parts[0] in RUNNER_TREES],
+        on_field_lines(PUBLISHER_FIELDS, lambda line: vendor.sub(new_publisher, line)),
+    )
+
+
+# ---------------------------------------------------------------------------
 # 结构性变更：移动源码目录、重命名以 bundle id 命名的文件
 # ---------------------------------------------------------------------------
 
@@ -337,11 +403,14 @@ def main():
     parser.add_argument("--original-app-name", default="PiliPlus")
     parser.add_argument("--repo", default="FRBLanApps/PiliSuper")
     parser.add_argument("--original-repo", default="bggRGjQaUbCoE/PiliPlus")
+    parser.add_argument("--publisher", default="FRBLanApps")
+    parser.add_argument("--original-publisher", default="com.example")
     args = parser.parse_args()
 
     old_app_name, new_app_name = args.original_app_name, args.app_name
     old_pkg_id, new_pkg_id = args.original_pkg_id, args.pkg_id
     old_repo, new_repo = args.original_repo, args.repo
+    old_publisher, new_publisher = args.original_publisher, args.publisher
 
     require_project_root()
     require_valid_java_package(new_pkg_id)
@@ -365,6 +434,10 @@ def main():
     if new_repo != old_repo:
         log_step("Rename repository references")
         rename_repository(old_repo, new_repo, files)
+
+    if new_publisher != old_publisher:
+        log_step("Rename publisher")
+        rename_publisher(old_publisher, new_publisher, files)
 
     if new_pkg_id != old_pkg_id:
         # Structural changes come last, so every pass above saw the old paths.
