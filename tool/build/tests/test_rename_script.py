@@ -379,15 +379,53 @@ class PublisherTests(RenameSandbox):
 
 
 class ValidationTests(RenameSandbox):
-    def test_reserved_word_package_rejected(self):
+    def assertRejected(self, *argv: str) -> None:
         with self.assertRaises(SystemExit):
-            run_rename("--pkg-id", "com.pili.super")
+            run_rename(*argv)
         self.assertIn("name: PiliPlus", read("pubspec.yaml"))
 
+    def assertPkgIdRejected(self, pkg_id: str) -> None:
+        self.assertRejected("--pkg-id", pkg_id)
+
+    def assertAppNameRejected(self, app_name: str) -> None:
+        self.assertRejected("--app-name", app_name)
+
+    def test_reserved_word_package_rejected(self):
+        self.assertPkgIdRejected("com.pili.super")
+
     def test_invalid_segment_package_rejected(self):
-        with self.assertRaises(SystemExit):
-            run_rename("--pkg-id", "org.frblanapps.pili+super")
-        self.assertIn("name: PiliPlus", read("pubspec.yaml"))
+        self.assertPkgIdRejected("org.frblanapps.pili+super")
+
+    def test_single_segment_package_rejected(self):
+        self.assertPkgIdRejected("foo")
+
+    def test_underscore_package_rejected(self):
+        self.assertPkgIdRejected("org.example.my_app")
+
+    def test_hyphen_package_rejected(self):
+        self.assertPkgIdRejected("org.example.my-app")
+
+    def test_leading_digit_segment_rejected(self):
+        self.assertPkgIdRejected("org.example.2fast")
+
+    def test_empty_segment_rejected(self):
+        self.assertPkgIdRejected("org..example")
+
+    def test_dart_reserved_app_name_rejected(self):
+        for app_name in ("mixin", "class", "with", "await", "required", "type"):
+            with self.subTest(app_name=app_name):
+                self.assertAppNameRejected(app_name)
+
+    def test_non_identifier_app_name_rejected(self):
+        for app_name in ("Pili-Super", "Pili Super", "2fast", "Pili.Super",
+                         "Pili+Super", ""):
+            with self.subTest(app_name=app_name):
+                self.assertAppNameRejected(app_name)
+
+    def test_dart_builtin_identifier_app_name_accepted(self):
+        """`dart pub get` accepts built-in identifiers, so neither may this."""
+        run_rename("--app-name", "dynamic")
+        self.assertIn("name: dynamic", read("pubspec.yaml"))
 
 
 if __name__ == "__main__":

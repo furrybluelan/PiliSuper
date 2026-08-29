@@ -15,9 +15,20 @@ them for the fork identity across every platform, in six passes:
 Upstream attribution survives on purpose: license headers, credit lines and
 git dependency URLs keep naming PiliPlus and bggRGjQaUbCoE.
 
---pkg-id doubles as the Android namespace and the Java/Kotlin source package,
-so it must be a legal Java package name。com.pili.super 会被拒绝，因为 super
-是 Java/Kotlin 保留字，用作 namespace 会导致 Android 构建失败。
+--pkg-id serves every platform at once: the Android namespace and the
+Java/Kotlin source package, the Apple bundle identifier, and the Linux
+application id. Only the intersection of their rules is accepted, so a value
+that passes here cannot fail later in a platform build:
+
+    two or more segments   Android rejects a dotted-component-less id
+    letters and digits     Apple rejects `_`, Java/Kotlin rejects `-`
+    leading letter         Android rejects a segment starting with a digit
+    no reserved word       `super` as a namespace breaks the Android build
+
+--app-name lands in the pubspec `name:` field, so it must be a Dart identifier
+that is not a Dart reserved word; `dart pub get` refuses the project outright
+otherwise. Dart's list barely overlaps the Java/Kotlin one, hence the separate
+table.
 """
 from __future__ import annotations
 
@@ -56,6 +67,19 @@ RESERVED_WORDS = {
     "val", "var", "vararg", "void", "volatile", "when", "where", "while",
 }
 
+# Words `dart pub get` refuses in the pubspec `name:` field, verified against
+# the Dart 3.44 SDK. Dart's built-in identifiers (`dynamic`, `factory`, `get`,
+# `static`, `typedef`, ...) are absent because pub accepts them.
+DART_RESERVED_WORDS = {
+    "abstract", "as", "assert", "await", "break", "case", "catch", "class",
+    "const", "continue", "covariant", "default", "deferred", "do", "else",
+    "enum", "export", "extends", "external", "final", "finally", "for", "hide",
+    "if", "implements", "import", "in", "interface", "is", "late", "library",
+    "mixin", "new", "on", "operator", "part", "required", "rethrow", "return",
+    "sealed", "set", "super", "switch", "this", "throw", "try", "type", "var",
+    "void", "while", "with", "yield",
+}
+
 # Runner fields that hold a user-visible label which `flutter create` seeded
 # from the lowercase project name instead of the display name. Pass 2 matches
 # the display name case-sensitively and so walks past `piliplus`, after which
@@ -81,13 +105,32 @@ RUNNER_TREES = {"windows", "linux", "macos"}
 # 基础工具：校验、遍历、读写、逐文件改写
 # ---------------------------------------------------------------------------
 
-def require_valid_java_package(pkg_id):
-    for segment in pkg_id.split("."):
-        legal = re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
-        if legal and segment not in RESERVED_WORDS:
-            continue
-        log_error(f"{pkg_id} 不是合法的 Java/Kotlin 包名（含保留字或非法段），将导致 Android 构建失败。")
+def require_valid_pkg_id(pkg_id):
+    def reject(reason):
+        log_error(f"{pkg_id} 不是合法的跨平台包名：{reason}，将导致构建失败。")
         raise SystemExit(1)
+
+    segments = pkg_id.split(".")
+    if len(segments) < 2:
+        reject("至少需要两段，Android applicationId 必须包含点分段")
+    for segment in segments:
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", segment):
+            reject(f"段 {segment!r} 必须以字母开头且只含字母与数字"
+                   "（Apple bundle id 不接受下划线，Java/Kotlin 包名不接受连字符）")
+        if segment in RESERVED_WORDS:
+            reject(f"段 {segment!r} 是 Java/Kotlin 保留字，不能用作 Android namespace")
+
+
+def require_valid_app_name(app_name):
+    def reject(reason):
+        log_error(f"{app_name} 不是合法的 Dart 包名：{reason}，dart pub get 将拒绝该项目。")
+        raise SystemExit(1)
+
+    if not re.fullmatch(r"[A-Za-z_$][A-Za-z0-9_$]*", app_name):
+        reject("必须是合法的 Dart 标识符（首字符为字母、下划线或 $，其余为字母、数字、"
+               "下划线或 $），不能含空格、连字符或点")
+    if app_name in DART_RESERVED_WORDS:
+        reject("是 Dart 保留字")
 
 
 def project_files():
@@ -413,7 +456,8 @@ def main():
     old_publisher, new_publisher = args.original_publisher, args.publisher
 
     require_project_root()
-    require_valid_java_package(new_pkg_id)
+    require_valid_pkg_id(new_pkg_id)
+    require_valid_app_name(new_app_name)
 
     # Listed once, before anything moves: the content passes below all work on
     # pre-rename paths, and the structural passes walk the tree again themselves.
