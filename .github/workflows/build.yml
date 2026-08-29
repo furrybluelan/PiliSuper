@@ -182,13 +182,16 @@ jobs:
           cache: true
 
       - name: Rename project
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          PKG_ID: ${{ inputs.pkg_id }}
         run: |
           NAME_ARGS=()
-          if [[ -n "${{ inputs.app_name}}" ]]; then
-            NAME_ARGS+=(--app-name "${{ inputs.app_name}}")
+          if [[ -n "$APP_NAME" ]]; then
+            NAME_ARGS+=(--app-name "$APP_NAME")
           fi
-          if [[ -n "${{ inputs.pkg_id }}" ]]; then
-            NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
+          if [[ -n "$PKG_ID" ]]; then
+            NAME_ARGS+=(--pkg-id "$PKG_ID")
           fi
           python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
@@ -266,13 +269,16 @@ jobs:
       - name: Build release APKs
         if: ${{ inputs.build_android_release == true }}
         env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+          SIGN_ANDROID: ${{ inputs.sign_android }}
+          EVENT_NAME: ${{ github.event_name }}
           KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
           KEY_ALIAS:    ${{ secrets.KEY_ALIAS }}
           KEY_PASS:     ${{ secrets.KEY_PASSWORD }}
           STORE_PASS:   ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           SIGN_ARGS=()
-          if [[ "${{ inputs.sign_android }}" == "true" || ( "${{ github.event_name }}" == "workflow_dispatch" && -n "$KEYSTORE_B64" ) ]]; then
+          if [[ "$SIGN_ANDROID" == "true" || ( "$EVENT_NAME" == "workflow_dispatch" && -n "$KEYSTORE_B64" ) ]]; then
             if [[ -z "$KEYSTORE_B64" || -z "$KEY_ALIAS" || -z "$KEY_PASS" ]]; then
               echo "Android signing was requested but signing secrets are incomplete" >&2
               exit 1
@@ -285,10 +291,13 @@ jobs:
               --clean-keys
             )
           fi
-          python3 tool/build/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist "${SIGN_ARGS[@]}"
+          python3 tool/build/build_android.py --version "$VERSION" --output-prefix "$APP_NAME" --output dist "${SIGN_ARGS[@]}"
 
       - name: Build Dev
         env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+          SIGN_ANDROID: ${{ inputs.sign_android }}
+          EVENT_NAME: ${{ github.event_name }}
           KEYSTORE_B64: ${{ secrets.SIGN_KEYSTORE_BASE64 }}
           KEY_ALIAS:    ${{ secrets.KEY_ALIAS }}
           KEY_PASS:     ${{ secrets.KEY_PASSWORD }}
@@ -296,7 +305,7 @@ jobs:
         if: ${{ inputs.build_android_dev == true }}
         run: |
           SIGN_ARGS=()
-          if [[ "${{ inputs.sign_android }}" == "true" || ( "${{ github.event_name }}" == "workflow_dispatch" && -n "$KEYSTORE_B64" ) ]]; then
+          if [[ "$SIGN_ANDROID" == "true" || ( "$EVENT_NAME" == "workflow_dispatch" && -n "$KEYSTORE_B64" ) ]]; then
             if [[ -z "$KEYSTORE_B64" || -z "$KEY_ALIAS" || -z "$KEY_PASS" ]]; then
               echo "Android signing was requested but signing secrets are incomplete" >&2
               exit 1
@@ -311,7 +320,7 @@ jobs:
           fi
 
           VERSION=$(sed -n 's/^version: //p' pubspec.yaml)
-          python3 tool/build/build_android.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist --dev "${SIGN_ARGS[@]}"
+          python3 tool/build/build_android.py --version "$VERSION" --output-prefix "$APP_NAME" --output dist --dev "${SIGN_ARGS[@]}"
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -381,13 +390,16 @@ jobs:
           flutter-version-file: pubspec.yaml
       
       - name: Rename project
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          PKG_ID: ${{ inputs.pkg_id }}
         run: |
           NAME_ARGS=()
-          if [[ -n "${{ inputs.app_name}}" ]]; then
-            NAME_ARGS+=(--app-name "${{ inputs.app_name}}")
+          if [[ -n "$APP_NAME" ]]; then
+            NAME_ARGS+=(--app-name "$APP_NAME")
           fi
-          if [[ -n "${{ inputs.pkg_id }}" ]]; then
-            NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
+          if [[ -n "$PKG_ID" ]]; then
+            NAME_ARGS+=(--pkg-id "$PKG_ID")
           fi
           python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
@@ -403,7 +415,9 @@ jobs:
         run: flutter pub get
 
       - name: Build IPA
-        run: python3 tool/build/build_ios.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+        run: python3 tool/build/build_ios.py --version "$VERSION" --output-prefix "$APP_NAME" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -440,13 +454,16 @@ jobs:
         run: npm install --global create-dmg
 
       - name: Rename project
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          PKG_ID: ${{ inputs.pkg_id }}
         run: |
           NAME_ARGS=()
-          if [[ -n "${{ inputs.app_name}}" ]]; then
-            NAME_ARGS+=(--app-name "${{ inputs.app_name}}")
+          if [[ -n "$APP_NAME" ]]; then
+            NAME_ARGS+=(--app-name "$APP_NAME")
           fi
-          if [[ -n "${{ inputs.pkg_id }}" ]]; then
-            NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
+          if [[ -n "$PKG_ID" ]]; then
+            NAME_ARGS+=(--pkg-id "$PKG_ID")
           fi
           python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
@@ -462,7 +479,9 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS archive
-        run: python3 tool/build/build_macos.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+        run: python3 tool/build/build_macos.py --version "$VERSION" --output-prefix "$APP_NAME" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -515,13 +534,16 @@ jobs:
 
       - name: Rename project
         shell: bash
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          PKG_ID: ${{ inputs.pkg_id }}
         run: |
           NAME_ARGS=()
-          if [[ -n "${{ inputs.app_name}}" ]]; then
-            NAME_ARGS+=(--app-name "${{ inputs.app_name}}")
+          if [[ -n "$APP_NAME" ]]; then
+            NAME_ARGS+=(--app-name "$APP_NAME")
           fi
-          if [[ -n "${{ inputs.pkg_id }}" ]]; then
-            NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
+          if [[ -n "$PKG_ID" ]]; then
+            NAME_ARGS+=(--pkg-id "$PKG_ID")
           fi
           python tool/build/rename.py "${NAME_ARGS[@]}"
 
@@ -542,12 +564,16 @@ jobs:
       - name: Build portable Windows archive
         if: ${{ inputs.build_windows_portable == true }}
         shell: bash
-        run: python tool/build/build_windows.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+        run: python tool/build/build_windows.py --version "$VERSION" --output-prefix "$APP_NAME" --output dist
 
       - name: Build Windows installer
         if: ${{ inputs.build_windows_installer == true }}
         shell: bash
-        run: python tool/build/build_windows.py --installer --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+        run: python tool/build/build_windows.py --installer --version "$VERSION" --output-prefix "$APP_NAME" --output dist
 
       - name: Release
         if: ${{ inputs.tag != '' }}
@@ -622,13 +648,16 @@ jobs:
           cache: true
 
       - name: Rename project
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          PKG_ID: ${{ inputs.pkg_id }}
         run: |
           NAME_ARGS=()
-          if [[ -n "${{ inputs.app_name}}" ]]; then
-            NAME_ARGS+=(--app-name "${{ inputs.app_name}}")
+          if [[ -n "$APP_NAME" ]]; then
+            NAME_ARGS+=(--app-name "$APP_NAME")
           fi
-          if [[ -n "${{ inputs.pkg_id }}" ]]; then
-            NAME_ARGS+=(--pkg-id "${{ inputs.pkg_id }}")
+          if [[ -n "$PKG_ID" ]]; then
+            NAME_ARGS+=(--pkg-id "$PKG_ID")
           fi
           python3 tool/build/rename.py "${NAME_ARGS[@]}"
 
@@ -651,19 +680,31 @@ jobs:
 
       - name: Package Linux tar.gz
         if: ${{ inputs.build_linux_tar_gz == true || inputs.build_linux_arch == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist tar.gz
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+          PKG_ID: ${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "$APP_NAME" --app-name "$APP_NAME" --pkg-id "$PKG_ID" --output dist tar.gz
 
       - name: Package Linux DEB
         if: ${{ inputs.build_linux_deb == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist deb
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+          PKG_ID: ${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "$APP_NAME" --app-name "$APP_NAME" --pkg-id "$PKG_ID" --output dist deb
 
       - name: Package Linux RPM
         if: ${{ inputs.build_linux_rpm == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist rpm
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+          PKG_ID: ${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "$APP_NAME" --app-name "$APP_NAME" --pkg-id "$PKG_ID" --output dist rpm
 
       - name: Package Linux AppImage
         if: ${{ inputs.build_linux_appimage == true }}
-        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --app-name "${{ inputs.app_name || 'PiliSuper' }}" --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" --output dist appimage
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+          PKG_ID: ${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}
+        run: python3 tool/build/packaging.py --version "$VERSION" --output-prefix "$APP_NAME" --app-name "$APP_NAME" --pkg-id "$PKG_ID" --output dist appimage
 
       - name: Upload Linux bundle for Arch packaging
         if: ${{ inputs.build_linux_arch == true }}
@@ -730,9 +771,11 @@ jobs:
           path: arch-input
 
       - name: Extract Linux bundle
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
         run: |
           mkdir -p build/linux/x64/release/bundle
-          tar -xzf arch-input/${{ inputs.app_name || 'PiliSuper' }}_linux_*.tar.gz \
+          tar -xzf "arch-input/${APP_NAME}"_linux_*.tar.gz \
             -C build/linux/x64/release/bundle
 
       - name: Create unprivileged package user
@@ -741,12 +784,15 @@ jobs:
           chown -R builder:builder "$GITHUB_WORKSPACE"
 
       - name: Build Arch package
+        env:
+          APP_NAME: ${{ inputs.app_name || 'PiliSuper' }}
+          PKG_ID: ${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}
         run: |
           runuser -u builder -- python3 tool/build/packaging.py \
             --version "${{ needs.linux.outputs.version }}" \
-            --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" \
-            --app-name "${{ inputs.app_name || 'PiliSuper' }}" \
-            --pkg-id "${{ inputs.pkg_id || 'org.frblanapps.pilisuper' }}" \
+            --output-prefix "$APP_NAME" \
+            --app-name "$APP_NAME" \
+            --pkg-id "$PKG_ID" \
             --output dist \
             arch
 
