@@ -65,35 +65,45 @@ class _DLNAPageState extends State<DLNAPage> {
   Future<void> _onSelectQuality(int qn) async {
     if (_isSwitchingQa || qn == _args.qn) return;
     _isSwitchingQa = true;
-    SmartDialog.showLoading();
-    final res = await _args.switchQuality(qn);
-    if (res case Success()) {
-      final device = _lastDevice;
-      // 重推前记录当前播放进度，重推后恢复
-      String? seekTime;
-      if (device != null) {
+    final prevUrl = _args.url;
+    final prevQn = _args.qn;
+    try {
+      SmartDialog.showLoading();
+      final res = await _args.switchQuality(qn);
+      if (res case Success()) {
+        final device = _lastDevice;
+        // 重推前记录当前播放进度，重推后恢复
+        String? seekTime;
+        if (device != null) {
+          try {
+            seekTime = parseSeekTime(
+              await device.position().timeout(const Duration(seconds: 5)),
+            );
+          } catch (_) {}
+        }
+        SmartDialog.dismiss();
+        // 重推成功才算切换成功，失败则回滚到切换前的地址与清晰度
         try {
-          seekTime = parseSeekTime(
-            await device.position().timeout(const Duration(seconds: 5)),
-          );
-        } catch (_) {}
+          await _rePush(device, seekTime);
+        } catch (_) {
+          _args
+            ..url = prevUrl
+            ..qn = prevQn;
+          if (!mounted) return;
+          setState(() {});
+          SmartDialog.showToast('切换清晰度失败，请重试');
+          return;
+        }
+        if (!mounted) return;
+        setState(() {});
+        SmartDialog.showToast('清晰度已切换为：${_args.qnDesc}');
+      } else {
+        SmartDialog.dismiss();
+        if (!mounted) return;
+        res.toast();
       }
-      SmartDialog.dismiss();
-      if (!mounted) {
-        // 页面已退出，仍完成重推以保持电视端播放
-        await _rePush(device, seekTime);
-        _isSwitchingQa = false;
-        return;
-      }
-      setState(() {});
-      SmartDialog.showToast('清晰度已切换为：${_args.qnDesc}');
-      await _rePush(device, seekTime);
+    } finally {
       _isSwitchingQa = false;
-    } else {
-      SmartDialog.dismiss();
-      _isSwitchingQa = false;
-      if (!mounted) return;
-      res.toast();
     }
   }
 
