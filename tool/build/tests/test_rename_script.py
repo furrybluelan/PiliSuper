@@ -326,6 +326,48 @@ class FullRenameTests(RenameSandbox):
             Path("crlf.txt").read_bytes(),
             b"id=org.frblanapps.pilisuper\r\nimport 'package:PiliSuper/x.dart';\r\n")
 
+    def test_symlinked_file_aborts_before_mutation(self):
+        external = tempfile.TemporaryDirectory()
+        self.addCleanup(external.cleanup)
+        outside = Path(external.name) / "outside.dart"
+        outside.write_text("const value = 'PiliPlus';\n", encoding="utf-8")
+        link = Path("lib/external.dart")
+        link.symlink_to(outside)
+
+        with self.assertRaises(SystemExit):
+            run_rename()
+
+        self.assertEqual(outside.read_text(encoding="utf-8"), "const value = 'PiliPlus';\n")
+        self.assertTrue(link.is_symlink())
+        self.assertIn("name: PiliPlus", read("pubspec.yaml"))
+        self.assertIn("package:PiliPlus/", read("lib/main.dart"))
+        self.assertFalse(Path("assets/linux/org.frblanapps.pilisuper.desktop").exists())
+
+    def test_directory_collision_aborts_before_mutation(self):
+        target = Path("android/app/src/main/kotlin/org/frblanapps/pilisuper")
+        target.mkdir(parents=True)
+        (target / "sentinel.txt").write_text("keep", encoding="utf-8")
+        original = read("android/app/src/main/kotlin/com/example/piliplus/MainActivity.kt")
+
+        with self.assertRaises(SystemExit):
+            run_rename()
+
+        self.assertTrue(Path("android/app/src/main/kotlin/com/example/piliplus/MainActivity.kt").is_file())
+        self.assertEqual(read("android/app/src/main/kotlin/com/example/piliplus/MainActivity.kt"), original)
+        self.assertEqual((target / "sentinel.txt").read_text(encoding="utf-8"), "keep")
+        self.assertIn("name: PiliPlus", read("pubspec.yaml"))
+
+    def test_identity_file_collision_aborts_before_mutation(self):
+        target = Path("assets/linux/org.frblanapps.pilisuper.desktop")
+        target.write_text("sentinel", encoding="utf-8")
+
+        with self.assertRaises(SystemExit):
+            run_rename()
+
+        self.assertTrue(Path("assets/linux/com.example.piliplus.desktop").is_file())
+        self.assertEqual(target.read_text(encoding="utf-8"), "sentinel")
+        self.assertIn("name: PiliPlus", read("pubspec.yaml"))
+
     def test_rename_is_idempotent(self):
         run_rename()
         snapshot = tree_snapshot()
@@ -426,6 +468,30 @@ class ValidationTests(RenameSandbox):
         """`dart pub get` accepts built-in identifiers, so neither may this."""
         run_rename("--app-name", "dynamic")
         self.assertIn("name: dynamic", read("pubspec.yaml"))
+
+
+class WorkflowTests(unittest.TestCase):
+    def test_user_inputs_are_not_embedded_in_shell_run_blocks(self):
+        workflow = BUILD_ROOT.parents[1] / ".github" / "workflows" / "build.yml"
+        lines = workflow.read_text(encoding="utf-8").splitlines()
+        in_run = False
+        run_indent = 0
+        shell_lines = []
+        for line in lines:
+            stripped = line.lstrip()
+            indent = len(line) - len(stripped)
+            if stripped.startswith("run:"):
+                in_run = True
+                run_indent = indent
+                shell_lines.append(stripped[4:])
+                continue
+            if in_run and stripped and indent <= run_indent:
+                in_run = False
+            if in_run:
+                shell_lines.append(line)
+
+        self.assertTrue(shell_lines)
+        self.assertNotIn("${{ inputs.", "\n".join(shell_lines))
 
 
 if __name__ == "__main__":

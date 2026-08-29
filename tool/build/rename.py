@@ -39,7 +39,7 @@ import shutil
 from pathlib import Path
 
 from build_common import (log_error, log_info, log_step, log_success,
-                          log_warning, require_project_root)
+                          require_project_root)
 
 SELF_PATH = Path(__file__).resolve()
 
@@ -145,6 +145,26 @@ def project_files():
     return found
 
 
+def require_no_symlinks(files):
+    """Reject links before any rewrite can follow them outside the tree."""
+    for directory, subdirectories, names in os.walk("."):
+        for name in (*subdirectories, *names):
+            path = Path(directory) / name
+            if path.is_symlink():
+                log_error(f"拒绝处理符号链接: {path}")
+                raise SystemExit(1)
+
+    for path in files:
+        if path.is_symlink():
+            log_error(f"拒绝处理符号链接: {path}")
+            raise SystemExit(1)
+
+    pubspec = Path("pubspec.yaml")
+    if pubspec.is_symlink():
+        log_error(f"拒绝处理符号链接: {pubspec}")
+        raise SystemExit(1)
+
+
 def read_text(path):
     """Contents with line endings kept verbatim, or None if the file is not text."""
     try:
@@ -155,6 +175,9 @@ def read_text(path):
 
 
 def write_text(path, content):
+    if path.is_symlink():
+        log_error(f"拒绝写入符号链接: {path}")
+        raise SystemExit(1)
     with path.open("w", encoding="utf-8", newline="") as handle:
         handle.write(content)
 
@@ -395,7 +418,7 @@ def remove_empty_parents(leaf):
         directory = directory.parent
 
 
-def move_source_directories(old_pkg_id, new_pkg_id):
+def source_directory_operations(old_pkg_id, new_pkg_id):
     """Relocate `.../com/example/piliplus/` source folders to the new package."""
     old_pkg_path = old_pkg_id.replace(".", "/")
     new_pkg_path = new_pkg_id.replace(".", "/")
@@ -408,28 +431,64 @@ def move_source_directories(old_pkg_id, new_pkg_id):
             sources.append(Path(directory))
             subdirectories[:] = []  # the package folder is the leaf we move
 
-    for source in sources:
-        location = source.as_posix()
-        target = Path(location[: location.rfind(old_pkg_path)] + new_pkg_path)
-        if target.exists():
-            log_warning(f"跳过目录移动，目标已存在: {target}")
-            continue
+    return [
+        (
+            source,
+            Path(source.as_posix()[: source.as_posix().rfind(old_pkg_path)] + new_pkg_path),
+        )
+        for source in sources
+    ]
+
+
+def identity_file_operations(old_pkg_id, new_pkg_id, files=None):
+    old_id = re.compile(re.escape(old_pkg_id), re.IGNORECASE)
+    operations = []
+    for path in files if files is not None else project_files():
+        if old_id.search(path.name):
+            operations.append((path, path.with_name(old_id.sub(new_pkg_id, path.name))))
+    return operations
+
+
+def require_structural_destinations_available(operations):
+    destinations = set()
+    for source, target in operations:
+        resolved_target = target.absolute()
+        if resolved_target in destinations:
+            log_error(f"结构目标重复: {source} -> {target}")
+            raise SystemExit(1)
+        destinations.add(resolved_target)
+        if os.path.lexists(target):
+            log_error(f"结构目标已存在: {source} -> {target}")
+            raise SystemExit(1)
+
+
+def move_source_directories(old_pkg_id, new_pkg_id, operations=None):
+    operations = (
+        source_directory_operations(old_pkg_id, new_pkg_id)
+        if operations is None
+        else operations
+    )
+    for source, target in operations:
+        if os.path.lexists(target):
+            log_error(f"结构目标已存在: {source} -> {target}")
+            raise SystemExit(1)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(source), str(target))
         remove_empty_parents(source.parent)
         log_info(f"moved: {source} -> {target}")
 
 
-def rename_identity_files(old_pkg_id, new_pkg_id):
+def rename_identity_files(old_pkg_id, new_pkg_id, operations=None):
     """Files named after the bundle id, such as `com.example.piliplus.desktop`."""
-    old_id = re.compile(re.escape(old_pkg_id), re.IGNORECASE)
-    for path in project_files():
-        if not old_id.search(path.name):
-            continue
-        target = path.with_name(old_id.sub(new_pkg_id, path.name))
-        if target.exists():
-            log_warning(f"跳过文件重命名，目标已存在: {target}")
-            continue
+    operations = (
+        identity_file_operations(old_pkg_id, new_pkg_id)
+        if operations is None
+        else operations
+    )
+    for path, target in operations:
+        if os.path.lexists(target):
+            log_error(f"结构目标已存在: {path} -> {target}")
+            raise SystemExit(1)
         path.rename(target)
         log_info(f"renamed: {path} -> {target}")
 
@@ -462,6 +521,14 @@ def main():
     # Listed once, before anything moves: the content passes below all work on
     # pre-rename paths, and the structural passes walk the tree again themselves.
     files = project_files()
+    require_no_symlinks(files)
+
+    directory_operations = []
+    identity_operations = []
+    if new_pkg_id != old_pkg_id:
+        directory_operations = source_directory_operations(old_pkg_id, new_pkg_id)
+        identity_operations = identity_file_operations(old_pkg_id, new_pkg_id, files)
+        require_structural_destinations_available(directory_operations + identity_operations)
 
     if new_app_name != old_app_name:
         log_step("Rename Dart package")
@@ -485,8 +552,8 @@ def main():
 
     if new_pkg_id != old_pkg_id:
         # Structural changes come last, so every pass above saw the old paths.
-        move_source_directories(old_pkg_id, new_pkg_id)
-        rename_identity_files(old_pkg_id, new_pkg_id)
+        move_source_directories(old_pkg_id, new_pkg_id, directory_operations)
+        rename_identity_files(old_pkg_id, new_pkg_id, identity_operations)
 
     log_success("项目标识已更新")
 
