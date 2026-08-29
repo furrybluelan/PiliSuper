@@ -22,6 +22,7 @@ import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/export/export_target.dart';
 import 'package:PiliPlus/utils/extension/core_palettes_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/font_utils.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/max_screen_size.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
@@ -108,6 +109,7 @@ void main() async {
     // 顺带清理上次进程中断遗留的导出中转文件与 pending 条目。
     _initTmpPath().then((_) => CacheExportService.purgeStaleExports()),
     CacheManager.ensureInitialized(),
+    ?FontUtils.init(),
   ]);
   Get
     ..lazyPut(AccountService.new)
