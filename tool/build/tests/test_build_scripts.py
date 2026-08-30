@@ -177,7 +177,7 @@ class PackagingTests(unittest.TestCase):
                 bundle,
                 root,
                 "PiliSuper",
-                packaging.package_identity("com.pili.super"),
+                packaging.package_identity("org.frblanapps.pilisuper"),
             )
 
             launcher = root / "usr" / "bin" / "pilisuper"
@@ -188,6 +188,12 @@ class PackagingTests(unittest.TestCase):
         identity = packaging.package_identity("org.example.client")
         self.assertEqual(identity.package_name, "org.example.client")
         self.assertEqual(identity.desktop_file_name, "org.example.client.desktop")
+
+    def test_legacy_com_pili_super_identity_keeps_pilisuper_branding(self):
+        identity = packaging.package_identity("com.pili.super")
+        self.assertEqual(identity.package_name, "pilisuper")
+        self.assertEqual(identity.desktop_file_name, "com.pili.super.desktop")
+        self.assertEqual(identity.icon_name, "pilisuper")
 
 
 class PrebuildTests(unittest.TestCase):
