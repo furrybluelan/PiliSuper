@@ -259,7 +259,7 @@ flutter pub get
 
 | 脚本 | 职责 |
 | --- | --- |
-| `tool/build/rename.py` | 改 Bundle ID、显示名、Dart 包名和仓库引用 |
+| `tool/build/rename.py` | 改 Bundle ID、显示名、Dart 包名、仓库引用和发行者署名 |
 | `tool/build/prebuild.py` | 生成 `pili_release.json` 并写入 Git 版本号 |
 | `tool/build/patch.py` | 为指定平台应用 Flutter SDK 或项目源码补丁 |
 | `tool/build/build_android.py` | 构建并导出 Android APK |
@@ -273,7 +273,7 @@ flutter pub get
 例如，构建 Android release：
 
 ```sh
-python tool/build/rename.py --pkg-id com.pili.super --app-name PiliSuper
+python tool/build/rename.py --pkg-id org.frblanapps.pilisuper --app-name PiliSuper
 python tool/build/prebuild.py --platform android
 flutter pub get
 VERSION=$(sed -n 's/^version: //p' pubspec.yaml)

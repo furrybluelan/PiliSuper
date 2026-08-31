@@ -15,7 +15,8 @@ from urllib.request import urlopen
 from build_common import log_success, require_command, run_command
 
 PACKAGE_NAME = "pilisuper"
-DESKTOP_FILE_NAME = "com.pili.super.desktop"
+DESKTOP_FILE_NAME = "org.frblanapps.pilisuper.desktop"
+LEGACY_DESKTOP_FILE_NAME = "com.pili.super.desktop"
 ICON_NAME = "pilisuper"
 
 
@@ -27,8 +28,10 @@ class PackageIdentity:
 
 
 def package_identity(pkg_id: str) -> PackageIdentity:
-    if pkg_id == "com.pili.super":
+    if pkg_id == "org.frblanapps.pilisuper":
         return PackageIdentity(PACKAGE_NAME, DESKTOP_FILE_NAME, ICON_NAME)
+    if pkg_id == "com.pili.super":
+        return PackageIdentity(PACKAGE_NAME, LEGACY_DESKTOP_FILE_NAME, ICON_NAME)
     normalized = re.sub(r"[^a-z0-9.+-]", "-", pkg_id.lower())
     return PackageIdentity(normalized, f"{normalized}.desktop", normalized)
 
@@ -319,7 +322,7 @@ def main() -> None:
     parser.add_argument("--output", default="dist")
     parser.add_argument("--output-prefix", default="PiliSuper")
     parser.add_argument("--app-name", default="PiliSuper")
-    parser.add_argument("--pkg-id", default="com.pili.super")
+    parser.add_argument("--pkg-id", default="org.frblanapps.pilisuper")
     parser.add_argument("targets", nargs="+", choices=["tar.gz", "zst", "deb", "rpm", "arch", "appimage"])
     args = parser.parse_args()
 
