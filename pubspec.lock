@@ -1270,7 +1270,7 @@ packages:
     source: hosted
     version: "0.19.5"
   nativeapi:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: nativeapi
       sha256: c4625e81f5ce2f4a9044c0ec1bdb38355119ffcf89e24eb20ae9fc5027a01e59
@@ -1578,42 +1578,10 @@ packages:
     dependency: "direct main"
     description:
       name: screen_retriever
-      sha256: ace919117a7520c13a50a6259e60c4a0d4cbe98809468792a91b5c5adada2aa6
+      sha256: e409a9247218b4c4772d05719144787aad35fc299b216d07e41647d9f35acc5b
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.2"
-  screen_retriever_linux:
-    dependency: transitive
-    description:
-      name: screen_retriever_linux
-      sha256: "7b52006a5ceae1f3d5af7f77188c3290d6e7d8ded16d99809bea84967c65c257"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.2"
-  screen_retriever_macos:
-    dependency: transitive
-    description:
-      name: screen_retriever_macos
-      sha256: a1489b99cce597c45a54b9aae1cd94c8d4705353b7e0bb2457a6e4de44e0ad8a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.2"
-  screen_retriever_platform_interface:
-    dependency: transitive
-    description:
-      name: screen_retriever_platform_interface
-      sha256: "94a5535277510a63184ca178ce12a1449bc0b38618879aa1c18bf57369c5064a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.2"
-  screen_retriever_windows:
-    dependency: transitive
-    description:
-      name: screen_retriever_windows
-      sha256: dafc6922b0bfbf1d48cf3ccbf519b4fff47bdcb820da1728ea6db675fecc9324
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.2"
+    version: "0.3.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -2000,12 +1968,12 @@ packages:
   window_manager:
     dependency: "direct main"
     description:
-      path: "packages/window_manager"
+      path: "."
       ref: main
-      resolved-ref: ac535d09a5850279e6591a9bdd285f9a3edeebf8
-      url: "https://github.com/bggRGjQaUbCoE/window_manager.git"
+      resolved-ref: "80acd536a1ea1c121c36e32d30e638a295087ed1"
+      url: "https://github.com/leanflutter/window_manager.git"
     source: git
-    version: "0.5.2"
+    version: "0.6.0"
   windows_file_picker:
     dependency: transitive
     description:
