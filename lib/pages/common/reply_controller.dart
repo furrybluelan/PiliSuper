@@ -20,6 +20,7 @@ import 'package:material_ui/material_ui.dart';
 abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
   ReplyController({int count = -1}) : count = RxInt(count);
 
+  Int64? targetRpid;
   late final RxInt count;
 
   late final Rx<ReplySortType> sortType;
@@ -43,10 +44,12 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
       _enableCommAntifraud || _biliSendCommAntifraud;
   dynamic get sourceId;
 
+  ReplySortType get prefSortType => Pref.replySortType;
+
   @override
   void onInit() {
     super.onInit();
-    final cacheSortType = Pref.replySortType;
+    final cacheSortType = prefSortType;
     sortType = cacheSortType.obs;
     mode = cacheSortType == .time ? Mode.MAIN_LIST_TIME : Mode.MAIN_LIST_HOT;
   }

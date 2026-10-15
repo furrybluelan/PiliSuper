@@ -1,7 +1,8 @@
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
-    show ReplyInfo, DetailListReply, Mode;
+    show ReplyInfo, DetailListReply;
 import 'package:PiliPlus/grpc/reply.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/models/common/reply/reply_sort_type.dart';
 import 'package:PiliPlus/models_new/dynamic/dyn_mention/item.dart';
 import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/pages/common/reply_controller.dart';
@@ -52,11 +53,11 @@ class VideoReplyReplyController extends ReplyController
   dynamic get sourceId => replyType == 1 ? IdUtils.av2bv(oid) : oid;
 
   @override
+  ReplySortType get prefSortType => Pref.reply2SortType;
+
+  @override
   void onInit() {
     super.onInit();
-    final cacheSortType = Pref.reply2SortType;
-    sortType.value = cacheSortType;
-    mode = cacheSortType == .time ? Mode.MAIN_LIST_TIME : Mode.MAIN_LIST_HOT;
     queryData();
   }
 
