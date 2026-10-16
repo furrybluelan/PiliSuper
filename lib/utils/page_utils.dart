@@ -114,7 +114,6 @@ abstract final class PageUtils {
     Object? rid,
     bool off = false,
     Object? type,
-    int? rpid,
   }) async {
     assert(id != null || rid != null);
     SmartDialog.showLoading();
@@ -132,7 +131,6 @@ abstract final class PageUtils {
             'id': id!,
             'type': 'opus',
           },
-          arguments: rpid != null ? {'rpid': rpid} : null,
           off: off,
         );
       } else {
@@ -140,7 +138,6 @@ abstract final class PageUtils {
           '/dynamicDetail',
           arguments: {
             'item': response,
-            'rpid': ?rpid,
           },
           off: off,
         );
@@ -539,7 +536,6 @@ abstract final class PageUtils {
     bool off = false,
     bool isVertical = false,
     Dimension? dimension,
-    int? rpid,
   }) {
     final arguments = {
       'aid': aid ?? IdUtils.bv2av(bvid!),
@@ -554,7 +550,6 @@ abstract final class PageUtils {
       'videoType': videoType,
       'isVertical': dimension?.isVertical ?? isVertical,
       'heroTag': Utils.makeHeroTag(cid),
-      'rpid': ?rpid,
       ...?extraArguments,
     };
     return PageUtils.toDupNamed('/videoV', arguments: arguments, off: off);

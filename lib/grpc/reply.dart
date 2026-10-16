@@ -46,7 +46,6 @@ abstract final class ReplyGrpc {
   static Future<LoadingState<MainListReply>> mainList({
     int type = 1,
     required int oid,
-    Int64? rpid,
     required Mode mode,
     required String? offset,
     required Int64? cursorNext,
@@ -56,7 +55,7 @@ abstract final class ReplyGrpc {
       MainListReq(
         oid: Int64(oid),
         type: Int64(type),
-        rpid: rpid,
+        rpid: Int64.ZERO,
         cursor: CursorReq(
           mode: mode,
           next: cursorNext,
