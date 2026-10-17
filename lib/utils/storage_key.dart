@@ -160,7 +160,8 @@ abstract final class SettingBoxKey {
       enableEmoteTooltip = 'enableEmoteTooltip',
       mineTabs = 'mineTabs',
       buvid = 'buvid',
-      replyAtBlockType = 'replyAtBlockType';
+      blockAtOnlyReply = 'blockAtOnlyReply',
+      blockReplyAtCount = 'blockReplyAtCount';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',

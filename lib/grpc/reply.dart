@@ -4,15 +4,14 @@ import 'package:PiliPlus/grpc/bilibili/pagination.pb.dart';
 import 'package:PiliPlus/grpc/grpc_req.dart';
 import 'package:PiliPlus/grpc/url.dart';
 import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models/common/reply/reply_at_match_type.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:fixnum/fixnum.dart';
 
 abstract final class ReplyGrpc {
   static bool antiGoodsReply = Pref.antiGoodsReply;
-  static (int? count, ReplyAtBlockType type) blockAtOnlyReply =
-      Pref.replyAtBlockType;
+  static var blockAtOnlyReply = Pref.blockAtOnlyReply;
+  static var blockReplyAtCount = Pref.blockReplyAtCount;
   static RegExp replyRegExp = RegExp(
     Pref.banWordForReply,
     caseSensitive: false,
@@ -40,12 +39,13 @@ abstract final class ReplyGrpc {
         reply.content.message.contains(Constants.goodsUrlPrefix);
   }
 
-  static bool _isAtOnlyReply(ReplyInfo reply) {
-    final content = reply.content;
-    if (content.emotes.isNotEmpty || content.pictures.isNotEmpty) return false;
+  static bool _blockAtOnlyReply(ReplyInfo reply) {
+    if (!blockAtOnlyReply) return false;
 
+    final content = reply.content;
     final atNameToMid = content.atNameToMid;
     if (atNameToMid.isEmpty) return false;
+    if (content.emotes.isNotEmpty || content.pictures.isNotEmpty) return false;
 
     final message = content.message;
 
@@ -110,16 +110,15 @@ abstract final class ReplyGrpc {
     return false;
   }
 
-  static bool needRemoveAtReply(ReplyInfo reply) =>
-      switch (blockAtOnlyReply.$2) {
-        .disable => false,
-        .atOnly => _isAtOnlyReply(reply),
-        .count => reply.content.atNameToMid.length >= blockAtOnlyReply.$1!,
-      };
+  static bool _blockReplyAtCount(ReplyInfo reply) {
+    return blockReplyAtCount != null &&
+        reply.content.atNameToMid.length >= blockReplyAtCount!;
+  }
 
   static bool needRemoveGrpc(ReplyInfo reply) {
     return GlobalData().blackMids.contains(reply.mid.toInt()) ||
-        needRemoveAtReply(reply) ||
+        _blockReplyAtCount(reply) ||
+        _blockAtOnlyReply(reply) ||
         (enableFilter && replyRegExp.hasMatch(reply.content.message)) ||
         (antiGoodsReply && needRemoveGoodGrpc(reply));
   }
