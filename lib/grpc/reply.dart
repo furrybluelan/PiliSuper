@@ -103,11 +103,11 @@ abstract final class ReplyGrpc {
           }
       }
     }
-    if (hasAt && codeUnits.isNotEmpty) {
+    if (hasAt) {
       return isAt();
     }
     codeUnits.clear();
-    return false;
+    return true;
   }
 
   static bool _blockReplyAtCount(ReplyInfo reply) {
