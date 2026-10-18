@@ -19,6 +19,7 @@ class DownloadPageController extends GetxController
 
   @override
   List<DownloadPageInfo> get list => pages;
+
   @override
   RxList<DownloadPageInfo> get state => pages;
 

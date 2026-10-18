@@ -25,14 +25,12 @@ class SubItem extends StatelessWidget {
     this.onSelect,
   });
 
+  void onLongPress() => imageSaveDialog(title: item.title, cover: item.cover);
+
   @override
   Widget build(BuildContext context) {
     final heroTag = Utils.makeHeroTag(item.id);
-    final type = switch (item.type) {
-      11 => '收藏夹',
-      21 => '合集',
-      _ => '其它(${item.type})',
-    };
+    final label = item.type2Label;
 
     final onLongPress = enableMultiSelect
         ? () => imageSaveDialog(title: item.title, cover: item.cover)
@@ -41,29 +39,7 @@ class SubItem extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onTap: enableMultiSelect
-            ? onSelect
-            : () {
-                if (item.state == 1) {
-                  SmartDialog.showToast('该$type已失效');
-                  return;
-                }
-                if (item.type == 11) {
-                  Get.toNamed(
-                    '/favDetail',
-                    parameters: {
-                      'mediaId': item.id!.toString(),
-                      'heroTag': heroTag,
-                    },
-                  );
-                } else {
-                  SubDetailPage.toSubDetailPage(
-                    item.id!,
-                    heroTag: heroTag,
-                    subInfo: item,
-                  );
-                }
-              },
+        onTap: enableMultiSelect ? onSelect : () => onPushSub(label, heroTag, item),
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
         child: Padding(
@@ -88,7 +64,7 @@ class SubItem extends StatelessWidget {
                             height: maxHeight,
                           ),
                         ),
-                        PBadge(right: 6, top: 6, text: type),
+                        PBadge(right: 6, top: 6, text: label),
                         Positioned.fill(
                           child: selectMask(
                             Theme.of(context).colorScheme,
@@ -159,6 +135,28 @@ class SubItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+Future<void>? onPushSub(String label, String heroTag, SubItemModel item) {
+  if (item.state == 1) {
+    SmartDialog.showToast('该$label已失效');
+    return null;
+  }
+  if (item.type == 11) {
+    return Get.toNamed(
+      '/favDetail',
+      parameters: {
+        'mediaId': item.id!.toString(),
+        'heroTag': heroTag,
+      },
+    );
+  } else {
+    return SubDetailPage.toSubDetailPage(
+      item.id!,
+      heroTag: heroTag,
+      subInfo: item,
     );
   }
 }

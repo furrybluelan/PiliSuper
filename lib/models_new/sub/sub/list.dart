@@ -21,6 +21,12 @@ class SubItemModel with MultiSelectData {
   int? type;
   CntInfo? cntInfo;
 
+  String get type2Label => switch (type) {
+    11 => '收藏夹',
+    21 => '合集',
+    _ => '其它($type)',
+  };
+
   SubItemModel({
     this.id,
     this.fid,
