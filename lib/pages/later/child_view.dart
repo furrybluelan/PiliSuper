@@ -10,8 +10,8 @@ import 'package:PiliPlus/pages/later/widgets/video_card_h_later.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LaterViewChildPage extends StatefulWidget {
   const LaterViewChildPage({
@@ -78,28 +78,26 @@ class _LaterViewChildPageState extends State<LaterViewChildPage>
                     index: index,
                     videoItem: videoItem,
                     ctr: _laterController,
-                    onViewLater: (cid) {
-                      PageUtils.toVideoPage(
-                        bvid: videoItem.bvid,
-                        cid: cid,
-                        cover: videoItem.pic,
-                        title: videoItem.title,
-                        dimension: videoItem.dimension,
-                        extraArguments: _baseCtr.isPlayAll.value
-                            ? {
-                                'oid': videoItem.aid,
-                                'sourceType': SourceType.watchLater,
-                                'count': _laterController
-                                    .baseCtr
-                                    .counts[LaterViewType.all.index],
-                                'favTitle': '稍后再看',
-                                'mediaId': _laterController.mid,
-                                'desc': _laterController.asc.value,
-                                'isContinuePlaying': index != 0,
-                              }
-                            : null,
-                      );
-                    },
+                    onViewLater: (cid) => PageUtils.toVideoPage(
+                      bvid: videoItem.bvid,
+                      cid: cid,
+                      cover: videoItem.pic,
+                      title: videoItem.title,
+                      dimension: videoItem.dimension,
+                      extraArguments: _baseCtr.isPlayAll.value
+                          ? {
+                              'oid': videoItem.aid,
+                              'sourceType': SourceType.watchLater,
+                              'count': _laterController
+                                  .baseCtr
+                                  .counts[LaterViewType.all.index],
+                              'favTitle': '稍后再看',
+                              'mediaId': _laterController.mid,
+                              'desc': _laterController.asc.value,
+                              'isContinuePlaying': index != 0,
+                            }
+                          : const {'viewLater': true},
+                    ),
                   );
                 },
                 itemCount: response.length,

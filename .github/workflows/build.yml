@@ -207,9 +207,6 @@ jobs:
       - name: Apply Patches
         run: python3 tool/build/patch.py android
 
-      - name: Resolve Flutter dependencies
-        run: flutter pub get
-
       # The locked media-kit fork downloads mutable "vnext" assets while checking
       # them against hashes for an older build. Patch only that dependency to the
       # immutable upstream v1.1.7 assets. Fail closed if the locked source changes.
@@ -404,11 +401,11 @@ jobs:
           python3 tool/build/prebuild.py --platform ios
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Apply Patches
-        run: python3 tool/build/patch.py ios
-
       - name: Resolve Flutter dependencies
         run: flutter pub get
+
+      - name: Apply Patches
+        run: python3 tool/build/patch.py ios
 
       - name: Build IPA
         run: python3 tool/build/build_ios.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
@@ -467,11 +464,11 @@ jobs:
           python3 tool/build/prebuild.py --platform macos
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Apply Patches
-        run: python3 tool/build/patch.py macos
-
       - name: Resolve Flutter dependencies
         run: flutter pub get
+
+      - name: Apply Patches
+        run: python3 tool/build/patch.py macos
 
       - name: Build macOS archive
         run: python3 tool/build/build_macos.py --version "$VERSION" --output-prefix "${{ inputs.app_name || 'PiliSuper' }}" --output dist
@@ -547,13 +544,13 @@ jobs:
           python tool/build/prebuild.py --platform windows
           echo "VERSION=$(sed -n 's/^version: //p' pubspec.yaml)" >> "$GITHUB_ENV"
 
-      - name: Apply Patches
-        shell: bash
-        run: python tool/build/patch.py windows
-
       - name: Resolve Flutter dependencies
         shell: bash
         run: flutter pub get
+
+      - name: Apply Patches
+        shell: bash
+        run: python tool/build/patch.py windows
 
       - name: Build portable Windows archive
         if: ${{ inputs.build_windows_portable == true }}
@@ -660,11 +657,11 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Apply Patches
-        run: python3 tool/build/patch.py linux
-
       - name: Resolve Flutter dependencies
         run: flutter pub get
+
+      - name: Apply Patches
+        run: python3 tool/build/patch.py linux
 
       - name: Build Linux bundle
         run: python3 tool/build/build_linux.py

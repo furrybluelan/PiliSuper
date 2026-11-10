@@ -9,19 +9,14 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 abstract final class UrlUtils {
   // 302重定向路由截取
-  static Future<String?> parseRedirectUrl(
-    String url, [
-    bool returnOri = false,
-  ]) async {
+  static Future<String?> parseRedirectUrl(String url) async {
     String? redirectUrl;
     try {
       final response = await Request.dio.head(
-        url,
+        url.endsWith('/') ? url : '$url/',
         options: Options(
           followRedirects: false,
-          validateStatus: (status) {
-            return 200 <= status! && status < 400;
-          },
+          validateStatus: (status) => 200 <= status! && status < 400,
           extra: {'account': AnonymousAccount()},
         ),
       );
@@ -31,10 +26,6 @@ abstract final class UrlUtils {
         redirectUrl = Uri.parse(url).resolve(redirectUrl).toString();
       }
     } catch (_) {}
-    if (returnOri && redirectUrl == null) redirectUrl = url;
-    if (redirectUrl?.endsWith('/') == true) {
-      redirectUrl = redirectUrl!.substring(0, redirectUrl.length - 1);
-    }
     return redirectUrl;
   }
 
@@ -46,8 +37,7 @@ abstract final class UrlUtils {
     final matchRes = IdUtils.matchAvorBv(input: pathSegment);
     if (matchRes.isNotEmpty) {
       final aid = matchRes.av;
-      String? bvid = matchRes.bv;
-      bvid ??= IdUtils.av2bv(aid!);
+      final bvid = matchRes.bv;
       final res = await SearchHttp.ab2cWithDimension(aid: aid, bvid: bvid);
       final cid = res?.cid;
       if (cid != null) {
@@ -56,6 +46,7 @@ abstract final class UrlUtils {
           bvid: bvid,
           cid: cid,
           dimension: res!.dimension,
+          // title: res.title,
         );
       }
     } else {

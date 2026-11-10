@@ -1,6 +1,6 @@
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MultiSelectAppBarWidget extends StatelessWidget
     implements PreferredSizeWidget {
@@ -40,9 +40,7 @@ class MultiSelectAppBarWidget extends StatelessWidget
           TextButton(
             style: style,
             onPressed: () {
-              if (ctr.checkedCount == 0) {
-                return;
-              }
+              if (ctr.checkedCount == 0) return;
               ctr.onRemove();
             },
             child: Text(

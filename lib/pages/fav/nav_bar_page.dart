@@ -9,7 +9,7 @@ import 'package:PiliPlus/pages/fav/topic/controller.dart';
 import 'package:PiliPlus/pages/fav/video/controller.dart';
 import 'package:PiliPlus/pages/fav_folder_sort/view.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
@@ -75,16 +75,13 @@ class _FavNavBarPageState extends State<FavNavBarPage>
                       case FavTabType.video:
                         _favController.scrollController.animToTop();
                       case FavTabType.article:
-                        Get.find<FavArticleController>()
-                            .scrollController
+                        Get.find<FavArticleController>().scrollController
                             .animToTop();
                       case FavTabType.topic:
-                        Get.find<FavTopicController>()
-                            .scrollController
+                        Get.find<FavTopicController>().scrollController
                             .animToTop();
                       case FavTabType.cheese:
-                        Get.find<FavCheeseController>()
-                            .scrollController
+                        Get.find<FavCheeseController>().scrollController
                             .animToTop();
                       default:
                     }
@@ -97,21 +94,18 @@ class _FavNavBarPageState extends State<FavNavBarPage>
             Obx(
               () => _showVideoFavMenu.value
                   ? IconButton(
-                      onPressed: () => Get.toNamed('/createFav')?.then(
-                        (data) {
-                          if (data != null) {
-                            final list =
-                                _favController.loadingState.value.dataOrNull;
-                            if (list != null && list.isNotEmpty) {
-                              list.insert(1, data);
-                              _favController.loadingState.refresh();
-                            } else {
-                              _favController.loadingState.value =
-                                  Success([data]);
-                            }
+                      onPressed: () => Get.toNamed('/createFav')?.then((data) {
+                        if (data != null) {
+                          final list =
+                              _favController.loadingState.value.dataOrNull;
+                          if (list != null && list.isNotEmpty) {
+                            list.insert(1, data);
+                            _favController.loadingState.refresh();
+                          } else {
+                            _favController.loadingState.value = Success([data]);
                           }
-                        },
-                      ),
+                        }
+                      }),
                       icon: const Icon(Icons.add),
                       tooltip: '新建收藏夹',
                     )
@@ -140,8 +134,9 @@ class _FavNavBarPageState extends State<FavNavBarPage>
               () => _showVideoFavMenu.value
                   ? IconButton(
                       onPressed: () {
-                        if (_favController.loadingState.value
-                            case Success(:final response)) {
+                        if (_favController.loadingState.value case Success(
+                          :final response,
+                        )) {
                           try {
                             final item = response!.first;
                             Get.toNamed(

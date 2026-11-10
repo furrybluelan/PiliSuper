@@ -11,10 +11,10 @@ import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:material_ui/material_ui.dart';
 
 class _VideoCustomAction {
   final String title;
@@ -275,9 +275,17 @@ class VideoPopupMenu extends StatelessWidget {
                           ),
                           actions: [
                             TextButton(
+                              onPressed: () {
+                                Get.back();
+                                Pref.setBlackMid(videoItem.owner.mid!);
+                                onRemove?.call();
+                              },
+                              child: const Text('本地屏蔽'),
+                            ),
+                            TextButton(
                               onPressed: Get.back,
                               child: Text(
-                                '点错了',
+                                '取消',
                                 style: TextStyle(
                                   color: ColorScheme.of(context).outline,
                                 ),

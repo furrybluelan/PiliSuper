@@ -8,27 +8,17 @@ import 'package:PiliPlus/pages/history/nav_bar_page.dart';
 import 'package:PiliPlus/pages/later/nav_bar_page.dart';
 import 'package:PiliPlus/pages/mine/view.dart';
 import 'package:PiliPlus/pages/subscription/nav_bar_page.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum NavigationBarType implements EnumWithLabel {
-  home(
-    '首页',
-    Icon(Icons.home_outlined),
-    Icon(Icons.home),
-    HomePage(),
-  ),
+  home('首页', Icon(Icons.home_outlined), Icon(Icons.home), HomePage()),
   dynamics(
     '动态',
     Icon(CustomIcons.motion_photos_on_outlined),
     Icon(CustomIcons.motion_photos_on),
     DynamicsPage(),
   ),
-  mine(
-    '我的',
-    Icon(Icons.person_outline),
-    Icon(Icons.person),
-    MinePage(),
-  ),
+  mine('我的', Icon(Icons.person_outline), Icon(Icons.person), MinePage()),
   history(
     '历史',
     Icon(Icons.history_outlined),
@@ -58,8 +48,7 @@ enum NavigationBarType implements EnumWithLabel {
     Icon(CustomIcons.watch_later_outlined),
     Icon(CustomIcons.watch_later_outlined),
     LaterNavBarPage(),
-  ),
-  ;
+  );
 
   @override
   final String label;

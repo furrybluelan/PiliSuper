@@ -5,8 +5,8 @@ import 'package:PiliPlus/models_new/space/space_archive/item.dart';
 import 'package:PiliPlus/pages/member_comic/controller.dart';
 import 'package:PiliPlus/pages/member_comic/widgets/item.dart';
 import 'package:PiliPlus/utils/grid.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MemberComic extends StatefulWidget {
   const MemberComic({
@@ -39,6 +39,7 @@ class _MemberComicState extends State<MemberComic>
   Widget build(BuildContext context) {
     super.build(context);
     return refreshIndicator(
+      isClampingScrollPhysics: true,
       onRefresh: _controller.onRefresh,
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -65,7 +66,7 @@ class _MemberComicState extends State<MemberComic>
                   if (index == response.length - 1) {
                     _controller.onLoadMore();
                   }
-                  return MemberComicItem(item: response[index]);
+                  return MemberComicItem(response[index]);
                 },
                 itemCount: response.length,
               )

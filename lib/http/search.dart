@@ -1,42 +1,43 @@
-import 'dart:convert';
-
 import 'package:PiliPlus/http/api.dart';
+import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/search/search_type.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/models/search/suggest.dart';
 import 'package:PiliPlus/models_new/dynamic/dyn_topic_pub_search/data.dart';
+import 'package:PiliPlus/models_new/pagelist/page_item.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/result.dart';
 import 'package:PiliPlus/models_new/search/search_rcmd/data.dart';
 import 'package:PiliPlus/models_new/search/search_trending/data.dart';
-import 'package:PiliPlus/models_new/video/video_detail/dimension.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
-import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract final class SearchHttp {
   // 获取搜索建议
+  @pragma('vm:notify-debugger-on-exception')
   static Future<LoadingState<SearchSuggestModel>> searchSuggest({
     required String term,
   }) async {
     final res = await Request().get(
       Api.searchSuggest,
-      queryParameters: {
+      queryParameters: await WbiSign.makSign({
         'term': term,
-        'main_ver': 'v1',
-        'highlight': term,
-      },
+        'highlight': 0,
+        'spmid': 333.1365,
+        'web_location': 333.1365,
+      }),
     );
-    if (res.data is String) {
-      Map<String, dynamic> resultMap = json.decode(res.data);
-      if (resultMap['code'] == 0) {
-        if (resultMap['result'] is Map) {
-          return Success(SearchSuggestModel.fromJson(resultMap['result']));
-        }
+    final resData = res.data;
+    if (resData is Map && resData['code'] == 0) {
+      try {
+        return Success(SearchSuggestModel.fromJson(resData['data']['result']));
+      } catch (_) {
+        if (kDebugMode) rethrow;
       }
     }
     return const Error(null);
@@ -77,7 +78,7 @@ abstract final class SearchHttp {
       'gaia_vtoken': ?gaiaVtoken,
     });
     final res = await Request().get(
-      Api.searchByType,
+      searchType.api,
       queryParameters: params,
       options: Options(
         headers: {
@@ -85,6 +86,7 @@ abstract final class SearchHttp {
           'origin': 'https://search.bilibili.com',
           'referer':
               'https://search.bilibili.com/${searchType.name}?keyword=${Uri.encodeFull(keyword)}',
+          'user-agent': BrowserUa.pc,
         },
       ),
     );
@@ -94,31 +96,20 @@ abstract final class SearchHttp {
         final Map<String, dynamic> dataData = resData['data'];
         final vVoucher = dataData['v_voucher'];
         if (vVoucher != null) {
-          RequestUtils.validate(vVoucher, onSuccess);
+          // RequestUtils.validate(vVoucher, onSuccess);
           return const Error('触发风控');
         }
-        dynamic data;
         try {
-          switch (searchType) {
-            case SearchType.video:
-              data = SearchVideoData.fromJson(dataData);
-              break;
-            case SearchType.live_room:
-              data = SearchLiveData.fromJson(dataData);
-              break;
-            case SearchType.bili_user:
-              data = SearchUserData.fromJson(dataData);
-              break;
-            case SearchType.media_bangumi || SearchType.media_ft:
-              data = SearchPgcData.fromJson(dataData);
-              break;
-            case SearchType.article:
-              data = SearchArticleData.fromJson(dataData);
-              break;
-            // default:
-            //   break;
-          }
-          return Success(data);
+          return Success(
+            switch (searchType) {
+              .all => SearchVideoData.fromSearchAll(dataData),
+              .video => SearchVideoData.fromJson(dataData),
+              .media_bangumi || .media_ft => SearchPgcData.fromJson(dataData),
+              .live_room => SearchLiveData.fromJson(dataData),
+              .bili_user => SearchUserData.fromJson(dataData),
+              .article => SearchArticleData.fromJson(dataData),
+            } as R,
+          );
         } catch (e, s) {
           return Error('$e\n\n$s');
         }
@@ -130,64 +121,18 @@ abstract final class SearchHttp {
     }
   }
 
-  @pragma('vm:notify-debugger-on-exception')
-  static Future<LoadingState<SearchAllData>> searchAll({
-    required String keyword,
-    required page,
-    String? order,
-    int? duration,
-    int? tids,
-    int? orderSort,
-    int? userType,
-    int? categoryId,
-    int? pubBegin,
-    int? pubEnd,
-  }) async {
-    final params = await WbiSign.makSign({
-      'keyword': keyword,
-      'page': page,
-      if (order != null && order.isNotEmpty) 'order': order,
-      'duration': ?duration,
-      'tids': ?tids,
-      'order_sort': ?orderSort,
-      'user_type': ?userType,
-      'category_id': ?categoryId,
-      'pubtime_begin_s': ?pubBegin,
-      'pubtime_end_s': ?pubEnd,
-    });
-    final res = await Request().get(
-      Api.searchAll,
-      queryParameters: params,
-    );
-    if (res.data is! Map) {
-      return const Error('没有相关数据');
-    }
-    if (res.data['code'] == 0) {
-      try {
-        return Success(SearchAllData.fromJson(res.data['data']));
-      } catch (e, s) {
-        return Error('$e\n\n$s');
-      }
-    } else {
-      return Error(res.data['message'] ?? '没有相关数据');
-    }
-  }
-
   static Future<int?> ab2c({dynamic aid, dynamic bvid, int? part}) async {
     return (await ab2cWithDimension(aid: aid, bvid: bvid, part: part))?.cid;
   }
 
-  static Future<({int? cid, Dimension? dimension})?> ab2cWithDimension({
+  static Future<PageItem?> ab2cWithDimension({
     dynamic aid,
     dynamic bvid,
     int? part,
   }) async {
     final res = await Request().get(
       Api.ab2c,
-      queryParameters: {
-        'aid': ?aid,
-        'bvid': ?bvid,
-      },
+      queryParameters: {'aid': ?aid, 'bvid': ?bvid},
     );
     if (res.data['code'] == 0) {
       if (res.data['data'] case List list) {
@@ -195,12 +140,7 @@ abstract final class SearchHttp {
             ? (list.getOrNull(part - 1) ?? list.firstOrNull)
             : list.firstOrNull;
         if (target != null) {
-          return (
-            cid: target['cid'] as int?,
-            dimension: target['dimension'] == null
-                ? null
-                : Dimension.fromJson(target['dimension']),
-          );
+          return PageItem.fromJson(target);
         }
       }
       return null;

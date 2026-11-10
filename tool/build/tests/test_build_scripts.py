@@ -12,6 +12,7 @@ BUILD_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BUILD_ROOT))
 
 build_common = importlib.import_module("build_common")
+build_windows = importlib.import_module("build_windows")
 build_android = importlib.import_module("build_android")
 build_ios = importlib.import_module("build_ios")
 build_macos = importlib.import_module("build_macos")
@@ -40,6 +41,38 @@ class BuildCommonTests(unittest.TestCase):
         run.assert_called_once_with(
             ["flutter", "build", "apk", "--release", "--no-pub", "--split-per-abi"]
         )
+
+
+class WindowsBuildTests(unittest.TestCase):
+    def test_installer_preserves_patches_without_pub_or_clean(self):
+        for with_defines in (False, True):
+            with self.subTest(with_defines=with_defines), tempfile.TemporaryDirectory() as temp, chdir(temp):
+                if with_defines:
+                    Path("pili_release.json").write_text("{}")
+                def build(command):
+                    Path("dist/installer.exe").write_bytes(b"installer")
+                with patch.object(sys, "argv", ["build_windows.py", "--installer", "--version", "1.0"]), \
+                     patch.object(build_windows, "require_project_root"), \
+                     patch.object(build_windows, "require_command"), \
+                     patch.object(build_windows, "run_command", side_effect=build) as run:
+                    build_windows.main()
+                args = run.call_args.args[0]
+                self.assertIn("--skip-clean", args)
+                flutter_args = args[args.index("--flutter-build-args") + 1].split(",")
+                self.assertIn("no-pub", flutter_args)
+                self.assertEqual("dart-define-from-file=pili_release.json" in flutter_args, with_defines)
+                self.assertTrue(Path("dist/PiliSuper_windows_1.0_x64_setup.exe").is_file())
+
+
+class WorkflowTests(unittest.TestCase):
+    def test_dependencies_resolved_before_patching_only(self):
+        workflow = (BUILD_ROOT.parents[1] / ".github/workflows/build.yml").read_text()
+        for platform in ("android", "ios", "macos", "windows", "linux"):
+            section = workflow.split(f"\n  {platform}:\n", 1)[1].split("\n  #", 1)[0]
+            self.assertEqual(section.count("flutter pub get"), 1, platform)
+            self.assertLess(section.index("flutter pub get"), section.index("tool/build/patch.py"))
+        self.assertNotIn("lib/scripts/patch.ps1", workflow)
+        self.assertNotIn("<<<<<<<", workflow)
 
 
 class AndroidBuildTests(unittest.TestCase):

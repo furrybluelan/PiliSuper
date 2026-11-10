@@ -5,10 +5,10 @@ import 'package:PiliPlus/pages/setting/widgets/popup_item.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/switch_item.dart';
 import 'package:PiliPlus/utils/storage.dart';
-import 'package:flutter/material.dart' hide PopupMenuItemSelected;
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart' hide PopupMenuItemSelected;
 
 @immutable
 sealed class SettingsModel {
@@ -88,7 +88,7 @@ class PopupModel<T extends EnumWithLabel> extends SettingsModel {
   final String title;
 
   final ValueGetter<T> value;
-  final List<T> items;
+  final Iterable<T> items;
   final PopupMenuItemSelected<T> onSelected;
 
   @override
@@ -210,12 +210,19 @@ SettingsModel getBanWordModel({
   required String title,
   required String key,
   required ValueChanged<RegExp> onChanged,
+  String? banScope,
 }) {
   String banWord = GStorage.setting.get(key, defaultValue: '');
   return NormalModel(
     leading: const Icon(Icons.filter_alt_outlined),
     title: title,
-    getSubtitle: () => banWord.isEmpty ? "点击添加" : banWord,
+    getSubtitle: () {
+      final subtitle = banWord.isEmpty ? "点击添加" : banWord;
+      if (banScope != null) {
+        return '作用域: $banScope\n$subtitle';
+      }
+      return subtitle;
+    },
     onTap: (context, setState) {
       String editValue = banWord;
       showDialog(
@@ -272,6 +279,7 @@ SettingsModel getVideoFilterSelectModel({
   required List<int> values,
   int defaultValue = 0,
   bool isFilter = true,
+  String? filterScope,
   ValueChanged<int>? onChanged,
 }) {
   assert(!isFilter || onChanged != null);
@@ -281,9 +289,16 @@ SettingsModel getVideoFilterSelectModel({
     leading: const Icon(Icons.timelapse_outlined),
     subtitle: subtitle,
     getSubtitle: subtitle == null
-        ? () => isFilter
-              ? '过滤掉$title小于「$value${suffix ?? ""}」的视频'
-              : '当前$title:「$value${suffix ?? ""}」'
+        ? () {
+            if (isFilter) {
+              final subtitle = '过滤掉$title小于「$value${suffix ?? ""}」的视频';
+              if (filterScope != null) {
+                return '作用域: $filterScope\n$subtitle';
+              }
+              return subtitle;
+            }
+            return '当前$title:「$value${suffix ?? ""}」';
+          }
         : null,
     onTap: (context, setState) async {
       var result = await showDialog<int>(

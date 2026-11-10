@@ -9,13 +9,9 @@ abstract final class StorageUtils {
   static Future<void> saveBytes2File({
     required String name,
     required Uint8List bytes,
-    required List<String> allowedExtensions,
-    FileType type = FileType.custom,
   }) async {
     try {
       final path = await FilePicker.saveFile(
-        allowedExtensions: allowedExtensions,
-        type: type,
         fileName: name,
         bytes: PlatformUtils.isDesktop ? Uint8List(0) : bytes,
       );
@@ -24,7 +20,7 @@ abstract final class StorageUtils {
         return;
       }
       if (PlatformUtils.isDesktop) {
-        await File(path).writeAsBytes(bytes);
+        await File(path.toFilePath()).writeAsBytes(bytes);
       }
       SmartDialog.showToast("已保存");
     } catch (e) {

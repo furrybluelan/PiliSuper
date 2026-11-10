@@ -11,11 +11,11 @@ import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:flutter/material.dart' hide showTimePicker;
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:material_ui/material_ui.dart' hide showTimePicker;
 
 class CreateVotePage extends StatefulWidget {
   const CreateVotePage({super.key, this.voteId});
@@ -423,29 +423,23 @@ class _CreateVotePageState extends State<CreateVotePage> {
     },
   );
 
-  void _onPickImg(int index) {
-    EasyThrottle.throttle(
-      'imagePicker',
-      const Duration(milliseconds: 500),
-      () async {
-        try {
-          final pickedFile = await imagePicker.pickImage(
-            imageQuality: 100,
-            source: ImageSource.gallery,
-            requestFullMetadata: false,
-          );
-          if (pickedFile != null) {
-            final path = pickedFile.path;
-            _controller.onUpload(index, path).whenComplete(() {
-              if (PlatformUtils.isMobile) {
-                File(path).tryDel();
-              }
-            });
+  Future<void> _onPickImg(int index) async {
+    try {
+      final pickedFile = await imagePicker.pickImage(
+        imageQuality: 100,
+        source: ImageSource.gallery,
+        requestFullMetadata: false,
+      );
+      if (pickedFile != null) {
+        final path = pickedFile.path;
+        _controller.onUpload(index, path).whenComplete(() {
+          if (PlatformUtils.isMobile) {
+            File(path).tryDel();
           }
-        } catch (e) {
-          SmartDialog.showToast(e.toString());
-        }
-      },
-    );
+        });
+      }
+    } catch (e) {
+      SmartDialog.showToast(e.toString());
+    }
   }
 }

@@ -18,8 +18,8 @@ import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class VotePanel extends StatefulWidget {
   final VoteInfo voteInfo;
@@ -531,9 +531,9 @@ class PercentageChip extends StatelessWidget {
 
 Future<void> showVoteDialog(
   BuildContext context,
-  int voteId, [
+  int voteId, {
   int? dynamicId,
-]) async {
+}) async {
   final voteInfo = await DynamicsHttp.voteInfo(voteId);
   if (context.mounted) {
     if (voteInfo case Success(:final response)) {

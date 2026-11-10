@@ -5,7 +5,7 @@ import 'package:PiliPlus/pages/blacklist/view.dart';
 import 'package:PiliPlus/pages/bubble/view.dart';
 import 'package:PiliPlus/pages/danmaku_block/view.dart';
 import 'package:PiliPlus/pages/dlna/view.dart';
-import 'package:PiliPlus/pages/download/view.dart';
+import 'package:PiliPlus/pages/download/download/view.dart';
 import 'package:PiliPlus/pages/dynamics/view.dart';
 import 'package:PiliPlus/pages/dynamics_create_vote/view.dart';
 import 'package:PiliPlus/pages/dynamics_detail/view.dart';
@@ -55,7 +55,7 @@ import 'package:PiliPlus/pages/search_trending/view.dart';
 import 'package:PiliPlus/pages/setting/pages/bar_set.dart';
 import 'package:PiliPlus/pages/setting/pages/color_select.dart';
 import 'package:PiliPlus/pages/setting/pages/display_mode.dart';
-import 'package:PiliPlus/pages/setting/pages/font_size_select.dart';
+import 'package:PiliPlus/pages/setting/pages/font_setting.dart';
 import 'package:PiliPlus/pages/setting/pages/logs.dart';
 import 'package:PiliPlus/pages/setting/pages/play_speed_set.dart';
 import 'package:PiliPlus/pages/setting/view.dart';
@@ -111,7 +111,7 @@ class Routes {
     //
     GetPage(name: '/blackListPage', page: () => const BlackListPage()),
     GetPage(name: '/colorSetting', page: () => const ColorSelectPage()),
-    GetPage(name: '/fontSizeSetting', page: () => const FontSizeSelectPage()),
+    GetPage(name: '/fontSetting', page: () => const FontSettingPage()),
     // 屏幕帧率
     GetPage(name: '/displayModeSetting', page: () => const SetDisplayMode()),
     //

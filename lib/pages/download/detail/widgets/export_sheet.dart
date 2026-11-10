@@ -4,7 +4,7 @@ import 'package:PiliPlus/models/common/export_mode.dart';
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/services/export/cache_export_service.dart';
 import 'package:PiliPlus/utils/export/export_target.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
@@ -173,10 +173,7 @@ class _ExportDialogState extends State<_ExportDialog> {
       actions: [
         TextButton(
           onPressed: Get.back,
-          child: Text(
-            '取消',
-            style: TextStyle(color: theme.colorScheme.outline),
-          ),
+          child: Text('取消', style: TextStyle(color: theme.colorScheme.outline)),
         ),
         TextButton(
           onPressed: _selected.isEmpty ? null : _start,
@@ -212,9 +209,7 @@ void showExportProgressDialog(CacheExportService service) {
                 '${service.currentLabel.value.isEmpty ? '' : ' · ${service.currentLabel.value}'}',
                 style: const TextStyle(fontSize: 14),
               ),
-              LinearProgressIndicator(
-                value: progress < 0 ? null : progress,
-              ),
+              LinearProgressIndicator(value: progress < 0 ? null : progress),
               if (progress >= 0)
                 Text(
                   '${(progress * 100).toStringAsFixed(1)}%',
@@ -310,9 +305,7 @@ void _showSummary(List<ExportItemResult> results) {
             ),
         ],
       ),
-      actions: [
-        TextButton(onPressed: Get.back, child: const Text('确定')),
-      ],
+      actions: [TextButton(onPressed: Get.back, child: const Text('确定'))],
     ),
   );
 }

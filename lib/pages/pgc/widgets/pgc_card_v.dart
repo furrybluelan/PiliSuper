@@ -6,7 +6,7 @@ import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_pgc/list.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // 视频卡片 - 垂直布局
 class PgcCardV extends StatelessWidget {
@@ -17,12 +17,10 @@ class PgcCardV extends StatelessWidget {
 
   final FavPgcItemModel item;
 
+  void onLongPress() => showPgcCover(title: item.title, cover: item.cover);
+
   @override
   Widget build(BuildContext context) {
-    void onLongPress() => imageSaveDialog(
-      title: item.title,
-      cover: item.cover,
-    );
     return Card(
       shape: const RoundedRectangleBorder(borderRadius: Style.mdRadius),
       child: InkWell(
@@ -34,7 +32,7 @@ class PgcCardV extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AspectRatio(
-              aspectRatio: 0.75,
+              aspectRatio: Style.aspectRatio3x4,
               child: LayoutBuilder(
                 builder: (context, boxConstraints) {
                   final double maxWidth = boxConstraints.maxWidth;

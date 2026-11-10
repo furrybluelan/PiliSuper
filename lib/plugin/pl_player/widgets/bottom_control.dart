@@ -6,14 +6,15 @@ import 'package:PiliPlus/plugin/pl_player/view/view.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class BottomControl extends StatelessWidget {
   const BottomControl({
     super.key,
     required this.maxWidth,
     required this.isFullScreen,
+    required this.animCtr,
     required this.controller,
     required this.buildBottomControl,
     required this.videoDetailController,
@@ -21,28 +22,50 @@ class BottomControl extends StatelessWidget {
 
   final double maxWidth;
   final bool isFullScreen;
+  final AnimationController animCtr;
   final PlPlayerController controller;
   final ValueGetter<Widget> buildBottomControl;
   final VideoDetailController videoDetailController;
 
   void onDragStart(ThumbDragDetails duration) {
     feedBack();
-    controller
-      ..position.value = duration.seconds
-      ..isSeeking.value = true;
+    controller.onSeekStart(duration.seconds);
   }
 
   void onDragUpdate(ThumbDragDetails duration) {
     if (!controller.isFileSource && controller.showSeekPreview) {
       controller.updatePreviewIndex(duration.seconds);
+      if (controller.hoverDx != null) {
+        controller.hoverDx = duration.localPosition.dx;
+      }
     }
-    controller.position.value = duration.seconds;
+    controller.seekPosition.value = duration.seconds;
   }
 
   void onSeek(int milliseconds) {
     controller
+      ..hoverDx = null
+      ..position.value = milliseconds ~/ 1000
       ..onSeekEnd()
-      ..seekTo(Duration(milliseconds: milliseconds), isSeek: false);
+      ..seekTo(Duration(milliseconds: milliseconds));
+  }
+
+  void _onHover(double dx, int seconds) {
+    if (animCtr.isAnimating) return;
+    if (controller.isSeeking.rawValue) return;
+    controller
+      ..hoverDx = dx
+      ..seekPosition.value = seconds
+      ..updatePreviewIndex(seconds);
+  }
+
+  void _onExit() {
+    if (controller.isSeeking.rawValue || controller.hoverDx == null) {
+      return;
+    }
+    controller
+      ..hidePreview()
+      ..hideTaskControls();
   }
 
   @override
@@ -54,8 +77,13 @@ class BottomControl extends StatelessWidget {
     final thumbGlowColor = primary.withAlpha(80);
     final bufferedBarColor = primary.withValues(alpha: 0.4);
 
+    final enableHover =
+        PlatformUtils.isDesktop &&
+        controller.showSeekPreview &&
+        !controller.isFileSource;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
+      padding: const .symmetric(horizontal: 10, vertical: 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -70,7 +98,7 @@ class BottomControl extends StatelessWidget {
                   children: [
                     Obx(
                       () => ProgressBar(
-                        progress: controller.position.value,
+                        progress: controller.progress,
                         buffered: controller.buffered.value,
                         total: controller.duration.value,
                         progressBarColor: primary,
@@ -84,6 +112,8 @@ class BottomControl extends StatelessWidget {
                         onDragStart: onDragStart,
                         onDragUpdate: onDragUpdate,
                         onSeek: onSeek,
+                        onHover: enableHover ? _onHover : null,
+                        onExit: enableHover ? _onExit : null,
                       ),
                     ),
                     if (controller.enableBlock &&
@@ -104,8 +134,7 @@ class BottomControl extends StatelessWidget {
                         child: ViewPointSegmentProgressBar(
                           segments: videoDetailController.viewPointList,
                           onSeek: PlatformUtils.isDesktop
-                              ? (position) =>
-                                    controller.seekTo(position, isSeek: false)
+                              ? controller.seekTo
                               : null,
                         ),
                       ),

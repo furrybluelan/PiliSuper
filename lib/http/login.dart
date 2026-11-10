@@ -4,7 +4,7 @@ import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models/login/model.dart';
+import 'package:PiliPlus/models/login/captcha_config.dart';
 import 'package:PiliPlus/models_new/login_devices/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
@@ -17,9 +17,9 @@ import 'package:encrypt/encrypt.dart';
 
 abstract final class LoginHttp {
   static final String deviceId = LoginUtils.genDeviceId();
-  static String get buvid => LoginUtils.buvid;
+  static String get _buvid => AnonymousAccount().buvid;
   static final Map<String, String> headers = {
-    'buvid': buvid,
+    'buvid': _buvid,
     'env': 'prod',
     'app-key': 'android_hd',
     'user-agent': Constants.userAgent,
@@ -69,17 +69,17 @@ abstract final class LoginHttp {
     };
   }
 
-  static Future queryCaptcha() async {
-    final res = await Request().get(Api.getCaptcha);
-    if (res.data['code'] == 0) {
-      return {
-        'status': true,
-        'data': CaptchaDataModel.fromJson(res.data['data']),
-      };
-    } else {
-      return {'status': false, 'data': res.data['message']};
-    }
-  }
+  // static Future queryCaptcha() async {
+  //   final res = await Request().get(Api.getCaptcha);
+  //   if (res.data['code'] == 0) {
+  //     return {
+  //       'status': true,
+  //       'data': CaptchaDataModel.fromJson(res.data['data']),
+  //     };
+  //   } else {
+  //     return {'status': false, 'data': res.data['message']};
+  //   }
+  // }
 
   // 获取salt与PubKey
   static Future getWebKey() async {
@@ -104,7 +104,7 @@ abstract final class LoginHttp {
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     final data = {
       'build': '2001100',
-      'buvid': buvid,
+      'buvid': _buvid,
       'c_locale': 'zh_CN',
       'channel': 'master',
       'cid': cid,
@@ -113,10 +113,10 @@ abstract final class LoginHttp {
       'gee_challenge': ?geeChallenge,
       'gee_seccode': ?geeSeccode,
       'gee_validate': ?geeValidate,
-      'local_id': buvid,
+      'local_id': _buvid,
       // https://chinggg.github.io/post/appre/
       'login_session_id': md5
-          .convert(ascii.encode(buvid + timestamp.toString()))
+          .convert(ascii.encode(_buvid + timestamp.toString()))
           .toString(),
       'mobi_app': 'android_hd',
       'platform': 'android',
@@ -207,7 +207,7 @@ abstract final class LoginHttp {
     Map<String, String> data = {
       'bili_local_id': deviceId,
       'build': '2001100',
-      'buvid': buvid,
+      'buvid': _buvid,
       'c_locale': 'zh_CN',
       'channel': 'master',
       'device': 'phone',
@@ -226,7 +226,7 @@ abstract final class LoginHttp {
       'gee_challenge': ?geeChallenge,
       'gee_seccode': ?geeSeccode,
       'gee_validate': ?geeValidate,
-      'local_id': buvid, //LoginUtils.generateBuvid(),
+      'local_id': _buvid, //LoginUtils.generateBuvid(),
       'mobi_app': 'android_hd',
       'password': passwordEncrypted,
       'permission': 'ALL',
@@ -275,7 +275,7 @@ abstract final class LoginHttp {
     Map<String, Object> data = {
       'bili_local_id': deviceId,
       'build': '2001100',
-      'buvid': buvid,
+      'buvid': _buvid,
       'c_locale': 'zh_CN',
       'captcha_key': captchaKey,
       'channel': 'master',
@@ -295,7 +295,7 @@ abstract final class LoginHttp {
       ),
       'from_pv': 'main.my-information.my-login.0.click',
       'from_url': Uri.encodeComponent('bilibili://user_center/mine'),
-      'local_id': buvid,
+      'local_id': _buvid,
       'mobi_app': 'android_hd',
       'platform': 'android',
       's_locale': 'zh_CN',
@@ -344,6 +344,24 @@ abstract final class LoginHttp {
         'msg': res.data['message'],
         'data': res.data['data'],
       };
+    }
+  }
+
+  // 检查原生 iOS 验证码配置是否已失效
+  static Future<bool> isGeetestConfigUnavailable(String gt) async {
+    try {
+      final res = await Request().get<String>(
+        'https://api.geetest.com/gettype.php',
+        queryParameters: {'gt': gt, 'client_type': 'ios', 'pt': 20},
+        options: Options(
+          responseType: ResponseType.plain,
+          extra: {'account': const NoAccount()},
+        ),
+      );
+      return isMissingCaptchaConfig(res.data ?? '');
+    } catch (_) {
+      // Transport failures do not prove the registration is unavailable.
+      return false;
     }
   }
 
@@ -454,7 +472,7 @@ abstract final class LoginHttp {
   }) async {
     final Map<String, String> data = {
       'build': '2001100',
-      'buvid': buvid,
+      'buvid': _buvid,
       // 'c_locale': 'zh_CN',
       // 'channel': 'master',
       'code': code,
@@ -464,7 +482,7 @@ abstract final class LoginHttp {
       // 'device_platform': 'Android14vivo',
       'disable_rcmd': '0',
       'grant_type': 'authorization_code',
-      'local_id': buvid,
+      'local_id': _buvid,
       'mobi_app': 'android_hd',
       'platform': 'android',
       // 's_locale': 'zh_CN',
@@ -492,7 +510,7 @@ abstract final class LoginHttp {
     }
   }
 
-  static Future<Map> logout(Account account) async {
+  static Future<LoadingState<void>> logout(LoginAccount account) async {
     final res = await Request().post(
       Api.logout,
       data: {'biliCSRF': account.csrf},
@@ -501,15 +519,18 @@ abstract final class LoginHttp {
         extra: {'account': account},
       ),
     );
-    return {'status': res.data['code'] == 0, 'msg': res.data['message']};
+    if (res.data['code'] == 0) {
+      return const Success(null);
+    } else {
+      return Error(res.data['message']);
+    }
   }
 
   static Future<LoadingState<LoginDevicesData>> loginDevices() async {
     final account = Accounts.main;
-    final buvid = LoginUtils.buvid;
     final params = {
-      'local_id': buvid,
-      'buvid': buvid,
+      'local_id': _buvid,
+      'buvid': _buvid,
       'device_name': 'android',
       'device_platform': 'android',
       'csrf': account.csrf,

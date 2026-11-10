@@ -8,17 +8,40 @@ import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/episode.dart';
 import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
+import 'package:PiliPlus/pages/common/common_intro_controller.dart';
+import 'package:PiliPlus/pages/live_room/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/local/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:audio_service_mpris/audio_service_mpris.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:jni/jni.dart' show JStringExtension;
 import 'package:path/path.dart' as path;
 
 Future<VideoPlayerServiceHandler> initAudioService() {
+  if (Platform.isLinux) {
+    AudioServiceMpris.init(
+      dBusName: 'com.example.piliplus.audio',
+      identity: Constants.appName,
+      desktopEntry: 'com.example.piliplus',
+      canGoNext: true,
+      canGoPrevious: true,
+      canPlay: true,
+      canPause: true,
+      canControl: true,
+    );
+  }
   return AudioService.init(
     builder: VideoPlayerServiceHandler.new,
     config: const AudioServiceConfig(
@@ -34,38 +57,108 @@ Future<VideoPlayerServiceHandler> initAudioService() {
   );
 }
 
+typedef _StatusConfig = (
+  PlayerStatus status,
+  bool isBuffering,
+  bool isLive,
+  double speed,
+);
+
 class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
+  VideoPlayerServiceHandler() {
+    // Android 14 dispatches volume keys from the activity straight to the
+    // session without checking canHandleVolumeKey(), so a FIXED remote
+    // session swallows them there. Only verified to fall back on Android 16.
+    if (Platform.isAndroid && DeviceUtils.sdkInt >= 36) {
+      final jStr = AndroidHelper.manufacturer();
+      if (jStr != null &&
+          jStr.toDartString(releaseOriginal: true).toLowerCase() == 'vivo') {
+        androidPlaybackInfo.add(
+          RemoteAndroidPlaybackInfo(
+            volumeControlType: .fixed,
+            maxVolume: 100,
+            volume: 50,
+          ),
+        );
+      }
+    }
+  }
+
   static final List<MediaItem> _item = [];
   bool enableBackgroundPlay = Pref.enableBackgroundPlay;
 
+  bool Function()? isPlaying;
   Future<void>? Function()? onPlay;
   Future<void>? Function()? onPause;
   Future<void>? Function(Duration position)? onSeek;
+  void Function()? onSkipToNext;
+  void Function()? onSkipToPrevious;
 
   @override
   Future<void> play() {
     return onPlay?.call() ??
         PlPlayerController.playIfExists() ??
         Future.syncValue(null);
-    // player.play();
   }
 
   @override
   Future<void> pause() {
-    return onPause?.call() ?? PlPlayerController.pauseIfExists();
-    // player.pause();
+    return onPause?.call() ??
+        PlPlayerController.pauseIfExists() ??
+        Future.syncValue(null);
+  }
+
+  CommonIntroController? _findIntroController() {
+    final playOwner = PlPlayerController.playOwner;
+    if (playOwner != null) {
+      final tag = playOwner.tag;
+      try {
+        return switch (playOwner.type) {
+          UgcIntroController _ => Get.find<UgcIntroController>(tag: tag),
+          PgcIntroController _ => Get.find<PgcIntroController>(tag: tag),
+          LocalIntroController _ => Get.find<LocalIntroController>(tag: tag),
+          _ => throw UnimplementedError(playOwner.type.toString()),
+        };
+      } catch (_) {
+        if (kDebugMode) rethrow;
+      }
+    }
+    return null;
+  }
+
+  @override
+  Future<void> skipToNext() {
+    final func = onSkipToNext ?? _findIntroController()?.nextPlay;
+    return func == null ? Future.syncValue(null) : Future.sync(func);
+  }
+
+  @override
+  Future<void> skipToPrevious() {
+    final func = onSkipToPrevious ?? _findIntroController()?.prevPlay;
+    return func == null ? Future.syncValue(null) : Future.sync(func);
   }
 
   @override
   Future<void> seek(Duration position) {
-    playbackState.add(
-      playbackState.value.copyWith(
-        updatePosition: position,
-      ),
-    );
-    return (onSeek?.call(position) ??
-        PlPlayerController.seekToIfExists(position, isSeek: false));
-    // await player.seekTo(position);
+    return onSeek?.call(position) ??
+        PlPlayerController.seekToIfExists(position) ??
+        Future.syncValue(null);
+  }
+
+  @override
+  Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) {
+    try {
+      switch (name) {
+        case 'ACTION_DM':
+          final tag = PlPlayerController.playOwner!.tag;
+          Get.find<LiveRoomController>(tag: tag).toggleDanmaku();
+        case 'ACTION_REFRESH':
+          final tag = PlPlayerController.playOwner!.tag;
+          Get.find<LiveRoomController>(tag: tag).queryLiveUrl();
+        default:
+      }
+    } catch (_) {}
+    return Future.syncValue(null);
   }
 
   void setMediaItem(MediaItem newMediaItem) {
@@ -79,62 +172,74 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     if (!mediaItem.isClosed) mediaItem.add(newMediaItem);
   }
 
-  void setPlaybackState(
+  Duration? _lastPos;
+  _StatusConfig? _lastConfig;
+  void onUpdateState(
     PlayerStatus status,
     bool isBuffering,
-    bool isLive,
-  ) {
-    if (!enableBackgroundPlay ||
-        _item.isEmpty ||
-        !PlPlayerController.instanceExists()) {
+    bool isLive, {
+    required Duration position,
+    required double speed,
+    String? debugLabel,
+  }) {
+    if (!enableBackgroundPlay || _item.isEmpty) {
       return;
     }
 
-    final AudioProcessingState processingState;
-    if (status.isCompleted) {
-      processingState = AudioProcessingState.completed;
-    } else if (isBuffering) {
-      processingState = AudioProcessingState.buffering;
-    } else {
-      processingState = AudioProcessingState.ready;
-    }
+    if (onPlay != null && debugLabel == 'onVideoPaused') return;
 
-    final playing = status.isPlaying;
+    final newConfig = (status, isBuffering, isLive, speed);
+    if (_lastConfig == newConfig) {
+      if (_lastPos != null) {
+        final pos = position.inSeconds;
+        final lastPos = _lastPos!.inSeconds;
+        _lastPos = position;
+        if (pos == lastPos && pos != 0) return;
+      }
+    }
+    _lastConfig = newConfig;
+
+    final AudioProcessingState processingState;
+    final bool playing;
+    switch (status) {
+      case .completed:
+        playing = false;
+        processingState = .completed;
+      case .playing:
+        playing = true;
+        processingState = isBuffering ? .buffering : .ready;
+      case .paused:
+        playing = isBuffering;
+        processingState = isBuffering ? .buffering : .ready;
+    }
+    _updateState(
+      processingState,
+      playing,
+      isLive,
+      position: position,
+      speed: speed,
+    );
+  }
+
+  void _updateState(
+    AudioProcessingState state,
+    bool playing,
+    bool isLive, {
+    required Duration position,
+    required double speed,
+  }) {
     playbackState.add(
       playbackState.value.copyWith(
-        processingState: isBuffering
-            ? AudioProcessingState.buffering
-            : processingState,
+        processingState: state,
+        updatePosition: position,
+        speed: speed,
         controls: [
-          if (!isLive)
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_rewind_10s',
-              label: 'Rewind',
-              action: MediaAction.rewind,
-            ),
-          if (playing)
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_pause',
-              label: 'Pause',
-              action: MediaAction.pause,
-            )
-          else
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_play',
-              label: 'Play',
-              action: MediaAction.play,
-            ),
-          if (!isLive)
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_fast_forward_10s',
-              label: 'Fast Forward',
-              action: MediaAction.fastForward,
-            ),
+          if (isLive) _refresh else _rewind,
+          if (playing) _pause else _play,
+          if (isLive) _dm else _fastForward,
         ],
         playing: playing,
-        systemActions: const {
-          MediaAction.seek,
-        },
+        systemActions: const {.seek},
       ),
     );
     if (Platform.isAndroid &&
@@ -146,13 +251,6 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
         playing,
       );
     }
-  }
-
-  void onStatusChange(PlayerStatus status, bool isBuffering, isLive) {
-    if (!enableBackgroundPlay) return;
-
-    if (_item.isEmpty) return;
-    setPlaybackState(status, isBuffering, isLive);
   }
 
   void onVideoDetailChange(
@@ -167,7 +265,6 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     //   debugPrint('当前调用栈为：');
     //   debugPrint(StackTrace.current);
     // }
-    if (!PlPlayerController.instanceExists()) return;
     if (data == null) return;
 
     Uri getUri(String? cover) => Uri.parse(ImageUtils.safeThumbnailUrl(cover));
@@ -245,8 +342,6 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
       default:
         return;
     }
-    // if (kDebugMode) debugPrint("exist: ${PlPlayerController.instanceExists()}");
-    if (!PlPlayerController.instanceExists()) return;
     _item.add(mediaItem);
     setMediaItem(mediaItem);
   }
@@ -258,54 +353,71 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
       _item.removeWhere((item) => item.id.endsWith(herotag));
     }
     if (_item.isNotEmpty) {
-      playbackState.add(
-        playbackState.value.copyWith(
-          processingState: AudioProcessingState.idle,
-          playing: false,
-        ),
-      );
       setMediaItem(_item.last);
-      stop();
+      playbackState.add(
+        playbackState.value.copyWith(processingState: .ready, playing: false),
+      );
     }
+  }
+
+  void clearIfNeeded() {
+    if (!enableBackgroundPlay) return;
+    if (_item.isEmpty) clear();
   }
 
   void clear() {
     if (!enableBackgroundPlay) return;
     mediaItem.add(null);
     _item.clear();
+    _lastPos = null;
+    _lastConfig = null;
     /**
      * if (playbackState.processingState == AudioProcessingState.idle &&
             previousState?.processingState != AudioProcessingState.idle) {
           await AudioService._stop();
         }
      */
-    if (playbackState.value.processingState == AudioProcessingState.idle) {
-      playbackState.add(
-        PlaybackState(
-          processingState: AudioProcessingState.completed,
-          playing: false,
-        ),
-      );
+    if (playbackState.value.processingState == .idle) {
+      playbackState.add(PlaybackState(processingState: .completed));
     }
-    playbackState.add(
-      PlaybackState(
-        processingState: AudioProcessingState.idle,
-        playing: false,
-      ),
-    );
-  }
-
-  void onPositionChange(Duration position) {
-    if (!enableBackgroundPlay ||
-        _item.isEmpty ||
-        !PlPlayerController.instanceExists()) {
-      return;
-    }
-
-    playbackState.add(
-      playbackState.value.copyWith(
-        updatePosition: position,
-      ),
-    );
+    playbackState.add(PlaybackState(processingState: .idle));
   }
 }
+
+const _refresh = MediaControl(
+  androidIcon: 'drawable/ic_player_refresh',
+  label: 'Refresh',
+  action: .custom,
+  customAction: CustomMediaAction(name: 'ACTION_REFRESH'),
+);
+
+const _dm = MediaControl(
+  androidIcon: 'drawable/ic_state_danmaku',
+  label: 'Danmaku',
+  action: .custom,
+  customAction: CustomMediaAction(name: 'ACTION_DM'),
+);
+
+const _play = MediaControl(
+  androidIcon: 'drawable/ic_player_play',
+  label: 'Play',
+  action: .play,
+);
+
+const _pause = MediaControl(
+  androidIcon: 'drawable/ic_player_pause',
+  label: 'Pause',
+  action: .pause,
+);
+
+const _rewind = MediaControl(
+  androidIcon: 'drawable/ic_player_rewind_10s',
+  label: 'Rewind',
+  action: .rewind,
+);
+
+const _fastForward = MediaControl(
+  androidIcon: 'drawable/ic_player_fast_forward_10s',
+  label: 'Fast Forward',
+  action: .fastForward,
+);

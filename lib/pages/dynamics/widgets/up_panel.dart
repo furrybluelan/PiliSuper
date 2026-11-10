@@ -9,8 +9,8 @@ import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class UpPanel extends StatefulWidget {
   const UpPanel({
@@ -231,6 +231,7 @@ class _UpPanelState extends State<UpPanel> {
                   isTop ? '${item.uname}\n' : item.uname!,
                   maxLines: 2,
                   textAlign: .center,
+                  overflow: .ellipsis,
                   style: TextStyle(
                     color: currentMid == item.mid
                         ? theme.colorScheme.primary

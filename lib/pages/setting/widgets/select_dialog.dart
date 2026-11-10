@@ -5,13 +5,14 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SelectDialog<T> extends StatelessWidget {
   final T? value;
   final String title;
   final List<(T, String)> values;
-  final Widget Function(BuildContext, int)? subtitleBuilder;
+  final Widget? Function(BuildContext context, int index, T value)?
+  subtitleBuilder;
   final bool toggleable;
 
   const SelectDialog({
@@ -41,22 +42,16 @@ class SelectDialog<T> extends StatelessWidget {
             groupValue: value,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                values.length,
-                (index) {
-                  final item = values[index];
-                  return RadioListTile<T>(
-                    toggleable: toggleable,
-                    dense: true,
-                    value: item.$1,
-                    title: Text(
-                      item.$2,
-                      style: titleMedium,
-                    ),
-                    subtitle: subtitleBuilder?.call(context, index),
-                  );
-                },
-              ),
+              children: List.generate(values.length, (index) {
+                final item = values[index];
+                return RadioListTile<T>(
+                  toggleable: toggleable,
+                  dense: true,
+                  value: item.$1,
+                  title: Text(item.$2, style: titleMedium),
+                  subtitle: subtitleBuilder?.call(context, index, item.$1),
+                );
+              }),
             ),
           ),
         ),
@@ -68,10 +63,7 @@ class SelectDialog<T> extends StatelessWidget {
 class CdnSelectDialog extends StatefulWidget {
   final BaseItem? sample;
 
-  const CdnSelectDialog({
-    super.key,
-    this.sample,
-  });
+  const CdnSelectDialog({super.key, this.sample});
 
   @override
   State<CdnSelectDialog> createState() => _CdnSelectDialogState();
@@ -87,10 +79,7 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
     _cdnSpeedTest = Pref.cdnSpeedTest;
     if (_cdnSpeedTest) {
       final length = CDNService.values.length;
-      _cdnResList = List.generate(
-        length,
-        (_) => ValueNotifier<String?>(null),
-      );
+      _cdnResList = List.generate(length, (_) => ValueNotifier<String?>(null));
       _cancelToken = CancelToken();
       _startSpeedTest();
     }
@@ -134,7 +123,7 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
       values: CDNService.values.map((i) => (i, i.desc)).toList(),
       value: VideoUtils.cdnService,
       subtitleBuilder: _cdnSpeedTest
-          ? (context, index) {
+          ? (context, index, type) {
               final item = _cdnResList[index];
               return ValueListenableBuilder(
                 valueListenable: item,

@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart' show VerticalDragGestureRecognizer;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+
+const double kBottomSheetDragHeight = 45.0;
 
 // ignore: camel_case_types
 class BottomSheet_ extends BottomSheet {
@@ -12,18 +14,24 @@ class BottomSheet_ extends BottomSheet {
     super.constraints,
     required super.onClosing,
     required super.builder,
+    this.dragHeight = kBottomSheetDragHeight,
   });
 
+  final double dragHeight;
+
   @override
-  BottomSheetState createState() => _MiniBottomSheetState();
+  BottomSheetState<BottomSheet_> createState() => _MiniBottomSheetState();
 }
 
-class _MiniBottomSheetState extends BottomSheetState {
-  VerticalDragGestureRecognizer? _verticalDragGestureRecognizer;
+class _MiniBottomSheetState extends BottomSheetState<BottomSheet_> {
+  _VerticalDragGestureRecognizer? _verticalDragGestureRecognizer;
 
-  VerticalDragGestureRecognizer get verticalDragGestureRecognizer =>
+  _VerticalDragGestureRecognizer get verticalDragGestureRecognizer =>
       _verticalDragGestureRecognizer ??=
-          VerticalDragGestureRecognizer(debugOwner: this)
+          _VerticalDragGestureRecognizer(
+              debugOwner: this,
+              dragHeight: widget.dragHeight,
+            )
             ..onStart = handleDragStart
             ..onUpdate = handleDragUpdate
             ..onEnd = handleDragEnd
@@ -74,5 +82,20 @@ class _MiniBottomSheetState extends BottomSheetState {
     }
 
     return bottomSheet;
+  }
+}
+
+class _VerticalDragGestureRecognizer extends VerticalDragGestureRecognizer {
+  _VerticalDragGestureRecognizer({
+    super.debugOwner,
+    this.dragHeight = kBottomSheetDragHeight,
+  });
+
+  final double dragHeight;
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return event.localPosition.dy < dragHeight &&
+        super.isPointerAllowed(event as PointerDownEvent);
   }
 }

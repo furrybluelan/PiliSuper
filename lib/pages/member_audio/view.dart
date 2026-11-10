@@ -8,8 +8,8 @@ import 'package:PiliPlus/models_new/space/space_audio/item.dart';
 import 'package:PiliPlus/pages/member_audio/controller.dart';
 import 'package:PiliPlus/pages/member_audio/widgets/item.dart';
 import 'package:PiliPlus/utils/grid.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MemberAudio extends StatefulWidget {
   const MemberAudio({
@@ -43,6 +43,7 @@ class _MemberAudioState extends State<MemberAudio>
     super.build(context);
     final colorScheme = ColorScheme.of(context);
     return refreshIndicator(
+      isClampingScrollPhysics: true,
       onRefresh: _controller.onRefresh,
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -112,9 +113,7 @@ class _MemberAudioState extends State<MemberAudio>
                       if (index == response.length - 1) {
                         _controller.onLoadMore();
                       }
-                      return MemberAudioItem(
-                        item: response[index],
-                      );
+                      return MemberAudioItem(response[index]);
                     },
                     itemCount: response.length,
                   ),

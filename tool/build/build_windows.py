@@ -45,14 +45,12 @@ def main() -> None:
             "windows",
             "--targets",
             "exe",
+            "--skip-clean",
         ]
+        flutter_args = ["no-pub"]
         if Path(args.dart_define_from_file).is_file():
-            fastforge_args.extend(
-                [
-                    "--flutter-build-args",
-                    f"dart-define-from-file={args.dart_define_from_file}",
-                ]
-            )
+            flutter_args.insert(0, f"dart-define-from-file={args.dart_define_from_file}")
+        fastforge_args.extend(["--flutter-build-args", ",".join(flutter_args)])
         fastforge_args.extend(extra)
         run_command(fastforge_args)
 

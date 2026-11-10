@@ -1,6 +1,7 @@
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/video.dart';
+import 'package:PiliPlus/models/common/video/base_quality.dart';
 import 'package:PiliPlus/models/common/video/cdn_type.dart';
 import 'package:PiliPlus/models/common/video/video_type.dart';
 import 'package:PiliPlus/models/video/play/url.dart';
@@ -39,9 +40,7 @@ abstract final class CdnSpeedService {
   static const _manualTimeout = Duration(seconds: 15);
 
   static void _pruneAttempts(DateTime now) {
-    _attemptTimestamps.removeWhere(
-      (t) => now.difference(t) > attemptWindow,
-    );
+    _attemptTimestamps.removeWhere((t) => now.difference(t) > attemptWindow);
   }
 
   /// 成功切换后 1 分钟内：不计卡顿、不自动测速（等线路稳定）
@@ -82,6 +81,7 @@ abstract final class CdnSpeedService {
     final result = await VideoHttp.videoUrl(
       cid: 196018899,
       bvid: 'BV1fK4y1t7hj',
+      qn: VideoQuality.high1080.code,
       tryLook: false,
       videoType: VideoType.ugc,
     );
@@ -106,10 +106,7 @@ abstract final class CdnSpeedService {
       BaseOptions(
         connectTimeout: timeout,
         receiveTimeout: timeout,
-        headers: {
-          'user-agent': BrowserUa.pc,
-          'referer': HttpString.baseUrl,
-        },
+        headers: {'user-agent': BrowserUa.pc, 'referer': HttpString.baseUrl},
       ),
     );
 

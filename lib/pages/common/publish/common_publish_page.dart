@@ -6,36 +6,35 @@ import 'package:PiliPlus/models/common/publish_panel_type.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:chat_bottom_container/chat_bottom_container.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract class CommonPublishPage<T> extends StatefulWidget {
   const CommonPublishPage({
     super.key,
     this.initialValue,
-    this.imageLengthLimit,
+    this.imageLengthLimit = 9,
     this.onSave,
     this.autofocus = true,
+    this.panelType = .none,
   });
 
   final String? initialValue;
-  final int? imageLengthLimit;
+  final int imageLengthLimit;
   final ValueChanged<T>? onSave;
   final bool autofocus;
+  final PanelType panelType;
 }
 
 abstract class CommonPublishPageState<T extends CommonPublishPage>
     extends State<T>
     with WidgetsBindingObserver {
   late bool _paused = false;
-  final FocusNode focusNode = FocusNode();
-  late final controller = ChatBottomPanelContainerController<PanelType>(
-    uiScale: Pref.uiScale,
-  );
+  late final FocusNode focusNode;
+  late final ChatBottomPanelContainerController<PanelType> controller;
   TextEditingController get editController;
 
-  final Rx<PanelType> panelType = PanelType.none.obs;
-  late final RxBool readOnly = false.obs;
+  late final Rx<PanelType> panelType;
   late final RxBool enablePublish = false.obs;
 
   bool isPublishing = false;
@@ -45,9 +44,21 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
 
   bool get handleKeyboard => Platform.isAndroid && widget.autofocus;
 
+  late ThemeData theme;
+
   @override
   void initState() {
     super.initState();
+    final panelType = widget.panelType;
+    this.panelType = Rx(panelType);
+    controller = ChatBottomPanelContainerController<PanelType>(
+      data: panelType,
+      uiScale: Pref.uiScale,
+      currentPanelType: panelType == .none ? .none : .other,
+    );
+
+    focusNode = FocusNode();
+
     if (handleKeyboard) {
       WidgetsBinding.instance.addObserver(this);
     }
@@ -57,6 +68,16 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
     if (widget.autofocus) {
       _requestFocus(duration: const Duration(milliseconds: 300));
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    initTheme();
+  }
+
+  void initTheme() {
+    theme = Theme.of(context);
   }
 
   @override
@@ -79,7 +100,7 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
   }
 
   void _requestFocus({Duration duration = const Duration(microseconds: 200)}) {
-    Future.delayed(duration, _safeRequestFocus);
+    Timer(duration, _safeRequestFocus);
   }
 
   @override
@@ -108,60 +129,16 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
   }
 
   void updatePanelType(PanelType type) {
-    final isSwitchToKeyboard = PanelType.keyboard == type;
-    bool isUpdated = false;
-    switch (type) {
-      case PanelType.keyboard:
-        updateInputView(isReadOnly: false);
-        break;
-      case PanelType.emoji || PanelType.more:
-        isUpdated = updateInputView(isReadOnly: true);
-        break;
-      default:
-        break;
-    }
-
-    void updatePanelTypeFunc() {
-      controller.updatePanelType(
-        isSwitchToKeyboard
-            ? ChatBottomPanelType.keyboard
-            : ChatBottomPanelType.other,
-        data: type,
-        forceHandleFocus: isSwitchToKeyboard
-            ? ChatBottomHandleFocus.requestFocus
-            : ChatBottomHandleFocus.unfocus,
-      );
-    }
-
-    if (isUpdated) {
-      // Waiting for the input view to update.
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        updatePanelTypeFunc();
-      });
-    } else {
-      updatePanelTypeFunc();
-    }
+    controller.updatePanelType(
+      type == .keyboard ? .keyboard : .other,
+      data: type,
+    );
   }
 
-  Future<void> hidePanel([_]) async {
-    if (focusNode.hasFocus) {
-      await Future.delayed(const Duration(milliseconds: 100));
-      if (!mounted) return;
-      focusNode.unfocus();
-    }
-    updateInputView(isReadOnly: false);
+  void hidePanel([_]) {
+    if (focusNode.hasFocus) focusNode.unfocus();
     if (ChatBottomPanelType.none == controller.currentPanelType) return;
     controller.updatePanelType(ChatBottomPanelType.none);
-  }
-
-  bool updateInputView({
-    required bool isReadOnly,
-  }) {
-    if (readOnly.value != isReadOnly) {
-      readOnly.value = isReadOnly;
-      return true;
-    }
-    return false;
   }
 
   Widget buildEmojiPickerPanel() {
@@ -176,38 +153,39 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
     );
   }
 
-  Widget buildMorePanel(ThemeData theme) => throw UnimplementedError();
+  Widget buildMorePanel() => throw UnimplementedError();
 
-  Widget buildPanelContainer(ThemeData theme, [Color? panelBgColor]) {
+  Widget _buildPanel(PanelType? type) {
+    if (type == null) return const SizedBox.shrink();
+    switch (type) {
+      case .emoji:
+        return buildEmojiPickerPanel();
+      case .more:
+        return buildMorePanel();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  void _onPanelTypeChange(ChatBottomPanelType panelType, PanelType? data) {
+    switch (panelType) {
+      case .none:
+        this.panelType.value = .none;
+      case .keyboard:
+        this.panelType.value = .keyboard;
+      case .other:
+        if (data == null) return;
+        this.panelType.value = data;
+    }
+  }
+
+  Widget buildPanelContainer([Color? panelBgColor]) {
     return ChatBottomPanelContainer<PanelType>(
       controller: controller,
       inputFocusNode: focusNode,
-      otherPanelWidget: (type) {
-        if (type == null) return const SizedBox.shrink();
-        switch (type) {
-          case PanelType.emoji:
-            return buildEmojiPickerPanel();
-          case PanelType.more:
-            return buildMorePanel(theme);
-          default:
-            return const SizedBox.shrink();
-        }
-      },
-      onPanelTypeChange: (panelType, data) {
-        switch (panelType) {
-          case ChatBottomPanelType.none:
-            this.panelType.value = PanelType.none;
-            break;
-          case ChatBottomPanelType.keyboard:
-            this.panelType.value = PanelType.keyboard;
-            break;
-          case ChatBottomPanelType.other:
-            if (data == null) return;
-            this.panelType.value = data;
-            break;
-        }
-      },
-      panelBgColor: panelBgColor ?? Theme.of(context).colorScheme.surface,
+      otherPanelWidget: _buildPanel,
+      onPanelTypeChange: _onPanelTypeChange,
+      panelBgColor: panelBgColor ?? theme.colorScheme.surface,
     );
   }
 

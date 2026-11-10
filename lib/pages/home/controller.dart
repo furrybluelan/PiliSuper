@@ -11,9 +11,8 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HomeController extends GetxController
     with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin {
@@ -58,11 +57,10 @@ class HomeController extends GetxController
   }
 
   @override
-  Future<void> onRefresh() {
-    return controller.onRefresh().catchError((e) {
-      if (kDebugMode) debugPrint(e.toString());
-    });
-  }
+  Future<void> onRefresh() => controller.onRefresh();
+
+  @override
+  Future<void> showRefresh() => controller.showRefresh();
 
   void setTabConfig() {
     final tabs = GStorage.setting.get(SettingBoxKey.tabBarSort) as List?;

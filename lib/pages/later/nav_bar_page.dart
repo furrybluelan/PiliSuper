@@ -13,7 +13,7 @@ import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -177,9 +177,7 @@ class _LaterNavBarPageState extends State<LaterNavBarPage>
             controller: _tabController,
             tabs: LaterViewType.values.map((item) {
               final count = _baseCtr.counts[item.index];
-              return Tab(
-                text: '${item.title}${count != -1 ? '($count)' : ''}',
-              );
+              return Tab(text: '${item.title}${count != -1 ? '($count)' : ''}');
             }).toList(),
             onTap: (_) {
               if (!_tabController.indexIsChanging) {
@@ -220,7 +218,10 @@ class _LaterNavBarPageState extends State<LaterNavBarPage>
                   ..onReload(),
                 borderRadius: const BorderRadius.all(Radius.circular(20)),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   child: Text.rich(
                     style: TextStyle(fontSize: 14, height: 1, color: color),
                     strutStyle: const StrutStyle(

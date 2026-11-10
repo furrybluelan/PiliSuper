@@ -1,9 +1,10 @@
 import 'dart:async' show Completer;
 
 import 'package:PiliPlus/common/widgets/scaffold/bottom_sheet.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart'
-    show RenderStack, BoxHitTestResult, StackParentData;
+import 'package:PiliPlus/common/widgets/scaffold/bottom_sheet_layout.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MiniScaffold extends StatefulWidget {
   const MiniScaffold({
@@ -27,9 +28,7 @@ class MiniScaffold extends StatefulWidget {
 
 class MiniScaffoldState extends State<MiniScaffold>
     with TickerProviderStateMixin {
-  final _dismissedBottomSheets = <StandardBottomSheet>[];
   PersistentBottomSheetController? _currentBottomSheet;
-  LocalHistoryEntry? _persistentSheetHistoryEntry;
 
   void _closeCurrentBottomSheet() {
     if (_currentBottomSheet != null) {
@@ -47,11 +46,11 @@ class MiniScaffoldState extends State<MiniScaffold>
 
   PersistentBottomSheetController _buildBottomSheet(
     WidgetBuilder builder, {
-    required bool isPersistent,
     required AnimationController animationController,
     BoxConstraints? constraints,
     bool? enableDrag,
     bool shouldDisposeAnimationController = true,
+    double dragHeight = kBottomSheetDragHeight,
   }) {
     final completer = Completer<void>();
     final bottomSheetKey = GlobalKey<StandardBottomSheetState>();
@@ -59,14 +58,6 @@ class MiniScaffoldState extends State<MiniScaffold>
 
     var removedEntry = false;
     var doingDispose = false;
-
-    void removePersistentSheetHistoryEntryIfNeeded() {
-      assert(isPersistent);
-      if (_persistentSheetHistoryEntry != null) {
-        _persistentSheetHistoryEntry!.remove();
-        _persistentSheetHistoryEntry = null;
-      }
-    }
 
     void removeCurrentBottomSheet() {
       removedEntry = true;
@@ -76,37 +67,24 @@ class MiniScaffoldState extends State<MiniScaffold>
       assert(_currentBottomSheet!.widget == bottomSheet);
       assert(bottomSheetKey.currentState != null);
 
-      if (isPersistent) {
-        removePersistentSheetHistoryEntryIfNeeded();
-      }
-
       bottomSheetKey.currentState!.close();
-      setState(() {
-        _currentBottomSheet = null;
-      });
 
-      if (!animationController.isDismissed) {
-        _dismissedBottomSheets.add(bottomSheet);
-      }
       completer.complete();
     }
 
-    final LocalHistoryEntry? entry = isPersistent
-        ? null
-        : LocalHistoryEntry(
-            onRemove: () {
-              if (!removedEntry &&
-                  _currentBottomSheet?.widget == bottomSheet &&
-                  !doingDispose) {
-                removeCurrentBottomSheet();
-              }
-            },
-          );
+    final LocalHistoryEntry entry = LocalHistoryEntry(
+      onRemove: () {
+        if (!removedEntry &&
+            _currentBottomSheet?.widget == bottomSheet &&
+            !doingDispose) {
+          removeCurrentBottomSheet();
+        }
+      },
+    );
 
     void removeEntryIfNeeded() {
-      if (!isPersistent && !removedEntry) {
-        assert(entry != null);
-        entry!.remove();
+      if (!removedEntry) {
+        entry.remove();
         removedEntry = true;
       }
     }
@@ -114,7 +92,8 @@ class MiniScaffoldState extends State<MiniScaffold>
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
       animationController: animationController,
-      enableDrag: enableDrag ?? !isPersistent,
+      enableDrag: enableDrag ?? true,
+      dragHeight: dragHeight,
       onClosing: () {
         if (_currentBottomSheet == null) {
           return;
@@ -123,10 +102,11 @@ class MiniScaffoldState extends State<MiniScaffold>
         removeEntryIfNeeded();
       },
       onDismissed: () {
-        if (_dismissedBottomSheets.contains(bottomSheet)) {
-          setState(() {
-            _dismissedBottomSheets.remove(bottomSheet);
-          });
+        if (bottomSheet == _currentBottomSheet?.widget) {
+          _currentBottomSheet = null;
+          if (mounted) {
+            setState(() {});
+          }
         }
       },
       onDispose: () {
@@ -137,22 +117,20 @@ class MiniScaffoldState extends State<MiniScaffold>
         }
       },
       builder: builder,
-      isPersistent: isPersistent,
+      isPersistent: false,
       constraints: constraints,
     );
 
-    if (!isPersistent) {
-      ModalRoute.of(context)!.addLocalHistoryEntry(entry!);
-    }
+    (Get.routing.route! as ModalRoute).addLocalHistoryEntry(entry);
 
     return PersistentBottomSheetController(
       bottomSheet,
       completer,
-      entry != null ? entry.remove : removeCurrentBottomSheet,
+      entry.remove,
       (VoidCallback fn) {
         bottomSheetKey.currentState?.setState(fn);
       },
-      !isPersistent,
+      true,
     );
   }
 
@@ -162,9 +140,8 @@ class MiniScaffoldState extends State<MiniScaffold>
     bool? enableDrag,
     AnimationController? transitionAnimationController,
     AnimationStyle? sheetAnimationStyle,
+    double dragHeight = kBottomSheetDragHeight,
   }) {
-    assert(debugCheckHasMediaQuery(context));
-
     _closeCurrentBottomSheet();
     final AnimationController controller =
         (transitionAnimationController ??
@@ -176,10 +153,10 @@ class MiniScaffoldState extends State<MiniScaffold>
     setState(() {
       _currentBottomSheet = _buildBottomSheet(
         builder,
-        isPersistent: false,
         animationController: controller,
         constraints: constraints,
         enableDrag: enableDrag,
+        dragHeight: dragHeight,
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
@@ -188,14 +165,9 @@ class MiniScaffoldState extends State<MiniScaffold>
 
   @override
   Widget build(BuildContext context) {
-    return BottomSheetStack(
-      clipBehavior: .none,
-      alignment: .bottomCenter,
-      children: [
-        widget.body,
-        ..._dismissedBottomSheets,
-        ?_currentBottomSheet?.widget,
-      ],
+    return BottomSheetLayout(
+      body: widget.body,
+      bottomSheet: _currentBottomSheet?.widget,
     );
   }
 }
@@ -211,13 +183,18 @@ class _StandardBottomSheet extends StandardBottomSheet {
     super.isPersistent,
     super.constraints,
     super.onDispose,
+    this.dragHeight = kBottomSheetDragHeight,
   });
 
+  final double dragHeight;
+
   @override
-  StandardBottomSheetState createState() => _StandardBottomSheetState();
+  StandardBottomSheetState<_StandardBottomSheet> createState() =>
+      _StandardBottomSheetState();
 }
 
-class _StandardBottomSheetState extends StandardBottomSheetState {
+class _StandardBottomSheetState
+    extends StandardBottomSheetState<_StandardBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final child = BottomSheet_(
@@ -228,6 +205,7 @@ class _StandardBottomSheetState extends StandardBottomSheetState {
       onClosing: widget.onClosing!,
       builder: widget.builder,
       constraints: widget.constraints,
+      dragHeight: widget.dragHeight,
     );
     if (widget.enableDrag) {
       return AnimatedBuilder(
@@ -250,59 +228,5 @@ class _StandardBottomSheetState extends StandardBottomSheetState {
       ),
       child: child,
     );
-  }
-}
-
-class BottomSheetStack extends Stack {
-  const BottomSheetStack({
-    super.key,
-    super.alignment,
-    super.textDirection,
-    super.fit,
-    super.clipBehavior,
-    super.children,
-  });
-
-  @override
-  RenderBottomSheetStack createRenderObject(BuildContext context) {
-    return RenderBottomSheetStack(
-      alignment: alignment,
-      textDirection: textDirection ?? Directionality.maybeOf(context),
-      fit: fit,
-      clipBehavior: clipBehavior,
-    );
-  }
-}
-
-class RenderBottomSheetStack extends RenderStack {
-  RenderBottomSheetStack({
-    super.children,
-    super.alignment,
-    super.textDirection,
-    super.fit,
-    super.clipBehavior,
-  });
-
-  /// HitTest lastChild only
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    RenderBox? child = lastChild;
-    if (child != null) {
-      final childParentData = child.parentData! as StackParentData;
-      return result.addWithPaintOffset(
-        offset: childParentData.offset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - childParentData.offset);
-          final isHit = child.hitTest(result, position: transformed);
-          if (childParentData.previousSibling != null) {
-            return false;
-          } else {
-            return isHit;
-          }
-        },
-      );
-    }
-    return false;
   }
 }

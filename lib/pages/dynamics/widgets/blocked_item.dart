@@ -1,7 +1,7 @@
 import 'package:PiliPlus/models/dynamics/result.dart' show ModuleBlocked;
 import 'package:PiliPlus/pages/article/widgets/opus_content.dart'
     show moduleBlockedItem;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 Widget blockedItem(
   BuildContext context, {
@@ -10,6 +10,6 @@ Widget blockedItem(
 }) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 1),
-    child: moduleBlockedItem(context, theme, blocked),
+    child: moduleBlockedItem(context, theme.colorScheme, blocked),
   );
 }

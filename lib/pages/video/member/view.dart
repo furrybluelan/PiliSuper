@@ -1,9 +1,14 @@
 import 'package:PiliPlus/common/skeleton/video_card_h.dart';
+import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
+import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
+    show displacement;
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
+import 'package:PiliPlus/common/widgets/refresh_indicator.dart';
+import 'package:PiliPlus/common/widgets/scroll_physics.dart'
+    show platformAlwaysClampingPhysics;
 import 'package:PiliPlus/common/widgets/sliver/sliver_pinned_header.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
@@ -25,9 +30,9 @@ import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HorizontalMemberPage extends StatefulWidget {
   const HorizontalMemberPage({
@@ -49,6 +54,8 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   late final HorizontalMemberPageController _controller;
   late final account = Accounts.main;
   late final String _bvid;
+  late ColorScheme colorScheme;
+  late final _isRefreshing = RxBool(false);
 
   @override
   void initState() {
@@ -73,39 +80,78 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    colorScheme = ColorScheme.of(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Obx(
-      () => _buildUserPage(theme, _controller.userState.value),
+    return Material(
+      child: Obx(
+        () => _buildUserPage(_controller.userState.value),
+      ),
     );
   }
 
-  Widget _buildUserPage(ThemeData theme, LoadingState userState) {
+  Future<void> _loadPrevAndKeepPos() async {
+    assert(_controller.hasPrev);
+    _isRefreshing.value = true;
+    final lastCount = _controller.loadingState.value.dataOrNull?.length;
+    await _controller.onRefresh();
+    if (mounted) {
+      _isRefreshing.value = false;
+      final newCount = _controller.loadingState.value.dataOrNull?.length;
+      if (lastCount != null && newCount != null && newCount > lastCount) {
+        _controller.scrollController.jumpTo((newCount - lastCount) * 112);
+      }
+    }
+  }
+
+  bool onNotification(ScrollEndNotification notification) {
+    if (notification.metrics.pixels == 0 &&
+        _controller.hasPrev &&
+        !_controller.isLoading) {
+      _loadPrevAndKeepPos();
+    }
+    return false;
+  }
+
+  Widget _buildUserPage(LoadingState userState) {
     return switch (userState) {
       Loading() => m3eLoading,
       Success(:final response) => Column(
         children: [
-          _buildUserInfo(theme, response),
+          _buildUserInfo(response),
           Expanded(
-            child: refreshIndicator(
-              onRefresh: _controller.onRefresh,
-              child: CustomScrollView(
-                controller: _controller.scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
-                    ),
-                    sliver: Obx(
-                      () => _buildVideoList(
-                        theme,
-                        _controller.loadingState.value,
+            child: Stack(
+              clipBehavior: .none,
+              children: [
+                NotificationListener<ScrollEndNotification>(
+                  onNotification: onNotification,
+                  child: CustomScrollView(
+                    physics: platformAlwaysClampingPhysics,
+                    controller: _controller.scrollController,
+                    slivers: [
+                      SliverPadding(
+                        padding: EdgeInsets.only(
+                          bottom:
+                              MediaQuery.viewPaddingOf(context).bottom + 100,
+                        ),
+                        sliver: Obx(
+                          () => _buildVideoList(_controller.loadingState.value),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: displacement + 35,
+                  child: RefreshIndicator_(isRefreshing: _isRefreshing),
+                ),
+              ],
             ),
           ),
         ],
@@ -121,16 +167,16 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
     };
   }
 
-  Widget _buildHeader(ThemeData theme) {
+  Widget _buildHeader() {
     return SliverPinnedHeader(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 4, 6, 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             ?_buildCount(),
-            _buildSortBtn(theme),
+            _buildSortBtn(),
           ],
         ),
       ),
@@ -148,7 +194,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
     return null;
   }
 
-  Widget _buildSortBtn(ThemeData theme) {
+  Widget _buildSortBtn() {
     return TextButton.icon(
       style: Style.buttonStyle,
       onPressed: () => _controller
@@ -157,33 +203,34 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
       icon: Icon(
         Icons.sort,
         size: 16,
-        color: theme.colorScheme.secondary,
+        color: colorScheme.secondary,
       ),
       label: Text(
         _controller.order.label,
         style: TextStyle(
           fontSize: 13,
-          color: theme.colorScheme.secondary,
+          color: colorScheme.secondary,
         ),
       ),
     );
   }
 
   Widget _buildVideoList(
-    ThemeData theme,
     LoadingState<List<SpaceArchiveItem>?> loadingState,
   ) {
     return switch (loadingState) {
-      Loading() => SliverFixedExtentList.builder(
-        itemCount: 10,
-        itemBuilder: (_, _) => const VideoCardHSkeleton(),
+      Loading() => const SliverFixedExtentList(
+        delegate: SliverSingleChildDelegate(
+          count: 10,
+          child: VideoCardHSkeleton(),
+        ),
         itemExtent: 112,
       ),
       Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverMainAxisGroup(
                 slivers: [
-                  _buildHeader(theme),
+                  _buildHeader(),
                   SliverFixedExtentList.builder(
                     itemBuilder: (context, index) {
                       if (index == response.length - 1 && _controller.hasNext) {
@@ -221,20 +268,20 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
     };
   }
 
-  Widget _buildUserInfo(ThemeData theme, MemberInfoModel memberInfoModel) {
+  Widget _buildUserInfo(MemberInfoModel memberInfoModel) {
     return Padding(
       padding: const .only(left: 16, top: 10, right: 16, bottom: 3),
       child: Row(
         spacing: 10,
         children: [
           _buildAvatar(memberInfoModel.face!),
-          Expanded(child: _buildInfo(theme, memberInfoModel)),
+          Expanded(child: _buildInfo(memberInfoModel)),
         ],
       ),
     );
   }
 
-  Column _buildInfo(ThemeData theme, MemberInfoModel memberInfoModel) => Column(
+  Column _buildInfo(MemberInfoModel memberInfoModel) => Column(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -250,7 +297,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                 color:
                     (memberInfoModel.vip?.status ?? -1) > 0 &&
                         memberInfoModel.vip?.type == 2
-                    ? theme.colorScheme.vipColor
+                    ? colorScheme.vipColor
                     : null,
               ),
             ),
@@ -269,7 +316,6 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
           children: UserInfoType.values
               .map(
                 (e) => _buildChildInfo(
-                  theme: theme,
                   type: e,
                   userStat: _controller.userStat,
                   memberInfoModel: memberInfoModel,
@@ -281,7 +327,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                   width: 20,
                   child: VerticalDivider(
                     width: 1,
-                    color: theme.colorScheme.outline,
+                    color: colorScheme.outline,
                   ),
                 );
                 yield child;
@@ -298,10 +344,10 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
             child: FilledButton.tonal(
               style: FilledButton.styleFrom(
                 backgroundColor: memberInfoModel.isFollowed == true
-                    ? theme.colorScheme.onInverseSurface
+                    ? colorScheme.onInverseSurface
                     : null,
                 foregroundColor: memberInfoModel.isFollowed == true
-                    ? theme.colorScheme.outline
+                    ? colorScheme.outline
                     : null,
                 padding: EdgeInsets.zero,
                 tapTargetSize: .shrinkWrap,
@@ -359,7 +405,6 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   );
 
   Widget _buildChildInfo({
-    required ThemeData theme,
     required UserInfoType type,
     required Map userStat,
     required MemberInfoModel memberInfoModel,
@@ -392,7 +437,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
         '$num${type.title}',
         style: TextStyle(
           fontSize: 14,
-          color: theme.colorScheme.outline,
+          color: colorScheme.outline,
         ),
       ),
     );

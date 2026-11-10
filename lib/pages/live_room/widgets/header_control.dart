@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/draggable_sheet/dyn.dart';
 import 'package:PiliPlus/common/widgets/marquee.dart';
-import 'package:PiliPlus/models/common/video/live_quality.dart';
 import 'package:PiliPlus/pages/live_room/controller.dart';
 import 'package:PiliPlus/pages/setting/models/play_settings.dart'
     show showPlayerVolumeDialog;
@@ -13,18 +12,19 @@ import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart'
     show shutdownTimerService;
-import 'package:PiliPlus/utils/android/bindings.g.dart';
+import 'package:PiliPlus/utils/android/android_helper.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
+import 'package:PiliPlus/utils/ios/pip_helper.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LiveHeaderControl extends StatefulWidget {
   const LiveHeaderControl({
@@ -109,17 +109,16 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
       );
     }
     child = Expanded(child: child);
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      foregroundColor: Colors.white,
-      primary: false,
-      automaticallyImplyLeading: false,
-      titleSpacing: 14,
-      title: Row(
+
+    const btnHeight = 30.0;
+
+    return Padding(
+      padding: const .symmetric(horizontal: 14, vertical: 13),
+      child: Row(
         children: [
           if (isFullScreen || plPlayerController.isDesktopPip)
             ComBtn(
-              height: 30,
+              height: btnHeight,
               tooltip: '返回',
               icon: const Icon(FontAwesomeIcons.arrowLeft, size: 15),
               onTap: () {
@@ -137,7 +136,7 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
             Obx(() {
               final isAlwaysOnTop = plPlayerController.isAlwaysOnTop.value;
               return ComBtn(
-                height: 30,
+                height: btnHeight,
                 tooltip: '${isAlwaysOnTop ? '取消' : ''}置顶',
                 icon: isAlwaysOnTop
                     ? const Icon(
@@ -155,7 +154,7 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
             }),
           if (isFullScreen || PlatformUtils.isDesktop)
             ComBtn(
-              height: 30,
+              height: btnHeight,
               tooltip: '发弹幕',
               icon: const Icon(
                 size: 18,
@@ -164,16 +163,16 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
               ),
               onTap: widget.onSendDanmaku,
             ),
-          if (Platform.isAndroid || (PlatformUtils.isDesktop && !isFullScreen))
+          if ((Platform.isAndroid && PiliAndroidHelper.isPipAvailable) ||
+              (Platform.isIOS && IOSPipHelper.isAvailable) ||
+              (PlatformUtils.isDesktop && !isFullScreen))
             ComBtn(
-              height: 30,
+              height: btnHeight,
               tooltip: '画中画',
               onTap: () {
                 if (PlatformUtils.isDesktop) {
                   plPlayerController.toggleDesktopPip();
-                  return;
-                }
-                if (AndroidHelper.isPipAvailable) {
+                } else {
                   plPlayerController.enterPip();
                 }
               },
@@ -185,7 +184,7 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
             ),
           Obx(
             () => ComBtn(
-              height: 30,
+              height: btnHeight,
               tooltip: '仅播放音频',
               onTap: () {
                 plPlayerController.onlyPlayAudio.toggle();
@@ -209,7 +208,7 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
               final continuePlayInBackground =
                   plPlayerController.continuePlayInBackground.value;
               return ComBtn(
-                height: 30,
+                height: btnHeight,
                 tooltip: '${continuePlayInBackground ? '关闭' : ''}后台播放',
                 onTap: plPlayerController.setContinuePlayInBackground,
                 icon: continuePlayInBackground
@@ -226,7 +225,7 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
               );
             }),
           ComBtn(
-            height: 30,
+            height: btnHeight,
             tooltip: '定时关闭',
             onTap: () => shutdownTimerService.showScheduleExitDialog(
               context,
@@ -321,131 +320,128 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
           snapSizes: [maxChildSize],
           initialChildSize: maxChildSize,
           builder: (context, scrollController) {
-            final theme = Theme.of(context);
-            final secondary = theme.colorScheme.secondary;
-            final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
+            final colorScheme = ColorScheme.of(context);
+            final secondary = colorScheme.secondary;
+            final onSurfaceVariant = colorScheme.onSurfaceVariant;
             final currStyle = TextStyle(fontSize: 14, color: secondary);
-            return Theme(
-              data: theme.copyWith(dividerColor: Colors.transparent),
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: Get.back,
-                    borderRadius: Style.bottomSheetRadius,
-                    child: SizedBox(
-                      height: 35,
-                      child: Center(
-                        child: Container(
-                          width: 32,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.outline,
-                            borderRadius: const .all(.circular(1.5)),
-                          ),
+            return Column(
+              children: [
+                InkWell(
+                  onTap: Get.back,
+                  borderRadius: Style.bottomSheetRadius,
+                  child: SizedBox(
+                    height: 35,
+                    child: Center(
+                      child: Container(
+                        width: 32,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: colorScheme.outline,
+                          borderRadius: const .all(.circular(1.5)),
                         ),
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: ListView(
-                      controller: scrollController,
-                      padding: .only(
-                        bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
-                      ),
-                      children: controller.stream.mapIndexed((si, stream) {
-                        final isCurrStream = si == controller.streamIndex;
-                        final streamColor = isCurrStream
-                            ? secondary
-                            : onSurfaceVariant;
-                        return _ExpansionTile(
-                          initiallyExpanded: isCurrStream,
-                          iconColor: streamColor,
-                          collapsedIconColor: streamColor,
-                          title: Text(
-                            stream.protocolName ?? si.toString(),
-                            style: isCurrStream
-                                ? currStyle
-                                : const TextStyle(fontSize: 14),
-                          ),
-                          children: stream.format.mapIndexed((fi, format) {
-                            final isCurrFormat =
-                                isCurrStream && fi == controller.formatIndex;
-                            final formatColor = isCurrFormat
-                                ? secondary
-                                : onSurfaceVariant;
-                            return _ExpansionTile(
-                              initiallyExpanded: isCurrFormat,
-                              iconColor: formatColor,
-                              collapsedIconColor: formatColor,
-                              title: Text(
-                                format.formatName ?? fi.toString(),
-                                style: isCurrFormat
-                                    ? currStyle
-                                    : const TextStyle(fontSize: 14),
-                              ),
-                              children: format.codec.mapIndexed((ci, codec) {
-                                final isCurrCodec =
-                                    isCurrFormat && ci == controller.codecIndex;
-                                final codecColor = isCurrCodec
-                                    ? secondary
-                                    : onSurfaceVariant;
-                                return _ExpansionTile(
-                                  initiallyExpanded: isCurrCodec,
-                                  iconColor: codecColor,
-                                  collapsedIconColor: codecColor,
-                                  title: Text(
-                                    '${codec.codecName ?? ci.toString()} (${LiveQuality.fromCode(codec.currentQn)?.desc ?? codec.currentQn})',
-                                    style: isCurrCodec
-                                        ? currStyle
-                                        : const TextStyle(fontSize: 14),
-                                  ),
-                                  children: codec.urlInfo.mapIndexed((ui, url) {
-                                    final isCurrUrl =
-                                        isCurrCodec &&
-                                        ui == controller.liveUrlIndex;
-                                    return ListTile(
-                                      dense: true,
-                                      title: Text(
-                                        '${url.host}...',
-                                        style: isCurrUrl
-                                            ? const TextStyle(fontSize: 14)
-                                            : TextStyle(
-                                                fontSize: 14,
-                                                color: onSurfaceVariant,
-                                              ),
-                                      ),
-                                      selected: isCurrUrl,
-                                      onTap: isCurrUrl
-                                          ? null
-                                          : () {
-                                              Get.back();
-                                              controller.initLiveUrl(
-                                                streamIndex: si,
-                                                formatIndex: fi,
-                                                codecIndex: ci,
-                                                liveUrlIndex: ui,
-                                              );
-                                              GStorage.setting.put(
-                                                SettingBoxKey.liveStream,
-                                                [
-                                                  stream.protocolName!,
-                                                  format.formatName!,
-                                                  codec.codecName!,
-                                                ],
-                                              );
-                                            },
-                                    );
-                                  }).toList(),
-                                );
-                              }).toList(),
-                            );
-                          }).toList(),
-                        );
-                      }).toList(),
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: .only(
+                      bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
                     ),
+                    children: controller.stream.mapIndexed((si, stream) {
+                      final isCurrStream = si == controller.streamIndex;
+                      final streamColor = isCurrStream
+                          ? secondary
+                          : onSurfaceVariant;
+                      return _ExpansionTile(
+                        initiallyExpanded: isCurrStream,
+                        iconColor: streamColor,
+                        collapsedIconColor: streamColor,
+                        title: Text(
+                          stream.protocolName ?? si.toString(),
+                          style: isCurrStream
+                              ? currStyle
+                              : const TextStyle(fontSize: 14),
+                        ),
+                        children: stream.format.mapIndexed((fi, format) {
+                          final isCurrFormat =
+                              isCurrStream && fi == controller.formatIndex;
+                          final formatColor = isCurrFormat
+                              ? secondary
+                              : onSurfaceVariant;
+                          return _ExpansionTile(
+                            initiallyExpanded: isCurrFormat,
+                            iconColor: formatColor,
+                            collapsedIconColor: formatColor,
+                            title: Text(
+                              format.formatName ?? fi.toString(),
+                              style: isCurrFormat
+                                  ? currStyle
+                                  : const TextStyle(fontSize: 14),
+                            ),
+                            children: format.codec.mapIndexed((ci, codec) {
+                              final isCurrCodec =
+                                  isCurrFormat && ci == controller.codecIndex;
+                              final codecColor = isCurrCodec
+                                  ? secondary
+                                  : onSurfaceVariant;
+                              return _ExpansionTile(
+                                initiallyExpanded: isCurrCodec,
+                                iconColor: codecColor,
+                                collapsedIconColor: codecColor,
+                                title: Text(
+                                  '${codec.codecName ?? ci.toString()} (${codec.currentQn.desc})',
+                                  style: isCurrCodec
+                                      ? currStyle
+                                      : const TextStyle(fontSize: 14),
+                                ),
+                                children: codec.urlInfo.mapIndexed((ui, url) {
+                                  final isCurrUrl =
+                                      isCurrCodec &&
+                                      ui == controller.liveUrlIndex;
+                                  return ListTile(
+                                    dense: true,
+                                    title: Text(
+                                      '${url.host}...',
+                                      style: isCurrUrl
+                                          ? const TextStyle(fontSize: 14)
+                                          : TextStyle(
+                                              fontSize: 14,
+                                              color: onSurfaceVariant,
+                                            ),
+                                    ),
+                                    selected: isCurrUrl,
+                                    onTap: isCurrUrl
+                                        ? null
+                                        : () {
+                                            Get.back();
+                                            controller.initLiveUrl(
+                                              streamIndex: si,
+                                              formatIndex: fi,
+                                              codecIndex: ci,
+                                              liveUrlIndex: ui,
+                                            );
+                                            GStorage.setting.put(
+                                              SettingBoxKey.liveStream,
+                                              [
+                                                stream.protocolName!,
+                                                format.formatName!,
+                                                codec.codecName!,
+                                              ],
+                                            );
+                                          },
+                                  );
+                                }).toList(),
+                              );
+                            }).toList(),
+                          );
+                        }).toList(),
+                      );
+                    }).toList(),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         );
@@ -457,15 +453,12 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
 class _ExpansionTile extends ExpansionTile {
   const _ExpansionTile({
     required super.title,
-    // ignore: unused_element_parameter
-    super.dense = true,
-    // ignore: unused_element_parameter
-    super.controlAffinity = .leading,
-    // ignore: unused_element_parameter
-    super.childrenPadding = const .only(left: 20),
     super.initiallyExpanded,
     super.iconColor,
     super.collapsedIconColor,
     super.children,
-  });
+  }) : super(
+         dense: true,
+         childrenPadding: const .only(left: 20),
+       );
 }

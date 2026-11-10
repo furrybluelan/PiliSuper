@@ -13,9 +13,9 @@ import 'package:PiliPlus/pages/later/base_controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 mixin BaseLaterController
     on
@@ -46,11 +46,7 @@ mixin BaseLaterController
   }
 
   // single
-  void toViewDel(
-    BuildContext context,
-    int index,
-    int? aid,
-  ) {
+  void toViewDel(BuildContext context, int index, int aid) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -67,7 +63,7 @@ mixin BaseLaterController
           TextButton(
             onPressed: () async {
               Get.back();
-              final res = await UserHttp.toViewDel(aids: aid.toString());
+              final res = await UserHttp.toViewDel(aids: aid);
               if (res.isSuccess) {
                 loadingState
                   ..value.data!.removeAt(index)

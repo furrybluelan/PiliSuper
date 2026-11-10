@@ -11,22 +11,19 @@ import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // 视频卡片 - 垂直布局
 class VideoCardVMemberHome extends StatelessWidget {
   final SpaceArchiveItem videoItem;
 
-  const VideoCardVMemberHome({
-    super.key,
-    required this.videoItem,
-  });
+  const VideoCardVMemberHome(this.videoItem, {super.key});
 
   Future<void> onPushDetail() async {
     String? goto = videoItem.goto;
     switch (goto) {
       case 'bangumi':
-        PageUtils.viewPgc(epId: videoItem.param);
+        PageUtils.viewPgc(epId: .parse(videoItem.param!));
         break;
 
       case 'av':

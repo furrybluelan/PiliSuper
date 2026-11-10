@@ -17,41 +17,63 @@
 package com.example.piliplus;
 
 import android.app.PendingIntent;
-import android.content.ComponentName;
+import android.app.RemoteAction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Icon;
 import android.media.session.PlaybackState;
 import android.os.Build;
-import android.util.Log;
 import android.view.KeyEvent;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
-import java.util.List;
+import com.ryanheise.audioservice.AudioService;
 
 class MediaHelper {
-    private static final String TAG = "MediaButtonReceiver";
+    private static @NonNull Intent getIntent(@NonNull Context context) {
+        return new Intent(context, com.ryanheise.audioservice.MediaButtonReceiver.class);
+    }
 
-    static PendingIntent buildMediaButtonPendingIntent(Context context, ComponentName mbrComponent, int action) {
-        if (mbrComponent == null) {
-            Log.w(TAG, "The component name of media button receiver should be provided.");
-            return null;
-        }
-        int keyCode = PlaybackStateCompat_toKeyCode(action);
-        if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
-            Log.w(TAG,
-                    "Cannot build a media button pending intent with the given action: " + action);
-            return null;
-        }
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.setComponent(mbrComponent);
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    static RemoteAction getRemoteAction(Context context, @DrawableRes int resId, String title, int action) {
+        return new RemoteAction(
+                Icon.createWithResource(context, resId),
+                title,
+                title,
+                buildMediaButtonPendingIntent(context, playbackStateToKeyCode(action))
+        );
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    static RemoteAction getCustomRemoteAction(Context context, @DrawableRes int resId, int code, @NonNull String title) {
+        return new RemoteAction(
+                Icon.createWithResource(context, resId),
+                title,
+                title,
+                buildCustomActionPendingIntent(context, code, title)
+        );
+    }
+
+    static @NonNull PendingIntent buildCustomActionPendingIntent(@NonNull Context context, int code, String customAction) {
+        Intent intent = getIntent(context);
+        intent.setAction(AudioService.NOTIFICATION_CUSTOM_ACTION);
+        intent.putExtra(AudioService.NOTIFICATION_CUSTOM_ACTION_NAME, customAction);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        return PendingIntent.getBroadcast(context, code, intent,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0);
+    }
+
+    private static PendingIntent buildMediaButtonPendingIntent(Context context, int keyCode) {
+        Intent intent = getIntent(context);
+        intent.setAction(Intent.ACTION_MEDIA_BUTTON);
         intent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         return PendingIntent.getBroadcast(context, keyCode, intent,
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0);
     }
 
-    private static int PlaybackStateCompat_toKeyCode(int action) {
+    private static int playbackStateToKeyCode(int action) {
         return switch (action) {
             case (int) PlaybackState.ACTION_STOP -> KeyEvent.KEYCODE_MEDIA_STOP;
             case (int) PlaybackState.ACTION_PAUSE -> KeyEvent.KEYCODE_MEDIA_PAUSE;
@@ -63,21 +85,5 @@ class MediaHelper {
             case (int) PlaybackState.ACTION_PLAY_PAUSE -> KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
             default -> KeyEvent.KEYCODE_UNKNOWN;
         };
-    }
-
-    static ComponentName getMediaButtonReceiverComponent(Context context) {
-        Intent queryIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        queryIntent.setPackage(context.getPackageName());
-        PackageManager pm = context.getPackageManager();
-        List<ResolveInfo> resolveInfos = pm.queryBroadcastReceivers(queryIntent, 0);
-        if (resolveInfos.size() == 1) {
-            ResolveInfo resolveInfo = resolveInfos.get(0);
-            return new ComponentName(resolveInfo.activityInfo.packageName,
-                    resolveInfo.activityInfo.name);
-        } else if (resolveInfos.size() > 1) {
-            Log.w(TAG, "More than one BroadcastReceiver that handles "
-                    + Intent.ACTION_MEDIA_BUTTON + " was found, returning null.");
-        }
-        return null;
     }
 }

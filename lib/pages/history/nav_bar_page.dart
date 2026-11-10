@@ -15,7 +15,7 @@ import 'package:PiliPlus/pages/history/view.dart';
 import 'package:PiliPlus/pages/history/widgets/item.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
 /// NavBar-embedded history page.
@@ -34,10 +34,7 @@ class _HistoryNavBarPageState extends State<HistoryNavBarPage>
   @override
   void initState() {
     super.initState();
-    _historyController = Get.put(
-      HistoryController(null),
-      tag: 'all',
-    );
+    _historyController = Get.put(HistoryController(null), tag: 'all');
   }
 
   HistoryController currCtr([int? index]) {
@@ -107,11 +104,14 @@ class _HistoryNavBarPageState extends State<HistoryNavBarPage>
                             controller: _historyController.tabController,
                             onTap: (index) {
                               if (!_historyController
-                                  .tabController!.indexIsChanging) {
+                                  .tabController!
+                                  .indexIsChanging) {
                                 currCtr().scrollController.animToTop();
                               } else if (enableMultiSelect) {
                                 currCtr(
-                                  _historyController.tabController!.previousIndex,
+                                  _historyController
+                                      .tabController!
+                                      .previousIndex,
                                 ).handleSelect();
                               }
                             },
@@ -163,8 +163,7 @@ class _HistoryNavBarPageState extends State<HistoryNavBarPage>
       PopupMenuButton(
         itemBuilder: (_) => [
           PopupMenuItem(
-            onTap: () =>
-                _historyController.baseCtr.onPauseHistory(context),
+            onTap: () => _historyController.baseCtr.onPauseHistory(context),
             child: Text(
               !_historyController.baseCtr.pauseStatus.value
                   ? '暂停观看记录'
@@ -172,21 +171,20 @@ class _HistoryNavBarPageState extends State<HistoryNavBarPage>
             ),
           ),
           PopupMenuItem(
-            onTap: () => _historyController.baseCtr.onClearHistory(
-              context,
-              () {
-                _historyController.loadingState.value = const Success(null);
-                if (_historyController.tabController != null) {
-                  for (final item in _historyController.tabs) {
-                    try {
-                      Get.find<HistoryController>(
-                        tag: item.type,
-                      ).loadingState.value = const Success(null);
-                    } catch (_) {}
-                  }
+            onTap: () => _historyController.baseCtr.onClearHistory(context, () {
+              _historyController.loadingState.value = const Success(null);
+              if (_historyController.tabController != null) {
+                for (final item in _historyController.tabs) {
+                  try {
+                    Get.find<HistoryController>(tag: item.type)
+                        .loadingState
+                        .value = const Success(
+                      null,
+                    );
+                  } catch (_) {}
                 }
-              },
-            ),
+              }
+            }),
             child: const Text('清空观看记录'),
           ),
           PopupMenuItem(
@@ -263,8 +261,7 @@ class _HistoryNavBarPageState extends State<HistoryNavBarPage>
               ),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () =>
-                    _historyController.baseCtr.onPauseHistory(context),
+                onTap: () => _historyController.baseCtr.onPauseHistory(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 6,

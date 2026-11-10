@@ -2,25 +2,32 @@ import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
+import 'package:PiliPlus/models/common/dynamic/article_type.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/models/dynamics/article_content_model.dart'
     show ArticleContentModel;
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/model_avatar.dart';
 import 'package:PiliPlus/models_new/article/article_view/data.dart';
+import 'package:PiliPlus/models_new/dynamic/dyn_mention/item.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_controller.dart';
+import 'package:PiliPlus/pages/common/reply/reply_controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/url_utils.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
-class ArticleController extends CommonDynController {
+class ArticleController extends CommonDynController
+    with
+        GetSingleTickerProviderStateMixin,
+        ReplyLocateMixin,
+        MainReplyLocateMixin,
+        DynReplyLocateMixin {
   late String id;
-  late String type;
+  late ArticleType type;
 
   late String url;
   late int commentId;
@@ -30,6 +37,8 @@ class ArticleController extends CommonDynController {
   @override
   int get replyType => commentType;
   final summary = Summary();
+  @override
+  MentionItem? get mentionItem => summary.author?.mentionItem;
 
   late final RxInt topIndex = 0.obs;
 
@@ -53,12 +62,11 @@ class ArticleController extends CommonDynController {
   @override
   void onInit() {
     super.onInit();
-    final params = Get.parameters;
-    id = params['id']!;
-    type = params['type']!;
+    id = args['id']!;
+    type = args['type']!;
 
     // to opus
-    if (type == 'read') {
+    if (type == .read) {
       UrlUtils.parseRedirectUrl('https://www.bilibili.com/read/cv$id/').then((
         url,
       ) {
@@ -66,9 +74,9 @@ class ArticleController extends CommonDynController {
           final opusId = PiliScheme.uriDigitRegExp.firstMatch(url)?.group(1);
           if (opusId != null) {
             id = opusId;
-            type = 'opus';
+            type = .opus;
           }
-          Get.putOrFind(() => this, tag: type + id);
+          Get.putOrFind(() => this, tag: type.name + id);
         }
         init();
       });
@@ -78,10 +86,10 @@ class ArticleController extends CommonDynController {
   }
 
   void init() {
-    url = type == 'read'
+    url = type == .read
         ? 'https://www.bilibili.com/read/cv$id'
         : 'https://www.bilibili.com/opus/$id';
-    commentType = type == 'picture' ? 11 : 12;
+    commentType = type.replyType;
 
     _queryContent();
   }
@@ -92,7 +100,7 @@ class ArticleController extends CommonDynController {
       //fallback
       if (response.fallback?.id != null) {
         id = response.fallback!.id!;
-        type = 'read';
+        type = .read;
         init();
         return false;
       }
@@ -165,11 +173,10 @@ class ArticleController extends CommonDynController {
 
   // 请求动态内容
   Future<void> _queryContent() async {
-    if (type != 'read') {
+    if (type != .read) {
       isLoaded.value = await queryOpus(id);
     } else {
       commentId = int.parse(id);
-      commentType = 12;
       isLoaded.value = await queryRead(commentId);
     }
     if (isLoaded.value) {
@@ -182,19 +189,17 @@ class ArticleController extends CommonDynController {
 
   Future<void> onFav() async {
     final favorite = stats.value?.favorite;
-    bool isFav = favorite?.status == true;
-    final res = type == 'read'
+    if (favorite == null) return;
+    final isFav = favorite.status ?? false;
+    final res = type == .read
         ? isFav
               ? await FavHttp.delFavArticle(id: commentId)
               : await FavHttp.addFavArticle(id: commentId)
         : await FavHttp.communityAction(opusId: id, action: isFav ? 4 : 3);
     if (res.isSuccess) {
-      favorite?.status = !isFav;
-      if (isFav) {
-        favorite?.count--;
-      } else {
-        favorite?.count++;
-      }
+      favorite
+        ..status = !isFav
+        ..count = (favorite.count ?? 0) + (isFav ? -1 : 1);
       stats.refresh();
       SmartDialog.showToast('${isFav ? '取消' : ''}收藏成功');
     } else {
@@ -204,18 +209,16 @@ class ArticleController extends CommonDynController {
 
   Future<void> onLike() async {
     final like = stats.value?.like;
-    bool isLike = like?.status == true;
+    if (like == null) return;
+    final isLike = like.status ?? false;
     final res = await DynamicsHttp.thumbDynamic(
       dynamicId: opusData?.idStr ?? articleData?.dynIdStr,
       up: isLike ? 2 : 1,
     );
     if (res.isSuccess) {
-      like?.status = !isLike;
-      if (isLike) {
-        like?.count--;
-      } else {
-        like?.count++;
-      }
+      like
+        ..status = !isLike
+        ..count = (like.count ?? 0) + (isLike ? -1 : 1);
       stats.refresh();
       SmartDialog.showToast(!isLike ? '点赞成功' : '取消赞');
     } else {

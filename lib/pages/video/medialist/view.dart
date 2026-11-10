@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
@@ -12,10 +14,11 @@ import 'package:PiliPlus/models_new/video/video_detail/episode.dart';
 import 'package:PiliPlus/pages/common/slide/common_slide_page.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart';
+import 'package:PiliPlus/utils/scroll_offset_helper.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MediaListPanel extends CommonSlidePage {
   const MediaListPanel({
@@ -48,80 +51,98 @@ class MediaListPanel extends CommonSlidePage {
 }
 
 class _MediaListPanelState extends State<MediaListPanel>
-    with SingleTickerProviderStateMixin, CommonSlideMixin {
-  late final ScrollController _controller;
+    with SingleTickerProviderStateMixin, CommonSlideMixin, ScrollOffsetMixin {
+  @override
+  final scrollController = ScrollController();
+  @override
+  late final int itemIndex;
+  @override
+  int get itemCount => widget.mediaList.length;
 
   @override
   void initState() {
     super.initState();
     final bvid = widget.bvid;
-    final bvIndex = widget.mediaList.indexWhere((item) => item.bvid == bvid);
-    _controller = ScrollController(
-      initialScrollOffset: bvIndex <= 0 ? 0 : bvIndex * 112.0 + 7,
+    itemIndex = max(
+      0,
+      widget.mediaList.indexWhere((item) => item.bvid == bvid),
     );
+    if (itemIndex > 0) {
+      WidgetsBinding.instance.addPostFrameCallback(jumpToCurrent);
+    }
   }
 
   @override
-  Widget buildPage(ThemeData theme) {
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget buildPage() {
     return Material(
       color: theme.colorScheme.surface,
       child: Column(
         children: [
-          AppBar(
-            primary: false,
-            toolbarHeight: 45,
-            automaticallyImplyLeading: false,
-            titleSpacing: 16,
-            title: Text(widget.panelTitle ?? '稍后再看'),
-            backgroundColor: Colors.transparent,
-            actions: [
-              iconButton(
-                iconSize: 20,
-                tooltip: widget.desc ? '顺序播放' : '倒序播放',
-                icon: widget.desc
-                    ? const Icon(MdiIcons.sortAscending)
-                    : const Icon(MdiIcons.sortDescending),
-                onPressed: () {
-                  Get.back();
-                  widget.onReverse();
-                },
-              ),
-              iconButton(
-                iconSize: 20,
-                tooltip: '关闭',
-                icon: const Icon(Icons.close),
-                onPressed: Get.back,
-              ),
-              const SizedBox(width: 14),
-            ],
-            shape: Border(
-              bottom: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          Container(
+            height: 45,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                ),
               ),
             ),
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    widget.panelTitle ?? '稍后再看',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                iconButton(
+                  iconSize: 20,
+                  tooltip: widget.desc ? '顺序播放' : '倒序播放',
+                  icon: widget.desc
+                      ? const Icon(MdiIcons.sortAscending)
+                      : const Icon(MdiIcons.sortDescending),
+                  onPressed: () {
+                    Get.back();
+                    widget.onReverse();
+                  },
+                ),
+                iconButton(
+                  iconSize: 20,
+                  tooltip: '关闭',
+                  icon: const Icon(Icons.close),
+                  onPressed: Get.back,
+                ),
+                const SizedBox(width: 14),
+              ],
+            ),
           ),
-          Expanded(
-            child: enableSlide ? slideList(theme) : buildList(theme),
-          ),
+          Expanded(child: enableSlide ? slideList() : buildList()),
         ],
       ),
     );
   }
 
   @override
-  Widget buildList(ThemeData theme) {
+  Widget buildList() {
     return widget.loadPrevious != null
         ? refreshIndicator(
             onRefresh: widget.loadPrevious!,
-            child: _buildList(theme),
+            child: _buildList(),
           )
-        : _buildList(theme);
+        : _buildList();
   }
 
-  Widget _buildList(ThemeData theme) {
+  Widget _buildList() {
     final showDelBtn = widget.onDelete != null && widget.mediaList.length > 1;
     return CustomScrollView(
-      controller: _controller,
+      controller: scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
@@ -141,7 +162,7 @@ class _MediaListPanelState extends State<MediaListPanel>
                 }
                 final item = widget.mediaList[index];
                 final isCurr = item.bvid == widget.bvid;
-                return _buildItem(theme, index, item, isCurr, showDelBtn);
+                return _buildItem(index, item, isCurr, showDelBtn);
               },
             ),
           ),
@@ -151,7 +172,6 @@ class _MediaListPanelState extends State<MediaListPanel>
   }
 
   Widget _buildItem(
-    ThemeData theme,
     int index,
     MediaListItemModel item,
     bool isCurr,

@@ -1,17 +1,20 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
+import 'package:PiliPlus/common/widgets/flutter/dyn_tab_bar.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
+import 'package:PiliPlus/common/widgets/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart'
     show NoOverscrollIndicator;
 import 'package:PiliPlus/common/widgets/scroll_physics.dart'
-    show ReloadScrollPhysics;
+    show ReloadScrollPhysics, platformAlwaysClampingPhysics;
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_to_box_adapter.dart';
 import 'package:PiliPlus/common/widgets/tap_region_surface.dart';
@@ -21,8 +24,10 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/reply/reply_option_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
-import 'package:PiliPlus/pages/common/dyn/reaction/controller.dart';
-import 'package:PiliPlus/pages/common/dyn/reaction/view.dart';
+import 'package:PiliPlus/pages/common/dyn/like_list/controller.dart';
+import 'package:PiliPlus/pages/common/dyn/like_list/view.dart';
+import 'package:PiliPlus/pages/common/dyn/repost_list/controller.dart';
+import 'package:PiliPlus/pages/common/dyn/repost_list/view.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/author_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/dynamic_panel.dart';
 import 'package:PiliPlus/pages/dynamics_create/view.dart';
@@ -31,19 +36,13 @@ import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/reply_scheme_helper.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-
-const Set<TargetPlatform> _kDesktopPlatforms = <TargetPlatform>{
-  TargetPlatform.macOS,
-  TargetPlatform.windows,
-  TargetPlatform.linux,
-};
+import 'package:material_ui/material_ui.dart';
 
 class DynamicDetailPage extends StatefulWidget {
   const DynamicDetailPage({super.key});
@@ -52,41 +51,24 @@ class DynamicDetailPage extends StatefulWidget {
   State<DynamicDetailPage> createState() => _DynamicDetailPageState();
 }
 
-class _DynamicDetailPageState
-    extends CommonDynPageMultiState<DynamicDetailPage> {
+class _DynamicDetailPageState extends CommonDynPageMultiState<DynamicDetailPage>
+    with DynReplyLocateStateMixin {
   @override
   late final DynamicDetailController controller;
-  late final DynReactController _reactController;
+  late final DynRepostController _repostController;
+  late final DynLikeController _likeController;
 
   late final RxBool _isRefreshing = false.obs;
-
-  void _startRefresh() {
-    _isRefreshing.value = true;
-    _refreshController
-      ..value = 0
-      ..repeat();
-  }
 
   void _stopRefresh() {
     if (!mounted) return;
     _isRefreshing.value = false;
-    _refreshController.stop();
   }
 
   void _onRefresh(Future<void> future) {
-    _startRefresh();
+    _isRefreshing.value = true;
     future.whenComplete(_stopRefresh);
-    // Future.delayed(
-    //   const Duration(milliseconds: 800),
-    // ).whenComplete(_stopRefresh);
   }
-
-  AnimationController? refreshController;
-  AnimationController get _refreshController =>
-      refreshController ??= AnimationController(
-        vsync: this,
-        duration: CircularProgressIndicator.defaultAnimationDuration,
-      );
 
   @override
   dynamic get arguments => {'item': controller.dynItem};
@@ -94,20 +76,23 @@ class _DynamicDetailPageState
   @override
   void initState() {
     super.initState();
-    final args = Get.arguments;
+    final Map args = Get.arguments;
     final item = args['item'] as DynamicItemModel;
     final id = item.idStr.toString();
-    if (args['viewComment'] ?? false) {
+    if (args['viewComment'] == true || args.containsKey(rootRpIdKey)) {
       WidgetsBinding.instance.addPostFrameCallback(_jumpToComment);
     }
-    controller = Get.putOrFind(DynamicDetailController.new, tag: id);
     final stat = item.modules.moduleStat;
-    controller.count.value = stat?.comment?.count ?? -1;
-    _reactController = Get.put(
-      DynReactController(
-        id,
-        count: (stat?.like?.count ?? -1) + (stat?.forward?.count ?? -1),
-      ),
+    controller = Get.putOrFind<DynamicDetailController>(
+      () => DynamicDetailController(count: stat?.comment?.count ?? -1),
+      tag: id,
+    );
+    _repostController = Get.putOrFind<DynRepostController>(
+      () => DynRepostController(id, count: stat?.forward?.count ?? -1),
+      tag: id,
+    );
+    _likeController = Get.putOrFind<DynLikeController>(
+      () => DynLikeController(id, count: stat?.like?.count ?? -1),
       tag: id,
     );
   }
@@ -117,7 +102,6 @@ class _DynamicDetailPageState
   @override
   void dispose() {
     _scrollable = null;
-    refreshController?.dispose();
     super.dispose();
   }
 
@@ -258,7 +242,7 @@ class _DynamicDetailPageState
         repostDynId: item.orig?.idStr,
       ),
       onSuccess: () {
-        Future.delayed(
+        Timer(
           const Duration(milliseconds: 500),
           () async {
             if (!mounted) return;
@@ -306,9 +290,9 @@ class _DynamicDetailPageState
   Widget _buildTabBar() {
     return SizedBox(
       height: 40,
-      child: TabBar(
+      child: DynTabBar(
         padding: .zero,
-        isScrollable: true,
+        // isScrollable: true,
         indicatorSize: .tab,
         tabAlignment: .start,
         controller: tabController,
@@ -324,62 +308,77 @@ class _DynamicDetailPageState
               }
               switch (value) {
                 case 0:
-                  _onRefresh(controller.onRefresh());
+                  _onRefresh(_repostController.onRefresh());
                 case 1:
-                  _onRefresh(_reactController.onRefresh());
+                  _onRefresh(controller.onRefresh());
+                case 2:
+                  _onRefresh(_likeController.onRefresh());
               }
             } else if (positions.length > 1) {
               positions.elementAt(1).jumpTo(0);
             }
           }
         },
-        tabs: [
-          Tab(
-            child: Obx(() {
-              final count = controller.count.value;
-              return Text(
-                '${DynType.reply.label}${count < 0 ? '' : ' ${NumUtils.numFormat(count)}'}',
-              );
-            }),
-          ),
-          Tab(
-            child: Obx(() {
-              final count = _reactController.count.value;
-              return Text(
-                '${DynType.reaction.label}${count < 0 ? '' : ' ${NumUtils.numFormat(count)}'}',
-              );
-            }),
-          ),
-        ],
+        tabs: DynType.values
+            .map(
+              (e) => Tab(
+                child: Obx(() {
+                  final count = switch (e) {
+                    .repost => _repostController.count.value,
+                    .reply => controller.count.value,
+                    .like => _likeController.count.value,
+                  };
+                  return Text(
+                    '${e.label}${count < 0 ? '' : ' ${NumUtils.numFormat(count)}'}',
+                  );
+                }),
+              ),
+            )
+            .toList(),
       ),
     );
   }
 
   Widget _buildTabBody([bool isPortrait = true]) {
-    final reply = CustomScrollView(
+    Widget reply = CustomScrollView(
+      primary: true,
       key: const PageStorageKey(DynType.reply),
-      physics: ReloadScrollPhysics(controller: controller),
+      physics: ReloadScrollPhysics(
+        controller: controller,
+        parent: isPortrait ? platformAlwaysClampingPhysics : null,
+      ),
       slivers: [
         buildReplyHeader(isPortrait),
         Obx(() => replyList(controller.loadingState.value)),
       ],
     );
+    if (!isPortrait) {
+      reply = refreshIndicator(onRefresh: controller.onRefresh, child: reply);
+    }
+
     final child = TabBarView(
       controller: tabController,
       hitTestBehavior: .translucent,
       physics: const NeverScrollableScrollPhysics(),
       horizontalDragGestureRecognizer:
           CustomHorizontalDragGestureRecognizer.new,
-      children: [
-        isPortrait
-            ? reply
-            : refreshIndicator(onRefresh: controller.onRefresh, child: reply),
-        DynReactPage(
-          isPortrait: isPortrait,
-          id: controller.dynItem.idStr,
-          controller: _reactController,
-        ),
-      ],
+      children: DynType.values
+          .map(
+            (e) => switch (e) {
+              .repost => DynRepostPage(
+                isPortrait: isPortrait,
+                id: controller.dynItem.idStr,
+                controller: _repostController,
+              ),
+              .reply => reply,
+              .like => DynLikePage(
+                isPortrait: isPortrait,
+                id: controller.dynItem.idStr,
+                controller: _likeController,
+              ),
+            },
+          )
+          .toList(),
     );
     if (isPortrait) {
       return Stack(
@@ -390,30 +389,7 @@ class _DynamicDetailPageState
             left: 0,
             right: 0,
             top: displacement,
-            child: Obx(() {
-              final isRefreshing = _isRefreshing.value;
-              return AnimatedScale(
-                scale: isRefreshing ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: Center(
-                  child: SizedBox.fromSize(
-                    size: const .square(40),
-                    child: Material(
-                      type: .circle,
-                      color: theme.colorScheme.onSecondary,
-                      elevation: 2.0,
-                      child: Padding(
-                        padding: const .all(6),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          controller: _refreshController,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
+            child: RefreshIndicator_(isRefreshing: _isRefreshing),
           ),
         ],
       );
@@ -468,6 +444,7 @@ class _DynamicDetailPageState
         Expanded(
           flex: flex,
           child: CustomScrollView(
+            primary: true,
             slivers: [
               SliverPadding(
                 padding: .only(
@@ -495,13 +472,6 @@ class _DynamicDetailPageState
         ),
       ],
     );
-    if (PlatformUtils.isDesktop) {
-      return PrimaryScrollController(
-        controller: PrimaryScrollController.of(context),
-        automaticallyInheritForPlatforms: _kDesktopPlatforms,
-        child: child,
-      );
-    }
     return child;
   }
 
@@ -536,25 +506,27 @@ class _DynamicDetailPageState
       required ValueChanged<Color> onPressed,
       IconData? activatedIcon,
     }) {
-      final status = stat?.status == true;
+      final bool status;
+      final String count;
+      if (stat != null) {
+        status = stat.status ?? false;
+        count = stat.count != null ? NumUtils.numFormat(stat.count) : text;
+      } else {
+        status = false;
+        count = text;
+      }
       final color = status ? primary : outline;
-      final iconWidget = Icon(
-        status ? activatedIcon : icon,
-        size: 16,
-        color: color,
-      );
+      final child = Icon(status ? activatedIcon : icon, size: 16, color: color);
       return TextButton.icon(
-        onPressed: () => onPressed(iconWidget.color!),
-        icon: iconWidget,
+        icon: child,
         style: btnStyle,
-        label: Text(
-          stat?.count != null ? NumUtils.numFormat(stat!.count) : text,
-          style: TextStyle(color: color),
-        ),
+        onPressed: () => onPressed(child.color!),
+        label: Text(count, style: TextStyle(color: color)),
       );
     }
 
-    final moduleStat = controller.dynItem.modules.moduleStat;
+    final dynItem = controller.dynItem;
+    final moduleStat = dynItem.modules.moduleStat;
     return Padding(
       padding: .only(left: padding.left, right: padding.right),
       child: Column(
@@ -593,7 +565,7 @@ class _DynamicDetailPageState
                           isScrollControlled: true,
                           useSafeArea: true,
                           builder: (context) => RepostPanel(
-                            item: controller.dynItem,
+                            item: dynItem,
                             onSuccess: () {
                               if (forward != null) {
                                 int count = forward.count ?? 0;
@@ -603,6 +575,12 @@ class _DynamicDetailPageState
                                 }
                               }
                             },
+                            replyInfo: (
+                              oid: controller.oid,
+                              replyType: controller.replyType,
+                            ),
+                            mentionItem:
+                                dynItem.modules.moduleAuthor?.mentionItem,
                           ),
                         ),
                       );
@@ -615,7 +593,7 @@ class _DynamicDetailPageState
                     text: '分享',
                     stat: null,
                     onPressed: (_) => ShareUtils.shareText(
-                      '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+                      '${HttpString.opusBaseUrl}/${controller.dynItem.idStr}',
                     ),
                   ),
                 ),
@@ -636,7 +614,7 @@ class _DynamicDetailPageState
                         text: '点赞',
                         stat: moduleStat?.like,
                         onPressed: (iconColor) => RequestUtils.onLikeDynamic(
-                          controller.dynItem,
+                          dynItem,
                           iconColor == primary,
                           () {
                             if (context.mounted) {
@@ -667,13 +645,13 @@ class _DynamicDetailPageState
           return Row(
             mainAxisAlignment: .spaceBetween,
             children: [
-              Text(sortType.title),
+              Text(sortType.desc),
               TextButton.icon(
                 style: Style.buttonStyle,
                 onPressed: controller.queryBySort,
                 icon: Icon(Icons.sort, size: 16, color: secondary),
                 label: Text(
-                  sortType.label,
+                  sortType.descShort,
                   style: TextStyle(fontSize: 13, color: secondary),
                 ),
               ),

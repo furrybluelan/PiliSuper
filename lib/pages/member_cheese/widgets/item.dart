@@ -7,7 +7,7 @@ import 'package:PiliPlus/models_new/space/space_cheese/item.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MemberCheeseItem extends StatelessWidget {
   const MemberCheeseItem({
@@ -94,9 +94,6 @@ class MemberCheeseItem extends StatelessWidget {
                       src: item.cover,
                       width: boxConstraints.maxWidth,
                       height: boxConstraints.maxHeight,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(4),
-                      ),
                     );
                     if (item.marks?.isNotEmpty == true) {
                       return Stack(
