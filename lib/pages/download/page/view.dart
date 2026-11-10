@@ -114,21 +114,18 @@ class _DownloadPagePageState extends State<DownloadPagePage>
     );
 
     bool isSuccess = true;
-    for (final chunk in allChecked.mapChunked(
-      kUpdateConcurrency,
-      (page) async {
-        bool isSuccess = true;
-        for (final chunk in page.entries.mapChunked(
-          kUpdateConcurrency,
-          toElement,
-        )) {
-          final res = await Future.wait(chunk);
-          if (res.any((e) => !e)) isSuccess = false;
-          if (dismiss) break;
-        }
-        return isSuccess;
-      },
-    )) {
+    for (final chunk in allChecked.mapChunked(kUpdateConcurrency, (page) async {
+      bool isSuccess = true;
+      for (final chunk in page.entries.mapChunked(
+        kUpdateConcurrency,
+        toElement,
+      )) {
+        final res = await Future.wait(chunk);
+        if (res.any((e) => !e)) isSuccess = false;
+        if (dismiss) break;
+      }
+      return isSuccess;
+    })) {
       final res = await Future.wait(chunk);
       if (res.any((e) => !e)) isSuccess = false;
       if (dismiss) break;

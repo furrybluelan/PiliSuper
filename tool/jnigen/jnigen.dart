@@ -2,7 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:jnigen/jnigen.dart';
 
-void main(List<String> args) async {
+Future<void> main(List<String> args) async {
   final packageRoot = Platform.script.resolve('../../');
   final generator = JniGenerator(
     input: Input(

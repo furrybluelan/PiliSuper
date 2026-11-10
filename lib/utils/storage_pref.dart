@@ -246,6 +246,10 @@ abstract final class Pref {
     defaultValue: AudioQuality.k192.code,
   );
 
+  /// 投屏默认画质，-1 表示跟随播放页画质
+  static int get defaultCastQa =>
+      _setting.get(SettingBoxKey.defaultCastQa, defaultValue: -1);
+
   static List<VideoDecodeFormatType> get preferCodecs {
     final codecs = _setting.get(SettingBoxKey.preferCodecs);
     if (codecs is List) {

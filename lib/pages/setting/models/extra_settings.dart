@@ -17,11 +17,10 @@ import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/setting/widgets/slider_dialog.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/cache_manager.dart';
+import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/export/export_channel.dart';
 import 'package:PiliPlus/utils/export/export_target.dart';
-import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/desktop/window_controller.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -34,6 +33,12 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/update.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:android_file_picker/android_file_picker.dart'
+    show
+        AndroidSAFAccessMode,
+        AndroidSAFGrant,
+        AndroidSAFOptions,
+        FilePickerAndroidOptions;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -388,12 +393,14 @@ void _showExportPathDialog(BuildContext context, VoidCallback setState) {
                 // SAF 仅 API 29+ 可用；更低版本让选择器返回普通路径。
                 final useSaf = Platform.isAndroid && DeviceUtils.sdkInt >= 29;
                 final picked = await FilePicker.getDirectoryPath(
-                  androidSafOptions: useSaf
-                      ? const AndroidSAFOptions(
-                          grant: AndroidSAFGrant.lifetime,
-                          accessMode: AndroidSAFAccessMode.readWrite,
+                  androidOptions: useSaf
+                      ? const FilePickerAndroidOptions(
+                          safOptions: AndroidSAFOptions(
+                            grant: AndroidSAFGrant.lifetime,
+                            accessMode: AndroidSAFAccessMode.readWrite,
+                          ),
                         )
-                      : null,
+                      : const AndroidOptions(),
                 );
                 if (picked == null || picked.isEmpty || picked == '/') return;
                 // 带 SAF 选项时返回 tree uri，其余情况返回文件系统路径。

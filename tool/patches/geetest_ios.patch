@@ -135,7 +135,7 @@ index 339f0fcda..41d953998 100644
        context: Get.context!,
        builder: (context) => GeetestWebviewDialog(gt, challenge),
 diff --git a/pubspec.yaml b/pubspec.yaml
-index 1ec95f9f1..e29e474e0 100644
+index 4f1b9f364..f83f0506b 100644
 --- a/pubspec.yaml
 +++ b/pubspec.yaml
 @@ -34,6 +34,7 @@ dependencies:
@@ -144,5 +144,5 @@ index 1ec95f9f1..e29e474e0 100644
      sdk: flutter
 +  gt3_flutter_plugin: ^0.1.0
  
+   android_file_picker: ^2.0.0
    app_links: ^7.1.1
-   archive: ^4.0.0

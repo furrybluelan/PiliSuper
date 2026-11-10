@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -258,7 +257,8 @@ class MainController extends GetxController
     }
     this.navigationBars = navigationBars;
     final defPage = Pref.defaultHomePage;
-    selectedIndex.value = math.max(0, navigationBars.indexOf(defPage));
+    final defIndex = navigationBars.indexOf(defPage);
+    selectedIndex.value = defIndex < 0 ? 0 : defIndex;
   }
 
   void checkDefaultSearch([bool shouldCheck = false]) {

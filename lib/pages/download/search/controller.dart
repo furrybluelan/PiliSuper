@@ -43,10 +43,7 @@ class DownloadSearchController
     loadingState
       ..value.data!.removeAt(index)
       ..refresh();
-    _downloadService.deleteDownload(
-      entry: entry,
-      removeList: true,
-    );
+    _downloadService.deleteDownload(entry: entry, removeList: true);
     GStorage.watchProgress.delete(entry.cid.toString());
   }
 

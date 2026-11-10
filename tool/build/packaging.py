@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Package an existing Linux Flutter bundle; it never runs Flutter builds."""
+"""Package an existing Linux Flutter bundle; it never runs Flutter builds.
+
+The tar.gz and AppImage bundles rely on host runtime libraries, including
+WebKitGTK 4.1; they do not bundle the system WebKit runtime.
+"""
 from __future__ import annotations
 
 import argparse
@@ -15,7 +19,8 @@ from urllib.request import urlopen
 from build_common import log_success, require_command, run_command
 
 PACKAGE_NAME = "pilisuper"
-DESKTOP_FILE_NAME = "com.pili.super.desktop"
+DESKTOP_FILE_NAME = "org.frblanapps.pilisuper.desktop"
+LEGACY_DESKTOP_FILE_NAME = "com.pili.super.desktop"
 ICON_NAME = "pilisuper"
 
 
@@ -27,8 +32,10 @@ class PackageIdentity:
 
 
 def package_identity(pkg_id: str) -> PackageIdentity:
-    if pkg_id == "com.pili.super":
+    if pkg_id == "org.frblanapps.pilisuper":
         return PackageIdentity(PACKAGE_NAME, DESKTOP_FILE_NAME, ICON_NAME)
+    if pkg_id == "com.pili.super":
+        return PackageIdentity(PACKAGE_NAME, LEGACY_DESKTOP_FILE_NAME, ICON_NAME)
     normalized = re.sub(r"[^a-z0-9.+-]", "-", pkg_id.lower())
     return PackageIdentity(normalized, f"{normalized}.desktop", normalized)
 
@@ -184,7 +191,7 @@ def package_deb(
             f"Installed-Size: {installed_size}\n"
             # Debian/Ubuntu: ayatana 为主；部分衍生版仅有 libappindicator3-1
             # json-glib: ffmpeg_kit_flutter 的原生层链接它来构造返回值
-            "Depends: libgtk-3-0, libmpv2, libjson-glib-1.0-0,"
+            "Depends: libgtk-3-0, libmpv2, libjson-glib-1.0-0, libwebkit2gtk-4.1-0,"
             " libayatana-appindicator3-1 | libappindicator3-1\n"
             "Homepage: https://github.com/FRBLanApps/PiliSuper\n"
             f"Description: {app_name}, a third-party Bilibili client\n",
@@ -227,7 +234,7 @@ def package_arch(
             "license=('GPL-3.0-or-later')\n"
             "options=('!debug')\n"
             # Arch 官方仓有 libayatana-appindicator
-            "depends=('gtk3' 'mpv' 'json-glib' 'libayatana-appindicator')\n"
+            "depends=('gtk3' 'mpv' 'json-glib' 'webkit2gtk-4.1' 'libayatana-appindicator')\n"
             f"source=('{source_archive.name}')\n"
             f"sha256sums=('{checksum}')\n\n"
             "package() {\n"
@@ -289,7 +296,7 @@ def package_rpm(
             f"BuildArch: {rpm_arch}\n"
             # RHEL/Alma/Rocky 无 ayatana 包；Fedora/EPEL 提供 libappindicator-gtk3
             # 托盘为桌面可选能力，故用 Recommends（无则仍可装，缺托盘）
-            "Requires: gtk3, mpv, json-glib\n"
+            "Requires: gtk3, mpv, json-glib, webkit2gtk4.1\n"
             "Recommends: libappindicator-gtk3\n\n"
             f"%description\n{app_name}, a third-party Bilibili client.\n\n"
             "%prep\n%setup -q\n\n"
@@ -319,7 +326,7 @@ def main() -> None:
     parser.add_argument("--output", default="dist")
     parser.add_argument("--output-prefix", default="PiliSuper")
     parser.add_argument("--app-name", default="PiliSuper")
-    parser.add_argument("--pkg-id", default="com.pili.super")
+    parser.add_argument("--pkg-id", default="org.frblanapps.pilisuper")
     parser.add_argument("targets", nargs="+", choices=["tar.gz", "zst", "deb", "rpm", "arch", "appimage"])
     args = parser.parse_args()
 

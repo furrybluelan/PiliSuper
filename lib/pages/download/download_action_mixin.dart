@@ -2,7 +2,7 @@ import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/models_new/download/download_info.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/pages/download/bounded_update.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:material_ui/material_ui.dart';
@@ -48,15 +48,11 @@ mixin CommonDownloadActionMixin<T extends StatefulWidget>
       },
     );
 
-    bool isSuccess = true;
-    for (final chunk in multiSelectCtr.allChecked.mapChunked(
-      kUpdateConcurrency,
+    final isSuccess = await runBoundedEntryUpdate(
+      multiSelectCtr.allChecked,
       toElement,
-    )) {
-      final res = await Future.wait(chunk);
-      if (res.any((e) => !e)) isSuccess = false;
-      if (dismiss) break;
-    }
+      () => dismiss,
+    );
 
     toastUpdateResult(dismiss, isSuccess);
 
@@ -107,15 +103,11 @@ mixin BaseDownloadActionMixin<
     bool dismiss = false;
     SmartDialog.showLoading(onDismiss: () => dismiss = true);
 
-    bool isSuccess = true;
-    for (final chunk in pageInfo.entries.mapChunked(
-      kUpdateConcurrency,
+    final isSuccess = await runBoundedEntryUpdate(
+      pageInfo.entries,
       toElement,
-    )) {
-      final res = await Future.wait(chunk);
-      if (res.any((e) => !e)) isSuccess = false;
-      if (dismiss) break;
-    }
+      () => dismiss,
+    );
 
     toastUpdateResult(dismiss, isSuccess);
 
@@ -148,26 +140,11 @@ mixin BaseDownloadActionMixin<
         renderBox.localToGlobal(renderBox.size.bottomLeft(.zero)),
       ),
       items: [
-        PopupMenuItem(
-          onTap: _onUpdateDm,
-          child: const Text('更新弹幕'),
-        ),
-        PopupMenuItem(
-          onTap: _onUpdateSeg,
-          child: const Text('更新片段'),
-        ),
-        PopupMenuItem(
-          onTap: _onUpdateSeasonInfo,
-          child: const Text('更新合集信息'),
-        ),
-        PopupMenuItem(
-          onTap: _onUpdateVolume,
-          child: const Text('更新音量均衡'),
-        ),
-        PopupMenuItem(
-          onTap: _onUpdatePlayInfo,
-          child: const Text('更新字幕、分段信息'),
-        ),
+        PopupMenuItem(onTap: _onUpdateDm, child: const Text('更新弹幕')),
+        PopupMenuItem(onTap: _onUpdateSeg, child: const Text('更新片段')),
+        PopupMenuItem(onTap: _onUpdateSeasonInfo, child: const Text('更新合集信息')),
+        PopupMenuItem(onTap: _onUpdateVolume, child: const Text('更新音量均衡')),
+        PopupMenuItem(onTap: _onUpdatePlayInfo, child: const Text('更新字幕、分段信息')),
       ],
     );
   }

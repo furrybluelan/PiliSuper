@@ -1110,7 +1110,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         isBuffering.value = buffering;
         if (buffering) _onBufferingStarted();
         if (!playerStatus.isCompleted) {
-          _stopWakeLockTimer();
+          if (playerStatus.isPlaying) _stopWakeLockTimer();
           _updatePlaybackState();
         }
       }),
@@ -1251,6 +1251,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     danmakuController?.clear();
     try {
       await _videoPlayerController?.seek(position);
+      _markSeek();
       _updateIOSPip(position);
     } catch (e) {
       if (kDebugMode) debugPrint('seek failed: $e');

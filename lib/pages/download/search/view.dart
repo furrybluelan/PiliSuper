@@ -13,10 +13,7 @@ import 'package:material_ui/material_ui.dart'
     hide SliverGridDelegateWithMaxCrossAxisExtent;
 
 class DownloadSearchPage extends StatefulWidget {
-  const DownloadSearchPage({
-    super.key,
-    required this.progress,
-  });
+  const DownloadSearchPage({super.key, required this.progress});
 
   final ChangeNotifier progress;
 

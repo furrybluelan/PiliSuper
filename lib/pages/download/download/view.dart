@@ -14,7 +14,7 @@ import 'package:PiliPlus/pages/download/download/widgets/season.dart';
 import 'package:PiliPlus/pages/download/download_action_mixin.dart';
 import 'package:PiliPlus/pages/download/search/view.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/pages/download/bounded_update.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:collection/collection.dart';
@@ -63,35 +63,13 @@ class _DownloadPageState extends State<DownloadPage>
       },
     );
 
-    bool isSuccess = true;
-    for (final chunk in _controller.allChecked.mapChunked(kUpdateConcurrency, (
-      season,
-    ) async {
-      bool isSuccess = true;
-      for (final chunk in season.pages.mapChunked(kUpdateConcurrency, (
-        page,
-      ) async {
-        bool isSuccess = true;
-        for (final chunk in page.entries.mapChunked(
-          kUpdateConcurrency,
-          toElement,
-        )) {
-          final res = await Future.wait(chunk);
-          if (res.any((e) => !e)) isSuccess = false;
-          if (dismiss) break;
-        }
-        return isSuccess;
-      })) {
-        final res = await Future.wait(chunk);
-        if (res.any((e) => !e)) isSuccess = false;
-        if (dismiss) break;
-      }
-      return isSuccess;
-    })) {
-      final res = await Future.wait(chunk);
-      if (res.any((e) => !e)) isSuccess = false;
-      if (dismiss) break;
-    }
+    final isSuccess = await runBoundedEntryUpdate(
+      _controller.allChecked.expand(
+        (season) => season.pages.expand((page) => page.entries),
+      ),
+      toElement,
+      () => dismiss,
+    );
 
     toastUpdateResult(dismiss, isSuccess);
 
@@ -131,26 +109,11 @@ class _DownloadPageState extends State<DownloadPage>
     bool dismiss = false;
     SmartDialog.showLoading(onDismiss: () => dismiss = true);
 
-    bool isSuccess = true;
-
-    for (final chunk in seasonInfo.pages.mapChunked(kUpdateConcurrency, (
-      page,
-    ) async {
-      bool isSuccess = true;
-      for (final chunk in page.entries.mapChunked(
-        kUpdateConcurrency,
-        toElement,
-      )) {
-        final res = await Future.wait(chunk);
-        if (res.any((e) => !e)) isSuccess = false;
-        if (dismiss) break;
-      }
-      return isSuccess;
-    })) {
-      final res = await Future.wait(chunk);
-      if (res.any((e) => !e)) isSuccess = false;
-      if (dismiss) break;
-    }
+    final isSuccess = await runBoundedEntryUpdate(
+      seasonInfo.pages.expand((page) => page.entries),
+      toElement,
+      () => dismiss,
+    );
 
     toastUpdateResult(dismiss, isSuccess);
 

@@ -122,12 +122,7 @@ class SeasonInfoItem extends StatelessWidget {
             controller.onSelect(season);
             return;
           }
-          Get.to(
-            DownloadPagePage(
-              seasonInfo: seasonInfo,
-              progress: progress,
-            ),
-          );
+          Get.to(DownloadPagePage(seasonInfo: seasonInfo, progress: progress));
         },
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,

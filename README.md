@@ -6,6 +6,8 @@
     <h1>PiliSuper</h1>
 <div align="center">
 
+中文 | [English](README.en.md)
+
 ![GitHub Repo stars](https://img.shields.io/github/stars/FRBLanApps/PiliSuper?style=flat&logo=Github)
 ![GitHub repo size](https://img.shields.io/github/repo-size/FRBLanApps/PiliSuper?style=flat&logo=Github)
 ![GitHub License](https://img.shields.io/github/license/FRBLanApps/PiliSuper?style=flat&logo=GNU&link=https%3A%2F%2Fwww.gnu.org%2Flicenses%2Fgpl-3.0.en.html)
@@ -26,10 +28,24 @@
 </div>
 <br/>
 
-## 登陆凭证与设置的迁移
+> [!TIP]
+> **登录凭证与设置的迁移**
+>
+> 本项目的设置信息已不再建议迁移至上游 PiliPlus，但上游的配置信息仍可用于本项目。
+> 迁移选项入口：**我的 - 设置 - 关于 - 导入/导出登录信息/设置**
 
-本项目的设置信息已不再建议迁移至上游 PiliPlus，但上游的配置信息仍可用于本项目。
-迁移选项入口：**我的 - 设置 - 关于 - 导入/导出登录信息/设置**
+> [!NOTE]
+> 时过境迁，转眼又是一年九月。开发者们也将回归学业，在下个长假之前，项目可能不会有太多功能更新；但闲暇之余，我们仍会关注并回复大家的意见与反馈。期待下个长假再会！
+
+如果你想参与项目维护，或想与其他用户交流，欢迎加群：
+
+<details>
+<summary>加群方式</summary>
+
+- Telegram: [点击加群](https://t.me/FRBLanApps_Group)
+- QQ: [点击加群](https://qm.qq.com/cgi-bin/qm/qr?k=udtok7jenzFQq_T_oGBkSYELBZJg1Pcp&jump_from=webapi&authKey=Whu6v%2B49D4byn9Q2ahb0bOWOXB0uW4Ym2G7cI0mjI6YfTgYmMyVc2%2Br34Egm9GAf)
+
+</details>
 
 ## 适配平台
 
@@ -221,6 +237,10 @@
 
 里面列出了很多功能和优化的想法，欢迎查看并提出建议)
 
+## 下载
+
+可以从 [PiliSuper Releases](https://github.com/FRBLanApps/PiliSuper/releases) 下载，或克隆本仓库在本地编译。
+
 <br/>
 
 ## 编译
@@ -248,7 +268,7 @@ flutter pub get
 
 | 脚本 | 职责 |
 | --- | --- |
-| `tool/build/rename.py` | 改 Bundle ID、显示名、Dart 包名和仓库引用 |
+| `tool/build/rename.py` | 改 Bundle ID、显示名、Dart 包名、仓库引用和发行者署名 |
 | `tool/build/prebuild.py` | 生成 `pili_release.json` 并写入 Git 版本号 |
 | `tool/build/patch.py` | 为指定平台应用 Flutter SDK 或项目源码补丁 |
 | `tool/build/build_android.py` | 构建并导出 Android APK |
@@ -262,7 +282,7 @@ flutter pub get
 例如，构建 Android release：
 
 ```sh
-python tool/build/rename.py --pkg-id com.pili.super --app-name PiliSuper
+python tool/build/rename.py --pkg-id org.frblanapps.pilisuper --app-name PiliSuper
 python tool/build/prebuild.py --platform android
 flutter pub get
 VERSION=$(sed -n 's/^version: //p' pubspec.yaml)

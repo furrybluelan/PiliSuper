@@ -42,10 +42,12 @@ final class VideoQuality extends BaseQuality {
 
   static final _codeMap = {for (final i in values) i.code: i};
 
-  VideoQuality.fromId(super.id, super.idStr) : shortDesc = idStr;
-
-  factory VideoQuality.fromCode(int code) =>
+  static VideoQuality fromCode(int code) =>
       _codeMap[code] ?? .fromId(code, code.toString());
+
+  static VideoQuality? tryFromCode(int code) => _codeMap[code];
+  factory VideoQuality.fromId(int id, String idStr) =>
+      VideoQuality(id, idStr, idStr);
 
   static VideoQuality? safeFromCode(int code) => _codeMap[code];
 
